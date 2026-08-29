@@ -1,0 +1,19 @@
+{
+	"format": 1,
+	"team": "packers",
+	"sport": "nfl",
+	"indices": [
+		"games",
+		"scoring"
+	],
+	"digests": {
+		"games": "4ca3b02161e324bd087b54e99ef3b632dbe59e4563025b446c95eff32c9cd16e",
+		"scoring": "747f7886f18ce9004bb699e27d70bd3b6b63d797fc00bd7cd20cfbc7b1eac0e6"
+	},
+	"sources": {
+		"schedules": "https://github.com/nflverse/nflverse-data/releases/download/schedules/games.csv",
+		"playByPlaySeasons": [
+			"2024"
+		]
+	}
+}

@@ -1,0 +1,10 @@
+node_modules/
+.env
+
+# Raw sources are fetched, never committed. A single nflverse play-by-play
+# season is 95MB and a Retrosheet slice is 388MB; both reduce to kilobytes once
+# derived, so keeping them would be storing an intermediate.
+data/sources/
+
+# Render-check captures.
+.render/

@@ -1,0 +1,21 @@
+# Line endings, stated per file type rather than globally. Same shape as the
+# two sites this comes from, including rules for the extensionless files that
+# no extension-based rule reaches.
+*.js   text eol=lf
+*.mjs  text eol=lf
+*.json text eol=lf
+*.md   text eol=lf
+*.yml  text eol=lf
+*.css  text eol=lf
+*.html text eol=lf
+
+Dockerfile     text eol=lf
+.dockerignore  text eol=lf
+.gitattributes text eol=lf
+.gitignore     text eol=lf
+
+# Derived index artifacts are brotli. Never touch them.
+*.br binary
+
+# Fetched sources are whatever upstream sent.
+*.csv -text

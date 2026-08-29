@@ -1,0 +1,126 @@
+code,name,firstSeen,lastSeen,source
+ARI,Arizona Cardinals,1921-11-20,2018-12-02,derived
+ATL,Atlanta Falcons,1966-10-23,2020-10-05,derived
+BAL,Baltimore Ravens,1998-10-25,2017-11-19,derived
+BCL,Baltimore Colts,1950-11-05,1950-11-05,derived
+BKN,New York Yankees,1931-09-20,1944-09-17,derived
+BUF,Buffalo Bills,1974-10-06,2018-09-30,derived
+BYK,Dallas Texans,1945-10-21,1948-09-17,derived
+CAR,Carolina Panthers,1997-01-12,2020-12-19,derived
+CHI,Chicago Bears,1921-11-27,2021-01-03,derived
+CIB,Cleveland Bulldogs,1927-09-25,1927-09-25,derived
+CIN,Cincinnati Bengals,1971-10-03,2017-09-24,derived
+CLE,Cleveland Browns,1953-09-27,2017-12-10,derived
+CLI,Cleveland Indians,1931-09-13,1931-09-13,derived
+COL,Columbus Tigers,1922-11-05,1922-11-05,derived
+CRP,Card-Pitt Combine,1944-10-08,1944-11-26,derived
+DAL,Dallas Cowboys,1960-11-13,2019-10-06,derived
+DAY,Dayton Triangles,1925-11-15,1929-09-22,derived
+DEN,Denver Broncos,1971-09-26,2019-09-22,derived
+DET,Detroit Lions,1930-11-02,2020-12-13,derived
+DPN,Detroit Panthers,1926-09-19,1926-11-28,derived
+DTX,Dallas Texans,1952-10-18,1952-11-23,derived
+DUL,Newark Tornadoes,1923-11-25,1927-10-09,derived
+ECG,Evansville Crimson Giants,1921-11-06,1921-11-06,derived
+FYJ,Franford Yellow Jackets,1925-11-28,1931-10-18,derived
+GUN,St. Louis Gunners,1934-12-02,1934-12-02,derived
+HAM,Hammond Pros,1921-11-13,1925-09-20,derived
+HOU,Houston Texans,2004-11-21,2020-10-25,derived
+IND,Indianapolis Colts,1953-10-18,2020-11-22,derived
+JAX,Jacksonville Jaguars,1995-09-24,2020-11-15,derived
+KC,Kansas City Chiefs,1967-01-15,2019-10-27,derived
+KCB,Kansas City Cowboys,1924-10-12,1924-11-27,derived
+LAC,Los Angeles Chargers,1970-10-12,2019-11-03,derived
+LAC,San Diego Chargers,1999-10-24,2015-10-18,derived
+LAR,Los Angeles Rams,1937-10-17,2021-01-16,derived
+LAR,St. Louis Rams,2002-01-20,2015-10-11,derived
+LOU,Louisville Colonels,1926-11-14,1926-11-14,derived
+MIA,Miami Dolphins,1971-12-19,2018-11-11,derived
+MIL,Milwaukee Badgers,1922-10-22,1926-11-07,derived
+MIN,Minnesota Vikings,1961-10-22,2020-11-01,derived
+MNN,Minneapolis Red Jackets,1921-10-23,1930-10-26,derived
+NE,New England Patriots,1973-11-18,2018-11-04,derived
+NO,New Orleans Saints,1968-11-17,2020-09-27,derived
+NYA,Staten Island Stapletons,1927-10-23,1928-11-11,derived
+NYG,New York Giants,1928-10-07,2019-12-01,derived
+NYJ,New York Jets,1973-09-17,2018-12-23,derived
+NYY,Dallas Texans,1949-10-07,1951-12-02,derived
+OAK,Oakland Raiders,1968-01-14,2019-10-20,derived
+PHI,Philadelphia Eagles,1933-10-29,2020-12-06,derived
+PIT,Pittsburgh Steelers,1933-10-15,2017-11-26,derived
+PRV,Providence Steam Roller,1925-12-06,1931-11-26,derived
+PTB,Boston Bulldogs,1925-11-26,1928-11-25,derived
+RAC,Racine Tornadoes,1922-10-08,1926-10-24,derived
+RCH,Rochester Jeffersons,1925-10-25,1925-10-25,derived
+RED,Cincinnati Reds,1934-10-14,1934-10-14,derived
+RII,Rock Island Independents,1921-10-30,1925-10-18,derived
+SEA,Seattle Seahawks,1976-10-10,2020-01-12,derived
+SF,San Francisco 49ers,1950-11-26,2020-11-05,derived
+SIS,Staten Island Stapletons,1930-11-30,1932-11-27,derived
+SLA,St. Louis All-Stars,1923-10-07,1923-11-04,derived
+STG,Phil-Pitt Combine,1943-12-05,1943-12-05,derived
+TB,Tampa Bay Buccaneers,1977-10-23,2021-01-24,derived
+TEN,Tennessee Titans,1972-11-19,2020-12-27,derived
+WSH,Washington Commanders,1932-11-13,2019-12-08,derived
+ABU,,,,unresolved
+AKR,,,,unresolved
+ATN,,,,unresolved
+BBA,,,,unresolved
+BDA,,,,unresolved
+BFF,,,,unresolved
+BRL,,,,unresolved
+CBD,,,,unresolved
+CCL,,,,unresolved
+CHB,,,,unresolved
+CHL,,,,unresolved
+CHT,,,,unresolved
+CLP,,,,unresolved
+CNC,,,,unresolved
+CRA,,,,unresolved
+CST,,,,unresolved
+CTI,,,,unresolved
+CWP,,,,unresolved
+DHR,,,,unresolved
+DTI,,,,unresolved
+DTM,,,,unresolved
+DWL,,,,unresolved
+ELY,,,,unresolved
+FTP,,,,unresolved
+FTW,,,,unresolved
+GAR,,,,unresolved
+GB,,,,unresolved
+HRT,,,,unresolved
+KEN,,,,unresolved
+KEW,,,,unresolved
+LAB,,,,unresolved
+LAN,,,,unresolved
+LDA,,,,unresolved
+LOG,,,,unresolved
+MCK,,,,unresolved
+MNM,,,,unresolved
+MSA,,,,unresolved
+MUN,,,,unresolved
+MUT,,,,unresolved
+NAA,,,,unresolved
+NG1,,,,unresolved
+OOR,,,,unresolved
+PTQ,,,,unresolved
+PUL,,,,unresolved
+RCK,,,,unresolved
+RIC,,,,unresolved
+ROS,,,,unresolved
+SEN,,,,unresolved
+STP,,,,unresolved
+SYR,,,,unresolved
+THO,,,,unresolved
+TLM,,,,unresolved
+TOL,,,,unresolved
+TON,,,,unresolved
+TOR,,,,unresolved
+UAP,,,,unresolved
+UTI,,,,unresolved
+WBU,,,,unresolved
+WGC,,,,unresolved
+WHE,,,,unresolved
+WJA,,,,unresolved
+ZAN,,,,unresolved
