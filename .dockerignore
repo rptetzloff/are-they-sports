@@ -1,0 +1,26 @@
+# What never belongs in the image.
+#
+# The rule learned the expensive way on the baseball site: this file excluded
+# `scripts`, and server.js imported from scripts/ to *read* its indices. The
+# import threw, the throw was caught, the server logged "rebuilding from CSV",
+# and every box score silently lost its scoring summary — live, with every route
+# returning 200. So the default here is to copy, and each exclusion below says
+# why it cannot be needed at runtime.
+
+.git
+.gitattributes
+.github
+node_modules
+
+# Fetched sources. Gitignored anyway, so this is belt and braces — but they are
+# 95MB and 388MB, they are input to `npm run build`, and nothing reads them at
+# request time. data/indices and data/reference are NOT excluded: the server
+# reads both on every boot.
+data/sources
+
+# The test suite runs in CI and locally, never in the container.
+test
+
+# Notes for people, not for the runtime.
+CLAUDE.md
+README.md

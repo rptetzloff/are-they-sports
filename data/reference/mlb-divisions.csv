@@ -1,0 +1,41 @@
+# Current division membership. Curated by hand; Retrosheet does not publish it.
+#
+# THIS IS A SNAPSHOT, NOT A HISTORY. See the note in nfl-divisions.csv — the
+# same rule applies and matters more here, because the Brewers spent 1969-1997
+# in the American League and appear in the NL Central anyway. A division scope
+# is today's clubs with all of their history, including the years that history
+# happened somewhere else.
+#
+# Codes are Retrosheet's, taken from the 2025 season of the fetched gameinfo:
+# the Athletics are ATH rather than OAK, and the Angels are ANA rather than LAA.
+code,conference,division
+BAL,AL,East
+BOS,AL,East
+NYA,AL,East
+TBA,AL,East
+TOR,AL,East
+CHA,AL,Central
+CLE,AL,Central
+DET,AL,Central
+KCA,AL,Central
+MIN,AL,Central
+ATH,AL,West
+ANA,AL,West
+HOU,AL,West
+SEA,AL,West
+TEX,AL,West
+ATL,NL,East
+MIA,NL,East
+NYN,NL,East
+PHI,NL,East
+WAS,NL,East
+CHN,NL,Central
+CIN,NL,Central
+MIL,NL,Central
+PIT,NL,Central
+SLN,NL,Central
+ARI,NL,West
+COL,NL,West
+LAN,NL,West
+SDN,NL,West
+SFN,NL,West

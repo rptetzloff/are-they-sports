@@ -11,9 +11,9 @@
 // into a string is 190MB of UTF-16 before parsing starts, and doing that for a
 // range of seasons is how a build runs a machine out of memory.
 
-import { createReadStream, existsSync, mkdirSync, readdirSync, writeFileSync } from 'node:fs';
-import { createInterface } from 'node:readline';
+import { existsSync, mkdirSync, readdirSync, writeFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
+import { csvRows } from '../lib/csv.js';
 import { brotliCompressSync, constants } from 'node:zlib';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -32,35 +32,6 @@ export const FORMAT = 1;
  *  split on ',' silently misaligns every column after `desc` — and the result
  *  parses fine and is wrong, which is the worst kind of wrong.
  */
-export function splitCsvLine(line) {
-	const out = [];
-	let cur = '', quoted = false;
-	for (let i = 0; i < line.length; i++) {
-		const c = line[i];
-		if (c === '"') {
-			if (quoted && line[i + 1] === '"') { cur += '"'; i++; }
-			else quoted = !quoted;
-		} else if (c === ',' && !quoted) { out.push(cur); cur = ''; }
-		else cur += c;
-	}
-	out.push(cur);
-	return out;
-}
-
-/** Stream a CSV as objects, one at a time. Never holds more than a row. */
-export async function* csvRows(path) {
-	const rl = createInterface({ input: createReadStream(path, 'utf8'), crlfDelay: Infinity });
-	let header = null;
-	for await (const line of rl) {
-		if (!line.trim()) continue;
-		const v = splitCsvLine(line);
-		if (!header) { header = v; continue; }
-		const o = {};
-		for (let i = 0; i < header.length; i++) o[header[i]] = v[i] ?? '';
-		yield o;
-	}
-}
-
 /** One JSON value per line: a header, then one entry per line.
  *
  *  Newline-delimited rather than one document, because reading an index back

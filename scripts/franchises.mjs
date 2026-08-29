@@ -44,39 +44,12 @@
 // a single name per code would relabel every St. Louis Rams game as Los
 // Angeles — but it is not evidence the ranges are correct.
 
-import { createReadStream } from 'node:fs';
-import { createInterface } from 'node:readline';
+import { csvRows as rows } from '../lib/csv.js';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const SOURCE_DIR = join(ROOT, 'data', 'sources');
-
-function splitCsvLine(line) {
-	const out = [];
-	let cur = '', q = false;
-	for (let i = 0; i < line.length; i++) {
-		const c = line[i];
-		if (c === '"') { if (q && line[i + 1] === '"') { cur += '"'; i++; } else q = !q; }
-		else if (c === ',' && !q) { out.push(cur); cur = ''; }
-		else cur += c;
-	}
-	out.push(cur);
-	return out;
-}
-
-async function* rows(path) {
-	const rl = createInterface({ input: createReadStream(path, 'utf8'), crlfDelay: Infinity });
-	let header = null;
-	for await (const line of rl) {
-		if (!line.trim()) continue;
-		const v = splitCsvLine(line);
-		if (!header) { header = v; continue; }
-		const o = {};
-		header.forEach((h, i) => { o[h] = v[i] ?? ''; });
-		yield o;
-	}
-}
 
 /** Collapse observations into one row per (code, name), bounded by the first
  *  and last date that pairing was seen.

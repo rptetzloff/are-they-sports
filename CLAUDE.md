@@ -1,6 +1,12 @@
 # House rules
 
-Twelve rules, so they get applied rather than rediscovered. Short on purpose.
+Fifteen rules, so they get applied rather than rediscovered. Short on purpose.
+
+(It said twelve, which was the count in the two sites this file came from and
+was already wrong here before the scope rule was added. A number in a heading is
+a claim like any other, and this one went stale exactly the way this file says
+claims do: nothing failed, nothing rendered wrong, and it stayed wrong until
+somebody counted.)
 
 This is that shared repo. `AreThePackersUndefeated` and `AreTheBrewersOnTV`
 each carry a near-identical copy of this file — 208 of 221 lines the same — from
@@ -191,6 +197,30 @@ on it, because the column names were guessed rather than read. Retrosheet has a
 and the baseball site's own collector had been reading it for years three
 directories away.
 
+## The scope is data too, and so is what it cannot serve
+
+One deployment shows a set of clubs, named by a single `SCOPE`: a club, a
+division, a conference, a league, or everything. The only branch anywhere is
+whether the resolved set has one club — one club serves the root and has no
+selector, and a single-club deployment keeps an **empty** URL prefix so that
+`arethepackersundefeated.com/records/...` survives the cutover unchanged.
+
+A division means **today's clubs, each with its whole history**, and that is a
+decision rather than an approximation. The NL Central carries the Brewers'
+American League seasons. Say so where someone might "fix" it.
+
+**Report the gap, never close it silently.** A club in scope with no manifest,
+or a manifest with no build, stays in the resolved list marked unavailable — so
+the boot log names it, `/healthz` counts it, and its own URL returns 503 saying
+which command is missing. Filtering it out would produce a site that promised
+sixteen clubs, showed two, and looked complete. That is the same failure this
+file keeps describing, and this is the version of it that would ship.
+
+Configuration errors and data gaps are different. A misspelled scope cannot be
+fixed by running a build, so it exits; an unbuilt club can, so it serves and
+reports unhealthy. The first version exited for both, which made the 503 branch
+unreachable and turned a readable list of missing clubs into a crash loop.
+
 ## The data has three tiers, and the split is the point
 
 **Sources are fetched and never committed.** One nflverse play-by-play season is
@@ -282,11 +312,12 @@ the point at which it is cheap to keep it that way.
 
 ---
 
-*This repo: no site yet. `scripts/fetch.mjs` pulls sources, `scripts/build.mjs`
+*This repo: no markup yet. `scripts/fetch.mjs` pulls sources, `scripts/build.mjs`
 derives artifacts, both sports are verified against the sites they came from —
 1,534 of 1,534 football games and 9,067 of 9,067 baseball games, matching on
-result and score — and `npm test` covers the pure parts in isolation. What is
-missing is name resolution, the record core, and anything that serves a page.*
+result and score — `server.js` answers in JSON under a configured scope, and
+`npm test` covers the pure parts in isolation. What is missing is name
+resolution, the record core, and anything that renders.*
 
 *Branching is work branch → `dev` → `main`, the same as the two sites, from
 before there is anything deployed to protect. The earlier version of this
