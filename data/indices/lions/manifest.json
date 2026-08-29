@@ -1,0 +1,19 @@
+{
+	"format": 1,
+	"team": "lions",
+	"sport": "nfl",
+	"indices": [
+		"games",
+		"scoring"
+	],
+	"digests": {
+		"games": "ca461f5ddca14f805dc06f6146e186dece45d4cfacea63f0d297b091ca5f329a",
+		"scoring": "0a6781f1cfc7a291e20a259ab01d529c3f45591f0af42827af8677c22f006731"
+	},
+	"sources": {
+		"schedules": "https://github.com/nflverse/nflverse-data/releases/download/schedules/games.csv",
+		"playByPlaySeasons": [
+			"2024"
+		]
+	}
+}

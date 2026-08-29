@@ -132,10 +132,41 @@ export function scoringRow(r) {
 	};
 }
 
+/** What every club in this league says. Facts about baseball, not about any
+ *  club; a club overrides any of them when it genuinely differs. */
+export const defaults = {
+	nouns: {
+		scoreNoun: 'runs',
+		/** Not "Points For" with a noun swapped — the verb changes too. */
+		scoreForLabel: 'Runs Scored',
+		scoreAgainstLabel: 'Runs Allowed',
+		championship: 'World Series',
+		leaderNoun: 'manager',
+		leaderPlural: 'managers',
+		meetingNoun: 'clash',
+		/** Not meetingNoun + 's'. That gives "clashs". */
+		meetingPlural: 'clashes',
+		losslessSeasonNoun: 'undefeated',
+	},
+	rules: {
+		/** Streaks end at the season boundary here and span them in football.
+		 *  Across 162 games the within-season run is the record anyone quotes;
+		 *  across 17 the cross-season one is. */
+		streaksSpanSeasons: false,
+		/** Of every MLB season above .700, two have happened since 1955. */
+		losslessSeasonIsPlausible: false,
+		/** Exact date. Across fifty-odd seasons of near-daily baseball there is
+		 *  almost always a game on today's date; football needs three days
+		 *  either side or the panel is empty most of the year. */
+		onThisDayWindowDays: 0,
+	},
+};
+
 export const sport = {
 	id: 'mlb',
 	name: 'baseball',
 	sources,
+	defaults,
 	gameRow,
 	isScoringPlay,
 	scoringRow,

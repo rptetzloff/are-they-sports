@@ -2,8 +2,11 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import nfl from '../sports/nfl.js'
 import mlb from '../sports/mlb.js'
-import packers from '../teams/packers.js'
-import brewers from '../teams/brewers.js'
+import { loadTeams } from '../lib/teams.js'
+
+const TEAMS_ALL = await loadTeams()
+const packers = TEAMS_ALL.find((t) => t.id === 'packers')
+const brewers = TEAMS_ALL.find((t) => t.id === 'brewers')
 
 // The seam itself, rather than either side of it.
 //
@@ -12,7 +15,10 @@ import brewers from '../teams/brewers.js'
 // Both of those are claims, and a claim that no test can fail is prose.
 
 const SPORTS = [nfl, mlb]
-const TEAMS = [packers, brewers]
+// Every club, not a chosen two. The point of the manifest rules is that they
+// hold for whatever gets added, and a list of two is a list that stops finding
+// problems the moment a third arrives.
+const TEAMS = TEAMS_ALL
 
 const nflRow = nfl.gameRow({
 	game_id: '2024_01_GB_PHI', season: '2024', game_type: 'REG', gameday: '2024-09-06',

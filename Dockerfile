@@ -10,6 +10,20 @@ FROM node:24-slim
 WORKDIR /app
 ENV NODE_ENV=production
 
+# Which build this is, surfaced at /healthz.
+#
+# Coolify sets SOURCE_COMMIT itself and server.js reads that too; this arg is
+# for a plain `docker build --build-arg BUILD_SHA=$(git rev-parse HEAD)`. When
+# neither is set the server reports "unknown" rather than guessing.
+#
+# This exists because "is the code I merged actually running?" has been a real
+# question three times: once when a merge left a commit behind on a work branch,
+# and twice during rollouts where old and new containers both served for about
+# twenty seconds and the same URL gave two different answers. Answering it by
+# diffing response bodies is slow and, twice, I got it wrong.
+ARG BUILD_SHA=""
+ENV BUILD_SHA=$BUILD_SHA
+
 # curl, purely so the *orchestrator's* health check can run.
 #
 # The HEALTHCHECK at the bottom of this file uses Node's own fetch and works —

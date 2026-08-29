@@ -34,25 +34,30 @@ import { builtTeams, loadIndex, readManifest } from './lib/indices.js';
 import { latestSeason, recordText, seasonTally, seasonVerdict, verdictText } from './lib/core.js';
 import { NEUTRAL, clubPage, selectorPage } from './lib/render.js';
 import { resolver } from './lib/names.js';
+import { SPORTS, loadTeams } from './lib/teams.js';
 import { matchRoute, parseView, routeTable } from './lib/routes.js';
 import { loadDivisions, needsSelector, parseScope, resolveScope } from './lib/scope.js';
 
 const PORT = Number(process.env.PORT ?? 3000);
-const SPORTS = ['nfl', 'mlb'];
+
+/** Which build this is.
+ *
+ *  Reported by /healthz so "is my code deployed?" is one request rather than a
+ *  guess. That question has now cost real time three times: a merge that left a
+ *  commit behind on a work branch, and two rollouts where the old and new
+ *  containers both served for about twenty seconds and the same hostname
+ *  returned two different answers.
+ *
+ *  SOURCE_COMMIT is what Coolify sets; BUILD_SHA is the Dockerfile's own build
+ *  arg, for a plain `docker build`. When neither is set it says so rather than
+ *  inventing a value — an unknown build is a fact worth showing, and a
+ *  fabricated one is worse than none.
+ */
+const BUILD = process.env.BUILD_SHA || process.env.SOURCE_COMMIT || 'unknown';
 
 function die(reason) {
 	console.error(`FATAL: ${reason}`);
 	process.exit(1);
-}
-
-/** Load every team manifest that exists. */
-async function loadTeams() {
-	const dir = join(dirname(fileURLToPath(import.meta.url)), 'teams');
-	const out = [];
-	for (const f of readdirSync(dir).filter((f) => f.endsWith('.js'))) {
-		out.push((await import(pathToFileURL(join(dir, f)).href)).default);
-	}
-	return out;
 }
 
 export function originOf(req, env = process.env) {
@@ -150,6 +155,7 @@ function main() {
 		// Say what is missing every time, at boot. A scope of sixteen clubs
 		// serving two is a legitimate state of this repo today and an illegitimate
 		// one in production, and the difference is whether anybody was told.
+		console.log(`  build        ${BUILD}`);
 		console.log(`  scope        ${process.env.SCOPE}`);
 		console.log(`  clubs        ${available.length} of ${table.length} available`);
 		for (const e of table.filter((e) => !e.available)) {
@@ -182,6 +188,7 @@ function main() {
 				// number is visible before anyone has decided it matters.
 				return json(res, healthy() ? 200 : 503, {
 					ok: healthy(),
+					build: BUILD,
 					strict,
 					scope: process.env.SCOPE,
 					inScope: table.length,
