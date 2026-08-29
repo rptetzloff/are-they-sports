@@ -56,6 +56,21 @@ export const team = {
 		onThisDayWindowDays: 3,
 	},
 
+	/** Brand colours, as values rather than literals in a stylesheet.
+	 *
+	 *  The two sites carry 282 hardcoded hex literals between them and not one
+	 *  custom property, and comparing their palettes showed the status colours
+	 *  were already identical — a win is #4caf50 on both. Only the brand values
+	 *  differ, which makes a palette team vocabulary and puts it here.
+	 *
+	 *  Taken from the live stylesheet: #ffb612 appears 64 times in it.
+	 */
+	colors: {
+		accent: '#ffb612',
+		base: '#203731',
+		baseDeep: '#1a2e28',
+	},
+
 	copy: {
 		/** The answer before the first regular-season game. Not YES, which is
 		 *  hollow, and emphatically not NO, which is what it said about a team

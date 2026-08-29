@@ -36,6 +36,15 @@ export const team = {
 		onThisDayWindowDays: 0,
 	},
 
+	/** Taken from the live stylesheet, where #ffc52f appears 111 times. Note it
+	 *  is NOT the football site's #ffb612 — near enough to look like a rounding
+	 *  error and different enough to be wrong. */
+	colors: {
+		accent: '#ffc52f',
+		base: '#12284b',
+		baseDeep: '#1a3558',
+	},
+
 	copy: {
 		seasonNotStarted: 'GO BREW CREW',
 	},
