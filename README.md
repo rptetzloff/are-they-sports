@@ -53,6 +53,36 @@ opponent or score. The pipeline's output was then compared against the football
 site's committed data — **1,534 of 1,534 played games match exactly** on result,
 points for and points against.
 
+## Names
+
+Two sports, two answers, because only one has a source that publishes eras.
+
+**Baseball resolves names by date.** Retrosheet's `CurrentNames.csv` carries
+franchise code, name, and the exact span each applied, so a 1969 Brewers game is
+labelled **Seattle Pilots** — which is what it was. `scripts/names.mjs` turns it
+into `data/reference/mlb-names.csv`, collapsing rows that differ only by league
+or division: 125 upstream rows become 88 name spans across 30 franchises.
+
+**Football resolves to the current name, whatever the date.** No equivalent
+source exists, so a 1995 Rams game says "Los Angeles Rams" even though it was
+played in St. Louis. That is wrong as history and is exactly what
+arethepackersundefeated.com has always done. `nameFor` returns `isHistorical` so
+a caller can tell the two apart rather than a function quietly meaning two
+things.
+
+The two football sources also **disagree on codes for the same club**:
+FiveThirtyEight writes `LAC`, `LAR`, `OAK`, `WSH`; nflverse writes `SD`, `STL`,
+`LA`, `LV`, `WAS`. One club's games contain both, because the eras come from
+different files, so `data/reference/nfl-names.csv` carries alias rows. Without
+them five of the Packers' own opponent codes resolve to nothing.
+
+Resolution is per sport, and it has to be: **`MIL` is the Milwaukee Badgers in
+football and the Milwaukee Brewers in baseball.**
+
+Every opponent either built club has ever played now resolves — 66 of 66 for the
+Packers, 34 of 34 for the Brewers — and a test asserts it against the real
+indices rather than against the tables agreeing with themselves.
+
 ## The franchise problem
 
 Retrosheet publishes `CurrentNames.csv`: franchise code, name, start date, end
