@@ -111,7 +111,16 @@ export function gameRow(r, teamId) {
 export function seedGameRow(r, teamId) {
 	const home = r.team1, away = r.team2;
 	if (home !== teamId && away !== teamId) return null;
-	if (!r.score1 && r.score1 !== '0') return null;
+	// Both scores, not just one. The earlier guard read `!r.score1 && r.score1
+	// !== '0'`, which looks careful and does two wrong things: the second clause
+	// is unreachable, because '0' is a truthy string, and the first never looked
+	// at score2 at all. A row with score1 and no score2 therefore produced
+	// scoreAgainst NaN, and since every comparison against NaN is false the
+	// result ternary fell through to its last branch — a 34-to-nothing game came
+	// out as a TIE. Found by a mutation run: replacing the guard with plain
+	// `!r.score1` changed nothing, which is what an unreachable clause looks
+	// like from the outside.
+	if (r.score1 === '' || r.score2 === '' || r.score1 == null || r.score2 == null) return null;
 
 	const isHome = home === teamId;
 	const scoreFor = isHome ? r.score1 : r.score2;
@@ -162,13 +171,6 @@ export function scoringRow(r) {
 	};
 }
 
-/** A predicate for scoring plays. Football's is stateless — nflverse flags them
- *  outright — but it is produced by a factory so both sports answer the builder
- *  the same way. See buildScoring in scripts/build.mjs. */
-export function scoringFilter() {
-	return isScoringPlay;
-}
-
 export const sport = {
 	id: 'nfl',
 	name: 'football',
@@ -176,7 +178,6 @@ export const sport = {
 	gameRow,
 	seedGameRow,
 	isScoringPlay,
-	scoringFilter,
 	scoringRow,
 	/** The column identifying a game across sources, so the builder can key an
 	 *  index without knowing the sport. */

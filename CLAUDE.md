@@ -1,6 +1,12 @@
 # House rules
 
-Twelve rules, so they get applied rather than rediscovered. Short on purpose.
+Fifteen rules, so they get applied rather than rediscovered. Short on purpose.
+
+(It said twelve, which was the count in the two sites this file came from and
+was already wrong here before the scope rule was added. A number in a heading is
+a claim like any other, and this one went stale exactly the way this file says
+claims do: nothing failed, nothing rendered wrong, and it stayed wrong until
+somebody counted.)
 
 This is that shared repo. `AreThePackersUndefeated` and `AreTheBrewersOnTV`
 each carry a near-identical copy of this file — 208 of 221 lines the same — from
@@ -102,14 +108,32 @@ because its `main.js` fetches its own CSV in the browser and `lib/seasons.js`
 reads the file at import and calls ESPN. Neither is reachable from `node --test`.
 Know which files your suite cannot see, and say so out loud.
 
-**This repo has none yet, and that is a debt rather than a decision.** Three
-commits have shipped on the strength of comparing output against the two live
-sites — 1,534 football games and 9,067 baseball games matching on result and
-score. That is a strong check and it is not a test suite: it needs 490MB of
-fetched sources and two sibling checkouts to run, so it cannot run in CI and
-will not survive those repos being retired. The pure parts — `splitCsvLine`,
-`gameRow`, `seedGameRow`, `isoDate`, `isScoringPlay`, `collapse` — take rows and
-return rows, and every one of them can be tested with a handful of literals.
+This repo now has 73, over the pure parts — `splitCsvLine`, `renderNdjson`, both
+`gameRow`s, `seedGameRow`, `isoDate`, `isScoringPlay`, `scoringRow`, `collapse`,
+`seasonRange`, `coveredSeasons` — plus the seam itself and the two manifests.
+They need no sources and run in about 140ms. The comparison against the two live
+sites still stands behind them and is still the stronger check, but it needs
+490MB of fetched sources and two sibling checkouts, so it cannot run in CI and
+will not survive those repos being retired.
+
+**Every one of them was mutation-tested: 25 deliberate breaks, 25 caught.** That
+is the only reason to believe any of it, and the run paid for itself twice over.
+Once by finding a real bug: `seedGameRow` guarded `score1` and never looked at
+`score2`, so a row with one score parsed the other to NaN, every comparison
+against NaN is false, and the ternary fell through — a 34-to-nothing game came
+out as a TIE. Once by finding a NUL byte inside a template literal in
+`scripts/franchises.mjs`, where `${code} ${name}` was really `${code}\0${name}`.
+That one produced correct output, which is why nothing had caught it; what it
+cost was that `grep` and `git diff` both treat a file containing a NUL as binary
+and refuse to show it. The mutation run surfaced it by failing to find a line it
+had just been shown.
+
+And the first mutation run was itself worthless: it invoked `node --test test/`,
+which this Node resolves as a module path and refuses, so all 23 mutants were
+"killed" by the runner erroring rather than by any test. It reported a perfect
+score. **A mutation harness needs a control that the unmutated suite passes under
+the exact command the harness uses** — otherwise it is one more check that passes
+because it is not looking at anything.
 
 Two layers, on purpose. Unit tests build their own rows and pin exact numbers.
 Tests against the real data assert relations and floors — ordered, distinct, at
@@ -172,6 +196,30 @@ on it, because the column names were guessed rather than read. Retrosheet has a
 `runs` column; the test is `runs > 0`, pure and identical in shape to football's,
 and the baseball site's own collector had been reading it for years three
 directories away.
+
+## The scope is data too, and so is what it cannot serve
+
+One deployment shows a set of clubs, named by a single `SCOPE`: a club, a
+division, a conference, a league, or everything. The only branch anywhere is
+whether the resolved set has one club — one club serves the root and has no
+selector, and a single-club deployment keeps an **empty** URL prefix so that
+`arethepackersundefeated.com/records/...` survives the cutover unchanged.
+
+A division means **today's clubs, each with its whole history**, and that is a
+decision rather than an approximation. The NL Central carries the Brewers'
+American League seasons. Say so where someone might "fix" it.
+
+**Report the gap, never close it silently.** A club in scope with no manifest,
+or a manifest with no build, stays in the resolved list marked unavailable — so
+the boot log names it, `/healthz` counts it, and its own URL returns 503 saying
+which command is missing. Filtering it out would produce a site that promised
+sixteen clubs, showed two, and looked complete. That is the same failure this
+file keeps describing, and this is the version of it that would ship.
+
+Configuration errors and data gaps are different. A misspelled scope cannot be
+fixed by running a build, so it exits; an unbuilt club can, so it serves and
+reports unhealthy. The first version exited for both, which made the 503 branch
+unreachable and turned a readable list of missing clubs into a crash loop.
 
 ## The data has three tiers, and the split is the point
 
@@ -264,12 +312,21 @@ the point at which it is cheap to keep it that way.
 
 ---
 
-*This repo: no site yet. `scripts/fetch.mjs` pulls sources, `scripts/build.mjs`
-derives artifacts, and both sports are verified against the sites they came
-from — 1,534 of 1,534 football games and 9,067 of 9,067 baseball games, matching
-on result and score. What is missing is name resolution, the record core, and
-anything that serves a page.*
+*This repo: no markup yet. `scripts/fetch.mjs` pulls sources, `scripts/build.mjs`
+derives artifacts, both sports are verified against the sites they came from —
+1,534 of 1,534 football games and 9,067 of 9,067 baseball games, matching on
+result and score — `server.js` answers in JSON under a configured scope, and
+`npm test` covers the pure parts in isolation. What is missing is name
+resolution, the record core, and anything that renders.*
 
-*Branching is `main` only for now, because there is nothing deployed to protect.
-When something is, it becomes work branch → `dev` → `main` as it is in the two
-sites, and the rule about back-merging comes with it.*
+*Branching is work branch → `dev` → `main`, the same as the two sites, from
+before there is anything deployed to protect. The earlier version of this
+paragraph said `main` only was fine until then; the reason to start now is that
+every serious git problem those repos had came from branch discipline, and the
+habit is cheaper to start than to retrofit. `main` is a known-good state even
+when nothing reads it.*
+
+*Everything the sites' rule says applies here: merge commits and never squash,
+branch from `dev` rather than another work branch, delete work branches on
+merge, never delete `dev` or `main`, and back-merge `main` into `dev` after each
+release so the next diff is clean.*
