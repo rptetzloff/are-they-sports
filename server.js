@@ -1,0 +1,212 @@
+/** The dev server.
+ *
+ *  Serves JSON, not pages. There is no markup in this repo yet and inventing
+ *  some here would bake a layout into a routing change; what this exists to
+ *  settle is the scope model — that one binary can be a single club, a
+ *  division, a league or everything, and that a single-club deployment keeps
+ *  the URLs arethepackersundefeated.com already has.
+ *
+ *  Configuration is two environment variables:
+ *
+ *    SCOPE          required. team:packers, division:nfl/nfc-north,
+ *                   conference:nfl/nfc, sport:nfl, all
+ *    PUBLIC_ORIGIN  optional. Pins the origin used in absolute links. Without
+ *                   it any Host header becomes canonical, which on the two live
+ *                   sites meant a preview domain could publish itself as the
+ *                   real one.
+ *
+ *  It fails loudly and exits rather than starting degraded. That is a direct
+ *  lesson: the baseball site once found its indices unreadable, caught the
+ *  error, logged "rebuilding from CSV", and served every route 200 with the box
+ *  scores silently gone. A server that cannot do its job should not be healthy.
+ */
+
+import { createServer } from 'node:http';
+import { readdirSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+import { builtTeams, loadIndex, readManifest } from './lib/indices.js';
+import { matchRoute, parseView, routeTable } from './lib/routes.js';
+import { loadDivisions, needsSelector, parseScope, resolveScope } from './lib/scope.js';
+
+const PORT = Number(process.env.PORT ?? 3000);
+const SPORTS = ['nfl', 'mlb'];
+
+function die(reason) {
+	console.error(`FATAL: ${reason}`);
+	process.exit(1);
+}
+
+/** Load every team manifest that exists. */
+async function loadTeams() {
+	const dir = join(dirname(fileURLToPath(import.meta.url)), 'teams');
+	const out = [];
+	for (const f of readdirSync(dir).filter((f) => f.endsWith('.js'))) {
+		out.push((await import(pathToFileURL(join(dir, f)).href)).default);
+	}
+	return out;
+}
+
+export function originOf(req, env = process.env) {
+	if (env.PUBLIC_ORIGIN) return env.PUBLIC_ORIGIN.replace(/\/+$/, '');
+	const proto = (req.headers['x-forwarded-proto'] || 'http').split(',')[0].trim();
+	const host = req.headers['x-forwarded-host'] || req.headers.host;
+	return `${proto}://${host}`;
+}
+
+const json = (res, code, body) => {
+	const buf = Buffer.from(`${JSON.stringify(body, null, '\t')}\n`);
+	res.writeHead(code, { 'content-type': 'application/json; charset=utf-8', 'content-length': buf.length });
+	res.end(buf);
+};
+
+/** A club's games, filtered to a season when asked. */
+function games(teamId, season) {
+	const { entries } = loadIndex(teamId, 'games');
+	return season ? entries.filter((g) => g.season === season) : entries;
+}
+
+function summary(entry, origin, base) {
+	const all = games(entry.teamId);
+	const played = all.filter((g) => g.result);
+	const seasons = [...new Set(all.map((g) => g.season))].sort();
+	return {
+		team: entry.teamId,
+		sport: entry.sport,
+		code: entry.code,
+		conference: entry.conference ?? null,
+		division: entry.division ?? null,
+		games: { total: all.length, played: played.length, scheduled: all.length - played.length },
+		seasons: { first: seasons[0], last: seasons.at(-1), count: seasons.length },
+		record: {
+			wins: played.filter((g) => g.result === 'WIN').length,
+			losses: played.filter((g) => g.result === 'LOSS').length,
+			ties: played.filter((g) => g.result === 'TIE').length,
+		},
+		sources: readManifest(entry.teamId).sources,
+		links: { self: `${origin}${base || '/'}`, latestSeason: `${origin}${base}/${seasons.at(-1)}` },
+	};
+}
+
+function main() {
+	const scope = (() => {
+		try { return parseScope(process.env.SCOPE); } catch (e) { return die(e.message); }
+	})();
+
+	const divisionsBySport = {};
+	for (const s of SPORTS) {
+		try { divisionsBySport[s] = loadDivisions(s); } catch (e) { return die(`division table for ${s}: ${e.message}`); }
+	}
+
+	return loadTeams().then((teams) => {
+		const built = builtTeams();
+		let resolved;
+		try {
+			resolved = resolveScope(scope, { divisionsBySport, teams, built });
+		} catch (e) {
+			return die(e.message);
+		}
+
+		const table = routeTable(scope, resolved);
+		const available = table.filter((e) => e.available);
+
+		// Say what is missing every time, at boot. A scope of sixteen clubs
+		// serving two is a legitimate state of this repo today and an illegitimate
+		// one in production, and the difference is whether anybody was told.
+		console.log(`  scope        ${process.env.SCOPE}`);
+		console.log(`  clubs        ${available.length} of ${table.length} available`);
+		for (const e of table.filter((e) => !e.available)) {
+			console.log(`  missing      ${e.sport}/${e.code} — ${e.teamId ? 'manifest but no build' : 'no manifest'}`);
+		}
+		// Not fatal, deliberately, and this is a reversal: the first version
+		// exited here. A configuration error and a data gap are different
+		// problems — a misspelled scope cannot be fixed by running a build, and
+		// a club that has not been built yet is the normal state of this repo.
+		// Exiting made the /healthz 503 branch unreachable and turned a
+		// readable "these clubs are missing" into a crash loop, where the reason
+		// is one restart back in the logs.
+		//
+		// So: config errors die above, data gaps serve and report unhealthy.
+		if (!available.length) {
+			console.error('  UNHEALTHY    no club in scope has built artifacts; run: npm run build <team>');
+		}
+		// Partial availability is healthy by default, because building clubs one
+		// at a time is how this repo works today. A deployment that means to
+		// promise the whole scope sets STRICT_SCOPE=1 and any gap is unhealthy.
+		const strict = process.env.STRICT_SCOPE === '1';
+		const healthy = () => (strict ? available.length === table.length : available.length > 0);
+
+		const server = createServer((req, res) => {
+			const url = new URL(req.url, 'http://placeholder');
+			const origin = originOf(req);
+
+			if (url.pathname === '/healthz') {
+				// Reports the gap whether or not it counts against health, so the
+				// number is visible before anyone has decided it matters.
+				return json(res, healthy() ? 200 : 503, {
+					ok: healthy(),
+					strict,
+					scope: process.env.SCOPE,
+					inScope: table.length,
+					available: available.length,
+					missing: table.filter((e) => !e.available).map((e) => `${e.sport}/${e.code}`),
+				});
+			}
+
+			// The selector. Only exists when the scope holds more than one club;
+			// a single-club scope serves that club at the root instead.
+			if (url.pathname === '/' && needsSelector(table)) {
+				return json(res, 200, {
+					scope: process.env.SCOPE,
+					clubs: table.map((e) => ({
+						team: e.teamId, sport: e.sport, code: e.code,
+						conference: e.conference ?? null, division: e.division ?? null,
+						available: e.available,
+						url: e.available ? `${origin}${e.base}` : null,
+					})),
+				});
+			}
+
+			const match = matchRoute(url.pathname, table);
+			if (!match) return json(res, 404, { error: 'no such path', path: url.pathname });
+
+			const { entry, rest } = match;
+			if (!entry.available) {
+				return json(res, 503, {
+					error: 'club is in scope but has no built artifacts',
+					team: entry.teamId, code: entry.code,
+					fix: entry.teamId ? `npm run build ${entry.teamId}` : `write teams/<id>.js for ${entry.code}`,
+				});
+			}
+
+			const view = parseView(rest);
+			if (!view) return json(res, 404, { error: 'no such view', path: url.pathname });
+
+			try {
+				if (view.view === 'summary') return json(res, 200, summary(entry, origin, entry.base));
+				if (view.view === 'season') {
+					const rows = games(entry.teamId, view.season);
+					if (!rows.length) return json(res, 404, { error: 'no such season', season: view.season });
+					return json(res, 200, { team: entry.teamId, season: view.season, games: rows });
+				}
+				// records and vs need the shared core, which has not been ported.
+				// Saying so beats an empty 200 that looks like a club with no
+				// records.
+				return json(res, 501, { error: `${view.view} needs the record core, which is not ported yet` });
+			} catch (e) {
+				console.error(e);
+				return json(res, 500, { error: e.message });
+			}
+		});
+
+		server.listen(PORT, () => console.log(`  listening    http://127.0.0.1:${PORT}`));
+		return server;
+	});
+}
+
+// pathToFileURL, not string surgery on the path. An earlier guard in this repo
+// compared a Windows path against a file:// URL by hand, matched nothing, and
+// silently ran no main at all — the script "succeeded" by doing nothing.
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+	main();
+}

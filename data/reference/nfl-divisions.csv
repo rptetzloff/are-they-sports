@@ -1,0 +1,50 @@
+# Current division membership. Curated by hand; no upstream publishes it.
+#
+# THIS IS A SNAPSHOT, NOT A HISTORY, AND THAT IS DELIBERATE.
+#
+# A division scope means "today's clubs in that division, each with its whole
+# history" — so NFC North is Chicago, Detroit, Green Bay and Minnesota, and it
+# shows Green Bay back to 1921 whether or not the division existed. It does not
+# mean "who was in the NFC North in 1985", which would need realignment history
+# and the franchise tracing that data/reference/nfl-franchises.csv describes.
+#
+# The practical consequence: this file goes stale on realignment or expansion,
+# and nothing about it fails when it does. scripts/verify-divisions.mjs checks
+# it against the codes in the most recent season of the fetched schedules.
+#
+# Codes are nflverse's, taken from the source rather than from memory: the Rams
+# are LA here and LAR in the FiveThirtyEight seed file, which is what a team
+# manifest's sourceIds list exists to reconcile.
+code,conference,division
+BUF,AFC,East
+MIA,AFC,East
+NE,AFC,East
+NYJ,AFC,East
+BAL,AFC,North
+CIN,AFC,North
+CLE,AFC,North
+PIT,AFC,North
+HOU,AFC,South
+IND,AFC,South
+JAX,AFC,South
+TEN,AFC,South
+DEN,AFC,West
+KC,AFC,West
+LV,AFC,West
+LAC,AFC,West
+DAL,NFC,East
+NYG,NFC,East
+PHI,NFC,East
+WAS,NFC,East
+CHI,NFC,North
+DET,NFC,North
+GB,NFC,North
+MIN,NFC,North
+ATL,NFC,South
+CAR,NFC,South
+NO,NFC,South
+TB,NFC,South
+ARI,NFC,West
+LA,NFC,West
+SF,NFC,West
+SEA,NFC,West

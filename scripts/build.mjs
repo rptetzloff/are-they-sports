@@ -11,9 +11,9 @@
 // into a string is 190MB of UTF-16 before parsing starts, and doing that for a
 // range of seasons is how a build runs a machine out of memory.
 
-import { createReadStream, existsSync, mkdirSync, readdirSync, writeFileSync } from 'node:fs';
-import { createInterface } from 'node:readline';
+import { existsSync, mkdirSync, readdirSync, writeFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
+import { csvRows } from '../lib/csv.js';
 import { brotliCompressSync, constants } from 'node:zlib';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -32,35 +32,6 @@ export const FORMAT = 1;
  *  split on ',' silently misaligns every column after `desc` — and the result
  *  parses fine and is wrong, which is the worst kind of wrong.
  */
-export function splitCsvLine(line) {
-	const out = [];
-	let cur = '', quoted = false;
-	for (let i = 0; i < line.length; i++) {
-		const c = line[i];
-		if (c === '"') {
-			if (quoted && line[i + 1] === '"') { cur += '"'; i++; }
-			else quoted = !quoted;
-		} else if (c === ',' && !quoted) { out.push(cur); cur = ''; }
-		else cur += c;
-	}
-	out.push(cur);
-	return out;
-}
-
-/** Stream a CSV as objects, one at a time. Never holds more than a row. */
-export async function* csvRows(path) {
-	const rl = createInterface({ input: createReadStream(path, 'utf8'), crlfDelay: Infinity });
-	let header = null;
-	for await (const line of rl) {
-		if (!line.trim()) continue;
-		const v = splitCsvLine(line);
-		if (!header) { header = v; continue; }
-		const o = {};
-		for (let i = 0; i < header.length; i++) o[header[i]] = v[i] ?? '';
-		yield o;
-	}
-}
-
 /** One JSON value per line: a header, then one entry per line.
  *
  *  Newline-delimited rather than one document, because reading an index back
@@ -118,21 +89,20 @@ export async function buildGames(sport, team, { schedulesPath, seedPath }) {
  *  filtered to one club without the adapter knowing how games were selected.
  */
 export async function buildScoring(sport, gameIds, pbpPaths) {
-	// The adapter is asked for a predicate rather than being asked a question
-	// about a row, because the two sports cannot answer the same way.
+	// The adapter answers one question about one row.
 	//
-	// nflverse marks scoring plays with a column, so football's test is pure.
-	// Retrosheet has no such flag: a play scored if the running total went up,
-	// which needs the previous row. Calling `sport.isScoringPlay(row)` can only
-	// ever serve the first kind, and the shape of the seam should not be decided
-	// by whichever sport was implemented first.
+	// This used to ask the adapter for a *predicate factory*, on the reasoning
+	// that "Retrosheet has no scoring flag: a play scored if the running total
+	// went up, which needs the previous row." That was wrong. Retrosheet has a
+	// `runs` column and the test is `runs > 0`, as pure as football's — the
+	// column names had been guessed rather than read, and the seam was reshaped
+	// around a difference that does not exist. The factory is gone with it,
+	// because an abstraction kept for a withdrawn premise is just a place for
+	// the next reader to look for meaning that is not there.
 	//
-	// So an adapter supplies scoringFilter(), returning a predicate that may
-	// close over whatever state it needs. A stateless sport returns a stateless
-	// one and nothing is lost.
-	const isScoring = sport.scoringFilter
-		? sport.scoringFilter()
-		: (r) => sport.isScoringPlay(r);
+	// If a sport ever does need previous-row state, this is one line to change
+	// and there will be a real case to shape it around.
+	const isScoring = (r) => sport.isScoringPlay(r);
 
 	const byGame = new Map();
 	let scanned = 0, kept = 0;
