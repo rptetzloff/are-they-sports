@@ -1,10 +1,15 @@
 /** The dev server.
  *
- *  Serves JSON, not pages. There is no markup in this repo yet and inventing
- *  some here would bake a layout into a routing change; what this exists to
- *  settle is the scope model — that one binary can be a single club, a
- *  division, a league or everything, and that a single-club deployment keeps
- *  the URLs arethepackersundefeated.com already has.
+ *  Serves HTML, with `?format=json` on every route for the data behind it. It
+ *  served JSON only for one commit, on purpose — inventing markup while routing
+ *  was still moving would have baked a layout into a routing change. The scope
+ *  model is settled now, so there are pages.
+ *
+ *  Rendering happens here, on the server. The football site does it in `main.js`
+ *  in the browser, which fetches its own CSV, and the result is that none of its
+ *  rendering is reachable from `node --test` — 118 tests passed there while
+ *  every past season showed a 0-0 record. Everything in lib/render.js takes data
+ *  and returns a string.
  *
  *  Configuration is two environment variables:
  *
@@ -26,6 +31,8 @@ import { readdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { builtTeams, loadIndex, readManifest } from './lib/indices.js';
+import { latestSeason, recordText, seasonTally, seasonVerdict, verdictText } from './lib/core.js';
+import { NEUTRAL, clubPage, selectorPage } from './lib/render.js';
 import { matchRoute, parseView, routeTable } from './lib/routes.js';
 import { loadDivisions, needsSelector, parseScope, resolveScope } from './lib/scope.js';
 
@@ -60,6 +67,20 @@ const json = (res, code, body) => {
 	res.end(buf);
 };
 
+const html = (res, code, body) => {
+	const buf = Buffer.from(body);
+	res.writeHead(code, { 'content-type': 'text/html; charset=utf-8', 'content-length': buf.length });
+	res.end(buf);
+};
+
+/** Whether this request wants the data rather than the page.
+ *
+ *  `?format=json` is kept because it is what makes a deployment debuggable from
+ *  a terminal — every check in this repo's commit messages was a curl against
+ *  these routes, and losing that to add markup would be a bad trade.
+ */
+const wantsJson = (url) => url.searchParams.get('format') === 'json';
+
 /** A club's games, filtered to a season when asked. */
 function games(teamId, season) {
 	const { entries } = loadIndex(teamId, 'games');
@@ -88,6 +109,16 @@ function summary(entry, origin, base) {
 	};
 }
 
+/** What the selector calls itself. Built from the scope rather than stored, so
+ *  a new division needs no copy written for it. */
+function scopeHeading(scope, table) {
+	if (scope.kind === 'all') return 'Every club';
+	if (scope.kind === 'sport') return `Every ${scope.sport.toUpperCase()} club`;
+	const first = table[0];
+	if (scope.kind === 'conference') return `${first.conference}`;
+	return `${first.conference} ${first.division}`;
+}
+
 function main() {
 	const scope = (() => {
 		try { return parseScope(process.env.SCOPE); } catch (e) { return die(e.message); }
@@ -107,6 +138,7 @@ function main() {
 			return die(e.message);
 		}
 
+		const teamsById = new Map(teams.map((t) => [t.id, t]));
 		const table = routeTable(scope, resolved);
 		const available = table.filter((e) => e.available);
 
@@ -156,15 +188,20 @@ function main() {
 			// The selector. Only exists when the scope holds more than one club;
 			// a single-club scope serves that club at the root instead.
 			if (url.pathname === '/' && needsSelector(table)) {
-				return json(res, 200, {
+				const clubs = table.map((e) => ({
+					team: e.teamId, sport: e.sport, code: e.code,
+					name: teamsById.get(e.teamId)?.nouns.fullName ?? null,
+					conference: e.conference ?? null, division: e.division ?? null,
+					available: e.available,
+					url: e.available ? `${origin}${e.base}` : null,
+				}));
+				if (wantsJson(url)) return json(res, 200, { scope: process.env.SCOPE, clubs });
+				return html(res, 200, selectorPage({
 					scope: process.env.SCOPE,
-					clubs: table.map((e) => ({
-						team: e.teamId, sport: e.sport, code: e.code,
-						conference: e.conference ?? null, division: e.division ?? null,
-						available: e.available,
-						url: e.available ? `${origin}${e.base}` : null,
-					})),
-				});
+					clubs,
+					colors: NEUTRAL,
+					heading: scopeHeading(scope, table),
+				}));
 			}
 
 			const match = matchRoute(url.pathname, table);
@@ -183,7 +220,21 @@ function main() {
 			if (!view) return json(res, 404, { error: 'no such view', path: url.pathname });
 
 			try {
-				if (view.view === 'summary') return json(res, 200, summary(entry, origin, entry.base));
+				if (view.view === 'summary') {
+					if (wantsJson(url)) return json(res, 200, summary(entry, origin, entry.base));
+					const team = teamsById.get(entry.teamId);
+					const latest = latestSeason(games(entry.teamId));
+					const tally = seasonTally(latest.rows, team);
+					const verdict = seasonVerdict({ ...tally, isPastSeason: latest.isPastSeason });
+					return html(res, 200, clubPage({
+						team,
+						season: latest.season,
+						tally,
+						verdict,
+						answer: verdictText(verdict, team),
+						recordLabel: recordText(tally),
+					}));
+				}
 				if (view.view === 'season') {
 					const rows = games(entry.teamId, view.season);
 					if (!rows.length) return json(res, 404, { error: 'no such season', season: view.season });

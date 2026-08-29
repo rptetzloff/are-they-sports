@@ -243,12 +243,15 @@ do, since FiveThirtyEight no longer exists to re-serve them.
 
 ## Colour and theme
 
-Nothing here renders yet. When it does: colour belongs in CSS custom properties,
-never a literal in a component. The two sites carry **282 hardcoded hex literals
-between them and not one variable**, and four brand values are the only real
-difference between their palettes — the status colours are already identical.
-That is the mistake this repo exists to not repeat, and a palette is team
-vocabulary, so it belongs in a manifest.
+Colour belongs in CSS custom properties, never a literal in a component. The two
+sites carry **282 hardcoded hex literals between them and not one variable**.
+
+Measured before porting: the brand values are the only real difference between
+their palettes, and the status colours had independently converged — a win is
+`#4caf50` on both. So `colors` is team vocabulary and lives in the manifest,
+while `--win` and `--loss` live in the renderer. `lib/render.js` writes `:root`
+once, and a test asserts that **no colour literal appears anywhere after that
+block**, which is the check that would have caught the sites.
 
 ## Dependencies default to none
 
@@ -312,12 +315,13 @@ the point at which it is cheap to keep it that way.
 
 ---
 
-*This repo: no markup yet. `scripts/fetch.mjs` pulls sources, `scripts/build.mjs`
-derives artifacts, both sports are verified against the sites they came from —
-1,534 of 1,534 football games and 9,067 of 9,067 baseball games, matching on
-result and score — `server.js` answers in JSON under a configured scope, and
-`npm test` covers the pure parts in isolation. What is missing is name
-resolution, the record core, and anything that renders.*
+*This repo: `scripts/fetch.mjs` pulls sources, `scripts/build.mjs` derives
+artifacts, both sports are verified against the sites they came from — 1,534 of
+1,534 football games and 9,067 of 9,067 baseball games, matching on result and
+score — and `server.js` renders a club page and a selector under a configured
+scope, with `?format=json` on every route. `npm test` covers all of it in
+isolation, mutation-tested. What is missing is name resolution, the records and
+head-to-head views, and the social-card renderer.*
 
 *Branching is work branch → `dev` → `main`, the same as the two sites, from
 before there is anything deployed to protect. The earlier version of this

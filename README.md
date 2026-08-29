@@ -9,8 +9,8 @@ other and drifted. Most of what they do is the same computation over different
 vocabularies, so this is the version where a new team is a manifest rather than
 a repository.
 
-**Early. The data pipeline works, and a dev server answers in JSON; there is no
-markup yet.**
+**Early. The data pipeline works and a server renders pages; the record and
+box-score views are not ported yet.**
 
 ## The data model
 
@@ -160,8 +160,8 @@ turned a half-recorded score into a tie.
 sports/     adapters: where data comes from, and how it becomes neutral rows
 teams/      manifests: identity, vocabulary, and rules that genuinely differ
 scripts/    fetch, build, franchise table
-lib/        csv, scope, routes, index reading
-server.js   dev server; serves JSON, no markup yet
+lib/        csv, scope, routes, index reading, record core, rendering
+server.js   the server; HTML, with ?format=json on every route
 test/       unit tests; needs no fetched sources
 data/
   sources/    fetched, gitignored
