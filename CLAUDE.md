@@ -258,6 +258,28 @@ be rebuilt, it is not derived data, it is a source of record and belongs in the
 third tier with a note saying where it came from — as the pre-1999 NFL results
 do, since FiveThirtyEight no longer exists to re-serve them.
 
+**Reversed, in part, for the database.** A row captured from a live feed the
+moment a game ends — before nflverse's weekly refresh publishes it — is not
+reproducible by definition, and `db/schema.sql` accepts that. The reason is that
+with per-club artifacts, recording one finished game means rebuilding a club's
+whole index, which is exactly why the two sites carry their worst code: there is
+nowhere to write a single result.
+
+But "the database is a source of record" was too blunt as first stated and is
+not what got built. **Provenance is per row.** Every row names its source, and
+`source.reproducible` says whether it could be rebuilt. So the architectural
+claim is a query:
+
+```sql
+SELECT count(*) FROM game g JOIN source s ON g.source = s.id
+ WHERE NOT s.reproducible;
+```
+
+Zero means the whole database can be thrown away and rebuilt. It returns to zero
+on its own, because an authoritative source supersedes a live capture as soon as
+it publishes — which is the property that keeps this from drifting into an
+unbackupable pile.
+
 ## Colour and theme
 
 Colour belongs in CSS custom properties, never a literal in a component. The two
@@ -274,6 +296,12 @@ block**, which is the check that would have caught the sites.
 
 Both sites run on Node's standard library and `node --test`. A new runtime
 dependency needs a reason in the PR.
+
+This repo now has exactly one, `pg`, because reads happen against Postgres at
+request time and Node ships no Postgres client. `node:sqlite` *is* built in and
+was measured as the alternative — every NFL game ever is 18,506 rows and 2.91MB
+— but a file-per-container means a poller per container, all fetching the same
+live data, which defeats one codebase serving many deployments.
 
 The lockfile is part of that. The football site's `package-lock.json` locked
 `vite` and nothing else, while `package.json` had declared `@resvg/resvg-js` and

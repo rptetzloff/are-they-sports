@@ -52,10 +52,19 @@ RUN apt-get update \
 	&& apt-get install -y --no-install-recommends curl \
 	&& rm -rf /var/lib/apt/lists/*
 
-# No `npm ci` stage. This repo has zero runtime dependencies — Node's standard
-# library and nothing else — so there is no node_modules to build and a deps
-# layer would copy a lockfile that installs nothing. Add the stage back the
-# moment package.json gains a dependency; the two sites both carry one.
+# The deps stage this file said to add back the moment package.json gained a
+# dependency. It has: `pg`, for the database that is now the source of record.
+# That is the repo's first runtime dependency and the reason is in the PR, which
+# is what the dependency rule asks for.
+#
+# Manifest and lockfile only, so this layer is rebuilt when dependencies change
+# and not when a CSV does. `ci`, not `install`: it fails on a lockfile that
+# disagrees with package.json rather than quietly resolving something new — the
+# football site shipped a lockfile pinning vite and neither native package its
+# social cards needed, and `npm install` hid it every deploy.
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev
+
 COPY . .
 
 # The scope this deployment serves. Required, and there is deliberately no
@@ -70,6 +79,11 @@ ENV SCOPE=""
 # Pins the origin in absolute links. Without it any Host header becomes
 # canonical, which is how a preview domain publishes itself as the real one.
 ENV PUBLIC_ORIGIN=""
+
+# Where the database lives. Reads happen at request time, so a deployment
+# without this is not self-contained the way earlier ones were — that is the
+# cost of the reversal recorded in db/schema.sql, taken deliberately.
+ENV DATABASE_URL=""
 
 # server.js reads PORT and falls back to 3000. Coolify sets what it expects.
 EXPOSE 3000
