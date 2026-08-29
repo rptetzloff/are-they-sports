@@ -10,6 +10,34 @@ FROM node:24-slim
 WORKDIR /app
 ENV NODE_ENV=production
 
+# curl, purely so the *orchestrator's* health check can run.
+#
+# The HEALTHCHECK at the bottom of this file uses Node's own fetch and works —
+# `docker inspect` reports healthy. But Coolify defines its own health check per
+# application and that one overrides the image's, and it is generated as a curl
+# command with a wget fallback. node:24-slim carries neither, nor nc, nor
+# python3 — verified, not assumed:
+#
+#     docker run --rm <image> bash -lc 'command -v curl wget nc python3'
+#
+# So every Coolify health check against this image failed regardless of the path
+# it was pointed at, while the site itself served fine. That is a bad failure to
+# debug from the outside, because the symptom is "unhealthy" and the cause is a
+# missing binary rather than anything the server did.
+#
+# Measured at 17MB on the image, 331MB to 348MB. The first draft of this comment
+# guessed ~4MB, which is what apt reports for the curl package alone and not what
+# lands once its dependencies are counted.
+#
+# The alternative is turning Coolify's health check off so the image's own is
+# used. That works, and it also means the platform has no idea whether the app
+# is up, so it is a worse 17MB saving than it looks.
+#
+# Point Coolify's health check at /healthz, NOT at / — see the note below.
+RUN apt-get update \
+	&& apt-get install -y --no-install-recommends curl \
+	&& rm -rf /var/lib/apt/lists/*
+
 # No `npm ci` stage. This repo has zero runtime dependencies — Node's standard
 # library and nothing else — so there is no node_modules to build and a deps
 # layer would copy a lockfile that installs nothing. Add the stage back the
@@ -38,9 +66,19 @@ EXPOSE 3000
 # deployment that actually promises a whole division wants.
 ENV STRICT_SCOPE=""
 
-# /healthz, not /. It reports how many clubs in scope have artifacts and names
-# the ones that do not, and STRICT_SCOPE above decides whether a gap counts
-# against health. Node's own fetch; node:slim carries no curl.
+# /healthz, not /. This matters more than it looks, and it applies to whatever
+# path is configured in Coolify too.
+#
+# `/` answers 200 even when NOTHING in scope is built — measured: a container on
+# SCOPE=conference:nfl/afc with no clubs built serves / as a selector listing
+# sixteen unavailable clubs, with a 200, while /healthz answers 503. A health
+# check pointed at / would call that deployment healthy.
+#
+# /healthz reports how many clubs in scope have artifacts and names the ones that
+# do not; STRICT_SCOPE above decides whether a partial gap counts against health.
+#
+# Node's own fetch here rather than the curl installed above, so this check still
+# works if that layer is ever dropped.
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
 	CMD node -e "fetch('http://127.0.0.1:'+(process.env.PORT||3000)+'/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
 

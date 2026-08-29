@@ -136,6 +136,17 @@ docker run -p 3000:3000 -e SCOPE=division:nfl/nfc-north are-they-sports
 The healthcheck is `/healthz`, and it reports the gap between what the scope
 promised and what is built.
 
+**Point your orchestrator's health check at `/healthz`, not `/`.** The root
+answers 200 even when nothing in scope is built — it is a selector listing
+unavailable clubs — so a check on `/` calls that deployment healthy. Only
+`/healthz` returns 503.
+
+The image carries `curl` for exactly one reason: Coolify defines its own health
+check per application, that definition overrides the image's `HEALTHCHECK`, and
+it is generated as a `curl` command with a `wget` fallback. `node:24-slim` ships
+neither, nor `nc`, nor `python3` — so every platform health check against this
+image failed while the site itself served fine. It costs 17MB.
+
 `npm test` covers the pure parts — CSV parsing, both adapters' row functions,
 the franchise table's collapse, season-range arguments — plus the seam itself:
 one test asserts the two sports produce exactly the same row keys, and another
