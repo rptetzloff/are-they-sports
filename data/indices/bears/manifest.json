@@ -1,0 +1,19 @@
+{
+	"format": 1,
+	"team": "bears",
+	"sport": "nfl",
+	"indices": [
+		"games",
+		"scoring"
+	],
+	"digests": {
+		"games": "2af6f23825b77e948df30c392baf8bc03bbbbd7758f4887a3b2da9ea5b363c9e",
+		"scoring": "ae88201a644b411a76f9697119f819afd2f8f5df2108aa67133d096e8d496d6e"
+	},
+	"sources": {
+		"schedules": "https://github.com/nflverse/nflverse-data/releases/download/schedules/games.csv",
+		"playByPlaySeasons": [
+			"2024"
+		]
+	}
+}

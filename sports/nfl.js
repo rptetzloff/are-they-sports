@@ -171,10 +171,49 @@ export function scoringRow(r) {
 	};
 }
 
+/** What every club in this league says, so a club manifest does not repeat it.
+ *
+ *  These are facts about football, not about any club: every NFL team scores
+ *  points, plays for the Super Bowl, is led by a coach, and has streaks that
+ *  span seasons. A club overrides any of them when it genuinely differs.
+ */
+export const defaults = {
+	nouns: {
+		scoreNoun: 'points',
+		scoreForLabel: 'Points For',
+		scoreAgainstLabel: 'Points Against',
+		championship: 'Super Bowl',
+		leaderNoun: 'coach',
+		leaderPlural: 'coaches',
+		meetingNoun: 'meeting',
+		meetingPlural: 'meetings',
+		/** In football, *perfect* means no losses and no ties — 1972 Miami and
+		 *  nobody else. 1929 Green Bay went 12-0-1: undefeated, not perfect.
+		 *  A club that wants "perfect" overrides this; the Dolphins are the one
+		 *  club for which it would be right. */
+		losslessSeasonNoun: 'undefeated',
+	},
+	rules: {
+		/** Streaks run across season boundaries here. The longest Green Bay
+		 *  streak, 15 games, ran from December 2010 into December 2011, and
+		 *  ending it at the boundary would erase the record the list exists to
+		 *  show. Baseball does the opposite, on purpose. */
+		streaksSpanSeasons: true,
+		/** A season with no losses is a plausible thing to look for in a
+		 *  17-game sport. */
+		losslessSeasonIsPlausible: true,
+		/** How far either side of today "on this day" looks. Three days, because
+		 *  a sport playing seventeen games a year has empty calendar dates by
+		 *  the hundred and an exact match would hide the panel most days. */
+		onThisDayWindowDays: 3,
+	},
+};
+
 export const sport = {
 	id: 'nfl',
 	name: 'football',
 	sources,
+	defaults,
 	gameRow,
 	seedGameRow,
 	isScoringPlay,

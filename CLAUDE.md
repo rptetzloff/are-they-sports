@@ -170,8 +170,25 @@ shape. That shape — `result`, `scoreFor`, `scoreAgainst`, a `championship`
 field, no mention of any club — is the whole seam. Everything downstream reads
 it without learning which league it is looking at.
 
-`teams/<id>.js` is data: identity, vocabulary, and the rules where two sports
-genuinely disagree. Adding a club is a file here and nothing else.
+`teams/<id>.js` is data: identity, colours, and whatever this club overrides.
+Adding a club is a file here and nothing else, and that file is about a dozen
+lines.
+
+**Vocabulary and rules belong to the sport, not the club** — a narrowing of what
+this rule used to say, which was that they lived in the team manifest. Measured:
+of the eleven nouns and three rules, only `team`, `fullName`, `colors` and
+`copy.seasonNotStarted` are facts about a club. "Points", "Super Bowl", "coach",
+"meetings" and every rule are facts about football, and copying them into
+thirty-two files is how these repos got here in the first place. `sports/<id>.js`
+carries `defaults`; `lib/manifest.js` merges and validates.
+
+Every field stays overridable, because the moment one is not, some club needs
+it: `losslessSeasonNoun` is a sport default today and becomes "perfect" the day
+anyone builds the 1972 Dolphins.
+
+Resolution validates, and it throws at boot with the field named. The failure it
+prevents is the word "undefined" rendering into a sentence — no throw, no failing
+test, no broken build, and the only signal is somebody reading the page.
 
 Anything that has to branch in code rather than resolve from a manifest is a
 sign the seam is in the wrong place.

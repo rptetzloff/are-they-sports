@@ -2,8 +2,10 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { NEUTRAL, clubPage, escapeHtml, page, paletteCss, questionFor, selectorPage } from '../lib/render.js'
 import { recordText, seasonTally, verdictText } from '../lib/core.js'
-import packers from '../teams/packers.js'
-import brewers from '../teams/brewers.js'
+import { loadTeam } from '../lib/teams.js'
+
+const packers = await loadTeam('packers')
+const brewers = await loadTeam('brewers')
 
 // Rendering, as strings. All of this is reachable from node --test, which is
 // the entire reason it lives here rather than in a browser-side main.js.

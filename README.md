@@ -53,6 +53,28 @@ opponent or score. The pipeline's output was then compared against the football
 site's committed data — **1,534 of 1,534 played games match exactly** on result,
 points for and points against.
 
+## Adding a club
+
+A club manifest is its sport, its id, the codes the sources call it by, its
+name, its colours and what it shouts before the season starts. Twelve lines.
+
+```js
+export const team = {
+	sport: 'nfl',
+	id: 'bears',
+	sourceIds: ['CHI'],
+	firstSeason: 1920,
+	nouns: { team: 'Bears', fullName: 'Chicago Bears' },
+	colors: { accent: '#c83803', base: '#0b162a', baseDeep: '#060d18' },
+	copy: { seasonNotStarted: 'BEAR DOWN' },
+};
+```
+
+Everything else — points, Super Bowl, coach, meetings, whether streaks span
+seasons — comes from `sports/nfl.js`, because those are facts about football
+rather than about Chicago. Any of them can be overridden. Then
+`npm run build bears`.
+
 ## Names
 
 Two sports, two answers, because only one has a source that publishes eras.
@@ -162,6 +184,7 @@ docker run -p 3000:3000 -e SCOPE=division:nfl/nfc-north are-they-sports
 | `PUBLIC_ORIGIN` | pins the origin in absolute links. Without it any `Host` header becomes canonical, which is how a preview domain publishes itself as the real one. |
 | `STRICT_SCOPE` | `1` makes any unbuilt club in scope unhealthy. Unset, serving at least one club is healthy, because building clubs one at a time is how this repo works today. |
 | `PORT` | defaults to 3000. |
+| `BUILD_SHA` | stamped into `/healthz` as `build`. Coolify's `SOURCE_COMMIT` is read too. Unset reports `"unknown"` rather than guessing. |
 
 The healthcheck is `/healthz`, and it reports the gap between what the scope
 promised and what is built.
@@ -188,7 +211,7 @@ turned a half-recorded score into a tie.
 
 ```
 sports/     adapters: where data comes from, and how it becomes neutral rows
-teams/      manifests: identity, vocabulary, and rules that genuinely differ
+teams/      manifests: identity and colours; about a dozen lines each
 scripts/    fetch, build, franchise table
 lib/        csv, scope, routes, index reading, record core, rendering
 server.js   the server; HTML, with ?format=json on every route

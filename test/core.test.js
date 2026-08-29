@@ -2,8 +2,11 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { latestSeason, recordText, seasonTally, seasonVerdict, verdictText } from '../lib/core.js'
 import { loadIndex } from '../lib/indices.js'
-import packers from '../teams/packers.js'
-import brewers from '../teams/brewers.js'
+import { loadTeam } from '../lib/teams.js'
+
+// Resolved against their sports, which is the shape everything actually uses.
+const packers = await loadTeam('packers')
+const brewers = await loadTeam('brewers')
 
 // The record core, ported from the two sites. Rows in, numbers out.
 
