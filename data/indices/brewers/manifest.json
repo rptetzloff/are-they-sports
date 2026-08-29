@@ -1,0 +1,16 @@
+{
+	"format": 1,
+	"team": "brewers",
+	"sport": "mlb",
+	"indices": [
+		"games",
+		"scoring"
+	],
+	"digests": {
+		"games": "dea952a3b36b2c9dc650718e454762b292d03a23ebc95b1b0d1b58f658500101",
+		"scoring": "318310523116086764b48cede0ac426d36c3e131ebeab4bd7dc6bf7f158fe24b"
+	},
+	"sources": {
+		"playByPlaySeasons": []
+	}
+}
