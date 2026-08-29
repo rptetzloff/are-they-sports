@@ -270,6 +270,14 @@ from — 1,534 of 1,534 football games and 9,067 of 9,067 baseball games, matchi
 on result and score. What is missing is name resolution, the record core, and
 anything that serves a page.*
 
-*Branching is `main` only for now, because there is nothing deployed to protect.
-When something is, it becomes work branch → `dev` → `main` as it is in the two
-sites, and the rule about back-merging comes with it.*
+*Branching is work branch → `dev` → `main`, the same as the two sites, from
+before there is anything deployed to protect. The earlier version of this
+paragraph said `main` only was fine until then; the reason to start now is that
+every serious git problem those repos had came from branch discipline, and the
+habit is cheaper to start than to retrofit. `main` is a known-good state even
+when nothing reads it.*
+
+*Everything the sites' rule says applies here: merge commits and never squash,
+branch from `dev` rather than another work branch, delete work branches on
+merge, never delete `dev` or `main`, and back-merge `main` into `dev` after each
+release so the next diff is clean.*
