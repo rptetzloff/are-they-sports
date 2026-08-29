@@ -78,7 +78,15 @@ Bears.
 npm run fetch packers                 # schedules + pre-1999 seed
 npm run fetch packers -- --pbp 2024   # one play-by-play season
 npm run build packers                 # derive committed artifacts
+npm test                              # no sources needed, ~140ms
 ```
+
+`npm test` covers the pure parts — CSV parsing, both adapters' row functions,
+the franchise table's collapse, season-range arguments — plus the seam itself:
+one test asserts the two sports produce exactly the same row keys, and another
+asserts the two manifests still disagree where they are supposed to. All 73 have
+been mutation-tested, which is how the suite found a `seedGameRow` guard that
+turned a half-recorded score into a tie.
 
 ## Layout
 
@@ -86,6 +94,7 @@ npm run build packers                 # derive committed artifacts
 sports/     adapters: where data comes from, and how it becomes neutral rows
 teams/      manifests: identity, vocabulary, and rules that genuinely differ
 scripts/    fetch, build, franchise table
+test/       unit tests; needs no fetched sources
 data/
   sources/    fetched, gitignored
   indices/    derived, committed

@@ -118,21 +118,20 @@ export async function buildGames(sport, team, { schedulesPath, seedPath }) {
  *  filtered to one club without the adapter knowing how games were selected.
  */
 export async function buildScoring(sport, gameIds, pbpPaths) {
-	// The adapter is asked for a predicate rather than being asked a question
-	// about a row, because the two sports cannot answer the same way.
+	// The adapter answers one question about one row.
 	//
-	// nflverse marks scoring plays with a column, so football's test is pure.
-	// Retrosheet has no such flag: a play scored if the running total went up,
-	// which needs the previous row. Calling `sport.isScoringPlay(row)` can only
-	// ever serve the first kind, and the shape of the seam should not be decided
-	// by whichever sport was implemented first.
+	// This used to ask the adapter for a *predicate factory*, on the reasoning
+	// that "Retrosheet has no scoring flag: a play scored if the running total
+	// went up, which needs the previous row." That was wrong. Retrosheet has a
+	// `runs` column and the test is `runs > 0`, as pure as football's — the
+	// column names had been guessed rather than read, and the seam was reshaped
+	// around a difference that does not exist. The factory is gone with it,
+	// because an abstraction kept for a withdrawn premise is just a place for
+	// the next reader to look for meaning that is not there.
 	//
-	// So an adapter supplies scoringFilter(), returning a predicate that may
-	// close over whatever state it needs. A stateless sport returns a stateless
-	// one and nothing is lost.
-	const isScoring = sport.scoringFilter
-		? sport.scoringFilter()
-		: (r) => sport.isScoringPlay(r);
+	// If a sport ever does need previous-row state, this is one line to change
+	// and there will be a real case to shape it around.
+	const isScoring = (r) => sport.isScoringPlay(r);
 
 	const byGame = new Map();
 	let scanned = 0, kept = 0;
