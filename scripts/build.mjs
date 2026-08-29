@@ -118,6 +118,22 @@ export async function buildGames(sport, team, { schedulesPath, seedPath }) {
  *  filtered to one club without the adapter knowing how games were selected.
  */
 export async function buildScoring(sport, gameIds, pbpPaths) {
+	// The adapter is asked for a predicate rather than being asked a question
+	// about a row, because the two sports cannot answer the same way.
+	//
+	// nflverse marks scoring plays with a column, so football's test is pure.
+	// Retrosheet has no such flag: a play scored if the running total went up,
+	// which needs the previous row. Calling `sport.isScoringPlay(row)` can only
+	// ever serve the first kind, and the shape of the seam should not be decided
+	// by whichever sport was implemented first.
+	//
+	// So an adapter supplies scoringFilter(), returning a predicate that may
+	// close over whatever state it needs. A stateless sport returns a stateless
+	// one and nothing is lost.
+	const isScoring = sport.scoringFilter
+		? sport.scoringFilter()
+		: (r) => sport.isScoringPlay(r);
+
 	const byGame = new Map();
 	let scanned = 0, kept = 0;
 	for (const p of pbpPaths) {
@@ -125,7 +141,7 @@ export async function buildScoring(sport, gameIds, pbpPaths) {
 			scanned++;
 			const gid = r[sport.gameKey];
 			if (!gameIds.has(gid)) continue;
-			if (!sport.isScoringPlay(r)) continue;
+			if (!isScoring(r)) continue;
 			kept++;
 			if (!byGame.has(gid)) byGame.set(gid, []);
 			byGame.get(gid).push(sport.scoringRow(r));

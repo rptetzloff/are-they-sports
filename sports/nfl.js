@@ -162,6 +162,13 @@ export function scoringRow(r) {
 	};
 }
 
+/** A predicate for scoring plays. Football's is stateless — nflverse flags them
+ *  outright — but it is produced by a factory so both sports answer the builder
+ *  the same way. See buildScoring in scripts/build.mjs. */
+export function scoringFilter() {
+	return isScoringPlay;
+}
+
 export const sport = {
 	id: 'nfl',
 	name: 'football',
@@ -169,6 +176,7 @@ export const sport = {
 	gameRow,
 	seedGameRow,
 	isScoringPlay,
+	scoringFilter,
 	scoringRow,
 	/** The column identifying a game across sources, so the builder can key an
 	 *  index without knowing the sport. */

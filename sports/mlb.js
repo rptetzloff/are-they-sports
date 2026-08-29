@@ -17,6 +17,9 @@
  *                       there is no pre-coverage era to fill. The builder
  *                       already treats seedResults as optional.
  *
+ *  What did NOT differ, despite a first draft claiming it did: detecting a
+ *  scoring play. Both sports answer it from one column of one row.
+ *
  *  What did not move: the row shape. result / scoreFor / scoreAgainst, a
  *  championship field the tally reads as "more championship-round wins than
  *  losses", and no mention anywhere of which club is being served.
@@ -92,30 +95,40 @@ export function gameRow(r, teamId) {
 	};
 }
 
-/** Retrosheet play rows carry a running score; a play that scored is one where
- *  the total changed. The file has no equivalent of nflverse's sp flag, so the
- *  builder is handed a stateful predicate rather than a pure one — see
- *  scoringFilter below. */
-export function scoringFilter() {
-	const lastByGame = new Map();
-	return (r) => {
-		const gid = r.gid;
-		const total = parseInt(r.vruns_after ?? r.vruns ?? 0, 10)
-			+ parseInt(r.hruns_after ?? r.hruns ?? 0, 10);
-		const prev = lastByGame.get(gid);
-		lastByGame.set(gid, total);
-		return prev !== undefined && Number.isFinite(total) && total > prev;
-	};
+/** A play scored if its `runs` column is non-zero.
+ *
+ *  This is pure, exactly like football's. An earlier version of this file
+ *  claimed baseball needed stateful detection — comparing a running score
+ *  against the previous row — and built a whole seam argument on it. That was
+ *  invented from guessed column names: the file has `score_v` and `score_h`,
+ *  not the `vruns_after` I assumed, and more to the point it has `runs`, which
+ *  the baseball site's own collector has been reading all along.
+ *
+ *  The lesson is the cheaper one: the working implementation was three
+ *  directories away and would have answered this in a minute.
+ *
+ *  64,051 of 728,867 plays score — 8.8%, which is the first real cut before
+ *  anything is dropped or compressed.
+ */
+export function isScoringPlay(r) {
+	return parseInt(r.runs, 10) > 0;
 }
 
+/** The fields a scoring play keeps, of the 100-odd columns Retrosheet carries. */
 export function scoringRow(r) {
 	return {
 		gid: r.gid,
-		period: r.inning,
-		half: r.top_bot,
-		desc: r.event ?? r.pbp ?? '',
-		batter: r.batter,
-		pitcher: r.pitcher,
+		inning: r.inning,
+		// top_bot is '0' for the top of the inning.
+		top: r.top_bot === '0',
+		team: r.batteam,
+		batter: r.batter?.trim() || '',
+		pitcher: r.pitcher?.trim() || '',
+		runs: parseInt(r.runs, 10),
+		// The score before the play, so a reader can render "MIL 4, SLN 0"
+		// after it without recomputing.
+		preV: parseInt(r.score_v, 10),
+		preH: parseInt(r.score_h, 10),
 	};
 }
 
@@ -124,8 +137,7 @@ export const sport = {
 	name: 'baseball',
 	sources,
 	gameRow,
-	isScoringPlay: null, // stateful; see scoringFilter
-	scoringFilter,
+	isScoringPlay,
 	scoringRow,
 	gameKey: 'gid',
 };
