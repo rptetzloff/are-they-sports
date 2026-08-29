@@ -33,6 +33,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { builtTeams, loadIndex, readManifest } from './lib/indices.js';
 import { latestSeason, recordText, seasonTally, seasonVerdict, verdictText } from './lib/core.js';
 import { NEUTRAL, clubPage, selectorPage } from './lib/render.js';
+import { resolver } from './lib/names.js';
 import { matchRoute, parseView, routeTable } from './lib/routes.js';
 import { loadDivisions, needsSelector, parseScope, resolveScope } from './lib/scope.js';
 
@@ -139,6 +140,10 @@ function main() {
 		}
 
 		const teamsById = new Map(teams.map((t) => [t.id, t]));
+		// One resolver per sport, loaded once. A club in scope with no manifest
+		// still has a name — that is the whole point, since 60 of the 62 clubs an
+		// `all` scope covers are unbuilt and would otherwise be bare codes.
+		const namers = Object.fromEntries(SPORTS.map((s) => [s, resolver(s)]));
 		const table = routeTable(scope, resolved);
 		const available = table.filter((e) => e.available);
 
@@ -190,7 +195,10 @@ function main() {
 			if (url.pathname === '/' && needsSelector(table)) {
 				const clubs = table.map((e) => ({
 					team: e.teamId, sport: e.sport, code: e.code,
-					name: teamsById.get(e.teamId)?.nouns.fullName ?? null,
+					// The manifest's own name when there is one, because a club
+					// that has been given a manifest has been given a preferred
+					// name; the reference table otherwise.
+					name: teamsById.get(e.teamId)?.nouns.fullName ?? namers[e.sport](e.code).name,
 					conference: e.conference ?? null, division: e.division ?? null,
 					available: e.available,
 					url: e.available ? `${origin}${e.base}` : null,
