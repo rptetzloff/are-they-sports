@@ -12,6 +12,12 @@
 
 Dockerfile     text eol=lf
 .dockerignore  text eol=lf
+
+# Git hooks are run through sh, and a CRLF shebang gives "/bin/sh^M: bad
+# interpreter". The file tested fine in the working copy and would have broken
+# on the next fresh checkout — git said so on commit and the warning was nearly
+# scrolled past.
+.githooks/*    text eol=lf
 .gitattributes text eol=lf
 .gitignore     text eol=lf
 
