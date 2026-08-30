@@ -69,13 +69,17 @@ export function franchiseMap(sportId, dir) {
 }
 
 const SQL_UPSERT_GAME = `
-INSERT INTO game (sport, id, season, date, round, home, away, home_score, away_score, neutral, status, source)
-VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+INSERT INTO game (sport, id, season, date, round, home, away, home_score, away_score, neutral, status, source, week)
+VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
 ON CONFLICT (sport, id) DO UPDATE SET
 	season = EXCLUDED.season, date = EXCLUDED.date, round = EXCLUDED.round,
 	home = EXCLUDED.home, away = EXCLUDED.away,
 	home_score = EXCLUDED.home_score, away_score = EXCLUDED.away_score,
 	neutral = EXCLUDED.neutral, status = EXCLUDED.status,
+	-- COALESCE, so a source that has no week never erases one that does. The
+	-- pre-1999 seed and nflverse overlap in 1999-2020, and the seed would
+	-- otherwise null out a real week every time it ran after nflverse.
+	week = COALESCE(EXCLUDED.week, game.week),
 	source = EXCLUDED.source, observed_at = now()
 WHERE (SELECT authority FROM source WHERE id = EXCLUDED.source)
    >= (SELECT authority FROM source WHERE id = game.source)
@@ -224,7 +228,10 @@ async function main() {
 		if (!home || !away || home === away) { skipped++; return; }
 		const r = await client.query(SQL_UPSERT_GAME,
 			[sportId, row.id, row.season, row.date, row.round, home, away,
-				row.homeScore, row.awayScore, row.neutral, row.status, row.source]);
+				row.homeScore, row.awayScore, row.neutral, row.status, row.source,
+				// Undefined and null both mean "this source has no week", and the
+				// upsert coalesces so a source without one never erases one.
+				row.week ?? null]);
 		loaded += r.rowCount;
 	};
 
@@ -258,6 +265,8 @@ async function main() {
 				home: r.home_team, away: r.away_team,
 				homeScore: played ? +r.home_score : null, awayScore: played ? +r.away_score : null,
 				neutral: false, status: played ? 'final' : 'scheduled', source: 'nflverse',
+				// The only source in the repo that has one.
+				week: r.week ? +r.week : null,
 			});
 		}
 	}

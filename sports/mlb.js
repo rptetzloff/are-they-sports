@@ -92,6 +92,9 @@ export function gameRow(r, teamId) {
 		scoreAgainst,
 		location: isHome ? 'home' : 'away',
 		gid: r.gid,
+		// Baseball has no weeks. The key exists so both sports produce the
+		// same row shape, which is the seam everything downstream reads.
+		week: null,
 	};
 }
 
@@ -118,6 +121,9 @@ export function isScoringPlay(r) {
 export function scoringRow(r) {
 	return {
 		gid: r.gid,
+		// Baseball has no weeks. The key exists so both sports produce the
+		// same row shape, which is the seam everything downstream reads.
+		week: null,
 		inning: r.inning,
 		// top_bot is '0' for the top of the inning.
 		top: r.top_bot === '0',
@@ -159,6 +165,10 @@ export const defaults = {
 		 *  almost always a game on today's date; football needs three days
 		 *  either side or the panel is empty most of the year. */
 		onThisDayWindowDays: 0,
+		/** Baseball plays most days, so a schedule is a list of dates. Nobody
+		 *  says "week 12" about a baseball season.
+		 */
+		schedulePeriod: 'date',
 	},
 };
 

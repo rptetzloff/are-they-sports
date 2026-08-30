@@ -263,6 +263,50 @@ are unresolved today, all clubs the Packers never played — a number that falls
 as teams are added, since a club the Packers never met probably played the
 Bears.
 
+## League-wide records
+
+`/records` at the scope root is the record book for every club in scope, where
+the scope holds more than one. Under `SCOPE=team:packers` the root *is* the
+Packers, so `/records` is already their record book and there is no league view
+to add.
+
+It runs `computeRecords` per club and merges, rather than a second
+implementation over pooled rows. The per-club rules are subtle and settled — a
+tie ends a win streak, an unfinished season is excluded, streaks span seasons
+per sport — and a parallel version would drift from them.
+
+The part that is genuinely different is double counting, and it is not uniform.
+Every game is in the data twice, once per club:
+
+- a blowout **win** for one club is a **loss** for the other, so ranking each
+  club's wins yields every game exactly once;
+- a **tie** is a tie for both and appears twice, so it is deduplicated by game
+  id — date plus opponent collides on a doubleheader;
+- a **season** or a **streak** belongs to one club and cannot double.
+
+## League-wide schedule
+
+`/schedule` and `/schedule/{season}` show every club in scope, grouped into the
+periods that sport plays in. Football groups by week and baseball by date, and
+which one is `rules.schedulePeriod` in `sports/<id>.js` rather than a branch in
+the renderer.
+
+**Weeks are stored, never derived, and do not exist before 1999.** nflverse
+carries a real `week` on all 7,548 of its games from 1999 on; the
+FiveThirtyEight seed covering 1920-1998 has no week column at all.
+
+Deriving one from dates looks obvious — seasons start in September, weeks are
+seven days — and was measured against nflverse's own numbers across four clubs:
+**wrong for 322 of 1,816 games, 17.7%**. A postponement shifts every week after
+it, and 2001 lost its week 2 to September 11th and replayed it at the end of the
+season. So a season whose games carry no week is grouped by date and says so.
+
+A game between two clubs in scope is one fixture, deduplicated by game id. For
+an ordinary game either club's perspective rebuilds the identical fixture;
+neutral-site games are the exception, because a club-perspective row reports
+`location: 'neutral'` and no longer records who was nominally home, so the lower
+source code wins and the answer does not depend on scope order.
+
 ## Scope: what one deployment shows
 
 A site is configured by a single `SCOPE`, which resolves to a set of clubs.

@@ -90,6 +90,10 @@ test('the row shape is the same one football produces', () => {
 	assert.deepEqual(Object.keys(gameRow(info(), 'MIL')).sort(), [
 		'Opponent', 'championship', 'date', 'gid', 'location',
 		'playoff', 'regular_season', 'result', 'scoreAgainst', 'scoreFor', 'season',
+		// Baseball has no weeks and says so with null. The key exists because
+		// the shape is the seam: a key present in one sport and absent in the
+		// other is how downstream code starts reading undefined.
+		'week',
 	])
 })
 

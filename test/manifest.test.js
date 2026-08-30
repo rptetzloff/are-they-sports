@@ -87,7 +87,12 @@ test('a club can supply a rule its sport forgot', () => {
 	const noRules = { id: 'nfl', defaults: { nouns: nfl.defaults.nouns } }
 	const t = resolveTeam({
 		...minimal,
-		rules: { streaksSpanSeasons: true, losslessSeasonIsPlausible: true, onThisDayWindowDays: 3 },
+		// Every required rule, so this fails when one is added rather than
+		// passing because the club happened to declare the old three.
+		rules: {
+			streaksSpanSeasons: true, losslessSeasonIsPlausible: true,
+			onThisDayWindowDays: 3, schedulePeriod: 'week',
+		},
 	}, noRules)
 	assert.equal(t.rules.onThisDayWindowDays, 3)
 })
@@ -145,7 +150,7 @@ test('the required lists are not empty', () => {
 	// A guard against the validation quietly checking nothing, which would make
 	// every test above pass for the wrong reason.
 	assert.ok(REQUIRED_NOUNS.length >= 10)
-	assert.ok(REQUIRED_RULES.length >= 3)
+	assert.ok(REQUIRED_RULES.length >= 4)
 })
 
 // --- the real clubs ---

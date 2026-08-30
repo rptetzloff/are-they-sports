@@ -32,6 +32,8 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { computeHeadToHead } from './lib/headtohead.js';
 import { computeRecords } from './lib/records.js';
+import { computeLeague } from './lib/league.js';
+import { computeSchedule } from './lib/schedule.js';
 import { codeTables, franchisesForClub, staleFranchises } from './lib/codes.js';
 import { availability, close, connect, franchisesWithGames, gamesFor, health, lastUpdated } from './lib/store.js';
 import {
@@ -39,7 +41,7 @@ import {
 	seasonWinPct, seriesRecords, streakBanner, verdictText,
 } from './lib/core.js';
 import {
-	NEUTRAL, clubPage, clubSwitcher, headToHeadPage, missingSeasonPage, opponentPage, recordsPage,
+	NEUTRAL, clubPage, clubSwitcher, headToHeadPage, leagueRecordsPage, leagueSchedulePage, missingSeasonPage, opponentPage, recordsPage,
 	scheduleHtml, seasonNav, selectorPage, siteNav, sparklineHtml,
 } from './lib/render.js';
 import { colorsFor, resolver } from './lib/names.js';
@@ -390,6 +392,66 @@ function main() {
 					clubs,
 					colors: NEUTRAL,
 					heading: scopeHeading(scope, table),
+				}));
+			}
+
+			// A whole league's season, week by week. Same rule as /records: only
+			// where the scope holds more than one club, since under
+			// SCOPE=team:packers the root is already that club's schedule.
+			const sched = url.pathname === '/schedule' ? null
+				: /^\/schedule\/\d{4}$/.test(url.pathname) ? url.pathname.slice(10) : undefined;
+			if (sched !== undefined && needsSelector(table)) {
+				const withGames = table.filter((e) => e.available && e.teamId);
+				const clubs = [];
+				for (const e of withGames) {
+					clubs.push({ team: teamsById.get(e.teamId), rows: await games(e) });
+				}
+				// The sport's own unit, declared in sports/<id>.js — football
+				// plays a round a week, baseball plays most days. Mixed scopes
+				// take the first club's, which is the same compromise /records
+				// makes and is why `all` is not a sensible schedule scope.
+				const first = teamsById.get(withGames[0]?.teamId);
+				const period = first?.rules.schedulePeriod ?? 'week';
+				const schedule = computeSchedule(clubs, { season: sched, period });
+				if (wantsJson(url)) return json(res, 200, schedule);
+				return html(res, 200, leagueSchedulePage({
+					schedule,
+					heading: scopeHeading(scope, table),
+					colors: NEUTRAL,
+					resolve: namers[withGames[0]?.sport ?? 'nfl'],
+					clubs: clubList(),
+					periodNoun: period === 'week' ? 'Week' : 'Games',
+				}));
+			}
+
+			// League-wide records, at the scope root. Only where the scope holds
+			// more than one club: under SCOPE=team:packers the root IS the
+			// Packers and /records is already their record book, so a league
+			// view there would be the same page under a second name.
+			if (url.pathname === '/records' && needsSelector(table)) {
+				const withGames = table.filter((e) => e.available && e.teamId);
+				const clubs = [];
+				for (const e of withGames) {
+					clubs.push({ team: teamsById.get(e.teamId), rows: await games(e) });
+				}
+				// One sport's rule, and only one sport's. A scope spanning both
+				// would have to pick, and the honest answer is that a combined
+				// football-and-baseball record book is not a thing anyone wants —
+				// so `all` gets the league table per sport and nothing merged.
+				const sports = [...new Set(withGames.map((e) => e.sport))];
+				const league = computeLeague(clubs, {
+					top: 10,
+					streaksSpanSeasons: sports.length === 1
+						? (teamsById.get(withGames[0].teamId)?.rules.streaksSpanSeasons ?? true)
+						: true,
+				});
+				if (wantsJson(url)) return json(res, 200, league);
+				return html(res, 200, leagueRecordsPage({
+					league,
+					heading: scopeHeading(scope, table),
+					colors: NEUTRAL,
+					clubs: clubList(),
+					mixedSports: sports.length > 1,
 				}));
 			}
 
