@@ -1,7 +1,8 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { displayName, loadHistory, mlbIndex, nflIndex, resolver, spanForDate, spanForSeason } from '../lib/names.js'
-import { isoDate, collapseNames } from '../scripts/names.mjs'
+import {
+	byFranchise, colorsFor, displayName, isoDate, loadHistory, mlbIndex, nflIndex, resolver, spanForDate, spanForSeason,
+} from '../lib/names.js'
 import { loadIndex } from '../lib/indices.js'
 import { loadDivisions } from '../lib/scope.js'
 
@@ -25,42 +26,6 @@ test('a missing end date stays empty, meaning current', () => {
 test('a date that is not a date yields empty rather than nonsense', () => {
 	assert.equal(isoDate('not a date'), '')
 	assert.equal(isoDate('1969-04-08'), '')
-})
-
-test('an open end survives a later row that closes earlier', () => {
-	// Retrosheet's file is ordered, so a naive `last.to = r.to` gets the same
-	// answer — which is why a mutant deleting the guard survived. The guard is
-	// against unordered input, and a name table that silently ended a franchise
-	// early would be a bad way to find out the assumption broke.
-	const out = collapseNames([
-		{ current: 'MIL', code: 'MIL', city: 'Milwaukee', nickname: 'Brewers', from: '1998-03-31', to: '' },
-		{ current: 'MIL', code: 'MIL', city: 'Milwaukee', nickname: 'Brewers', from: '1970-04-07', to: '1997-09-28' },
-	])
-	assert.equal(out.length, 1)
-	assert.equal(out[0].to, '', 'a closed span overwrote an open one')
-})
-
-test('a rename under one code is not collapsed away', () => {
-	// SE1 to MIL also changes code, so a collapse keyed on code alone still
-	// separates those two — the Angels are the real test, since ANA covers both
-	// Anaheim and Los Angeles.
-	const out = collapseNames([
-		{ current: 'ANA', code: 'ANA', city: 'Anaheim', nickname: 'Angels', from: '1997-04-02', to: '2004-10-03' },
-		{ current: 'ANA', code: 'ANA', city: 'Los Angeles', nickname: 'Angels', from: '2005-04-05', to: '' },
-	])
-	assert.equal(out.length, 2)
-	assert.deepEqual(out.map((o) => o.name), ['Anaheim Angels', 'Los Angeles Angels'])
-})
-
-test('rows differing only by division collapse into one name span', () => {
-	const out = collapseNames([
-		{ current: 'MIL', code: 'MIL', city: 'Milwaukee', nickname: 'Brewers', from: '1970-04-07', to: '1971-09-30' },
-		{ current: 'MIL', code: 'MIL', city: 'Milwaukee', nickname: 'Brewers', from: '1972-04-15', to: '1993-10-03' },
-		{ current: 'MIL', code: 'MIL', city: 'Milwaukee', nickname: 'Brewers', from: '1998-03-31', to: '' },
-	])
-	assert.equal(out.length, 1)
-	assert.equal(out[0].from, '1970-04-07')
-	assert.equal(out[0].to, '')
 })
 
 // --- spans ---
@@ -124,7 +89,21 @@ test('a season outside every span falls back rather than blanking', () => {
 
 test('a nameless row is skipped rather than blanking a code', () => {
 	assert.equal(nflIndex([{ teamAbbrv: 'AKR', city: '', teamName: '' }]).get('AKR'), undefined)
-	assert.equal(mlbIndex([{ code: 'X', name: '', from: '', to: '' }]).get('X'), undefined)
+	assert.equal(mlbIndex([{ teamName: 'X', city: '', team: '' }]).get('X'), undefined)
+})
+
+test('the baseball columns are not what their names suggest', () => {
+	// `teamName` is the CODE and `team` is the nickname, which is the opposite
+	// of what either reads like. Taking them at face value gives a franchise
+	// called "MIL" playing a club called "Brewers".
+	const idx = mlbIndex([{
+		franchiseName: 'MIL', teamName: 'SE1', city: 'Seattle', team: 'Pilots',
+		startDate: '4/8/1969', endDate: '10/2/1969', league: 'AL', colorA: '#0033A0',
+	}])
+	const [span] = idx.get('SE1')
+	assert.equal(span.name, 'Seattle Pilots')
+	assert.equal(span.franchise, 'MIL')
+	assert.equal(span.from, '1969-04-08')
 })
 
 test('a display name is city and nickname, and survives a missing city', () => {
@@ -222,4 +201,41 @@ test('every opponent either club has ever played resolves to a name', () => {
 		assert.deepEqual(unnamed, [], `${id} has unnamed opponents: ${unnamed.join(' ')}`)
 		assert.ok(codes.length > 30, `${id} only had ${codes.length} opponents — is the index loaded?`)
 	}
+})
+
+test('a franchise resolves through the codes it used to play under', () => {
+	// The database stores canonical franchises, not the code a game was recorded
+	// under. Asking for ANA in 1969 finds only the Angels' own spans, which
+	// start in 1997, and falls back to "Anaheim Angels" for a season they played
+	// as the California Angels under the code CAL.
+	//
+	// A franchise's identity over time is the union of its codes' spans.
+	const mlb = resolver('mlb')
+	assert.equal(mlb('ANA', { date: '1969-06-01' }).name, 'California Angels')
+	assert.equal(mlb('ANA', { date: '2024-06-01' }).name, 'Los Angeles Angels')
+	// And the Brewers' franchise covers their season as the Pilots.
+	assert.equal(mlb('MIL', { date: '1969-06-01' }).name, 'Seattle Pilots')
+	assert.equal(mlb('MIL', { date: '2025-06-01' }).name, 'Milwaukee Brewers')
+
+	const nfl = resolver('nfl')
+	assert.equal(nfl('DHR', { season: '1921' }).name, 'Detroit Tigers')
+	assert.equal(nfl('DHR', { season: '1925' }).name, 'Detroit Panthers')
+})
+
+test('a franchise index is the union of its codes', () => {
+	const idx = mlbIndex([
+		{ franchiseName: 'MIL', teamName: 'SE1', city: 'Seattle', team: 'Pilots', startDate: '4/8/1969', endDate: '10/2/1969' },
+		{ franchiseName: 'MIL', teamName: 'MIL', city: 'Milwaukee', team: 'Brewers', startDate: '4/7/1970', endDate: '' },
+	])
+	assert.equal(idx.get('SE1').length, 1)
+	assert.equal(byFranchise(idx).get('MIL').length, 2)
+})
+
+test('baseball colours are era-correct now, which they could not be before', () => {
+	// mlb-colors.csv was a stopgap with one row per franchise and no eras, so a
+	// 1969 Pilots page rendered in Brewers navy. The history table replaced it.
+	const mlb = resolver('mlb')
+	const fb = { base: '#2a2a2a', accent: '#ffffff' }
+	assert.equal(colorsFor(mlb, 'MIL', { date: '1969-06-01' }, fb).base, '#0033A0')
+	assert.equal(colorsFor(mlb, 'MIL', { date: '2025-06-01' }, fb).base, '#12284B')
 })
