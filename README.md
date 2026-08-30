@@ -53,6 +53,47 @@ opponent or score. The pipeline's output was then compared against the football
 site's committed data — **1,534 of 1,534 played games match exactly** on result,
 points for and points against.
 
+## Database
+
+Postgres 18 on the server; the schema also applies cleanly to 17. Reads happen
+at request time, so `DATABASE_URL` is required wherever the server runs.
+
+```
+DATABASE_URL=postgres://user:pass@host:5432/ats npm run migrate
+DATABASE_URL=... npm run load nfl
+```
+
+`migrate` applies numbered files from `db/migrations` in order, each in its own
+transaction, and records what it applied. Running it twice does nothing the
+second time — the only property that makes it safe to point at a server. It also
+stores a checksum per file and **refuses to run if an applied migration changed
+on disk**, because a file and a database that disagree give every fresh
+environment the edit and every existing one the original, with nothing reporting
+a problem. An applied migration is history; change it with a new file.
+`--dry-run` lists what would be applied.
+
+Connection strings support `sslmode` — `?sslmode=require`, or
+`?sslmode=no-verify` for a self-signed certificate. A database on the same
+internal network needs neither.
+
+### Provenance, and what a backup has to protect
+
+Every row names its source, and `source.reproducible` says whether it could be
+rebuilt. So the question is a query rather than an argument:
+
+```sql
+SELECT count(*) FROM game g JOIN source s ON g.source = s.id
+ WHERE NOT s.reproducible;
+```
+
+Zero means the whole database can be thrown away and rebuilt from sources. It
+returns to zero on its own, because an authoritative source supersedes a live
+capture as soon as it publishes.
+
+The upsert rule follows from that: a source may write if its authority is at
+least as high, **or** if the existing row is not yet final. A live feed may
+complete a scheduled game; it may not revise a finished one.
+
 ## Adding a club
 
 A club manifest is its sport, its id, the codes the sources call it by, its
