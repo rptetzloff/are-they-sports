@@ -12,11 +12,12 @@
 // replaces the capture with the authoritative version, and running it twice in
 // a row changes nothing. Authority is a column in `source`, not a branch here.
 
-import { readFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import pg from 'pg';
 import { csvRows, parseCsv } from '../lib/csv.js';
+import { download } from './fetch.mjs';
 import { isoDate } from '../sports/mlb.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -83,6 +84,32 @@ WHERE (SELECT authority FROM source WHERE id = EXCLUDED.source)
    >= (SELECT authority FROM source WHERE id = game.source)
    OR game.status <> 'final'`;
 
+/** Make sure a source file is present, fetching it if the adapter knows where
+ *  it lives.
+ *
+ *  This exists because the obvious place to run a load is inside the deployed
+ *  container, and the container has no sources: `.dockerignore` excludes
+ *  data/sources because play-by-play is 95MB a season. But a *game* load does
+ *  not need play-by-play — it needs schedules and, for football, the pre-1999
+ *  seed. Those are 2.1MB and 1.2MB. So the container can simply fetch them.
+ *
+ *  What it cannot do is invent a source nobody publishes. Retrosheet has no
+ *  fetcher here, so MLB says exactly that instead of failing on an open().
+ */
+async function ensureSource(sportId, path, cfg, label) {
+	if (existsSync(path)) return true;
+	if (!cfg?.url || typeof cfg.url !== 'string') {
+		console.error(`missing ${path}`);
+		console.error(`  ${label} has no download URL in sports/${sportId}.js — it has to be put there by hand.`);
+		return false;
+	}
+	mkdirSync(dirname(path), { recursive: true });
+	console.log(`  fetching     ${label} ...`);
+	const bytes = await download(cfg.url, path);
+	console.log(`  fetched      ${label}  ${(bytes / 1048576).toFixed(1)} MB`);
+	return true;
+}
+
 async function main() {
 	const sportId = process.argv[2] ?? 'nfl';
 	const url = process.env.DATABASE_URL;
@@ -137,7 +164,16 @@ async function main() {
 	};
 
 	if (sportId === 'nfl') {
-		for await (const r of csvRows(join(SOURCE_DIR, 'nfl', 'seed-results.csv'))) {
+		const seedPath = join(SOURCE_DIR, 'nfl', 'seed-results.csv');
+		const schedPath = join(SOURCE_DIR, 'nfl', 'schedules.csv');
+		const sport = (await import('../sports/nfl.js')).default;
+		if (!await ensureSource('nfl', seedPath, sport.sources.seedResults, 'seed-results.csv')
+			|| !await ensureSource('nfl', schedPath, sport.sources.schedules, 'schedules.csv')) {
+			await client.query('ROLLBACK');
+			await client.end();
+			return 1;
+		}
+		for await (const r of csvRows(seedPath)) {
 			if (+r.season >= 1999) continue;
 			if (r.score1 === '' || r.score2 === '') continue;
 			await put({
@@ -147,7 +183,7 @@ async function main() {
 				neutral: r.neutral === '1', status: 'final', source: 'fivethirtyeight',
 			});
 		}
-		for await (const r of csvRows(join(SOURCE_DIR, 'nfl', 'schedules.csv'))) {
+		for await (const r of csvRows(schedPath)) {
 			const played = r.home_score !== '' && r.away_score !== '';
 			await put({
 				id: r.game_id, season: +r.season, date: r.gameday,
@@ -160,10 +196,17 @@ async function main() {
 	}
 
 	if (sportId === 'mlb') {
+		const schedPath = join(SOURCE_DIR, 'mlb', 'schedules.csv');
+		const sport = (await import('../sports/mlb.js')).default;
+		if (!await ensureSource('mlb', schedPath, sport.sources.schedules, 'Retrosheet gameinfo')) {
+			await client.query('ROLLBACK');
+			await client.end();
+			return 1;
+		}
 		// Retrosheet's gameinfo is one row per game with both clubs, and unlike
 		// football there is no second era to splice in — coverage runs the whole
 		// length of every franchise.
-		for await (const r of csvRows(join(SOURCE_DIR, 'mlb', 'schedules.csv'))) {
+		for await (const r of csvRows(schedPath)) {
 			const played = r.vruns !== '' && r.hruns !== '';
 			// gametype is a word here rather than a two-letter code, and only the
 			// World Series is the championship round: an LCS game must not set it
