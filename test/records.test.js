@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { computeRecords, rec } from '../lib/records.js'
+import { computeRecords, pct, rec } from '../lib/records.js'
 import { titleHeading } from '../lib/render.js'
 import { loadIndex } from '../lib/indices.js'
 import { loadTeam } from '../lib/teams.js'
@@ -291,4 +291,32 @@ test('a single-final season is unchanged by that', () => {
 	const r = computeRecords([post(1965, 'W', { championship: '1965', championshipTitle: 'NFL Championship' })])
 	assert.deepEqual(r.championshipAppearances[0].titleNames, ['NFL Championship'])
 	assert.equal(r.championshipAppearances[0].title, 'NFL Championship')
+})
+
+test('a winning percentage is three decimals with no leading zero', () => {
+	// How every record book writes it. Notation rather than precision — "57.1"
+	// and ".571" are the same three significant figures.
+	assert.equal(pct(0.5714), '.571')
+	assert.equal(pct(0.4633), '.463')
+	assert.equal(pct(0.0625), '.063')
+	assert.equal(pct(0), '.000')
+})
+
+test('a perfect record keeps its leading one', () => {
+	// "1.000" is read instantly and ".000" is the opposite number, so stripping
+	// the zero cannot be unconditional.
+	assert.equal(pct(1), '1.000')
+})
+
+test('the percentage rounds rather than truncating', () => {
+	// .9615 is 1929's 12-0-1 with ties counted half, and it is .962 in every
+	// record book that prints it.
+	assert.equal(pct(0.9615), '.962')
+	assert.equal(pct(0.5556), '.556')
+
+	// And an exact-looking half is not one. 0.5555 is stored slightly BELOW
+	// half, so it rounds down — which is JavaScript's number representation
+	// rather than anything this function decides, and is worth pinning so the
+	// next person does not read it as a bug and "fix" it.
+	assert.equal(pct(0.5555), '.555')
 })
