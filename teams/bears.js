@@ -7,7 +7,6 @@ export const team = {
 	sourceIds: ['CHI'],
 	firstSeason: 1920,
 	nouns: { team: 'Bears', fullName: 'Chicago Bears' },
-	colors: { accent: '#c83803', base: '#0b162a', baseDeep: '#060d18' },
 	copy: { seasonNotStarted: 'BEAR DOWN' },
 };
 

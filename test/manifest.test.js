@@ -17,7 +17,6 @@ const TEAMS = await loadTeams()
 const minimal = {
 	sport: 'nfl', id: 'test', sourceIds: ['TST'], firstSeason: 1990,
 	nouns: { team: 'Tests', fullName: 'Test Club' },
-	colors: { accent: '#fff', base: '#000', baseDeep: '#000' },
 	copy: { seasonNotStarted: 'GO TESTS' },
 }
 
@@ -115,7 +114,6 @@ test('a rule of the wrong type is rejected', () => {
 test('the club-only fields are required, because no sport can supply them', () => {
 	for (const [field, broken] of [
 		['sourceIds', { sourceIds: [] }],
-		['colors.accent', { colors: {} }],
 		['copy.seasonNotStarted', { copy: {} }],
 	]) {
 		assert.throws(() => resolveTeam({ ...minimal, ...broken }, nfl),
