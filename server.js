@@ -94,19 +94,36 @@ const wantsJson = (url) => url.searchParams.get('format') === 'json';
 
 /** A club's games, filtered to a season when asked.
  *
- *  Cached per franchise for the life of the process. A club's history changes
- *  when a game finishes, not between requests, and re-querying 9,067 rows on
- *  every page load would be work done for nothing. The cost is that a finished
- *  game is not visible until the next deploy — which is a real limitation and
- *  the reason a TTL or an invalidation hook is the next thing this needs.
+ *  Cached per franchise, and invalidated when the data actually changes rather
+ *  than on a timer. `max(observed_at)` is one cheap indexed query; it is checked
+ *  at most every thirty seconds, and the rows are only re-read when that stamp
+ *  has moved.
+ *
+ *  The first version cached for the life of the process, which meant a load
+ *  against a running deployment was invisible until it was redeployed. That is
+ *  not a theoretical cost: it hid a playoff-flag correction once and a franchise
+ *  remapping once, and both times the site looked right and was quietly wrong —
+ *  which is the failure this project keeps finding, arriving through a cache.
  */
 const gameCache = new Map();
+const CACHE_CHECK_MS = 30_000;
 
 async function games(entry, season) {
-	if (!gameCache.has(entry.franchise)) {
-		gameCache.set(entry.franchise, await gamesFor(entry.sport, entry.franchise));
+	const key = entry.franchise;
+	const hit = gameCache.get(key);
+	const now = Date.now();
+
+	let rows = hit?.rows;
+	if (!hit || now - hit.checkedAt >= CACHE_CHECK_MS) {
+		const stamp = (await lastUpdated(entry.sport, entry.franchise))?.toISOString() ?? null;
+		if (!hit || hit.stamp !== stamp) {
+			rows = await gamesFor(entry.sport, entry.franchise);
+			gameCache.set(key, { rows, stamp, checkedAt: now });
+		} else {
+			hit.checkedAt = now;
+		}
 	}
-	const rows = gameCache.get(entry.franchise);
+
 	return season ? rows.filter((g) => g.season === season) : rows;
 }
 
