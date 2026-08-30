@@ -37,8 +37,8 @@ import {
 	seasonWinPct, seriesRecords, streakBanner, verdictText,
 } from './lib/core.js';
 import {
-	NEUTRAL, clubPage, clubSwitcher, recordsPage, scheduleHtml, seasonNav, selectorPage, siteNav,
-	sparklineHtml,
+	NEUTRAL, clubPage, clubSwitcher, missingSeasonPage, recordsPage, scheduleHtml, seasonNav,
+	selectorPage, siteNav, sparklineHtml,
 } from './lib/render.js';
 import { colorsFor, resolver } from './lib/names.js';
 import { SPORTS, loadTeams } from './lib/teams.js';
@@ -370,6 +370,13 @@ function main() {
 			const view = parseView(rest);
 			if (!view) return json(res, 404, { error: 'no such view', path: url.pathname });
 
+			// What the switcher appends to another club's base, so switching
+			// keeps you on the page you were on. A season is included: comparing
+			// the same year across clubs is exactly what someone switching from a
+			// season page wants, and a club that did not exist then gets a page
+			// that says so rather than a bare 404.
+			const here = rest === '/' ? '' : rest;
+
 			/** Everything a club page shows, for one season.
 			 *
 			 *  Shared by the front page (the latest season) and /{season}, so the
@@ -432,7 +439,7 @@ function main() {
 					nav: seasonNav(allSeasons, season, entry.base),
 					siteNavHtml: siteNav(entry.base, team),
 					spark: sparklineHtml(seasonWinPct(all)),
-					switcher: clubSwitcher(clubList(), entry.teamId),
+					switcher: clubSwitcher(clubList(), entry.teamId, here),
 					updatedAt: (await lastUpdated(entry.sport, entry.franchise))?.toISOString().slice(0, 10) ?? null,
 					lastLossless: lastLosslessSeason(all),
 					allTime: {
@@ -461,8 +468,22 @@ function main() {
 						return json(res, 200, { team: entry.teamId, season: view.season, games: rows });
 					}
 					const body = await renderSeason(view.season);
-					if (!body) return json(res, 404, { error: 'no such season', season: view.season });
-					return html(res, 200, body);
+					if (body) return html(res, 200, body);
+					// Reachable by switching clubs from a season page — the
+					// Vikings have no 1929 — so it explains itself and offers the
+					// seasons this club does have.
+					const team = teamsById.get(entry.teamId);
+					const all = seasons(await games(entry));
+					return html(res, 404, missingSeasonPage({
+						team,
+						season: view.season,
+						colors: team.colors ?? colorsFor(namers[entry.sport], entry.code, { season: all.at(-1) }, NEUTRAL),
+						base: entry.base,
+						first: all[0],
+						last: all.at(-1),
+						switcher: clubSwitcher(clubList(), entry.teamId, here),
+						siteNavHtml: siteNav(entry.base, team),
+					}));
 				}
 				if (view.view === 'records') {
 					const team = teamsById.get(entry.teamId);
@@ -483,7 +504,7 @@ function main() {
 						resolve: namers[entry.sport],
 						base: entry.base,
 						siteNavHtml: siteNav(entry.base, team),
-						switcher: clubSwitcher(clubList(), entry.teamId),
+						switcher: clubSwitcher(clubList(), entry.teamId, here),
 					}));
 				}
 				// vs and history still need porting. Saying so beats an empty 200
