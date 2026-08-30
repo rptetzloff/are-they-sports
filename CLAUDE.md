@@ -244,7 +244,12 @@ unreachable and turned a readable list of missing clubs into a crash loop.
 95MB; the Retrosheet slice is 388MB. `data/sources/` is gitignored and exists
 only while a build runs.
 
-**Artifacts are derived and committed.** They are what a site reads. 490MB of
+**Artifacts are derived and committed.** They *were* what a site reads; the
+server now reads games from the database instead, and `scripts/build.mjs` still
+produces them. Keeping two representations of the same data is exactly the drift
+this file warns about, so the next decision is whether they stay — they earned
+their keep once more by being what the database load was verified against, club
+by club. 490MB of
 sources become 801KB, because rows nobody displays are dropped first — 728,867
 baseball plays to 64,051 that scored, 49,492 league football plays to 238 for
 one team — and only then is anything compressed.

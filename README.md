@@ -206,7 +206,7 @@ two clubs as a whole league.
 ```
 npm run fetch packers                 # schedules + pre-1999 seed
 npm run fetch packers -- --pbp 2024   # one play-by-play season
-npm run build packers                 # derive committed artifacts
+npm run build packers                 # derive committed artifacts (no longer read by the server)
 npm test                              # no sources needed, ~190ms
 
 SCOPE=team:packers npm run dev        # http://127.0.0.1:3000
@@ -222,6 +222,7 @@ docker run -p 3000:3000 -e SCOPE=division:nfl/nfc-north are-they-sports
 | variable | |
 |---|---|
 | `SCOPE` | **required.** No default: a server that guessed would start, answer every route, and show the wrong clubs. |
+| `DATABASE_URL` | **required.** Games are read at request time. Missing is fatal; unreachable is not — the server starts and answers 503 with the reason. |
 | `PUBLIC_ORIGIN` | pins the origin in absolute links. Without it any `Host` header becomes canonical, which is how a preview domain publishes itself as the real one. |
 | `STRICT_SCOPE` | `1` makes any unbuilt club in scope unhealthy. Unset, serving at least one club is healthy, because building clubs one at a time is how this repo works today. |
 | `PORT` | defaults to 3000. |
