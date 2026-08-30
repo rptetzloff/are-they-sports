@@ -1,7 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { NEUTRAL, clubPage, escapeHtml, page, paletteCss, questionFor, selectorPage } from '../lib/render.js'
-import { colorsFor, resolver } from '../lib/names.js'
+import { colorsFor, loadColors, resolver } from '../lib/names.js'
 import { recordText, seasonTally, verdictText } from '../lib/core.js'
 import { loadTeam } from '../lib/teams.js'
 
@@ -64,7 +64,9 @@ test('the palette comes from data, never from a literal', () => {
 	const css = paletteCss(colorsFor(resolver('nfl'), 'GB', '2024', NEUTRAL))
 	assert.ok(css.includes('--base: #203731'), css)
 	assert.ok(css.includes('--accent: #FFB612'), css)
-	assert.ok(paletteCss(brewers.colors).includes('--accent: #ffc52f'))
+	// Baseball's come from a separate curated table, because Retrosheet
+	// publishes no colours.
+	assert.ok(paletteCss(loadColors('mlb').get('MIL')).includes('--accent: #ffc52f'))
 })
 
 test('a club rendered in an older era gets the colours of that era', () => {
@@ -87,7 +89,7 @@ test('a franchise with no colours on record falls back', () => {
 test('the status colours are shared, not per club', () => {
 	// Comparing the two sites showed they had independently arrived at the same
 	// values, so a win is #4caf50 for everyone and it is not team vocabulary.
-	for (const colors of [NEUTRAL, brewers.colors]) {
+	for (const colors of [NEUTRAL, loadColors('mlb').get('MIL')]) {
 		assert.ok(paletteCss(colors).includes('--win: #4caf50'))
 		assert.ok(paletteCss(colors).includes('--loss: #f44336'))
 	}
@@ -221,4 +223,24 @@ test('the lossless-season noun comes from the manifest, not the code', () => {
 	// only way to tell.
 	const perfectionists = { ...packers, nouns: { ...packers.nouns, team: 'Dolphins', losslessSeasonNoun: 'perfect' } }
 	assert.equal(questionFor(perfectionists), 'Are the Dolphins Perfect?')
+})
+
+test('every baseball club has colours, and the verified row is the Brewers', () => {
+	// Curated from knowledge rather than published, unlike football's — which
+	// arrived as data with colours already in it. The file says so, and marks
+	// which single row was checked against anything.
+	const m = loadColors('mlb')
+	assert.equal(m.size, 30)
+	assert.deepEqual(m.get('MIL'), { base: '#12284b', accent: '#ffc52f' })
+	for (const [code, c] of m) {
+		assert.match(c.base, /^#[0-9a-fA-F]{6}$/, `${code} base`)
+		assert.match(c.accent, /^#[0-9a-fA-F]{6}$/, `${code} accent`)
+		assert.notEqual(c.base.toLowerCase(), c.accent.toLowerCase(), `${code} has one colour twice`)
+	}
+})
+
+test('football colours do not come from that table', () => {
+	// It is baseball-only on purpose: football's ride along with its franchise
+	// history and are era-correct, which this cannot be.
+	assert.equal(loadColors('nfl').size, 0)
 })

@@ -38,7 +38,7 @@ import {
 import {
 	NEUTRAL, clubPage, clubSwitcher, scheduleHtml, seasonNav, selectorPage, siteNav, sparklineHtml,
 } from './lib/render.js';
-import { colorsFor, resolver } from './lib/names.js';
+import { colorsFor, loadColors, resolver } from './lib/names.js';
 import { SPORTS, loadTeams } from './lib/teams.js';
 import { matchRoute, parseView, routeTable } from './lib/routes.js';
 import { loadDivisions, needsSelector, parseScope, resolveScope } from './lib/scope.js';
@@ -216,6 +216,9 @@ function main() {
 		// still has a name — that is the whole point, since 60 of the 62 clubs an
 		// `all` scope covers are unbuilt and would otherwise be bare codes.
 		const namers = Object.fromEntries(SPORTS.map((s) => [s, resolver(s)]));
+		// Baseball's colours are a separate curated table; football's ride along
+		// with its franchise history.
+		const palettes = Object.fromEntries(SPORTS.map((s) => [s, loadColors(s)]));
 		const table = routeTable(scope, resolved);
 		let available = table.filter((e) => e.available);
 
@@ -421,7 +424,9 @@ function main() {
 					// The club's colours for the season being rendered, so a
 					// 1950s page uses the green they used then. A manifest may
 					// override; most no longer need to.
-					colors: team.colors ?? colorsFor(resolve, entry.code, season, NEUTRAL),
+					colors: team.colors
+						?? palettes[entry.sport].get(entry.franchise)
+						?? colorsFor(resolve, entry.code, season, NEUTRAL),
 					banner: streakBanner(played.filter((g) => g.regular_season === '1'), { isPastSeason, team }),
 					schedule: scheduleHtml(withNames, { heading: `${season} Season Schedule` }),
 					nav: seasonNav(allSeasons, season, entry.base),
