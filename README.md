@@ -263,6 +263,45 @@ are unresolved today, all clubs the Packers never played — a number that falls
 as teams are added, since a club the Packers never met probably played the
 Bears.
 
+## The season being played
+
+Retrosheet is authoritative and published annually — the file supplied on
+2026-08-30 ends at the 2025 World Series. So on any day of a season the
+authoritative source has nothing for it, and a club page answers about a season
+that finished last November as though it were current.
+
+```
+npm run load mlb -- --live          # the season being played
+npm run load mlb -- --live 2026     # a named one
+```
+
+Nine requests rather than two hundred: ESPN's scoreboard takes `dates=YYYYMM`
+and returns the month. Rows are written as `espn` — authority 10,
+`reproducible = false` — and the upsert rule replaces them with Retrosheet's the
+next time the annual file loads, so the count of non-reproducible rows returns
+to zero on its own.
+
+The game id is synthesised in **Retrosheet's** shape rather than using ESPN's,
+because games are keyed on `(sport, id)`: an ESPN id would make the same game a
+second row the moment Retrosheet published the season. That needs the club's
+**era** code, not its franchise — `ATH202507040` is a game whose franchise is
+`OAK` — which is what `espnAbbrv` in the franchise history provides, one more
+`<provider>Abbrv` column.
+
+Four things a live scoreboard carries that are not results, each found by
+comparing a count against the real season:
+
+- **spring training.** March 2026 is 321 preseason events against 76
+  regular-season ones; loaded as games it gave the Brewers 26 games in March.
+- **postponements.** `STATUS_POSTPONED` is also state `post` and carries 0-0, so
+  reading the state stored thirteen of them as nil-nil finals. `completed` is
+  the field that means finished.
+- **the All-Star game**, which arrives as `AL` against `NL`, and **postseason
+  fixtures** as `TBD` against `TBD`. Both were registered as clubs.
+- **the month boundary.** `dates=202607` returns through August 1st and
+  `dates=202608` starts there, so boundary games arrive twice and Postgres
+  refuses an upsert whose own values repeat a key.
+
 ## Baseball data, and why its load runs differently
 
 Football fetches its own sources: `scripts/load.mjs nfl` runs anywhere, including

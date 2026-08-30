@@ -196,8 +196,56 @@ export async function repairAliasFranchises(client, sportId, codes) {
 	return repaired;
 }
 
+/** Fetch the season being played now from a live feed, and upsert it.
+ *
+ *  Separate from the main load so it can run often: it touches nine URLs rather
+ *  than a 45MB file, and the authoritative source has nothing for the current
+ *  season anyway — Retrosheet publishes annually, so on any day between March
+ *  and the World Series the club pages would otherwise answer about last year.
+ *
+ *  Every row is written as the live source, which is authority 10 and not
+ *  reproducible. The upsert rule lets it through because the rows do not exist
+ *  yet, and replaces it with the authoritative row the next time the annual file
+ *  is loaded — the count of non-reproducible rows returns to zero on its own,
+ *  which is the property that whole design rests on.
+ */
+async function loadLive(client, sportId, cfg, season, put) {
+	const codes = codeTable(sportId, loadHistory(sportId));
+	const sport = (await import(`../sports/${sportId}.js`));
+	let seen = 0;
+	for (const month of cfg.months) {
+		const url = cfg.url(`${season}${String(month).padStart(2, '0')}`);
+		let events;
+		try {
+			const res = await fetch(url);
+			if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+			events = (await res.json()).events ?? [];
+		} catch (e) {
+			// One month failing is not a reason to lose the others, and a live
+			// feed being briefly unavailable is not a configuration error.
+			console.error(`  live         ${season}-${month}: ${e.message}`);
+			continue;
+		}
+		for (const { event, number } of sport.numberEvents(events)) {
+			const row = sport.liveGameRow(event, {
+				eraCodeOf: codes.eraCodeOf, franchiseOf: codes.franchiseOf, knows: codes.knows, number,
+			});
+			if (!row) continue;
+			seen++;
+			await put(row);
+		}
+	}
+	return seen;
+}
+
 async function main() {
 	const sportId = process.argv[2] ?? 'nfl';
+	// `--live` fetches only the season being played, from the live feed. Without
+	// it the run is the full authoritative load and never touches the feed, so a
+	// scheduled live refresh and an annual reload are the same script at very
+	// different costs.
+	const liveOnly = process.argv.includes('--live');
+	const seasonArg = process.argv.slice(3).find((a) => /^[0-9]{4}$/.test(a));
 	const url = process.env.DATABASE_URL;
 	if (!url) {
 		console.error('DATABASE_URL is required');
@@ -282,8 +330,17 @@ async function main() {
 
 	const flush = async () => {
 		if (!pending.length) return;
+		// One row per id. Postgres refuses an ON CONFLICT DO UPDATE whose own
+		// VALUES contain the same key twice — "cannot affect row a second time" —
+		// and a live feed produces exactly that: ESPN's monthly window spills a
+		// day, so `dates=202607` returns through August 1st and `dates=202608`
+		// starts there. The boundary games arrive in both requests.
+		//
+		// Last wins, which is the later fetch and so the fresher score.
+		const byId = new Map(pending.map((row) => [`${sportId}/${row.id}`, row]));
+		const batch = [...byId.values()];
 		const params = [];
-		const tuples = pending.map((row) => {
+		const tuples = batch.map((row) => {
 			const at = params.length;
 			params.push(sportId, row.id, row.season, row.date, row.round, row.home, row.away,
 				row.homeScore, row.awayScore, row.neutral, row.status, row.source,
@@ -309,6 +366,29 @@ async function main() {
 		pending.push({ ...row, home, away });
 		if (pending.length >= BATCH) await flush();
 	};
+
+	// A live refresh ends here: it reuses `put` and the batch, and touches
+	// neither the authoritative files nor the repair and championship passes
+	// below, which are about history rather than today.
+	if (liveOnly) {
+		const sport = (await import(`../sports/${sportId}.js`)).default;
+		const cfg = sport.sources.live;
+		if (!cfg) {
+			console.error(`${sportId} declares no live source`);
+			await client.query('ROLLBACK');
+			await client.end();
+			return 2;
+		}
+		// The clock is read HERE and nowhere else, because "which season is being
+		// played" is the one question that genuinely depends on today.
+		const season = seasonArg ? Number(seasonArg) : cfg.seasonOf(new Date());
+		const seen = await loadLive(client, sportId, cfg, season, put);
+		await flush();
+		await client.query('COMMIT');
+		console.log(`  live         ${season}: ${seen} games seen, ${loaded} written, ${skipped} skipped`);
+		await client.end();
+		return 0;
+	}
 
 	if (sportId === 'nfl') {
 		const seedPath = join(SOURCE_DIR, 'nfl', 'seed-results.csv');

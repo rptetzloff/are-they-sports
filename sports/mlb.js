@@ -76,6 +76,33 @@ export const sources = {
 		 */
 		env: 'MLB_SCHEDULES_URL',
 	},
+	/** ESPN's public scoreboard, for the season currently being played.
+	 *
+	 *  Retrosheet is authoritative and, by its own note in the source table,
+	 *  published annually — the file supplied on 2026-08-30 ends at the 2025
+	 *  World Series. So on any day during a season, the authoritative source has
+	 *  nothing for it, and a club page answers about a season that finished last
+	 *  November as though it were current.
+	 *
+	 *  That is what `espn` is for. It is already declared in the schema at
+	 *  authority 10 and `reproducible = false`, with the note "superseded the
+	 *  moment an authoritative source publishes" — the row is replaced by
+	 *  Retrosheet's the next time the annual file is loaded, and the count of
+	 *  non-reproducible rows returns to zero on its own.
+	 *
+	 *  A month at a time: `dates=YYYYMM` returns the whole month, so a season is
+	 *  nine requests rather than two hundred.
+	 */
+	live: {
+		url: (yyyymm) => `https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/scoreboard?dates=${yyyymm}&limit=1000`,
+		// March to November covers spring openers through a Game 7.
+		months: [3, 4, 5, 6, 7, 8, 9, 10, 11],
+		source: 'espn',
+		/** Which season a date belongs to. Baseball's is the calendar year; an
+		 *  NFL season crosses the new year and would not be, which is why this
+		 *  is declared per sport rather than assumed. */
+		seasonOf: (date) => date.getUTCFullYear(),
+	},
 	playByPlay: {
 		file: 'plays.lfs.csv',
 		perSeason: false,
@@ -217,3 +244,95 @@ export const sport = {
 };
 
 export default sport;
+
+/** One ESPN scoreboard event as a game row, or null.
+ *
+ *  The id is synthesised in RETROSHEET's shape — era code, date, game number —
+ *  rather than using ESPN's own. Games are keyed on (sport, id), so an ESPN id
+ *  would make the same game a second row the moment Retrosheet published the
+ *  season, and the club would have played everything twice.
+ *
+ *  The game number is the hard part and is derived rather than read: Retrosheet
+ *  writes 0 for a single game and 1 and 2 for a doubleheader, and ESPN says
+ *  nothing about which is which. Events sharing a home club and a date are
+ *  ordered by start time and numbered; a lone game is 0.
+ */
+export function liveGameRow(event, { eraCodeOf, franchiseOf, knows, number = 0 }) {
+	const comp = event?.competitions?.[0];
+	if (!comp) return null;
+	// Spring training is not the season. ESPN's scoreboard carries it as
+	// `season.type === 1`, and March 2026 is 321 preseason events against 76
+	// regular-season ones — loaded as real games it gave the Brewers 26 games in
+	// March and 161 for the year by the end of August, when they had played 137.
+	//
+	// The same call the authoritative load already makes: Retrosheet's
+	// `exhibition` and `allstar` rows are skipped for the same reason, and this
+	// feed's All-Star game arrives as NL versus AL, which are not clubs.
+	if ((event.season?.type ?? 2) < 2) return null;
+
+	const home = comp.competitors?.find((c) => c.homeAway === 'home');
+	const away = comp.competitors?.find((c) => c.homeAway === 'away');
+	if (!home?.team?.abbreviation || !away?.team?.abbreviation) return null;
+
+	// Both sides must be clubs this repo knows. A live scoreboard carries things
+	// that are not: the All-Star game arrives as AL against NL, and postseason
+	// fixtures appear as TBD against TBD months before the matchups are set.
+	//
+	// Rejecting them here rather than downstream matters, because the loader
+	// registers a franchise for a code BEFORE deciding whether to keep the game —
+	// so AL, NL and TBD were all created as clubs, and the All-Star game was
+	// stored as a real one.
+	//
+	// The historical load makes the same call from the other direction: it skips
+	// Retrosheet's `allstar` and `exhibition` rows.
+	if (knows && (!knows(home.team.abbreviation) || !knows(away.team.abbreviation))) return null;
+
+	const date = String(event.date).slice(0, 10);
+	// `completed`, not `state === 'post'`. A POSTPONED game is also state `post`
+	// and is not completed, and it carries a 0-0 score — so reading the state
+	// stored thirteen postponements in three months as nil-nil finals and gave
+	// the Brewers 140 games by August 30 when they had played 137.
+	//
+	// `in` is a game being played and `pre` one that has not started; both carry
+	// a score too, and neither is a result.
+	const played = comp.status?.type?.completed === true;
+	const eraHome = eraCodeOf(home.team.abbreviation);
+
+	return {
+		id: `${eraHome}${date.replace(/-/g, '')}${number}`,
+		season: Number(String(event.season?.year ?? date.slice(0, 4))),
+		date,
+		// ESPN's season type: 1 preseason, 2 regular, 3 postseason. Anything
+		// beyond the regular season is a playoff game; which ROUND it was, and
+		// whether it was the World Series, is left to the authoritative source
+		// rather than guessed from a live feed.
+		round: (event.season?.type ?? 2) > 2 ? 'playoff' : 'regular',
+		home: franchiseOf(home.team.abbreviation),
+		away: franchiseOf(away.team.abbreviation),
+		homeScore: played ? Number(home.score) : null,
+		awayScore: played ? Number(away.score) : null,
+		neutral: Boolean(comp.neutralSite),
+		status: played ? 'final' : 'scheduled',
+		source: 'espn',
+		week: null,
+	};
+}
+
+/** Group events into Retrosheet game numbers: 0 alone, 1 and 2 for a double. */
+export function numberEvents(events) {
+	const byDay = new Map();
+	for (const e of events) {
+		const comp = e?.competitions?.[0];
+		const home = comp?.competitors?.find((c) => c.homeAway === 'home')?.team?.abbreviation;
+		if (!home) continue;
+		const key = `${home}|${String(e.date).slice(0, 10)}`;
+		if (!byDay.has(key)) byDay.set(key, []);
+		byDay.get(key).push(e);
+	}
+	const out = [];
+	for (const group of byDay.values()) {
+		const sorted = group.slice().sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
+		sorted.forEach((e, i) => out.push({ event: e, number: sorted.length > 1 ? i + 1 : 0 }));
+	}
+	return out;
+}
