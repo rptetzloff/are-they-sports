@@ -41,7 +41,7 @@ import {
 	seasonWinPct, seriesRecords, streakBanner, verdictText,
 } from './lib/core.js';
 import {
-	NEUTRAL, clubPage, clubSwitcher, headToHeadPage, leagueRecordsPage, leagueSchedulePage, missingSeasonPage, opponentPage, recordsPage,
+	NEUTRAL, clubPage, clubSwitcher, headToHeadPage, leagueNav, leagueRecordsPage, leagueSchedulePage, missingSeasonPage, opponentPage, recordsPage,
 	scheduleHtml, seasonNav, selectorPage, siteNav, sparklineHtml,
 } from './lib/render.js';
 import { colorsFor, resolver } from './lib/names.js';
@@ -392,6 +392,9 @@ function main() {
 					clubs,
 					colors: NEUTRAL,
 					heading: scopeHeading(scope, table),
+					// The root is where anyone lands, and the league pages were
+					// reachable only by typing their paths.
+					nav: leagueNav('clubs'),
 				}));
 			}
 
@@ -537,7 +540,7 @@ function main() {
 					banner: streakBanner(played.filter((g) => g.regular_season === '1'), { isPastSeason, team }),
 					schedule: scheduleHtml(withNames, { heading: `${season} Season Schedule` }),
 					nav: seasonNav(allSeasons, season, entry.base),
-					siteNavHtml: siteNav(entry.base, team),
+					siteNavHtml: siteNav(entry.base, team, { league: needsSelector(table) }),
 					spark: sparklineHtml(seasonWinPct(all)),
 					switcher: clubSwitcher(clubList(), entry.teamId, here),
 					updatedAt: (await lastUpdated(entry.sport, entry.franchise))?.toISOString().slice(0, 10) ?? null,
@@ -582,7 +585,7 @@ function main() {
 						first: all[0],
 						last: all.at(-1),
 						switcher: clubSwitcher(clubList(), entry.teamId, here),
-						siteNavHtml: siteNav(entry.base, team),
+						siteNavHtml: siteNav(entry.base, team, { league: needsSelector(table) }),
 					}));
 				}
 				if (view.view === 'records') {
@@ -603,7 +606,7 @@ function main() {
 						records,
 						resolve: namers[entry.sport],
 						base: entry.base,
-						siteNavHtml: siteNav(entry.base, team),
+						siteNavHtml: siteNav(entry.base, team, { league: needsSelector(table) }),
 						switcher: clubSwitcher(clubList(), entry.teamId, here),
 					}));
 				}
@@ -616,7 +619,7 @@ function main() {
 						?? colorsFor(resolve, entry.code, { season: seasons(all).at(-1), date: all.at(-1)?.date }, NEUTRAL);
 					const common = {
 						team, colors, resolve, base: entry.base,
-						siteNavHtml: siteNav(entry.base, team),
+						siteNavHtml: siteNav(entry.base, team, { league: needsSelector(table) }),
 						switcher: clubSwitcher(clubList(), entry.teamId, here),
 					};
 

@@ -263,6 +263,18 @@ are unresolved today, all clubs the Packers never played — a number that falls
 as teams are added, since a club the Packers never met probably played the
 Bears.
 
+## Getting to the league pages
+
+`/records` and `/schedule` are linked from the club selector at the root, from
+each other, and from every club page's site nav — under a multi-club scope only,
+because under `SCOPE=team:packers` those routes do not exist and linking to them
+would be worse than not having them.
+
+Worth saying because the first version had none of that. Both pages answered
+200, every route test passed, and nothing anywhere pointed at them: a working
+page nobody can reach. No test noticed, because every test already knew the URL.
+`test/reachable.test.js` is the one that asks the other question.
+
 ## League-wide records
 
 `/records` at the scope root is the record book for every club in scope, where
