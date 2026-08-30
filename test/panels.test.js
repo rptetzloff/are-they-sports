@@ -1,7 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { lastLosslessSeason, seasons, streakBanner } from '../lib/core.js'
-import { formatDate, scheduleHtml, seasonNav } from '../lib/render.js'
+import { lastLosslessSeason, seasons, seasonWinPct, seriesRecords, streakBanner } from '../lib/core.js'
+import { clubSwitcher, formatDate, scheduleHtml, seasonNav, sparklineHtml } from '../lib/render.js'
 import { seedRound } from '../sports/nfl.js'
 import { loadTeam } from '../lib/teams.js'
 
@@ -36,8 +36,8 @@ test('a tie does not end an unbeaten run', () => {
 
 test('an unbeaten season reports its real record, ties and all', () => {
 	// Not `${n}-0`, which would relabel 12-0-1 as 13-0.
-	assert.match(streakBanner(run('WWWWWWWWWWTWW'), { isPastSeason: true, team: packers }), /12-0-1/)
-	assert.match(streakBanner(run('WWWW'), { isPastSeason: true, team: packers }), /4-0$/)
+	assert.match(streakBanner(run('WWWWWWWWWWTWW'), { isPastSeason: true, team: packers }), /<strong>12-0-1<\/strong>/)
+	assert.match(streakBanner(run('WWWW'), { isPastSeason: true, team: packers }), /<strong>4-0<\/strong>/)
 })
 
 test('a live unbeaten run with a tie is not called a win streak', () => {
@@ -49,7 +49,7 @@ test('a live unbeaten run with a tie is not called a win streak', () => {
 
 test('a loss still ends the run', () => {
 	const banner = streakBanner(run('WWLWW'), { isPastSeason: true, team: packers })
-	assert.match(banner, /Undefeated for 2 games/)
+	assert.match(banner, /Undefeated for <strong>2 games<\/strong>/)
 	assert.match(banner, /before first loss/)
 })
 
@@ -205,4 +205,202 @@ test('the loader and the adapter read the playoff column the same way', () => {
 	// The trap: '0' is truthy, so a plain `r.playoff ?` marks every game a
 	// playoff game. That is exactly what shipped, for all 16,810 pre-1999 rows.
 	assert.equal(seedRound({ playoff: '' }), 'regular')
+})
+
+// --- all-time head-to-head ---
+
+test('a series record counts only completed games', () => {
+	// An unplayed fixture has no result. Counting it as anything — and a naive
+	// `result !== 'WIN'` would count it as a loss — puts a game that has not
+	// happened into an all-time record.
+	const rows = [
+		{ Opponent: 'CHI', result: 'WIN' },
+		{ Opponent: 'CHI', result: 'LOSS' },
+		{ Opponent: 'CHI', result: '' },
+	]
+	assert.equal(seriesRecords(rows).get('CHI'), '1–1')
+})
+
+test('ties appear in a series record only when there are some', () => {
+	assert.equal(seriesRecords([{ Opponent: 'CHI', result: 'TIE' }]).get('CHI'), '0–0–1')
+	assert.equal(seriesRecords([{ Opponent: 'CHI', result: 'WIN' }]).get('CHI'), '1–0')
+})
+
+test('each opponent is counted separately', () => {
+	const r = seriesRecords([
+		{ Opponent: 'CHI', result: 'WIN' },
+		{ Opponent: 'MIN', result: 'LOSS' },
+	])
+	assert.equal(r.get('CHI'), '1–0')
+	assert.equal(r.get('MIN'), '0–1')
+	assert.equal(r.get('DET'), undefined)
+})
+
+test('a schedule card carries the all-time series when it has one', () => {
+	const withSeries = scheduleHtml([{ ...run('W')[0], opponentName: 'Chicago Bears', seriesRecord: '109–98–6' }], { heading: 'x' })
+	assert.match(withSeries, /All-time: 109–98–6/)
+	// And omits the line entirely rather than rendering an empty one.
+	assert.ok(!scheduleHtml([run('W')[0]], { heading: 'x' }).includes('All-time'))
+})
+
+// --- season navigation, six buttons ---
+
+const MANY = Array.from({ length: 100 }, (_, i) => String(1921 + i))
+
+test('navigation jumps ten seasons as well as one', () => {
+	// Six buttons, matching the baseball site: first, back ten, back one,
+	// forward one, forward ten, last. Ten is a lot of clicks to save across a
+	// hundred seasons.
+	const nav = seasonNav(MANY, '1971', '/packers')
+	assert.match(nav, /"\/packers\/1921"/)   // first
+	assert.match(nav, /"\/packers\/1961"/)   // back ten
+	assert.match(nav, /"\/packers\/1970"/)   // back one
+	assert.match(nav, /"\/packers\/1972"/)   // forward one
+	assert.match(nav, /"\/packers\/1981"/)   // forward ten
+	assert.match(nav, /"\/packers\/2020"/)   // last
+})
+
+test('a ten-season jump clamps rather than falling off the end', () => {
+	// Five seasons in, back ten is the first season.
+	//
+	// Asserting `!includes('undefined')` cannot catch this and the first version
+	// of this test did exactly that: escapeHtml renders undefined as an empty
+	// string, so falling off the end produces href="/packers/" — a link to
+	// nothing that contains the word nowhere. The assertion has to be on the
+	// href that should be there, and on there being no empty one.
+	const nav = seasonNav(MANY, '1925', '/packers')
+	assert.match(nav, /href="\/packers\/1921"/)
+	assert.ok(!nav.includes('href="/packers/"'), nav)
+
+	const late = seasonNav(MANY, '2018', '/packers')
+	assert.match(late, /href="\/packers\/2020"/)
+	assert.ok(!late.includes('href="/packers/"'), late)
+})
+
+// --- the club switcher ---
+
+const CLUBS = [
+	{ teamId: 'packers', sport: 'nfl', code: 'GB', name: 'Green Bay Packers', available: true, url: '/nfl/packers' },
+	{ teamId: 'bears', sport: 'nfl', code: 'CHI', name: 'Chicago Bears', available: true, url: '/nfl/bears' },
+	{ teamId: null, sport: 'nfl', code: 'MIN', name: 'Minnesota Vikings', available: false, url: null },
+	{ teamId: 'brewers', sport: 'mlb', code: 'MIL', name: 'Milwaukee Brewers', available: true, url: '/mlb/brewers' },
+]
+
+test('the switcher links every other club', () => {
+	const html = clubSwitcher(CLUBS, 'packers')
+	assert.match(html, /href="\/nfl\/bears"/)
+	assert.match(html, /href="\/mlb\/brewers"/)
+})
+
+test('the current club is marked, not linked to itself', () => {
+	const html = clubSwitcher(CLUBS, 'packers')
+	assert.match(html, /<li class="here">Green Bay Packers<\/li>/)
+	assert.ok(!html.includes('href="/nfl/packers"'), html)
+})
+
+test('clubs with no data are listed and not linked', () => {
+	// The same reason the selector lists them: hiding them makes a partial
+	// deployment look whole.
+	const html = clubSwitcher(CLUBS, 'packers')
+	assert.match(html, /class="unavailable">Minnesota Vikings/)
+})
+
+test('a scope spanning two sports groups by sport', () => {
+	const html = clubSwitcher(CLUBS, 'packers')
+	assert.match(html, /switch-sport">NFL/)
+	assert.match(html, /switch-sport">MLB/)
+})
+
+test('a single-sport scope has no sport headings', () => {
+	// A heading over the only group is noise.
+	const html = clubSwitcher(CLUBS.filter((c) => c.sport === 'nfl'), 'packers')
+	assert.ok(!html.includes('switch-sport'), html)
+})
+
+test('a scope with one club has no switcher at all', () => {
+	// There is nothing to switch to, and an empty chooser is worse than none.
+	assert.equal(clubSwitcher([CLUBS[0]], 'packers'), '')
+	assert.equal(clubSwitcher([], 'packers'), '')
+})
+
+test('the switcher works without JavaScript', () => {
+	// A details element, because everything else on this page is server
+	// rendered and a chooser that needs a script would be the only thing that
+	// does not work with it disabled.
+	assert.match(clubSwitcher(CLUBS, 'packers'), /^<details/)
+	assert.match(clubSwitcher(CLUBS, 'packers'), /<summary>/)
+})
+
+test('the banner bolds its numbers, which is what both sites do', () => {
+	// Emphasis was lost in the port and the sentence rendered as flat text. It
+	// is HTML on purpose, so clubPage does not escape it — which means the club
+	// name it interpolates has to be escaped here.
+	const banner = streakBanner(run('WWLWW'), { isPastSeason: false, team: packers })
+	assert.match(banner, /<strong>/)
+})
+
+test('a club name in the banner is escaped', () => {
+	// The one interpolated value that is not a number this code computed.
+	const hostile = { ...packers, nouns: { ...packers.nouns, team: '<img src=x>' } }
+	const banner = streakBanner(run('WWLWW'), { isPastSeason: false, team: hostile })
+	assert.ok(!banner.includes('<img'), banner)
+	assert.match(banner, /&lt;img/)
+})
+
+// --- the history sparkline ---
+
+test('win percentage counts a tie as a half', () => {
+	// Which is how every league that has ties computes it. 12-0-1 is .962 —
+	// not 1.000, and not .923.
+	const rows = [...run('WWWWWWWWWWTWW', '1929')]
+	const [y] = seasonWinPct(rows)
+	assert.equal(y.season, '1929')
+	assert.equal(y.pct.toFixed(3), '0.962')
+})
+
+test('the postseason is excluded from the line', () => {
+	// Otherwise a club moves by whether it reached the playoffs rather than by
+	// how it played: 13-3 with a playoff loss would show worse than 13-3 with
+	// no playoffs at all.
+	const rows = [
+		...run('WWWW', '2011'),
+		{ ...run('L', '2011')[0], regular_season: '0', playoff: '1' },
+	]
+	assert.equal(seasonWinPct(rows)[0].pct, 1)
+})
+
+test('seasons come back oldest first', () => {
+	const pts = seasonWinPct([...run('WW', '2011'), ...run('LL', '1929')])
+	assert.deepEqual(pts.map((p) => p.season), ['1929', '2011'])
+})
+
+test('an unplayed season contributes nothing', () => {
+	const rows = [{ ...run('W', '2026')[0], result: '' }]
+	assert.deepEqual(seasonWinPct(rows), [])
+})
+
+test('the sparkline is inline svg, with a baseline', () => {
+	// No script and no request: both sites draw this with a charting library in
+	// the browser, and a polyline reproduces it.
+	const svg = sparklineHtml([{ season: '1921', pct: 0.5 }, { season: '1929', pct: 1 }])
+	assert.match(svg, /^<svg/)
+	assert.match(svg, /<polyline/)
+	// The .500 line is what makes it readable — above is a winning season.
+	assert.match(svg, /spark-base/)
+	assert.match(svg, /aria-label="Win percentage by season, 1921 to 1929"/)
+})
+
+test('a higher percentage is drawn higher', () => {
+	// y is inverted in SVG, so getting this backwards draws every good season
+	// at the bottom and still looks like a chart.
+	const svg = sparklineHtml([{ season: 'a', pct: 0 }, { season: 'b', pct: 1 }])
+	const [, points] = svg.match(/points="([^"]+)"/)
+	const [first, second] = points.split(' ').map((p) => Number(p.split(',')[1]))
+	assert.ok(second < first, `pct 1 drew at y=${second}, pct 0 at y=${first}`)
+})
+
+test('one season is not a line', () => {
+	// A polyline through a single point draws nothing and reserves space for it.
+	assert.equal(sparklineHtml([{ season: '2026', pct: 1 }]), '')
+	assert.equal(sparklineHtml([]), '')
 })
