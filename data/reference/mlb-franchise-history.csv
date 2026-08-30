@@ -1,4 +1,4 @@
-franchiseName,teamName,league,division,city,team,alternate,startDate,endDate,locationCity,locationState,colorA,colorB,colorC,colorD,colorE
+franchiseAbbrv,teamAbbrv,league,division,city,teamName,alternateName,startDate,endDate,locationCity,locationState,colorA,colorB,colorC,colorD,colorE
 ANA,LAA,AL,,Los Angeles,Angels,,4/11/1961,9/1/1965,Los Angeles,CA,#BA0021,#003263,#C4CED4,,
 ANA,CAL,AL,,California,Angels,,9/2/1965,9/29/1968,Anaheim,CA,#BA0021,#003263,#C4CED4,,
 ANA,CAL,AL,W,California,Angels,,4/8/1969,9/29/1996,Anaheim,CA,#BA0021,#003263,#C4CED4,,

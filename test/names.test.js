@@ -89,15 +89,23 @@ test('a season outside every span falls back rather than blanking', () => {
 
 test('a nameless row is skipped rather than blanking a code', () => {
 	assert.equal(nflIndex([{ teamAbbrv: 'AKR', city: '', teamName: '' }]).get('AKR'), undefined)
-	assert.equal(mlbIndex([{ teamName: 'X', city: '', team: '' }]).get('X'), undefined)
+	// Under the old column names this row had no `teamAbbrv` at all, so it was
+	// skipped for the wrong reason and the assertion held vacuously.
+	assert.equal(mlbIndex([{ teamAbbrv: 'X', city: '', teamName: '' }]).get('X'), undefined)
 })
 
-test('the baseball columns are not what their names suggest', () => {
-	// `teamName` is the CODE and `team` is the nickname, which is the opposite
-	// of what either reads like. Taking them at face value gives a franchise
-	// called "MIL" playing a club called "Brewers".
+test('both sports name their columns the same way', () => {
+	// This used to assert the opposite, and was titled "the baseball columns are
+	// not what their names suggest": `teamName` was the CODE and `team` was the
+	// nickname. Taking them at face value gave a franchise called "MIL" playing
+	// a club called "Brewers", and reading them at face value is exactly what
+	// lib/codes.js did — building an empty MLB table with no error.
+	//
+	// So the file was renamed to football's convention rather than the trap
+	// being documented forever. `franchiseAbbrv` joins eras, `teamAbbrv` names
+	// one, `teamName` is the nickname. One rule now reads both sports.
 	const idx = mlbIndex([{
-		franchiseName: 'MIL', teamName: 'SE1', city: 'Seattle', team: 'Pilots',
+		franchiseAbbrv: 'MIL', teamAbbrv: 'SE1', city: 'Seattle', teamName: 'Pilots',
 		startDate: '4/8/1969', endDate: '10/2/1969', league: 'AL', colorA: '#0033A0',
 	}])
 	const [span] = idx.get('SE1')
@@ -224,8 +232,8 @@ test('a franchise resolves through the codes it used to play under', () => {
 
 test('a franchise index is the union of its codes', () => {
 	const idx = mlbIndex([
-		{ franchiseName: 'MIL', teamName: 'SE1', city: 'Seattle', team: 'Pilots', startDate: '4/8/1969', endDate: '10/2/1969' },
-		{ franchiseName: 'MIL', teamName: 'MIL', city: 'Milwaukee', team: 'Brewers', startDate: '4/7/1970', endDate: '' },
+		{ franchiseAbbrv: 'MIL', teamAbbrv: 'SE1', city: 'Seattle', teamName: 'Pilots', startDate: '4/8/1969', endDate: '10/2/1969' },
+		{ franchiseAbbrv: 'MIL', teamAbbrv: 'MIL', city: 'Milwaukee', teamName: 'Brewers', startDate: '4/7/1970', endDate: '' },
 	])
 	assert.equal(idx.get('SE1').length, 1)
 	assert.equal(byFranchise(idx).get('MIL').length, 2)
