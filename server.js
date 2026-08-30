@@ -30,6 +30,7 @@ import { createServer } from 'node:http';
 import { readdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { computeHeadToHead } from './lib/headtohead.js';
 import { computeRecords } from './lib/records.js';
 import { availability, close, connect, franchiseForCodes, franchisesWithGames, gamesFor, health, lastUpdated } from './lib/store.js';
 import {
@@ -37,8 +38,8 @@ import {
 	seasonWinPct, seriesRecords, streakBanner, verdictText,
 } from './lib/core.js';
 import {
-	NEUTRAL, clubPage, clubSwitcher, recordsPage, scheduleHtml, seasonNav, selectorPage, siteNav,
-	sparklineHtml,
+	NEUTRAL, clubPage, clubSwitcher, headToHeadPage, missingSeasonPage, opponentPage, recordsPage,
+	scheduleHtml, seasonNav, selectorPage, siteNav, sparklineHtml,
 } from './lib/render.js';
 import { colorsFor, resolver } from './lib/names.js';
 import { SPORTS, loadTeams } from './lib/teams.js';
@@ -370,6 +371,13 @@ function main() {
 			const view = parseView(rest);
 			if (!view) return json(res, 404, { error: 'no such view', path: url.pathname });
 
+			// What the switcher appends to another club's base, so switching
+			// keeps you on the page you were on. A season is included: comparing
+			// the same year across clubs is exactly what someone switching from a
+			// season page wants, and a club that did not exist then gets a page
+			// that says so rather than a bare 404.
+			const here = rest === '/' ? '' : rest;
+
 			/** Everything a club page shows, for one season.
 			 *
 			 *  Shared by the front page (the latest season) and /{season}, so the
@@ -432,7 +440,7 @@ function main() {
 					nav: seasonNav(allSeasons, season, entry.base),
 					siteNavHtml: siteNav(entry.base, team),
 					spark: sparklineHtml(seasonWinPct(all)),
-					switcher: clubSwitcher(clubList(), entry.teamId),
+					switcher: clubSwitcher(clubList(), entry.teamId, here),
 					updatedAt: (await lastUpdated(entry.sport, entry.franchise))?.toISOString().slice(0, 10) ?? null,
 					lastLossless: lastLosslessSeason(all),
 					allTime: {
@@ -461,8 +469,22 @@ function main() {
 						return json(res, 200, { team: entry.teamId, season: view.season, games: rows });
 					}
 					const body = await renderSeason(view.season);
-					if (!body) return json(res, 404, { error: 'no such season', season: view.season });
-					return html(res, 200, body);
+					if (body) return html(res, 200, body);
+					// Reachable by switching clubs from a season page — the
+					// Vikings have no 1929 — so it explains itself and offers the
+					// seasons this club does have.
+					const team = teamsById.get(entry.teamId);
+					const all = seasons(await games(entry));
+					return html(res, 404, missingSeasonPage({
+						team,
+						season: view.season,
+						colors: team.colors ?? colorsFor(namers[entry.sport], entry.code, { season: all.at(-1) }, NEUTRAL),
+						base: entry.base,
+						first: all[0],
+						last: all.at(-1),
+						switcher: clubSwitcher(clubList(), entry.teamId, here),
+						siteNavHtml: siteNav(entry.base, team),
+					}));
 				}
 				if (view.view === 'records') {
 					const team = teamsById.get(entry.teamId);
@@ -483,11 +505,47 @@ function main() {
 						resolve: namers[entry.sport],
 						base: entry.base,
 						siteNavHtml: siteNav(entry.base, team),
-						switcher: clubSwitcher(clubList(), entry.teamId),
+						switcher: clubSwitcher(clubList(), entry.teamId, here),
 					}));
 				}
-				// vs and history still need porting. Saying so beats an empty 200
-				// that looks like a club with nothing to show.
+				if (view.view === 'vs') {
+					const team = teamsById.get(entry.teamId);
+					const all = await games(entry);
+					const h2h = computeHeadToHead(all);
+					const resolve = namers[entry.sport];
+					const colors = team.colors
+						?? colorsFor(resolve, entry.code, { season: seasons(all).at(-1), date: all.at(-1)?.date }, NEUTRAL);
+					const common = {
+						team, colors, resolve, base: entry.base,
+						siteNavHtml: siteNav(entry.base, team),
+						switcher: clubSwitcher(clubList(), entry.teamId, here),
+					};
+
+					if (!view.opponent) {
+						if (wantsJson(url)) return json(res, 200, h2h.opponents);
+						return html(res, 200, headToHeadPage({ ...common, opponents: h2h.opponents }));
+					}
+
+					const opponent = h2h.bySlug.get(view.opponent);
+					if (!opponent) {
+						return json(res, 404, {
+							error: 'no such opponent',
+							opponent: view.opponent,
+							// A club they never played is a fair question with a
+							// short answer, and listing the ones they did beats a
+							// bare 404.
+							played: h2h.opponents.map((o) => o.slug),
+						});
+					}
+					if (wantsJson(url)) return json(res, 200, opponent);
+					return html(res, 200, opponentPage({
+						...common,
+						opponent,
+						name: resolve(opponent.code, { season: String(opponent.last.season), date: opponent.last.date }).name,
+					}));
+				}
+				// history still needs porting. Saying so beats an empty 200 that
+				// looks like a club with nothing to show.
 				return json(res, 501, { error: `${view.view} is not ported yet` });
 			} catch (e) {
 				console.error(e);

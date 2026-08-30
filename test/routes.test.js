@@ -100,6 +100,8 @@ test('the four views parse, and nothing else does', () => {
 	assert.deepEqual(parseView('/records'), { view: 'records', record: null })
 	assert.deepEqual(parseView('/records/longest-streak'), { view: 'records', record: 'longest-streak' })
 	assert.deepEqual(parseView('/vs/bears'), { view: 'vs', opponent: 'bears' })
+	// Bare /vs is the index of every opponent; the footer links to it.
+	assert.deepEqual(parseView('/vs'), { view: 'vs', opponent: null })
 	for (const bad of ['/24', '/20244', '/records/Longest', '/vs/', '/vs/a/b', '/nonsense']) {
 		assert.equal(parseView(bad), null, `accepted ${bad}`)
 	}

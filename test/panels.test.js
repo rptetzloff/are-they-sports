@@ -404,3 +404,21 @@ test('one season is not a line', () => {
 	assert.equal(sparklineHtml([{ season: '2026', pct: 1 }]), '')
 	assert.equal(sparklineHtml([]), '')
 })
+
+test('the switcher keeps you on the page you were on', () => {
+	// From the Packers' records to the Bears' records, not to their front page.
+	// Being sent home to re-navigate is the thing a switcher exists to avoid.
+	const html = clubSwitcher(CLUBS, 'packers', '/records')
+	assert.match(html, /href="\/nfl\/bears\/records"/)
+	assert.match(html, /href="\/mlb\/brewers\/records"/)
+})
+
+test('a season carries across too, because comparing one is the point', () => {
+	assert.match(clubSwitcher(CLUBS, 'packers', '/2011'), /href="\/nfl\/bears\/2011"/)
+})
+
+test('no path is still the club front page', () => {
+	const html = clubSwitcher(CLUBS, 'packers')
+	assert.match(html, /href="\/nfl\/bears"/)
+	assert.ok(!html.includes('/nfl/bears/'), html)
+})
