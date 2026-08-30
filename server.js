@@ -30,7 +30,7 @@ import { createServer } from 'node:http';
 import { readdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { close, connect, franchiseForCodes, franchisesWithGames, gamesFor, health } from './lib/store.js';
+import { availability, close, connect, franchiseForCodes, franchisesWithGames, gamesFor, health } from './lib/store.js';
 import { latestSeason, recordText, seasonTally, seasonVerdict, verdictText } from './lib/core.js';
 import { NEUTRAL, clubPage, selectorPage } from './lib/render.js';
 import { resolver } from './lib/names.js';
@@ -218,26 +218,51 @@ function main() {
 		if (!available.length) {
 			console.error('  UNHEALTHY    no club in scope has games in the database; run: npm run load <sport>');
 		}
-		// Partial availability is healthy by default, because building clubs one
-		// at a time is how this repo works today. A deployment that means to
-		// promise the whole scope sets STRICT_SCOPE=1 and any gap is unhealthy.
+		// Health means "my dependencies are up", not "my data is complete".
+		//
+		// This is a fix, and the bug it fixes was mine. Health used to require at
+		// least one available club, which sounds reasonable and is not: an
+		// orchestrator gates a deployment on the health check, so a container
+		// reporting unhealthy is a failed deploy that gets rolled back. With an
+		// empty database that means the app can never be deployed — and the app
+		// is not how the database gets filled, so there is no way out of it. A
+		// real deployment failed exactly this way, and the container never left
+		// `starting` before going `unhealthy`.
+		//
+		// So an unreachable database is unhealthy, because nothing can be served
+		// without it. A reachable database with no rows yet is healthy and says
+		// so loudly at boot and in /healthz — the same distinction between a
+		// configuration error and a data gap that the rest of this file draws.
+		//
+		// STRICT_SCOPE=1 restores the strict reading for a deployment that means
+		// to promise its whole scope, where a partial answer is worse than none.
 		const strict = process.env.STRICT_SCOPE === '1';
-		const healthy = () => dbHealth.ok && (strict ? available.length === table.length : available.length > 0);
+		const healthy = () => dbHealth.ok && (!strict || available.length === table.length);
 
 		const server = createServer(async (req, res) => {
 			const url = new URL(req.url, 'http://placeholder');
 			const origin = originOf(req);
 
 			if (url.pathname === '/healthz') {
-				// Reports the gap whether or not it counts against health, so the
-				// number is visible before anyone has decided it matters.
-				return json(res, healthy() ? 200 : 503, {
-					ok: healthy(),
+				// Queried live, every time. It used to report the value captured
+				// at boot, which meant a database that died afterwards was
+				// invisible: the container stayed healthy while every request
+				// failed. A health check reporting a cached success is the exact
+				// failure this project keeps finding — a check that passes
+				// because it is not looking at anything.
+				const now = await health();
+				const ok = now.ok && (!strict || available.length === table.length);
+				return json(res, ok ? 200 : 503, {
+					ok,
 					build: BUILD,
-					database: dbHealth.ok ? { games: dbHealth.games, migrations: dbHealth.migrations } : { error: dbHealth.error },
+					database: now.ok ? { games: now.games, migrations: now.migrations } : { error: now.error },
 					strict,
 					scope: process.env.SCOPE,
 					inScope: table.length,
+					// Availability is still measured at boot. A club gaining rows
+					// while the process runs will not show until a restart, which
+					// is the same staleness the per-franchise game cache has and
+					// wants the same fix.
 					available: available.length,
 					missing: table.filter((e) => !e.available).map((e) => `${e.sport}/${e.code}`),
 				});
@@ -269,6 +294,28 @@ function main() {
 			if (!match) return json(res, 404, { error: 'no such path', path: url.pathname });
 
 			const { entry, rest } = match;
+			// Re-checked rather than trusted from boot, so a load against a
+			// running deployment is served within the cache window instead of
+			// waiting for a restart.
+			//
+			// The franchise has to be re-resolved too, not just the availability.
+			// Booting against an empty database leaves franchise null — there are
+			// no franchise_code rows to resolve against yet — and a first version
+			// of this guard required a franchise before re-checking, so a club
+			// stayed 503 after a successful load. Which is the one case the
+			// re-check exists for.
+			if (!entry.available) {
+				const team = teamsById.get(entry.teamId);
+				if (team) {
+					try {
+						entry.franchise ??= await franchiseForCodes(team.sport, team.sourceIds);
+					} catch { /* reported at boot; a page is not the place to explain it */ }
+				}
+				if (entry.franchise) {
+					const live = await availability(Date.now());
+					if ((live.get(`${entry.sport}/${entry.franchise}`) ?? 0) > 0) entry.available = true;
+				}
+			}
 			if (!entry.available) {
 				return json(res, 503, {
 					error: 'club is in scope but has no games in the database',
