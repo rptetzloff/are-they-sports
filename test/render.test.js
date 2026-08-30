@@ -259,15 +259,32 @@ test('the bar is AA for large text, because that is what the accent carries', ()
 	assert.ok(contrast('#0B162A', '#C83803') < 4.5)
 })
 
-test('no club in either sport has to borrow white', () => {
-	// The measure of whether the bar is set right: every club renders in its own
-	// colours, and the fallback is reserved for palettes that genuinely cannot.
+test('every club renders in a colour it actually publishes', () => {
+	// The measure of whether the bar is set right, and the assertion has to be
+	// this rather than "the accent is not white".
+	//
+	// That earlier version passed for the wrong reason. The Lions' silver is
+	// 2.42:1 on their blue, so the accent falls to white — but white is their
+	// own third colour, and the test only distinguished it from the fallback
+	// because the file writes #FFFFFF and NEUTRAL writes #ffffff. Compare
+	// case-insensitively and it could not tell them apart at all.
+	//
+	// So: assert the accent came from the club's palette. That is the property
+	// that matters, and it is true of all 62.
 	for (const [sport, when] of [['nfl', { season: '2024' }], ['mlb', { date: '2025-06-01' }]]) {
 		const r = resolver(sport)
 		for (const code of loadDivisions(sport).map((x) => x.code)) {
-			assert.notEqual(colorsFor(r, code, when, NEUTRAL).accent, NEUTRAL.accent, `${sport} ${code} fell back`)
+			const own = (r(code, when).colors ?? []).map((c) => c.toLowerCase())
+			const { accent } = colorsFor(r, code, when, NEUTRAL)
+			assert.ok(own.includes(accent.toLowerCase()),
+				`${sport} ${code} rendered ${accent}, which is not one of ${own.join(' ')}`)
 		}
 	}
+})
+
+test('the fallback is still reached when a palette genuinely cannot', () => {
+	// Three dark colours, none of which clears 3:1 on the darkest.
+	assert.equal(choosePalette(['#003263', '#BA0021', '#862633'], NEUTRAL).accent, NEUTRAL.accent)
 })
 
 test('an illegible palette falls back rather than rendering unreadably', () => {
