@@ -197,3 +197,17 @@ test('every entry carries the club id, not just its name', () => {
 		}
 	}
 })
+
+test('across clubs, more losses is the worse season', () => {
+	// The per-club lists arrive already sorted, so a wrong comparator here is
+	// invisible unless two DIFFERENT clubs tie on percentage — which is exactly
+	// why a mutant reverting this survived a run where every winless season
+	// belonged to one club.
+	const l = computeLeague([
+		{ team: club('DET', 'Lions'), rows: season(2008, 'LLLLLLLLLLLLLLLL') },
+		{ team: club('TB', 'Buccaneers'), rows: season(1976, 'LLLLLLLLLLLLLL') },
+		{ team: club('CLE', 'Browns'), rows: season(2017, 'LLLLLLLLLLLLLLLL') },
+	])
+	assert.deepEqual(l.worstSeasons.map((s) => `${s.club} ${s.record}`),
+		['Lions 0–16', 'Browns 0–16', 'Buccaneers 0–14'])
+})
