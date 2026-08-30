@@ -289,6 +289,76 @@ test('schema', { skip: !DATABASE_URL && 'no DATABASE_URL — constraints and the
 		})
 	})
 
+	await t.test('one code names one franchise, so a stale mapping cannot accumulate', async () => {
+		// The primary key was (sport, code, franchise), which made "LV is LV" and
+		// "LV is OAK" two rows rather than a contradiction. ON CONFLICT DO NOTHING
+		// never conflicted, both were inserted, and re-running the load could not
+		// correct one. That is what the server read at boot, and it exited.
+		await inRollback(async () => {
+			await fixture()
+			await client.query("INSERT INTO franchise VALUES ('nfl','WSH') ON CONFLICT DO NOTHING")
+			await client.query("INSERT INTO franchise_code (sport,code,franchise) VALUES ('nfl','WAS','GB')")
+			await client.query(`INSERT INTO franchise_code (sport,code,franchise) VALUES ('nfl','WAS','WSH')
+			                    ON CONFLICT (sport, code) DO UPDATE SET franchise = EXCLUDED.franchise`)
+			const { rows } = await client.query("SELECT franchise FROM franchise_code WHERE sport='nfl' AND code='WAS'")
+			assert.deepEqual(rows.map((r) => r.franchise), ['WSH'], 'a code kept two franchises')
+		})
+	})
+
+	await t.test('the repair moves games off an alias and loses none', async () => {
+		// Run against a real database because the two previous attempts at this
+		// passed every local check and failed on the server: the first read a
+		// stale table at boot, the second deleted a franchise that
+		// division_membership still referenced and rolled the whole load back.
+		const { repairAliasFranchises } = await import('../scripts/load.mjs')
+		const { codeTable } = await import('../lib/codes.js')
+		await inRollback(async () => {
+			await fixture()
+			await client.query("INSERT INTO source (id,authority,reproducible,note) VALUES ('t',1,true,'test') ON CONFLICT DO NOTHING")
+			for (const f of ['WAS', 'WSH']) {
+				await client.query('INSERT INTO franchise VALUES ($1,$2) ON CONFLICT DO NOTHING', ['nfl', f])
+				await client.query("INSERT INTO division_membership VALUES ($1,$2,'NFC','East') ON CONFLICT DO NOTHING", ['nfl', f])
+			}
+			for (const [id, home, date] of [['r1', 'WAS', '2021-11-01'], ['r2', 'WSH', '2021-11-02']]) {
+				await client.query(
+					`INSERT INTO game (sport,id,season,date,round,home,away,home_score,away_score,status,source)
+					 VALUES ('nfl',$1,2021,$2,'regular',$3,'GB',10,20,'final','t')`,
+					[id, date, home])
+			}
+			const before = (await client.query("SELECT count(*)::int n FROM game WHERE sport='nfl'")).rows[0].n
+
+			const repaired = await repairAliasFranchises(client, 'nfl', codeTable('nfl'))
+			assert.ok(repaired.some((r) => r.from === 'WAS' && r.to === 'WSH'),
+				`WAS was not repaired: ${JSON.stringify(repaired)}`)
+
+			const after = (await client.query("SELECT count(*)::int n FROM game WHERE sport='nfl'")).rows[0].n
+			assert.equal(after, before, 'the repair lost games')
+			assert.equal((await client.query("SELECT count(*)::int n FROM game WHERE home='WAS' OR away='WAS'")).rows[0].n, 0)
+			assert.equal((await client.query("SELECT count(*)::int n FROM game WHERE home='WSH'")).rows[0].n, 2)
+			// The foreign key that rolled the load back the first time.
+			assert.equal((await client.query("SELECT count(*)::int n FROM franchise WHERE sport='nfl' AND id='WAS'")).rows[0].n, 0)
+
+			// Idempotent: a correct database is not repaired twice.
+			assert.deepEqual(await repairAliasFranchises(client, 'nfl', codeTable('nfl')), [])
+		})
+	})
+
+	await t.test('a table referencing franchise that the repair does not handle stops it', async () => {
+		// Naming the referencing tables by hand is how division_membership was
+		// missed. This asserts the catalogue check is not vacuous.
+		const { repairAliasFranchises } = await import('../scripts/load.mjs')
+		const { codeTable } = await import('../lib/codes.js')
+		await inRollback(async () => {
+			await fixture()
+			await client.query(`CREATE TABLE coach_tmp (
+				sport TEXT NOT NULL, franchise TEXT NOT NULL,
+				FOREIGN KEY (sport, franchise) REFERENCES franchise(sport, id))`)
+			await assert.rejects(
+				() => repairAliasFranchises(client, 'nfl', codeTable('nfl')),
+				/coach_tmp/)
+		})
+	})
+
 	await t.test('what a backup must protect is answerable as a query', async () => {
 		// Not "is zero" — a live capture legitimately makes it non-zero until
 		// upstream publishes. The point is that the question has an answer.
