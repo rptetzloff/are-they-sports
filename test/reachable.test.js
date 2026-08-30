@@ -202,3 +202,44 @@ test('a sport-qualified schedule keeps its prefix on every season link', () => {
 	assert.ok(seasons.length > 0, 'no season links at all')
 	for (const h of seasons) assert.ok(h.startsWith('/nfl/'), `${h} lost the sport`)
 })
+
+test('each block resolves names with its own sport', () => {
+	// The bug: a page covering two sports took ONE namer, from the first club in
+	// scope, which under `all` is a football club. Baseball codes were then
+	// resolved against the football table — LAN became the Lansing Oldsmobiles,
+	// CIN the Bengals, MIL the Milwaukee Badgers, MIN the Vikings. Every one of
+	// those is a real football club, so the page looked plausible and was
+	// entirely wrong.
+	const football = (code) => ({ name: code === 'CIN' ? 'Cincinnati Bengals' : code })
+	const baseball = (code) => ({ name: code === 'CIN' ? 'Cincinnati Reds' : code })
+	const period = { key: 'd1', kind: 'date', week: null, date: '2025-04-01', games: [{
+		gid: 'g', date: '2025-04-01', week: null, round: 'regular',
+		home: 'CIN', away: 'CHN', homeId: null, awayId: null,
+		homeScore: 3, awayScore: 1, neutral: false, played: true,
+	}] }
+	const html = leagueSchedulePage({
+		schedule: { season: 2025, seasons: [2025], periods: [], weeksKnown: true, games: 0 },
+		label: 'NFL', periodNoun: 'Week', resolve: football,
+		more: [{
+			label: 'MLB', periodNoun: 'Games', resolve: baseball,
+			schedule: { season: 2025, seasons: [2025], periods: [period], weeksKnown: false, games: 1 },
+		}],
+		heading: 'Every club', colors: COLORS, clubs: [],
+	})
+	assert.ok(html.includes('Cincinnati Reds'), 'the baseball block used the football namer')
+	assert.equal(html.includes('Cincinnati Bengals'), false, 'a football name reached the baseball block')
+})
+
+test('a records block names opponents with its own sport too', () => {
+	// Same failure on the other page: ties and biggest wins name the opponent.
+	const football = (code) => ({ name: code === 'MIL' ? 'Milwaukee Badgers' : code })
+	const baseball = (code) => ({ name: code === 'MIL' ? 'Milwaukee Brewers' : code })
+	const win = { club: 'Cubs', teamId: 'cubs', sport: 'mlb', opponent: 'MIL', opponentId: null, pf: 9, pa: 1, season: 1998 }
+	const html = leagueRecordsPage({
+		league: EMPTY_LEAGUE, label: 'NFL', resolve: football,
+		more: [{ label: 'MLB', resolve: baseball, league: { ...EMPTY_LEAGUE, clubs: 1, seasonRange: { first: 1876, last: 2025 }, lopsidedWins: [win] } }],
+		heading: 'Every club', colors: COLORS, clubs: [],
+	})
+	assert.ok(html.includes('Milwaukee Brewers'), 'the baseball block used the football namer')
+	assert.equal(html.includes('Milwaukee Badgers'), false)
+})

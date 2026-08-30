@@ -471,6 +471,9 @@ function main() {
 					return {
 						label: sport.toUpperCase(),
 						periodNoun: period === 'week' ? 'Week' : 'Games',
+						// This sport's namer. Taking one for the whole page
+						// resolved baseball codes against the football table.
+						resolve: namers[sport],
 						schedule: computeSchedule(inSport, { season: sched, period }),
 					};
 				});
@@ -487,7 +490,7 @@ function main() {
 					schedule,
 					heading: scopeHeading(scope, table),
 					colors: NEUTRAL,
-					resolve: namers[withGames[0]?.sport ?? 'nfl'],
+					resolve: firstSport.resolve,
 					clubs: clubList(),
 					periodNoun: firstSport.periodNoun,
 					label: firstSport.label,
@@ -532,6 +535,7 @@ function main() {
 						// "football" and "baseball", which reads oddly as a heading
 						// over a table of clubs.
 						label: sport.toUpperCase(),
+						resolve: namers[sport],
 						league: computeLeague(inSport, {
 							top: 10,
 							// Each sport's own rule now, rather than one picked for
@@ -550,14 +554,16 @@ function main() {
 				if (wantsJson(url)) return json(res, 200, league);
 				return html(res, 200, leagueRecordsPage({
 					league,
-					resolve: namers[withGames[0]?.sport ?? 'nfl'],
+					resolve: first.resolve,
 					heading: scopeHeading(scope, table),
 					colors: NEUTRAL,
 					clubs: clubList(),
 					more: rest,
 					label,
 					tabs: sportTabs(inScopeSports, leagueRoute.sport, 'records'),
-					resolve: namers[withGames[0]?.sport ?? 'nfl'],
+					// The first BLOCK's namer, not the first club's. Under a
+					// mixed scope those differ, and every block carries its own.
+					resolve: first.resolve,
 					// The same control a club page carries, so a league page is
 					// not a dead end for anyone wanting one club.
 					switcher: clubSwitcher(clubList(), null, ''),
