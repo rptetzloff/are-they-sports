@@ -271,3 +271,24 @@ test('at the same winless percentage, more losses is the worse season', () => {
 	const b = computeRecords([...season(1929, 'WWWW'), ...season(1972, 'WWWWWWWWWWWWWW')])
 	assert.deepEqual(b.bestSeasons.map((s) => s.season), [1972, 1929])
 })
+
+test('a season with two finals keeps both, most significant first', () => {
+	// 1966: the Packers won the NFL Championship and then Super Bowl I, and both
+	// games are in the data. Keeping only the first labelled that season "NFL
+	// Championship" and undercounted their Super Bowls by two — four became two,
+	// which is the number anyone actually checks.
+	const r = computeRecords([
+		post(1966, 'W', { championship: '1966', championshipTitle: 'NFL Championship', date: '1967-01-01' }),
+		post(1966, 'W', { championship: '1966', championshipTitle: 'Super Bowl', date: '1967-01-15' }),
+	])
+	const [a] = r.championshipAppearances
+	assert.deepEqual(a.titleNames, ['Super Bowl', 'NFL Championship'])
+	assert.equal(a.title, 'Super Bowl', 'the league final outranked the Super Bowl it fed')
+	assert.equal(a.won, true)
+})
+
+test('a single-final season is unchanged by that', () => {
+	const r = computeRecords([post(1965, 'W', { championship: '1965', championshipTitle: 'NFL Championship' })])
+	assert.deepEqual(r.championshipAppearances[0].titleNames, ['NFL Championship'])
+	assert.equal(r.championshipAppearances[0].title, 'NFL Championship')
+})
