@@ -1,6 +1,6 @@
 # House rules
 
-Fifteen rules, so they get applied rather than rediscovered. Short on purpose.
+Sixteen rules, so they get applied rather than rediscovered. Short on purpose.
 
 (It said twelve, which was the count in the two sites this file came from and
 was already wrong here before the scope rule was added. A number in a heading is
@@ -292,6 +292,42 @@ The header comments in `scripts/` and `sports/` carry the measured numbers and
 the reasoning. They are the documentation, and they go stale the same way prose
 does — the "stateful scoring detection" comment was wrong for exactly as long as
 the code under it was.
+
+## `main` means feature parity, and nothing less
+
+**A release is when this repo can replace the two sites, not when a slice of it
+works.** Until then `dev` is what deploys and `main` sits where it is. That is a
+decision, not an oversight, and it is why `main` is currently eight commits and
+several months of work behind.
+
+The bar, inventoried from the two sites rather than remembered:
+
+*Routes both sites have.* `/`, `/{season}`, `/records`, `/history`, `/vs`, the
+leaders page (`/coaches` on one, `/managers` on the other), `/robots.txt`, and
+six social-card routes — `/og/default.png`, `/og/history.png`, `/og/{leaders}.png`,
+`/og/records/{slug}`, `/og/vs/{opponent}`, `/og/{season}`.
+
+*Front-page panels both sites have.* The answer, the record, the schedule grid,
+a season selector with first/prev/next, the streak banner and its details, the
+on-this-day panel and its details, last lossless season, a history sparkline,
+last-updated, a data credit, share buttons, and a photo gallery with a lightbox.
+
+*Baseball-only, and its whole reason for existing.* `/game/{id}` box scores with
+a linescore modal, standings, and the TV-listings feature — watch modal, channel
+list, provider picker. None of that is historical data; it needs a live source.
+
+*What this repo has today.* The answer, the record, and a club selector. Two of
+about twenty-five panels, and two of the fifteen routes.
+
+Two of these are genuinely hard rather than merely long. The social cards need
+`@resvg/resvg-js`, which is the one native dependency either site carries and the
+reason the image is Debian rather than Alpine. And TV listings are live data with
+no historical equivalent, so the fetch/build/artifact split those three tiers
+describe does not obviously apply to them.
+
+Parity also has to survive the seam: the leaders page is `/coaches` or
+`/managers` depending on the sport, and TV listings exist for one club and not
+the other. Those are manifest and adapter questions, not `if` statements.
 
 ## Commits and branches
 
