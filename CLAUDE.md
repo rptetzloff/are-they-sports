@@ -182,6 +182,15 @@ of the eleven nouns and three rules, only `team`, `fullName`, `colors` and
 thirty-two files is how these repos got here in the first place. `sports/<id>.js`
 carries `defaults`; `lib/manifest.js` merges and validates.
 
+Narrowed once more when the other twenty-eight NFL clubs were added.
+`copy.seasonNotStarted` was on that list of four and is off it: it is the one
+club field a sport can derive a usable value for, by naming the club. Requiring
+it meant twenty-eight manifests each needed a chant, and there is no source for
+those — writing them would have been remembering, which is how the MLB colours
+went wrong. A club with nothing declared now gets `GO PACKERS`, which is weaker
+than `GO PACK GO` and is not wrong; the four clubs that have a real one still
+say it. `colors` had already left the list, to the franchise-history table.
+
 Every field stays overridable, because the moment one is not, some club needs
 it: `losslessSeasonNoun` is a sport default today and becomes "perfect" the day
 anyone builds the 1972 Dolphins.

@@ -112,13 +112,33 @@ test('a rule of the wrong type is rejected', () => {
 })
 
 test('the club-only fields are required, because no sport can supply them', () => {
+	// `copy.seasonNotStarted` was on this list and is not any more. It is the one
+	// club field a sport can supply a usable value for, by naming the club, and
+	// requiring it meant every one of thirty-two manifests had to carry an
+	// invented chant. A club with no declared cheer now gets "GO PACKERS"; the
+	// ones with a real one still say it.
 	for (const [field, broken] of [
 		['sourceIds', { sourceIds: [] }],
-		['copy.seasonNotStarted', { copy: {} }],
 	]) {
 		assert.throws(() => resolveTeam({ ...minimal, ...broken }, nfl),
 			new RegExp(field.replace('.', '\\.')), `${field} was not required`)
 	}
+})
+
+test('a club with no cheer is given one, and a club with one keeps it', () => {
+	// `minimal` declares "GO TESTS" and is nicknamed "Tests", so the declared and
+	// derived cheers are the same string and resolving it proves nothing about
+	// which branch ran. Written that way first, two of three mutants survived —
+	// including deleting the derivation outright. The fixture needs a club whose
+	// derived cheer is distinctive, and no `copy` at all.
+	const undeclared = { ...minimal, nouns: { team: 'Jets', fullName: 'New York Jets' } }
+	delete undeclared.copy
+	assert.equal(resolveTeam(undeclared, nfl).copy.seasonNotStarted, 'GO JETS')
+
+	assert.equal(
+		resolveTeam({ ...undeclared, copy: { seasonNotStarted: 'BEAR DOWN' } }, nfl)
+			.copy.seasonNotStarted,
+		'BEAR DOWN')
 })
 
 test('the required lists are not empty', () => {
