@@ -94,20 +94,29 @@ test('the title is escaped like anything else', () => {
 	assert.ok(page({ title: '<b>x', colors: NEUTRAL, body: '' }).includes('<title>&lt;b&gt;x</title>'))
 })
 
+test('a club can state its question outright', () => {
+	// Not derivable by substitution: the baseball site asks "Are the Brewers On
+	// TV?", which no amount of vocabulary swapping reaches from "undefeated". So
+	// it is manifest copy, with the football shape as the default.
+	const tv = { ...brewers, copy: { ...brewers.copy, question: 'Are the Brewers On TV?' } }
+	assert.equal(questionFor(tv), 'Are the Brewers On TV?')
+})
+
 test('the question is asked in the club\'s own words', () => {
 	// "undefeated" is the manifest's losslessSeasonNoun, not a constant. In
 	// football perfect means no losses and no ties, and 1929 went 12-0-1.
-	assert.equal(questionFor(packers), 'Are the Packers undefeated?')
-	assert.equal(questionFor(brewers), 'Are the Brewers undefeated?')
+	// Title case, matching both sites' headings.
+	assert.equal(questionFor(packers), 'Are the Packers Undefeated?')
+	assert.equal(questionFor(brewers), 'Are the Brewers Undefeated?')
 })
 
 test('a club page shows the question, the answer and the record', () => {
 	const out = clubPage({
 		team: packers, season: '2026', tally: tally(), verdict: 'no', answer: 'NO', recordLabel: '13-3',
 	})
-	assert.ok(out.includes('Are the Packers undefeated?'))
+	assert.ok(out.includes('Are the Packers Undefeated?'))
 	assert.ok(out.includes('>NO<'))
-	assert.ok(out.includes('2026 record: <b>13-3</b>'))
+	assert.ok(out.includes('2026 Record: 13-3'))
 })
 
 test('a season that has not started says so, rather than implying it', () => {
@@ -140,7 +149,7 @@ test('postseason and championship appear only when they exist', () => {
 		tally: tally({ postseason: { w: 6, l: 6, t: 0 }, championshipName: 'World Series 1982' }),
 		verdict: 'no', answer: 'NO', recordLabel: '95-67',
 	})
-	assert.ok(with_.includes('Postseason 6-6'))
+	assert.ok(with_.includes('Postseason: 6-6'))
 	assert.ok(with_.includes('World Series 1982'))
 })
 
@@ -188,5 +197,5 @@ test('the lossless-season noun comes from the manifest, not the code', () => {
 	// survived for exactly that reason. A club that says something else is the
 	// only way to tell.
 	const perfectionists = { ...packers, nouns: { ...packers.nouns, team: 'Dolphins', losslessSeasonNoun: 'perfect' } }
-	assert.equal(questionFor(perfectionists), 'Are the Dolphins perfect?')
+	assert.equal(questionFor(perfectionists), 'Are the Dolphins Perfect?')
 })

@@ -32,9 +32,10 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { availability, close, connect, franchiseForCodes, franchisesWithGames, gamesFor, health } from './lib/store.js';
 import {
-	lastLosslessSeason, latestSeason, recordText, seasons, seasonTally, seasonVerdict, streakBanner, verdictText,
+	daysToNextGame, lastLosslessSeason, latestSeason, recordText, seasons, seasonTally, seasonVerdict,
+	streakBanner, verdictText,
 } from './lib/core.js';
-import { NEUTRAL, clubPage, scheduleHtml, seasonNav, selectorPage } from './lib/render.js';
+import { NEUTRAL, clubPage, scheduleHtml, seasonNav, selectorPage, siteNav } from './lib/render.js';
 import { resolver } from './lib/names.js';
 import { SPORTS, loadTeams } from './lib/teams.js';
 import { matchRoute, parseView, routeTable } from './lib/routes.js';
@@ -358,7 +359,14 @@ function main() {
 				const played = rows.filter((g) => g.result);
 				const isPastSeason = rows.every((g) => g.result !== '');
 				const tally = seasonTally(rows, team);
-				const verdict = seasonVerdict({ ...tally, isPastSeason });
+				const verdict = seasonVerdict({
+					...tally,
+					isPastSeason,
+					// Four states, not three: the deep offseason reads differently
+					// from the week before the opener, and the data already knows
+					// when the next game is.
+					daysToNextGame: daysToNextGame(all, new Date()),
+				});
 
 				// Opponent names are resolved here because resolution is per
 				// sport and dated: a 1969 Brewers opponent is not called what it
@@ -375,8 +383,9 @@ function main() {
 					answer: verdictText(verdict, team),
 					recordLabel: recordText(tally),
 					banner: streakBanner(played.filter((g) => g.regular_season === '1'), { isPastSeason, team }),
-					schedule: scheduleHtml(withNames, { heading: `${season} schedule` }),
+					schedule: scheduleHtml(withNames, { heading: `${season} Season Schedule` }),
 					nav: seasonNav(allSeasons, season, entry.base),
+					siteNavHtml: siteNav(entry.base, team),
 					lastLossless: lastLosslessSeason(all),
 					allTime: {
 						record: recordText({

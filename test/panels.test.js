@@ -1,7 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { lastLosslessSeason, seasons, streakBanner } from '../lib/core.js'
-import { scheduleHtml, seasonNav } from '../lib/render.js'
+import { formatDate, scheduleHtml, seasonNav } from '../lib/render.js'
 import { seedRound } from '../sports/nfl.js'
 import { loadTeam } from '../lib/teams.js'
 
@@ -105,10 +105,26 @@ test('a season of nothing but ties is not lossless', () => {
 // --- schedule ---
 
 test('a schedule shows date, opponent and result', () => {
-	const html = scheduleHtml([{ ...run('W')[0], opponentName: 'Chicago Bears' }], { heading: '1929 schedule' })
+	const html = scheduleHtml([{ ...run('W')[0], opponentName: 'Chicago Bears' }], { heading: '1929 Season Schedule' })
 	assert.match(html, /Chicago Bears/)
-	assert.match(html, /1929 schedule/)
-	assert.match(html, />W</)
+	assert.match(html, /1929 Season Schedule/)
+	assert.match(html, /W 10–7/)
+	// A card per game, coloured by result, which is the baseball site's layout.
+	assert.match(html, /class="game-item win"/)
+})
+
+test('a date renders as a weekday and a day, in UTC', () => {
+	// Formatted by hand rather than with toLocaleDateString. A date with no time
+	// is midnight UTC, and formatting that in a timezone behind UTC moves every
+	// game a day earlier — a bug that appears only for people west of Greenwich
+	// and never on the machine it was written on.
+	assert.equal(formatDate('1929-09-22'), 'Sun, Sep 22')
+	assert.equal(formatDate('2010-09-12'), 'Sun, Sep 12')
+	assert.equal(formatDate('2011-01-01'), 'Sat, Jan 1')
+})
+
+test('an unparseable date renders as itself rather than Invalid Date', () => {
+	assert.equal(formatDate('not a date'), 'not a date')
 })
 
 test('an unplayed game says scheduled rather than showing a blank score', () => {
@@ -118,11 +134,10 @@ test('an unplayed game says scheduled rather than showing a blank score', () => 
 	assert.ok(!html.includes('–</td>'), 'rendered an empty score')
 })
 
-test('venue is marked for away and neutral, and blank for home', () => {
+test('an away game is marked, a home game says vs', () => {
 	const at = (location) => scheduleHtml([{ ...run('W')[0], location, opponentName: 'X' }], { heading: 'x' })
-	assert.match(at('away'), /class="at">@</)
-	assert.match(at('neutral'), /class="at">v</)
-	assert.match(at('home'), /class="at"><\/span>/)
+	assert.match(at('away'), /@ X/)
+	assert.match(at('home'), /vs X/)
 })
 
 test('an opponent with no resolved name falls back to the code', () => {
