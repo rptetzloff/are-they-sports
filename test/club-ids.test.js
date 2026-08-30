@@ -5,7 +5,7 @@ import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 import { loadTeams } from '../lib/teams.js'
 import { loadDivisions, parseScope, resolveScope } from '../lib/scope.js'
-import { codeTables } from '../lib/codes.js'
+import { codeTables, franchisesForClub } from '../lib/codes.js'
 
 // A club id is unique WITHIN a sport and not across them. The Cardinals are an
 // NFL club and a baseball club; so are the Giants. The sports still to come add
@@ -163,4 +163,30 @@ test('a club that has moved still lists its older codes', () => {
 	assert.deepEqual(byId.get('mlb/brewers').sourceIds.sort(), ['MIL', 'SE1'])
 	assert.ok(byId.get('mlb/cubs').sourceIds.includes('CH1'))
 	assert.ok(byId.get('nfl/raiders').sourceIds.includes('LV'))
+})
+
+test('finding a club by id alone picks the wrong sport', () => {
+	// Not a test of behaviour but of the hazard, because this is the mistake
+	// that keeps recurring. `teams/mlb` sorts before `teams/nfl`, so a bare-id
+	// lookup for "giants" or "cardinals" returns the BASEBALL club — and the
+	// server used one to compute availability, took SFN as the NFL Giants'
+	// franchise, and reported 30 of 62 available with nfl/NYG and nfl/ARI
+	// blacked out.
+	for (const id of ['giants', 'cardinals']) {
+		assert.equal(TEAMS.find((t) => t.id === id).sport, 'mlb',
+			`${id} no longer resolves to baseball first — this test is now proving nothing`)
+		assert.equal(TEAMS.find((t) => t.sport === 'nfl' && t.id === id).sport, 'nfl')
+	}
+})
+
+test('each club of a shared-id pair takes its own franchise', () => {
+	// The consequence. The NFL Giants are NYG and the baseball Giants are SFN,
+	// and a lookup that confuses them makes one of them permanently unavailable
+	// because nothing named nfl/SFN has games.
+	const franchiseOf = codeTables(['nfl', 'mlb']).franchiseOf
+	const of = (sport, id) => franchisesForClub(TEAMS.find((t) => t.sport === sport && t.id === id), franchiseOf)
+	assert.deepEqual(of('nfl', 'giants'), ['NYG'])
+	assert.deepEqual(of('mlb', 'giants'), ['SFN'])
+	assert.deepEqual(of('nfl', 'cardinals'), ['ARI'])
+	assert.deepEqual(of('mlb', 'cardinals'), ['SLN'])
 })

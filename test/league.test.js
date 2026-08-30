@@ -213,6 +213,10 @@ test('every entry carries the club id, not just its name', () => {
 		for (const e of list) {
 			assert.equal(e.teamId, 'GB', `${name} entry has no club id: ${JSON.stringify(e)}`)
 			assert.equal(e.club, 'Packers')
+			// And the sport, because the id alone is not unique across sports —
+			// the renderer keys club urls on both. Asserting only the id left a
+			// mutant alive that stripped the sport from every entry.
+			assert.equal(e.sport, 'nfl', `${name} entry has no sport: ${JSON.stringify(e)}`)
 		}
 	}
 })
