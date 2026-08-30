@@ -9,7 +9,6 @@ export const team = {
 	sourceIds: ['DET'],
 	firstSeason: 1930,
 	nouns: { team: 'Lions', fullName: 'Detroit Lions' },
-	colors: { accent: '#0076b6', base: '#1a1a1a', baseDeep: '#0d0d0d' },
 	copy: { seasonNotStarted: 'ONE PRIDE' },
 };
 

@@ -38,7 +38,7 @@ import {
 import {
 	NEUTRAL, clubPage, clubSwitcher, scheduleHtml, seasonNav, selectorPage, siteNav, sparklineHtml,
 } from './lib/render.js';
-import { resolver } from './lib/names.js';
+import { colorsFor, resolver } from './lib/names.js';
 import { SPORTS, loadTeams } from './lib/teams.js';
 import { matchRoute, parseView, routeTable } from './lib/routes.js';
 import { loadDivisions, needsSelector, parseScope, resolveScope } from './lib/scope.js';
@@ -418,6 +418,10 @@ function main() {
 					verdict,
 					answer: verdictText(verdict, team),
 					recordLabel: recordText(tally),
+					// The club's colours for the season being rendered, so a
+					// 1950s page uses the green they used then. A manifest may
+					// override; most no longer need to.
+					colors: team.colors ?? colorsFor(resolve, entry.code, season, NEUTRAL),
 					banner: streakBanner(played.filter((g) => g.regular_season === '1'), { isPastSeason, team }),
 					schedule: scheduleHtml(withNames, { heading: `${season} Season Schedule` }),
 					nav: seasonNav(allSeasons, season, entry.base),

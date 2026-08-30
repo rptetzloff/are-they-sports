@@ -30,12 +30,6 @@ export const team = {
 		fullName: 'Green Bay Packers',
 	},
 
-	/** Taken from the live stylesheet, where #ffb612 appears 64 times. */
-	colors: {
-		accent: '#ffb612',
-		base: '#203731',
-		baseDeep: '#1a2e28',
-	},
 
 	copy: {
 		/** The answer before the first regular-season game. Not YES, which is

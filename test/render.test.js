@@ -1,6 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { NEUTRAL, clubPage, escapeHtml, page, paletteCss, questionFor, selectorPage } from '../lib/render.js'
+import { colorsFor, resolver } from '../lib/names.js'
 import { recordText, seasonTally, verdictText } from '../lib/core.js'
 import { loadTeam } from '../lib/teams.js'
 
@@ -53,21 +54,42 @@ test('a url is escaped inside the attribute it sits in', () => {
 	assert.ok(!out.includes('"onmouseover="'), 'attribute escaped out of its quotes')
 })
 
-test('the palette comes from the club, never from a literal', () => {
+test('the palette comes from data, never from a literal', () => {
 	// The two sites carry 282 hardcoded hex literals between them and not one
 	// custom property. This is the rule that stops that happening again.
-	const css = paletteCss(packers.colors)
-	assert.ok(css.includes('--accent: #ffb612'))
-	assert.ok(css.includes('--base: #203731'))
+	//
+	// Football's colours now come from the franchise history table for the era
+	// being rendered, so they are not in a manifest at all; baseball's are an
+	// override, because Retrosheet publishes none.
+	const css = paletteCss(colorsFor(resolver('nfl'), 'GB', '2024', NEUTRAL))
+	assert.ok(css.includes('--base: #203731'), css)
+	assert.ok(css.includes('--accent: #FFB612'), css)
 	assert.ok(paletteCss(brewers.colors).includes('--accent: #ffc52f'))
+})
+
+test('a club rendered in an older era gets the colours of that era', () => {
+	// The reason to take colours from a dated table rather than a manifest.
+	const nfl = resolver('nfl')
+	assert.equal(colorsFor(nfl, 'GB', '1955', NEUTRAL).base, '#175E33')
+	assert.equal(colorsFor(nfl, 'GB', '2024', NEUTRAL).base, '#203731')
+	// And the Lions were the Portsmouth Spartans, in purple.
+	assert.equal(colorsFor(nfl, 'DET', '1930', NEUTRAL).base, '#582C83')
+})
+
+test('a franchise with no colours on record falls back', () => {
+	// Many 1920s clubs have none, so a fallback is required rather than
+	// optional — and an unknown code has to reach it too.
+	const nfl = resolver('nfl')
+	assert.deepEqual(colorsFor(nfl, 'ZZZ', '1920', NEUTRAL), NEUTRAL)
+	assert.equal(colorsFor(nfl, 'MUT', '1920', NEUTRAL).base, NEUTRAL.base)
 })
 
 test('the status colours are shared, not per club', () => {
 	// Comparing the two sites showed they had independently arrived at the same
 	// values, so a win is #4caf50 for everyone and it is not team vocabulary.
-	for (const team of [packers, brewers]) {
-		assert.ok(paletteCss(team.colors).includes('--win: #4caf50'))
-		assert.ok(paletteCss(team.colors).includes('--loss: #f44336'))
+	for (const colors of [NEUTRAL, brewers.colors]) {
+		assert.ok(paletteCss(colors).includes('--win: #4caf50'))
+		assert.ok(paletteCss(colors).includes('--loss: #f44336'))
 	}
 })
 
@@ -76,6 +98,7 @@ test('no colour literal appears outside the palette block', () => {
 	// must reference a variable.
 	const out = clubPage({
 		team: packers, season: '2026', tally: tally(), verdict: 'no', answer: 'NO', recordLabel: '13-3',
+		colors: NEUTRAL,
 	})
 	const afterPalette = out.slice(out.indexOf('}', out.indexOf(':root')))
 	const literals = afterPalette.match(/#[0-9a-fA-F]{3,8}\b/g) ?? []
@@ -112,7 +135,7 @@ test('the question is asked in the club\'s own words', () => {
 
 test('a club page shows the question, the answer and the record', () => {
 	const out = clubPage({
-		team: packers, season: '2026', tally: tally(), verdict: 'no', answer: 'NO', recordLabel: '13-3',
+		team: packers, season: '2026', tally: tally(), verdict: 'no', answer: 'NO', recordLabel: '13-3', colors: NEUTRAL,
 	})
 	assert.ok(out.includes('Are the Packers Undefeated?'))
 	assert.ok(out.includes('>NO<'))
@@ -125,7 +148,7 @@ test('a season that has not started says so, rather than implying it', () => {
 	// replaced.
 	const out = clubPage({
 		team: packers, season: '2026', tally: tally({ wins: 0, losses: 0 }),
-		verdict: 'not-started', answer: verdictText('not-started', packers), recordLabel: '0-0',
+		verdict: 'not-started', answer: verdictText('not-started', packers), recordLabel: '0-0', colors: NEUTRAL,
 	})
 	assert.ok(out.includes('GO PACK GO'))
 	assert.ok(out.includes('2026 has not started.'))
@@ -133,21 +156,21 @@ test('a season that has not started says so, rather than implying it', () => {
 
 test('a started season does not claim it has not started', () => {
 	const out = clubPage({
-		team: packers, season: '2025', tally: tally(), verdict: 'no', answer: 'NO', recordLabel: '13-3',
+		team: packers, season: '2025', tally: tally(), verdict: 'no', answer: 'NO', recordLabel: '13-3', colors: NEUTRAL,
 	})
 	assert.ok(!out.includes('has not started'))
 })
 
 test('postseason and championship appear only when they exist', () => {
 	const without = clubPage({
-		team: brewers, season: '2025', tally: tally(), verdict: 'no', answer: 'NO', recordLabel: '97-65',
+		team: brewers, season: '2025', tally: tally(), verdict: 'no', answer: 'NO', recordLabel: '97-65', colors: NEUTRAL,
 	})
 	assert.ok(!without.includes('Postseason'))
 
 	const with_ = clubPage({
 		team: brewers, season: '1982',
 		tally: tally({ postseason: { w: 6, l: 6, t: 0 }, championshipName: 'World Series 1982' }),
-		verdict: 'no', answer: 'NO', recordLabel: '95-67',
+		verdict: 'no', answer: 'NO', recordLabel: '95-67', colors: NEUTRAL,
 	})
 	assert.ok(with_.includes('Postseason: 6-6'))
 	assert.ok(with_.includes('World Series 1982'))
