@@ -185,7 +185,9 @@ test('a team scope resolves through the manifest, not the division table', () =>
 test('a team scope naming an unknown club throws and lists what exists', () => {
 	assert.throws(() => resolveScope(parseScope('team:vikings'),
 		{ divisionsBySport: BY_SPORT, teams: TEAMS, built: new Set() }),
-	/no manifest for team "vikings"; have brewers, packers/)
+	// Qualified by sport, because an unqualified list is ambiguous the moment
+	// two sports share a nickname — which they do.
+	/no manifest for team "vikings"; have mlb\/brewers, nfl\/packers/)
 })
 
 test('a club with two codes appears once', () => {

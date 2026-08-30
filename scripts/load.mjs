@@ -194,6 +194,7 @@ async function main() {
 
 	/** Register a code, inventing a franchise for it if it is unknown. */
 	const known = new Set();
+	const codesSeen = new Set();
 	const franchiseFor = async (code) => {
 		if (!code) return null;
 		const franchise = byCode.get(code) ?? code;
@@ -206,18 +207,59 @@ async function main() {
 					[sportId, franchise, n.name, 'manual']);
 			}
 		}
-		// Upsert, not DO NOTHING. The primary key used to include `franchise`, so
-		// "LV is LV" and "LV is OAK" were two rows rather than a contradiction,
-		// nothing ever conflicted, and a wrong mapping could not be corrected by
-		// re-running this. See db/migrations/0003.
-		await client.query(
-			`INSERT INTO franchise_code (sport, code, franchise) VALUES ($1,$2,$3)
-			 ON CONFLICT (sport, code) DO UPDATE SET franchise = EXCLUDED.franchise`,
-			[sportId, code, franchise]);
+		// Once per CODE, not once per call. A code maps to one franchise for the
+		// whole run, so every write after the first is identical to it — and this
+		// is called twice per game, for the home and away side.
+		//
+		// Football hid the cost: 18,506 games meant 37,000 redundant round-trips,
+		// which is slow and survivable. Baseball is 223,653 games and 447,000 of
+		// them, all rewriting the same 134 rows, and the load was still in this
+		// loop after three minutes.
+		if (!codesSeen.has(code)) {
+			codesSeen.add(code);
+			// Upsert, not DO NOTHING. The primary key used to include
+			// `franchise`, so "LV is LV" and "LV is OAK" were two rows rather
+			// than a contradiction, nothing ever conflicted, and a wrong mapping
+			// could not be corrected by re-running this. See db/migrations/0003.
+			await client.query(
+				`INSERT INTO franchise_code (sport, code, franchise) VALUES ($1,$2,$3)
+				 ON CONFLICT (sport, code) DO UPDATE SET franchise = EXCLUDED.franchise`,
+				[sportId, code, franchise]);
+		}
 		return franchise;
 	};
 
 	let loaded = 0, skipped = 0;
+	// Batched, because one awaited INSERT per game is a round-trip per game.
+	//
+	// Football never made that hurt: 18,506 games is slow-but-fine. Baseball is
+	// 223,653, and the load did not finish inside two minutes. The cost is
+	// latency, not Postgres — the same rows go in at a fraction of the time when
+	// several hundred travel together.
+	//
+	// 500 at a time: 13 columns means 6,500 parameters, well inside Postgres's
+	// 65,535 limit, and small enough that a failure names a manageable slice.
+	const BATCH = 500;
+	let pending = [];
+
+	const flush = async () => {
+		if (!pending.length) return;
+		const params = [];
+		const tuples = pending.map((row) => {
+			const at = params.length;
+			params.push(sportId, row.id, row.season, row.date, row.round, row.home, row.away,
+				row.homeScore, row.awayScore, row.neutral, row.status, row.source,
+				// Undefined and null both mean "this source has no week", and the
+				// upsert coalesces so a source without one never erases one.
+				row.week ?? null);
+			return `(${Array.from({ length: 13 }, (_, i) => `$${at + i + 1}`).join(',')})`;
+		});
+		pending = [];
+		const r = await client.query(SQL_UPSERT_GAME.replace('VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)',
+			`VALUES ${tuples.join(',')}`), params);
+		loaded += r.rowCount;
+	};
+
 	const put = async (row) => {
 		const home = await franchiseFor(row.home);
 		const away = await franchiseFor(row.away);
@@ -226,13 +268,8 @@ async function main() {
 		// produce exactly that, so it is counted rather than allowed to abort a
 		// whole load.
 		if (!home || !away || home === away) { skipped++; return; }
-		const r = await client.query(SQL_UPSERT_GAME,
-			[sportId, row.id, row.season, row.date, row.round, home, away,
-				row.homeScore, row.awayScore, row.neutral, row.status, row.source,
-				// Undefined and null both mean "this source has no week", and the
-				// upsert coalesces so a source without one never erases one.
-				row.week ?? null]);
-		loaded += r.rowCount;
+		pending.push({ ...row, home, away });
+		if (pending.length >= BATCH) await flush();
 	};
 
 	if (sportId === 'nfl') {
@@ -282,11 +319,34 @@ async function main() {
 		// Retrosheet's gameinfo is one row per game with both clubs, and unlike
 		// football there is no second era to splice in — coverage runs the whole
 		// length of every franchise.
+		let skippedType = 0;
 		for await (const r of csvRows(schedPath)) {
+			// All-star and exhibition games are not this club playing that club.
+			// They were invisible while the only source here was one club's
+			// slice, which contains neither; the league-wide file has 2,403
+			// exhibitions and 163 all-star games, and the round mapping below
+			// would have filed every one of them as a PLAYOFF game — inflating
+			// the postseason record of all thirty clubs.
+			//
+			// All-star games also name sides that are not clubs at all: NLS and
+			// ALS are the two league squads, ASE and ASW the East and West.
+			//
+			// NOT CUW. An earlier version of this comment listed it alongside
+			// them, from seeing it in a sample of exhibition rows. CUW is the
+			// Cuban Stars (West), a real club, and its 1924 game against the
+			// Chicago American Giants is typed `regular` — Retrosheet covers the
+			// Negro Leagues, which MLB recognised as major leagues in 2020.
+			if (r.gametype === 'allstar' || r.gametype === 'exhibition') { skippedType++; continue; }
+
 			const played = r.vruns !== '' && r.hruns !== '';
 			// gametype is a word here rather than a two-letter code, and only the
 			// World Series is the championship round: an LCS game must not set it
 			// or a pennant becomes a title.
+			//
+			// `championship` is NOT the title despite the name — it is the 1900
+			// Chronicle-Telegraph Cup and its like, played before the World
+			// Series existed. Treating it as a title would award nineteenth
+			// century pennants alongside modern ones.
 			const round = r.gametype === 'worldseries' ? 'championship'
 				: r.gametype === 'regular' ? 'regular' : 'playoff';
 			await put({
@@ -296,6 +356,7 @@ async function main() {
 				neutral: false, status: played ? 'final' : 'scheduled', source: 'retrosheet',
 			});
 		}
+		if (skippedType) console.log(`  skipped      ${skippedType} all-star and exhibition games`);
 	}
 
 	// Championship games, marked after the fact.
@@ -313,6 +374,13 @@ async function main() {
 	// A season's final game between clubs of DIFFERENT leagues is the Super
 	// Bowl, which is what 1966 through 1969 looked like: an NFL championship, an
 	// AFL championship, and then the two winners meeting.
+
+	// Drain the batch FIRST. Everything below reads the games back out of the
+	// database, and a buffered row is not there yet — the championship pass
+	// would have searched a table missing its last few hundred games, which for
+	// football is the most recent seasons and therefore the most recent finals.
+	await flush();
+
 	if (sportId === 'nfl') {
 		const resolve = resolver('nfl');
 
@@ -369,6 +437,10 @@ async function main() {
 			[sportId, f, d.conference, d.division]);
 	}
 
+	// A no-op when the drain above already ran, and kept deliberately: anything
+	// added between here and there that does NOT read games back would otherwise
+	// leave the last partial batch unwritten.
+	await flush();
 	await client.query('COMMIT');
 	console.log(`  loaded       ${loaded} games (${skipped} skipped)`);
 	const { rows } = await client.query(
