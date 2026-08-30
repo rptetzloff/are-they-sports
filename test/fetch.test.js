@@ -3,6 +3,7 @@ import assert from 'node:assert/strict'
 import { coveredSeasons, seasonRange } from '../scripts/fetch.mjs'
 import nfl from '../sports/nfl.js'
 import mlb from '../sports/mlb.js'
+import { shouldSign } from '../scripts/fetch.mjs'
 import packers from '../teams/nfl/packers.js'
 import brewers from '../teams/mlb/brewers.js'
 
@@ -151,4 +152,20 @@ test('a failed fetch does not leave the partial file behind', async () => {
 		server.close()
 		rmSync(dir, { recursive: true, force: true })
 	}
+})
+
+test('public sources are never signed, whatever credentials exist', () => {
+	// Football's sources are open URLs. Sending an S3 Authorization header to
+	// GitHub's CDN because a bucket was configured for baseball would be a
+	// strange way to break football, and a mutant that signed everything
+	// survived because the decision was inline and unreachable.
+	const creds = { accessKeyId: 'a', secretAccessKey: 'b' }
+	assert.equal(shouldSign('https://github.com/nflverse/x/releases/download/y/games.csv', creds), false)
+	assert.equal(shouldSign('https://raw.githubusercontent.com/fivethirtyeight/x/master/y.csv', creds), false)
+	// Anything else is signed when there are credentials, because a self-hosted
+	// bucket's address is whatever the deployment chose.
+	assert.equal(shouldSign('http://minio:9000/sports/mlb-games.csv.gz', creds), true)
+	assert.equal(shouldSign('https://s3.example.com/b/k', creds), true)
+	// And never without them.
+	assert.equal(shouldSign('http://minio:9000/b/k', null), false)
 })

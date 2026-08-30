@@ -290,9 +290,24 @@ stored without it both arrive as CSV. That flag existed and was exactly the
 wrong thing to trust: the file is identical either way and only the metadata
 differs.
 
-The fetch is unauthenticated, so the object needs to be readable by the
-container — anonymous read on that one object, or a bucket the internal network
-can reach. A presigned URL works but expires, which makes it a poor value for a
+A **private** bucket works: set `S3_ACCESS_KEY_ID` and `S3_SECRET_ACCESS_KEY`
+(plus `S3_REGION`, default `us-east-1`) and the request is signed. Nothing has
+to be made public and no presigned URL has to be refreshed.
+
+Signed by hand, in `lib/sigv4.js`, rather than by `@aws-sdk/client-s3`. Measured:
+the SDK is 26 packages and 15MB, which is real but not the reason. The reason is
+that the SDK fetches an object through its own client, so the URL would have to
+be split into endpoint, bucket and key, path-style addressing configured, and a
+second code path maintained beside the plain-URL fetch football uses. Signing
+adds a header to the request already being made.
+
+**Public sources are never signed.** nflverse and FiveThirtyEight are open URLs,
+and sending an S3 Authorization header to GitHub's CDN because a bucket was
+configured for baseball would be a strange way to break football.
+
+Anonymous read on that one object or prefix also works, and needs no
+credentials — MinIO can scope a policy to a prefix rather than the whole pool. A
+presigned URL works too but expires, which makes it a poor value for a
 persistent environment variable.
 
 Both ways of getting this wrong say so. An unreachable URL names the URL, the

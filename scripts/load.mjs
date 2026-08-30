@@ -490,5 +490,14 @@ async function main() {
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-	process.exit(await main());
+	// `process.exitCode`, not `process.exit()`. Exiting immediately tears down
+	// handles that are still closing, and on Windows a failed fetch then trips
+	// "Assertion failed: !(handle->flags & UV_HANDLE_CLOSING)" in libuv and the
+	// process returns 127 — so a clean, readable error still ended in a crash
+	// dump and the wrong exit code. Reproduced in four lines: download a 403,
+	// then call process.exit.
+	//
+	// Setting the code lets the loop drain and exit on its own. Every path here
+	// ends its database client, so there is nothing to keep it alive.
+	process.exitCode = await main();
 }

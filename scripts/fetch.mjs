@@ -17,6 +17,23 @@
 import { createWriteStream, existsSync, mkdirSync, statSync } from 'node:fs';
 import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
+import { credentialsFromEnv, signGet } from '../lib/sigv4.js';
+
+/** Hosts that are public by definition, and must never be sent a signature.
+ *
+ *  Narrow on purpose: anything not on this list is signed when credentials
+ *  exist, which is the safe default for a self-hosted bucket whose address is
+ *  whatever the deployment chose. */
+const PUBLIC_HOSTS = ['github.com', 'githubusercontent.com'];
+
+/** Whether this request gets an Authorization header.
+ *
+ *  Exported so it can be tested without a network: it was inline, and a mutant
+ *  that signed EVERY request — including the public football sources — survived
+ *  because nothing could reach the decision.
+ */
+export const shouldSign = (url, credentials) => Boolean(credentials)
+	&& !PUBLIC_HOSTS.some((h) => new URL(url).hostname.endsWith(h));
 import { createGunzip } from 'node:zlib';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -44,10 +61,25 @@ const mb = (n) => `${(n / 1048576).toFixed(1)} MB`;
  *  Gzip's first two bytes are 1f 8b, so the stream can simply be asked. That
  *  makes the flag unnecessary and the upload unable to be configured wrong.
  */
-export async function download(url, dest) {
+export async function download(url, dest, { credentials = credentialsFromEnv() } = {}) {
 	mkdirSync(dirname(dest), { recursive: true });
-	const res = await fetch(url);
-	if (!res.ok) throw new Error(`${res.status} ${res.statusText} for ${url}`);
+	// Signed only when credentials exist AND the URL is not a public one this
+	// repo already knows. nflverse and FiveThirtyEight are open URLs, and
+	// sending an S3 Authorization header to GitHub's CDN because a bucket was
+	// configured for baseball would be a strange way to break football.
+	const signed = shouldSign(url, credentials);
+	const res = await fetch(url, signed ? { headers: signGet(url, credentials) } : undefined);
+	if (!res.ok) {
+		// Drain the refused body before throwing. Leaving it open kept a libuv
+		// handle alive, and process.exit on Windows then tripped
+		// "Assertion failed: !(handle->flags & UV_HANDLE_CLOSING)" and returned
+		// 127 instead of the exit code the loader chose — so a clean, readable
+		// failure still ended in a crash dump.
+		await res.body?.cancel().catch(() => {});
+		throw new Error(`${res.status} ${res.statusText} for ${url}`
+			+ (res.status === 403 && !signed ? ' — the object is not public; set S3_ACCESS_KEY_ID and S3_SECRET_ACCESS_KEY' : '')
+			+ (res.status === 403 && signed ? ' — signed request refused; check S3_REGION and the key' : ''));
+	}
 
 	// Peek at the first chunk, then put it back. Reading the whole body to
 	// inspect it would undo the streaming this function exists for.
