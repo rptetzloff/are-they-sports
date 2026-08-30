@@ -327,3 +327,14 @@ test('the percentage rounds rather than truncating', () => {
 	// anything this function decides, pinned so it is not read as a bug.
 	assert.equal(pct(0.55555), '.5555')
 })
+
+test('a season percentage is three decimals, a league table four', () => {
+	// Four decimals exist because three could not separate the Cowboys from the
+	// Packers over a century. A single season is seventeen games and cannot
+	// resolve a fourth decimal at all: 9-7-1 is .559, and ".5588" claims a
+	// precision the sample does not have.
+	assert.equal(pct((9 + 0.5) / 17, 3), '.559')
+	assert.equal(pct((9 + 0.5) / 17), '.5588')
+	assert.equal(pct(1, 3), '1.000')
+	assert.equal(pct(0, 3), '.000')
+})
