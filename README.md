@@ -350,6 +350,23 @@ from the divisions table.
 Chronicle-Telegraph Cup and its like, played before the World Series existed.
 Only `worldseries` sets the championship round.
 
+## A scope covering two sports shows two leagues
+
+`/records` and `/schedule` render **one block per sport**, never merged. A
+football season ranked against a baseball season is not a comparison, and the
+earlier version did exactly that and printed a note admitting the lists compared
+clubs that never played each other. The note was true and the page was still a
+pile.
+
+It also removes a rule that had to be fudged. Streaks span seasons in football
+and stop at the season boundary in baseball; a merged league had to pick one.
+Football is grouped by week and baseball by date; a merged schedule sorted 22
+week-periods against 209 date-periods and claimed weeks were known because
+*some* of the games had them. Per sport, each uses its own.
+
+A single-sport scope is unlabelled and reads exactly as before, which is what
+every existing deployment sees.
+
 ## Getting to the league pages
 
 `/records` and `/schedule` are linked from the club selector at the root, from
