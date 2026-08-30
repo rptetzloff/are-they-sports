@@ -249,6 +249,27 @@ test('the accent is the first legible colour, not the most legible', () => {
 	assert.equal(choosePalette(['#203731', '#FFB612', '#FFFFFF'], NEUTRAL).accent, '#FFB612')
 })
 
+test('the bar is AA for large text, because that is what the accent carries', () => {
+	// 4.5 is the body-text bar and it rejected the Bears' own orange at 3.46:1
+	// in favour of white. The accent carries a heading at 30 to 48px and bold
+	// labels below it, where 3:1 is the standard — and their own site puts that
+	// orange on that navy.
+	assert.equal(choosePalette(['#0B162A', '#C83803', '#FFFFFF'], NEUTRAL).accent, '#C83803')
+	assert.ok(contrast('#0B162A', '#C83803') >= 3)
+	assert.ok(contrast('#0B162A', '#C83803') < 4.5)
+})
+
+test('no club in either sport has to borrow white', () => {
+	// The measure of whether the bar is set right: every club renders in its own
+	// colours, and the fallback is reserved for palettes that genuinely cannot.
+	for (const [sport, when] of [['nfl', { season: '2024' }], ['mlb', { date: '2025-06-01' }]]) {
+		const r = resolver(sport)
+		for (const code of loadDivisions(sport).map((x) => x.code)) {
+			assert.notEqual(colorsFor(r, code, when, NEUTRAL).accent, NEUTRAL.accent, `${sport} ${code} fell back`)
+		}
+	}
+})
+
 test('an illegible palette falls back rather than rendering unreadably', () => {
 	// The Angels publish three dark colours whose best pair is 1.9:1. A heading
 	// nobody can read is not a club's identity either.
