@@ -242,12 +242,32 @@ test('seasons tied on percentage break by extremity, then by the earlier year', 
 	]).bestSeasons
 	assert.deepEqual(best.map((s) => s.season), [1930, 1929, 1931])
 
-	// Worst: fewer losses first, because 0-4 is a worse season than 0-12 is at
-	// the same .000 — the shorter one lost less and still won nothing.
+	// Worst: MORE losses first, mirroring more wins being better. This test
+	// asserted the opposite and argued for it — that a short winless season
+	// "lost less and still won nothing" — which is a defence of the output
+	// rather than a rule. At the same .000, 0-16 is a worse season than 0-10 by
+	// every reading anyone uses, and the live football site still ranks them the
+	// wrong way round.
+	//
+	// The big season sits in a MIDDLE year again, so the tiebreaker cannot be
+	// deleted and pass on year order alone.
 	const worst = computeRecords([
 		...season(1930, 'LLLL'),
 		...season(1929, 'LLLLLLLL'),
 		...season(1931, 'LLLL'),
 	]).worstSeasons
-	assert.deepEqual(worst.map((s) => s.season), [1930, 1931, 1929])
+	assert.deepEqual(worst.map((s) => s.season), [1929, 1930, 1931])
+})
+
+test('at the same winless percentage, more losses is the worse season', () => {
+	// The case that prompted this: 0-16 must outrank 0-10 as the worst season a
+	// club ever had. Both are .000, so only the tiebreaker separates them, and
+	// it is the mirror of 15-0 beating 4-0 among the best.
+	const r = computeRecords([...season(1942, 'LLLLLLLLLL'), ...season(2008, 'LLLLLLLLLLLLLLLL')])
+	assert.deepEqual(r.worstSeasons.map((s) => `${s.season} ${s.record}`), ['2008 0–16', '1942 0–10'])
+
+	// And the symmetry it mirrors, asserted in the same test so the two cannot
+	// drift apart again.
+	const b = computeRecords([...season(1929, 'WWWW'), ...season(1972, 'WWWWWWWWWWWWWW')])
+	assert.deepEqual(b.bestSeasons.map((s) => s.season), [1972, 1929])
 })
