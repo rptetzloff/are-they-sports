@@ -19,6 +19,7 @@ import pg from 'pg';
 import { csvRows, parseCsv } from '../lib/csv.js';
 import { download } from './fetch.mjs';
 import { isoDate } from '../sports/mlb.js';
+import { seedRound } from '../sports/nfl.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const SOURCE_DIR = join(ROOT, 'data', 'sources');
@@ -178,7 +179,9 @@ async function main() {
 			if (r.score1 === '' || r.score2 === '') continue;
 			await put({
 				id: `${r.date}-${r.team1}-${r.team2}`, season: +r.season, date: r.date,
-				round: r.playoff === 's' ? 'championship' : r.playoff ? 'playoff' : 'regular',
+				// Shared with the adapter, so the reading of this column lives in one
+				// place. See seedRound in sports/nfl.js for why it is not `r.playoff ?`.
+				round: seedRound(r),
 				home: r.team1, away: r.team2, homeScore: +r.score1, awayScore: +r.score2,
 				neutral: r.neutral === '1', status: 'final', source: 'fivethirtyeight',
 			});

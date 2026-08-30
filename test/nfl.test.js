@@ -80,11 +80,26 @@ test('a neutral-site game is neither home nor away', () => {
 	assert.equal(seedGameRow(seed({ neutral: '1' }), 'GB').location, 'neutral')
 })
 
-test('the playoff column is a round code, not a flag', () => {
-	assert.equal(seedGameRow(seed({ playoff: '' }), 'GB').regular_season, '1')
-	assert.equal(seedGameRow(seed({ playoff: 'c' }), 'GB').playoff, '1')
-	assert.equal(seedGameRow(seed({ playoff: 'c' }), 'GB').championship, '')
-	assert.equal(seedGameRow(seed({ playoff: 's', season: '1966' }), 'GB').championship, '1966')
+test('the playoff column is a 0/1 flag, and "0" is truthy', () => {
+	// This test used to assert the opposite — that `playoff` held a round code,
+	// with 'c' for a conference game and 's' for the Super Bowl. Neither value
+	// appears anywhere in the file. It passed because it made up its own input,
+	// and it made the bug it was written over look tested: `Boolean(r.playoff)`
+	// marked every pre-1999 game a playoff game, because Boolean('0') is true.
+	//
+	// The real file holds "0" 16,220 times and "1" 590 times, and nothing else.
+	assert.equal(seedGameRow(seed({ playoff: '0' }), 'GB').regular_season, '1')
+	assert.equal(seedGameRow(seed({ playoff: '0' }), 'GB').playoff, '0')
+	assert.equal(seedGameRow(seed({ playoff: '1' }), 'GB').regular_season, '0')
+	assert.equal(seedGameRow(seed({ playoff: '1' }), 'GB').playoff, '1')
+})
+
+test('no championship is claimed from a source that cannot identify one', () => {
+	// The file has a playoff flag and no round detail, so there is nothing to
+	// read a championship from. Saying nothing beats marking the wrong game.
+	for (const playoff of ['0', '1']) {
+		assert.equal(seedGameRow(seed({ playoff, season: '1966' }), 'GB').championship, '')
+	}
 })
 
 test('a row with no score is skipped rather than counted as a scoreless draw', () => {
