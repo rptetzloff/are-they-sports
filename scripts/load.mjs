@@ -113,10 +113,7 @@ async function ensureSource(sportId, path, cfg, label) {
 	}
 	mkdirSync(dirname(path), { recursive: true });
 	console.log(`  fetching     ${label} ...`);
-	// An options object, not a positional flag. Passing the boolean
-	// destructures to gunzip=false, so the file lands still compressed and the
-	// CSV parser reads gzip magic bytes as a header row.
-	const bytes = await download(url, path, { gunzip: Boolean(cfg.gzipped) });
+	const bytes = await download(url, path);
 	console.log(`  fetched      ${label}  ${(bytes / 1048576).toFixed(1)} MB`);
 	return true;
 }

@@ -53,7 +53,6 @@ export const sources = {
 		// decompress either way.
 		url: (season) => `https://github.com/nflverse/nflverse-data/releases/download/pbp/play_by_play_${season}.csv.gz`,
 		perSeason: true,
-		gzipped: true,
 		// nflverse play-by-play begins in 1999. Before that only schedules and
 		// results exist, so a team's scoring index simply starts later rather
 		// than the build failing.

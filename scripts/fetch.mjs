@@ -26,19 +26,42 @@ export const SOURCE_DIR = join(ROOT, 'data', 'sources');
 
 const mb = (n) => `${(n / 1048576).toFixed(1)} MB`;
 
-/** Fetch one URL to a path, decompressing on the way if it is gzipped.
+/** Fetch one URL to a path, decompressing on the way if what arrives is gzipped.
  *
  *  Streamed rather than buffered: a 95MB CSV read into a string before writing
  *  is 190MB of UTF-16 for no reason, and the same mistake once cost the
  *  baseball site a 600MB heap against a 512MB box.
+ *
+ *  **Decided by the bytes, not by a flag.** It used to take `gunzip: true` from
+ *  the source declaration, which is a claim about the file and not about what
+ *  the response actually contains — and the two come apart the moment a file is
+ *  served from object storage. Upload a .gz to S3 with `Content-Encoding: gzip`
+ *  and fetch transparently decompresses it, so a pipeline through createGunzip
+ *  receives plain CSV and dies on the header check. Upload the same file
+ *  WITHOUT that header and it works. The file is identical; only the metadata
+ *  differs.
+ *
+ *  Gzip's first two bytes are 1f 8b, so the stream can simply be asked. That
+ *  makes the flag unnecessary and the upload unable to be configured wrong.
  */
-export async function download(url, dest, { gunzip = false } = {}) {
+export async function download(url, dest) {
 	mkdirSync(dirname(dest), { recursive: true });
 	const res = await fetch(url);
 	if (!res.ok) throw new Error(`${res.status} ${res.statusText} for ${url}`);
+
+	// Peek at the first chunk, then put it back. Reading the whole body to
+	// inspect it would undo the streaming this function exists for.
+	const chunks = Readable.fromWeb(res.body)[Symbol.asyncIterator]();
+	const first = await chunks.next();
+	const head = first.done ? Buffer.alloc(0) : Buffer.from(first.value);
+	const gzipped = head.length > 1 && head[0] === 0x1f && head[1] === 0x8b;
+	const body = Readable.from((async function* replay() {
+		if (!first.done) yield head;
+		for await (const chunk of { [Symbol.asyncIterator]: () => chunks }) yield chunk;
+	})());
+
 	const out = createWriteStream(dest);
-	const body = Readable.fromWeb(res.body);
-	await (gunzip ? pipeline(body, createGunzip(), out) : pipeline(body, out));
+	await (gzipped ? pipeline(body, createGunzip(), out) : pipeline(body, out));
 	return statSync(dest).size;
 }
 
@@ -104,9 +127,7 @@ async function main() {
 			continue;
 		}
 		process.stdout.write(`  fetch   pbp ${season} ...`);
-		const size = await download(sport.sources.playByPlay.url(season), dest, {
-			gunzip: sport.sources.playByPlay.gzipped,
-		});
+		const size = await download(sport.sources.playByPlay.url(season), dest);
 		console.log(`\r  done    pbp ${season}  ${mb(size)}          `);
 	}
 	return 0;
