@@ -30,12 +30,14 @@ import { createServer } from 'node:http';
 import { readdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { availability, close, connect, franchiseForCodes, franchisesWithGames, gamesFor, health } from './lib/store.js';
+import { availability, close, connect, franchiseForCodes, franchisesWithGames, gamesFor, health, lastUpdated } from './lib/store.js';
 import {
 	daysToNextGame, lastLosslessSeason, latestSeason, recordText, seasons, seasonTally, seasonVerdict,
-	streakBanner, verdictText,
+	seasonWinPct, seriesRecords, streakBanner, verdictText,
 } from './lib/core.js';
-import { NEUTRAL, clubPage, scheduleHtml, seasonNav, selectorPage, siteNav } from './lib/render.js';
+import {
+	NEUTRAL, clubPage, clubSwitcher, scheduleHtml, seasonNav, selectorPage, siteNav, sparklineHtml,
+} from './lib/render.js';
 import { resolver } from './lib/names.js';
 import { SPORTS, loadTeams } from './lib/teams.js';
 import { matchRoute, parseView, routeTable } from './lib/routes.js';
@@ -307,6 +309,13 @@ function main() {
 
 			// The selector. Only exists when the scope holds more than one club;
 			// a single-club scope serves that club at the root instead.
+			const clubList = () => table.map((e) => ({
+				teamId: e.teamId, sport: e.sport, code: e.code,
+				name: teamsById.get(e.teamId)?.nouns.fullName ?? namers[e.sport](e.code).name,
+				available: e.available,
+				url: e.available ? `${origin}${e.base}` : null,
+			}));
+
 			if (url.pathname === '/' && needsSelector(table)) {
 				const clubs = table.map((e) => ({
 					team: e.teamId, sport: e.sport, code: e.code,
@@ -372,7 +381,14 @@ function main() {
 				// sport and dated: a 1969 Brewers opponent is not called what it
 				// is called now, and the renderer should not know that.
 				const resolve = namers[entry.sport];
-				const withNames = rows.map((g) => ({ ...g, opponentName: resolve(g.Opponent, g.date).name }));
+				// All-time head-to-head, from the club's own rows. The baseball
+				// site puts this under every opponent on the schedule.
+				const series = seriesRecords(all);
+				const withNames = rows.map((g) => ({
+					...g,
+					opponentName: resolve(g.Opponent, g.date).name,
+					seriesRecord: series.get(g.Opponent) ?? null,
+				}));
 
 				const allPlayed = all.filter((g) => g.result);
 				return clubPage({
@@ -386,6 +402,9 @@ function main() {
 					schedule: scheduleHtml(withNames, { heading: `${season} Season Schedule` }),
 					nav: seasonNav(allSeasons, season, entry.base),
 					siteNavHtml: siteNav(entry.base, team),
+					spark: sparklineHtml(seasonWinPct(all)),
+					switcher: clubSwitcher(clubList(), entry.teamId),
+					updatedAt: (await lastUpdated(entry.sport, entry.franchise))?.toISOString().slice(0, 10) ?? null,
 					lastLossless: lastLosslessSeason(all),
 					allTime: {
 						record: recordText({
