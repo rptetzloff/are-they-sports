@@ -73,3 +73,39 @@ test('a single-club deployment offers no league pages, because it has none', () 
 	assert.ok(!solo.includes('/schedule'), 'linked to a schedule that does not exist')
 	assert.ok(solo.includes('/records'), 'the club\'s own records went missing')
 })
+
+test('a league page links each club by sport and id, not id alone', () => {
+	// Two clubs share the id "giants". A url map keyed on the id collapses them,
+	// so one links to the other's page — the third place this exact collision
+	// has appeared.
+	const league = {
+		...EMPTY_LEAGUE,
+		clubs: 2,
+		seasonRange: { first: 1900, last: 2025 },
+		allTime: [
+			{ club: 'Giants', teamId: 'giants', sport: 'nfl', record: '1–0', winPct: 1, from: 1925, to: 2025 },
+			{ club: 'Giants', teamId: 'giants', sport: 'mlb', record: '0–1', winPct: 0, from: 1883, to: 2025 },
+		],
+	}
+	const html = leagueRecordsPage({
+		league, heading: 'Every club', colors: COLORS,
+		clubs: [
+			{ teamId: 'giants', sport: 'nfl', name: 'New York Giants', url: '/nfl/giants' },
+			{ teamId: 'giants', sport: 'mlb', name: 'San Francisco Giants', url: '/mlb/giants' },
+		],
+	})
+	assert.ok(hrefs(html).includes('/nfl/giants/records'), 'the football Giants are not linked')
+	assert.ok(hrefs(html).includes('/mlb/giants/records'), 'the baseball Giants are not linked')
+})
+
+test('a league page carries the nav above its content', () => {
+	// It was only at the foot, which on an `all` scope is below sixty-two clubs'
+	// worth of lists. A link nobody scrolls far enough to reach is not a way
+	// back, which is how it was reported.
+	const html = leagueRecordsPage({
+		league: EMPTY_LEAGUE, heading: 'Every club', colors: COLORS, clubs: [],
+	})
+	const firstNav = html.indexOf('league-nav', html.indexOf('</style>'))
+	const firstCard = html.indexOf('record-card', html.indexOf('</style>'))
+	assert.ok(firstNav > 0 && firstNav < firstCard, 'the nav is not above the content')
+})

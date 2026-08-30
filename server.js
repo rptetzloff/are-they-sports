@@ -216,8 +216,19 @@ function main() {
 		// The reference table ships with the code, so it cannot be out of step
 		// with the manifests that were written against it.
 		const codes = codeTables(Object.keys(divisionsBySport));
+		// By SPORT and id. A club id is unique only within a sport, and matching
+		// on the id alone finds whichever manifest loaded first — `teams/mlb`
+		// sorts before `teams/nfl`, so an entry for the NFL Giants resolved to
+		// the baseball Giants, took SFN as its franchise, and went unavailable
+		// because nothing named nfl/SFN has games.
+		//
+		// Measured: an `all` scope reported 30 of 62 available with nfl/NYG and
+		// nfl/ARI missing — the two ids both sports use. The map below is keyed
+		// on sport and id for exactly this reason; this lookup was written
+		// before it and was not changed with it.
+		const club = (sport, id) => teams.find((t) => t.sport === sport && t.id === id);
 		for (const e of resolved) {
-			const team = teams.find((t) => t.id === e.teamId);
+			const team = club(e.sport, e.teamId);
 			if (!team) continue;
 			const distinct = franchisesForClub(team, codes.franchiseOf);
 			if (distinct.length > 1) {
@@ -429,6 +440,7 @@ function main() {
 					resolve: namers[withGames[0]?.sport ?? 'nfl'],
 					clubs: clubList(),
 					periodNoun: period === 'week' ? 'Week' : 'Games',
+					switcher: clubSwitcher(clubList(), null, ''),
 				}));
 			}
 
@@ -461,6 +473,9 @@ function main() {
 					colors: NEUTRAL,
 					clubs: clubList(),
 					mixedSports: sports.length > 1,
+					// The same control a club page carries, so a league page is
+					// not a dead end for anyone wanting one club.
+					switcher: clubSwitcher(clubList(), null, ''),
 				}));
 			}
 
