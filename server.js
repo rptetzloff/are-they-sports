@@ -451,6 +451,7 @@ function main() {
 				if (wantsJson(url)) return json(res, 200, league);
 				return html(res, 200, leagueRecordsPage({
 					league,
+					resolve: namers[withGames[0]?.sport ?? 'nfl'],
 					heading: scopeHeading(scope, table),
 					colors: NEUTRAL,
 					clubs: clubList(),

@@ -230,3 +230,42 @@ test('across clubs, more losses is the worse season', () => {
 	assert.deepEqual(l.worstSeasons.map((s) => `${s.club} ${s.record}`),
 		['Lions 0–16', 'Browns 0–16', 'Buccaneers 0–14'])
 })
+
+test('a tie and a blowout both name the other club', () => {
+	// A tie has two clubs in it. Naming only the one whose row survived the
+	// deduplication renders "Packers 40–40, 2025" and leaves out who they tied.
+	const l = computeLeague([
+		{ team: club('GB', 'Packers'), rows: [
+			...season(2025, 'T', { gid: 't', Opponent: 'DAL', scoreFor: '40', scoreAgainst: '40' }),
+			...season(1940, 'W', { gid: 'w', Opponent: 'WSH', scoreFor: '73', scoreAgainst: '0' }),
+		] },
+	])
+	assert.equal(l.ties[0].opponent, 'DAL')
+	assert.equal(l.lopsidedWins[0].opponent, 'WSH')
+	// And the id when that club is in scope, so it can be linked.
+	assert.equal(l.ties[0].opponentId, null)
+
+	// And an id when that club IS in scope, on both lists. Asserting only the
+	// tie left a mutant alive that stripped the id from every blowout: the
+	// opponent CODE comes from records.js and survives either way, so checking
+	// the code proves nothing about the linking.
+	const both = computeLeague([
+		{ team: club('GB', 'Packers'), rows: [
+			...season(2025, 'T', { gid: 't', Opponent: 'CHI' }),
+			...season(1962, 'W', { gid: 'w', Opponent: 'CHI', scoreFor: '49', scoreAgainst: '0' }),
+		] },
+		{ team: club('CHI', 'Bears'), rows: season(2025, 'T', { gid: 't', Opponent: 'GB' }) },
+	])
+	assert.equal(both.ties[0].opponentId, 'CHI', 'a tie against an in-scope club has no id')
+	assert.equal(both.lopsidedWins[0].opponentId, 'CHI', 'a blowout against an in-scope club has no id')
+})
+
+test('the tie count says how many there are, not just how many are shown', () => {
+	// The one card ordered by recency rather than rank, so a reader cannot tell
+	// it was cut. Every other list is a top-N and looks like one.
+	const rows = []
+	for (let y = 1930; y < 1960; y++) rows.push(...season(y, 'T', { gid: `t${y}` }))
+	const l = computeLeague([{ team: club('GB', 'Packers'), rows }], { top: 10 })
+	assert.equal(l.ties.length, 10)
+	assert.equal(l.tiesTotal, 30)
+})
