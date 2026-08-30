@@ -41,7 +41,7 @@ import {
 	seasonWinPct, seriesRecords, streakBanner, verdictText,
 } from './lib/core.js';
 import {
-	NEUTRAL, clubPage, clubSwitcher, headToHeadPage, leagueNav, leagueRecordsPage, leagueSchedulePage, missingSeasonPage, opponentPage, recordsPage,
+	NEUTRAL, clubPage, clubSwitcher, headToHeadPage, leagueNav, leagueRecordsPage, leagueSchedulePage, sportTabs, missingSeasonPage, opponentPage, recordsPage,
 	scheduleHtml, seasonNav, selectorPage, siteNav, sparklineHtml,
 } from './lib/render.js';
 import { colorsFor, resolver } from './lib/names.js';
@@ -115,7 +115,18 @@ const gameCache = new Map();
 const CACHE_CHECK_MS = 30_000;
 
 async function games(entry, season) {
-	const key = entry.franchise;
+	// Keyed by SPORT and franchise. Franchise codes collide across sports and
+	// the same-city pairs are the worst of it: the Orioles and the Ravens are
+	// both BAL, the Twins and the Vikings both MIN, the Marlins and the Dolphins
+	// both MIA, the Pirates and the Steelers both PIT, the Mariners and the
+	// Seahawks both SEA. Keyed on the code alone, whichever club was requested
+	// first filled the cache and the other was served its rows — so the MLB
+	// record book showed the Orioles at 276-208-1 since 1996, which is the
+	// Ravens.
+	//
+	// `codeIndex` is keyed this way for exactly this reason, with a comment
+	// naming MIN. The cache was not, and only showed it once baseball loaded.
+	const key = `${entry.sport}/${entry.franchise}`;
 	const hit = gameCache.get(key);
 	const now = Date.now();
 
@@ -414,11 +425,34 @@ function main() {
 				}));
 			}
 
+			// League routes, optionally qualified by sport.
+			//
+			//   /records            /schedule            /schedule/2025
+			//   /nfl/records        /nfl/schedule        /nfl/schedule/2025
+			//
+			// The qualified form exists because an `all` scope covers two sports
+			// and stacking both on one page made it long and unbookmarkable. The
+			// unqualified form still works and shows the first sport, with tabs.
+			//
+			// A sport prefix is only recognised when the scope actually holds
+			// that sport, so `/nfl/records` under SCOPE=sport:mlb is a 404 rather
+			// than an empty page — and it cannot shadow a club, because a club's
+			// path under a multi-sport scope is /{sport}/{club} and no club is
+			// called "records" or "schedule".
+			const inScopeSports = [...new Set(table.map((e) => e.sport))];
+			const leagueRoute = (() => {
+				const m = url.pathname.match(/^(?:\/([a-z0-9]+))?\/(records|schedule)(?:\/(\d{4}))?$/);
+				if (!m) return null;
+				const [, sport, view, season] = m;
+				if (sport && !inScopeSports.includes(sport)) return null;
+				if (view === 'records' && season) return null;
+				return { sport: sport ?? null, view, season: season ?? null };
+			})();
+
 			// A whole league's season, week by week. Same rule as /records: only
 			// where the scope holds more than one club, since under
 			// SCOPE=team:packers the root is already that club's schedule.
-			const sched = url.pathname === '/schedule' ? null
-				: /^\/schedule\/\d{4}$/.test(url.pathname) ? url.pathname.slice(10) : undefined;
+			const sched = leagueRoute?.view === 'schedule' ? leagueRoute.season : undefined;
 			if (sched !== undefined && needsSelector(table)) {
 				const withGames = table.filter((e) => e.available && e.teamId);
 				const clubs = [];
@@ -430,7 +464,8 @@ function main() {
 				// scope used to take the first club's rule for everything — so an
 				// `all` scope put 22 NFL week-periods and 209 MLB date-periods in
 				// one list, sorted against each other.
-				const bySport = [...new Set(withGames.map((e) => e.sport))].map((sport) => {
+				const wanted = leagueRoute.sport ? [leagueRoute.sport] : [...new Set(withGames.map((e) => e.sport))];
+				const bySport = wanted.map((sport) => {
 					const inSport = clubs.filter((c) => c.team?.sport === sport);
 					const period = inSport[0]?.team?.rules.schedulePeriod ?? 'week';
 					return {
@@ -457,6 +492,11 @@ function main() {
 					periodNoun: firstSport.periodNoun,
 					label: firstSport.label,
 					more: otherSports,
+					tabs: sportTabs(inScopeSports, leagueRoute.sport, 'schedule'),
+					// The season nav builds its links from this. Left empty, a
+					// sport-qualified page linked back to the unqualified one and
+					// silently dropped the sport on every season change.
+					base: leagueRoute.sport ? '/' + leagueRoute.sport : '',
 					switcher: clubSwitcher(clubList(), null, ''),
 				}));
 			}
@@ -465,7 +505,7 @@ function main() {
 			// more than one club: under SCOPE=team:packers the root IS the
 			// Packers and /records is already their record book, so a league
 			// view there would be the same page under a second name.
-			if (url.pathname === '/records' && needsSelector(table)) {
+			if (leagueRoute?.view === 'records' && needsSelector(table)) {
 				const withGames = table.filter((e) => e.available && e.teamId);
 				const clubs = [];
 				for (const e of withGames) {
@@ -479,7 +519,11 @@ function main() {
 				// It also fixes a rule that had to be fudged: streaks span
 				// seasons in football and not in baseball, and a merged league
 				// had to pick one. Per sport, each uses its own.
-				const sports = [...new Set(withGames.map((e) => e.sport))];
+				// Named sport, or every sport in scope. Naming one is what makes
+				// /nfl/records a page rather than a section of a longer one.
+				const sports = leagueRoute.sport
+					? [leagueRoute.sport]
+					: [...new Set(withGames.map((e) => e.sport))];
 				const leagues = sports.map((sport) => {
 					const inSport = clubs.filter((c) => c.team?.sport === sport);
 					return {
@@ -512,6 +556,7 @@ function main() {
 					clubs: clubList(),
 					more: rest,
 					label,
+					tabs: sportTabs(inScopeSports, leagueRoute.sport, 'records'),
 					resolve: namers[withGames[0]?.sport ?? 'nfl'],
 					// The same control a club page carries, so a league page is
 					// not a dead end for anyone wanting one club.

@@ -190,3 +190,27 @@ test('each club of a shared-id pair takes its own franchise', () => {
 	assert.deepEqual(of('nfl', 'cardinals'), ['ARI'])
 	assert.deepEqual(of('mlb', 'cardinals'), ['SLN'])
 })
+
+test('franchise codes collide across sports, so anything keyed on one must say which', () => {
+	// Not a test of behaviour but of the hazard, because this has now been the
+	// cause four times: codeIndex, resolveScope's dedupe, the server's club map,
+	// and the game cache. The last one served the MLB Orioles the Ravens' rows —
+	// 276-208-1 since 1996 in a record book that starts in 1901.
+	const codes = codeTables(['nfl', 'mlb'])
+	const shared = codes.table('nfl').franchises().filter((f) => codes.table('mlb').knows(f))
+	// The same-city pairs are the dangerous ones and there are plenty.
+	for (const f of ['BAL', 'MIN', 'MIA', 'PIT', 'SEA']) {
+		assert.ok(shared.includes(f), `${f} is no longer shared — this test is proving less than it says`)
+	}
+	assert.ok(shared.length >= 10, `only ${shared.length} shared codes: ${shared.join(' ')}`)
+})
+
+test('a shared franchise code names different clubs in each sport', () => {
+	// BAL is the Ravens and the Orioles. Both are real, both are current, and
+	// nothing about the code distinguishes them.
+	const byKey = new Map(TEAMS.map((t) => [`${t.sport}/${t.sourceIds[0]}`, t]))
+	assert.equal(byKey.get('nfl/BAL').id, 'ravens')
+	assert.equal(byKey.get('mlb/BAL').id, 'orioles')
+	assert.equal(byKey.get('nfl/MIN').id, 'vikings')
+	assert.equal(byKey.get('mlb/MIN').id, 'twins')
+})

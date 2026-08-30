@@ -350,6 +350,28 @@ from the divisions table.
 Chronicle-Telegraph Cup and its like, played before the World Series existed.
 Only `worldseries` sets the championship round.
 
+## Per-sport league pages
+
+Under a scope covering more than one sport:
+
+```
+/records          /schedule          /schedule/2025      every sport, stacked
+/nfl/records      /nfl/schedule      /nfl/schedule/2025  one sport
+/mlb/records      /mlb/schedule      /mlb/schedule/2025
+```
+
+Tabs across the top switch between them, and the qualified pages keep their
+prefix on every link — a sport-qualified schedule that offered `/schedule/2023`
+for the previous season would silently drop back to the stacked view.
+
+A sport prefix is recognised only when the scope holds that sport, so
+`/nfl/records` under `SCOPE=sport:mlb` is a 404 rather than an empty page. It
+cannot shadow a club either: a club's path under a multi-sport scope is
+`/{sport}/{club}`, and no club is called "records" or "schedule".
+
+A single-sport scope has no tabs and no qualified routes, because there is
+nothing to switch between.
+
 ## A scope covering two sports shows two leagues
 
 `/records` and `/schedule` render **one block per sport**, never merged. A
