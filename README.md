@@ -263,6 +263,27 @@ are unresolved today, all clubs the Packers never played — a number that falls
 as teams are added, since a club the Packers never met probably played the
 Bears.
 
+## League-wide records
+
+`/records` at the scope root is the record book for every club in scope, where
+the scope holds more than one. Under `SCOPE=team:packers` the root *is* the
+Packers, so `/records` is already their record book and there is no league view
+to add.
+
+It runs `computeRecords` per club and merges, rather than a second
+implementation over pooled rows. The per-club rules are subtle and settled — a
+tie ends a win streak, an unfinished season is excluded, streaks span seasons
+per sport — and a parallel version would drift from them.
+
+The part that is genuinely different is double counting, and it is not uniform.
+Every game is in the data twice, once per club:
+
+- a blowout **win** for one club is a **loss** for the other, so ranking each
+  club's wins yields every game exactly once;
+- a **tie** is a tie for both and appears twice, so it is deduplicated by game
+  id — date plus opponent collides on a doubleheader;
+- a **season** or a **streak** belongs to one club and cannot double.
+
 ## Scope: what one deployment shows
 
 A site is configured by a single `SCOPE`, which resolves to a set of clubs.

@@ -32,6 +32,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { computeHeadToHead } from './lib/headtohead.js';
 import { computeRecords } from './lib/records.js';
+import { computeLeague } from './lib/league.js';
 import { codeTables, franchisesForClub, staleFranchises } from './lib/codes.js';
 import { availability, close, connect, franchisesWithGames, gamesFor, health, lastUpdated } from './lib/store.js';
 import {
@@ -39,7 +40,7 @@ import {
 	seasonWinPct, seriesRecords, streakBanner, verdictText,
 } from './lib/core.js';
 import {
-	NEUTRAL, clubPage, clubSwitcher, headToHeadPage, missingSeasonPage, opponentPage, recordsPage,
+	NEUTRAL, clubPage, clubSwitcher, headToHeadPage, leagueRecordsPage, missingSeasonPage, opponentPage, recordsPage,
 	scheduleHtml, seasonNav, selectorPage, siteNav, sparklineHtml,
 } from './lib/render.js';
 import { colorsFor, resolver } from './lib/names.js';
@@ -390,6 +391,37 @@ function main() {
 					clubs,
 					colors: NEUTRAL,
 					heading: scopeHeading(scope, table),
+				}));
+			}
+
+			// League-wide records, at the scope root. Only where the scope holds
+			// more than one club: under SCOPE=team:packers the root IS the
+			// Packers and /records is already their record book, so a league
+			// view there would be the same page under a second name.
+			if (url.pathname === '/records' && needsSelector(table)) {
+				const withGames = table.filter((e) => e.available && e.teamId);
+				const clubs = [];
+				for (const e of withGames) {
+					clubs.push({ team: teamsById.get(e.teamId), rows: await games(e) });
+				}
+				// One sport's rule, and only one sport's. A scope spanning both
+				// would have to pick, and the honest answer is that a combined
+				// football-and-baseball record book is not a thing anyone wants —
+				// so `all` gets the league table per sport and nothing merged.
+				const sports = [...new Set(withGames.map((e) => e.sport))];
+				const league = computeLeague(clubs, {
+					top: 10,
+					streaksSpanSeasons: sports.length === 1
+						? (teamsById.get(withGames[0].teamId)?.rules.streaksSpanSeasons ?? true)
+						: true,
+				});
+				if (wantsJson(url)) return json(res, 200, league);
+				return html(res, 200, leagueRecordsPage({
+					league,
+					heading: scopeHeading(scope, table),
+					colors: NEUTRAL,
+					clubs: clubList(),
+					mixedSports: sports.length > 1,
 				}));
 			}
 
