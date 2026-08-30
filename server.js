@@ -34,6 +34,7 @@ import { computeHeadToHead } from './lib/headtohead.js';
 import { computeRecords } from './lib/records.js';
 import { computeLeague } from './lib/league.js';
 import { computeSchedule } from './lib/schedule.js';
+import { historyPoints } from './lib/history.js';
 import { codeTables, franchisesForClub, staleFranchises } from './lib/codes.js';
 import { availability, close, connect, franchisesWithGames, gamesFor, health, lastUpdated } from './lib/store.js';
 import {
@@ -41,7 +42,7 @@ import {
 	seasonWinPct, seriesRecords, streakBanner, verdictText,
 } from './lib/core.js';
 import {
-	NEUTRAL, clubPage, clubSwitcher, headToHeadPage, leagueNav, leagueRecordsPage, leagueSchedulePage, sportTabs, missingSeasonPage, opponentPage, recordsPage,
+	NEUTRAL, clubPage, clubSwitcher, headToHeadPage, historyPage, leagueNav, leagueRecordsPage, leagueSchedulePage, sportTabs, missingSeasonPage, opponentPage, recordsPage,
 	scheduleHtml, seasonNav, selectorPage, siteNav, sparklineHtml,
 } from './lib/render.js';
 import { colorsFor, resolver } from './lib/names.js';
@@ -692,6 +693,23 @@ function main() {
 						last: all.at(-1),
 						switcher: clubSwitcher(clubList(), entry.teamId, here),
 						siteNavHtml: siteNav(entry.base, team, { league: needsSelector(table) }),
+					}));
+				}
+				if (view.view === 'history') {
+					const team = clubFor(entry);
+					const all = await games(entry);
+					const records = computeRecords(all, { streaksSpanSeasons: team.rules.streaksSpanSeasons });
+					const points = historyPoints(records.everySeason);
+					if (wantsJson(url)) return json(res, 200, { seasons: points });
+					const latest = latestSeason(all);
+					return html(res, 200, historyPage({
+						team,
+						colors: team.colors ?? colorsFor(namers[entry.sport], entry.code, { season: latest?.season, date: all.at(-1)?.date }, NEUTRAL),
+						points,
+						base: entry.base,
+						siteNavHtml: siteNav(entry.base, team, { league: needsSelector(table) }),
+						switcher: clubSwitcher(clubList(), entry.teamId, here),
+						updatedAt: await lastUpdated(entry.sport, entry.franchise),
 					}));
 				}
 				if (view.view === 'records') {
