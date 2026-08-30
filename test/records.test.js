@@ -293,30 +293,37 @@ test('a single-final season is unchanged by that', () => {
 	assert.equal(r.championshipAppearances[0].title, 'NFL Championship')
 })
 
-test('a winning percentage is three decimals with no leading zero', () => {
-	// How every record book writes it. Notation rather than precision — "57.1"
-	// and ".571" are the same three significant figures.
-	assert.equal(pct(0.5714), '.571')
-	assert.equal(pct(0.4633), '.463')
-	assert.equal(pct(0.0625), '.063')
-	assert.equal(pct(0), '.000')
+test('a winning percentage has no leading zero', () => {
+	assert.equal(pct(0.5714), '.5714')
+	assert.equal(pct(0.4633), '.4633')
+	assert.equal(pct(0.0625), '.0625')
+	assert.equal(pct(0), '.0000')
+})
+
+test('four decimals, because three cannot separate the clubs', () => {
+	// Measured against all 32 current clubs: three decimals collides three
+	// times — Cowboys and Packers, Vikings and Dolphins and Chiefs, Saints and
+	// Lions. Four collides none. These are the real all-time figures for the
+	// pair that prompted it, and a table whose job is ranking must not print
+	// one number for two clubs.
+	const cowboys = (576 + 7 / 2) / (576 + 432 + 7)
+	const packers = (819 + 39 / 2) / (819 + 611 + 39)
+	assert.equal(cowboys.toFixed(3), packers.toFixed(3), 'the premise no longer holds')
+	assert.notEqual(pct(cowboys), pct(packers))
+	assert.equal(pct(cowboys), '.5709')
+	assert.equal(pct(packers), '.5708')
 })
 
 test('a perfect record keeps its leading one', () => {
-	// "1.000" is read instantly and ".000" is the opposite number, so stripping
-	// the zero cannot be unconditional.
-	assert.equal(pct(1), '1.000')
+	// "1.0000" is read instantly and ".0000" is the opposite number, so
+	// stripping the zero cannot be unconditional.
+	assert.equal(pct(1), '1.0000')
 })
 
 test('the percentage rounds rather than truncating', () => {
-	// .9615 is 1929's 12-0-1 with ties counted half, and it is .962 in every
-	// record book that prints it.
-	assert.equal(pct(0.9615), '.962')
-	assert.equal(pct(0.5556), '.556')
-
-	// And an exact-looking half is not one. 0.5555 is stored slightly BELOW
-	// half, so it rounds down — which is JavaScript's number representation
-	// rather than anything this function decides, and is worth pinning so the
-	// next person does not read it as a bug and "fix" it.
-	assert.equal(pct(0.5555), '.555')
+	assert.equal(pct(0.96155), '.9616')
+	// And an exact-looking half is not one. 0.55555 is stored slightly BELOW
+	// half, so it rounds down — JavaScript's number representation rather than
+	// anything this function decides, pinned so it is not read as a bug.
+	assert.equal(pct(0.55555), '.5555')
 })
