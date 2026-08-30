@@ -99,14 +99,24 @@ WHERE (SELECT authority FROM source WHERE id = EXCLUDED.source)
  */
 async function ensureSource(sportId, path, cfg, label) {
 	if (existsSync(path)) return true;
-	if (!cfg?.url || typeof cfg.url !== 'string') {
+	// An environment variable outranks a declared URL, and for some sources it
+	// is the only option: Retrosheet publishes downloads rather than releases,
+	// so a baseball deployment hosts its own copy and names it here rather than
+	// hardcoding a private address into a public repository.
+	const url = (cfg?.env && process.env[cfg.env]) || cfg?.url;
+	if (!url || typeof url !== 'string') {
 		console.error(`missing ${path}`);
-		console.error(`  ${label} has no download URL in sports/${sportId}.js — it has to be put there by hand.`);
+		console.error(cfg?.env
+			? `  ${label} has no URL. Set ${cfg.env}, or put the file at ${path} by hand.`
+			: `  ${label} has no download URL in sports/${sportId}.js — it has to be put there by hand.`);
 		return false;
 	}
 	mkdirSync(dirname(path), { recursive: true });
 	console.log(`  fetching     ${label} ...`);
-	const bytes = await download(cfg.url, path);
+	// An options object, not a positional flag. Passing the boolean
+	// destructures to gunzip=false, so the file lands still compressed and the
+	// CSV parser reads gzip magic bytes as a header row.
+	const bytes = await download(url, path, { gunzip: Boolean(cfg.gzipped) });
 	console.log(`  fetched      ${label}  ${(bytes / 1048576).toFixed(1)} MB`);
 	return true;
 }

@@ -61,6 +61,21 @@ export const sources = {
 		// appear in any scope, because scopes come from the divisions table.
 		file: 'gameinfo.csv',
 		perSeason: false,
+		gzipped: true,
+		/** Where to fetch it from, named rather than written here.
+		 *
+		 *  There is no public URL to hardcode: Retrosheet publishes downloads
+		 *  rather than releases, so this file is hosted by whoever runs the
+		 *  deployment. Naming the variable instead of the URL keeps a private
+		 *  host out of a public repository, and means a container can load
+		 *  baseball unaided the way it already loads football.
+		 *
+		 *  Serve the eight columns this reads — gid, season, date, gametype,
+		 *  hometeam, visteam, hruns, vruns — gzipped. That is 1.6MB against the
+		 *  full file's 43MB, and the other thirty-five columns are umpires,
+		 *  weather and attendance that nothing here looks at.
+		 */
+		env: 'MLB_SCHEDULES_URL',
 	},
 	playByPlay: {
 		file: 'plays.lfs.csv',
