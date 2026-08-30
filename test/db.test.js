@@ -359,6 +359,48 @@ test('schema', { skip: !DATABASE_URL && 'no DATABASE_URL — constraints and the
 		})
 	})
 
+	await t.test('only one process refreshes at a time', async () => {
+		// The server refreshes the season being played on a timer. Every replica
+		// runs that timer, so without a lock they would all fetch the same nine
+		// URLs on the same schedule and write the same rows — the objection
+		// CLAUDE.md raises against a database per container, arriving from the
+		// other side.
+		//
+		// Two SESSIONS, not two queries: an advisory lock belongs to the session
+		// that took it, and a pool does not guarantee the same one twice.
+		const { lockKeyFor, withLock } = await import('../lib/live.js')
+		const other = new pg.Client({ connectionString: DATABASE_URL })
+		await other.connect()
+		try {
+			const key = lockKeyFor('test-sport')
+			let ranInside = false
+			const outcome = await withLock(client, key, async () => {
+				// While this one holds it, the other must be turned away rather
+				// than queued — a refresh already running should be skipped, not
+				// stacked up behind itself.
+				const blocked = await withLock(other, key, async () => { ranInside = true; return 'ran' })
+				assert.deepEqual(blocked, { skipped: true })
+				assert.equal(ranInside, false)
+				return 'held'
+			})
+			assert.equal(outcome, 'held')
+
+			// And released afterwards, or the first refresh would be the last.
+			const after = await withLock(other, key, async () => 'free')
+			assert.equal(after, 'free')
+		} finally {
+			await other.end()
+		}
+	})
+
+	await t.test('a refresh that throws still releases the lock', async () => {
+		const { lockKeyFor, withLock } = await import('../lib/live.js')
+		const key = lockKeyFor('test-throw')
+		await assert.rejects(() => withLock(client, key, async () => { throw new Error('boom') }), /boom/)
+		// If the finally clause were missing this would be skipped forever.
+		assert.equal(await withLock(client, key, async () => 'free'), 'free')
+	})
+
 	await t.test('what a backup must protect is answerable as a query', async () => {
 		// Not "is zero" — a live capture legitimately makes it non-zero until
 		// upstream publishes. The point is that the question has an answer.

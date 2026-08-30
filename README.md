@@ -265,6 +265,31 @@ Bears.
 
 ## The season being played
 
+The server keeps it current itself. Every two minutes by default; set
+`LIVE_REFRESH_MS=0` to turn it off, or to something else in milliseconds.
+
+```
+live         refreshing mlb every 120s
+live         mlb 2026: 2450 rows
+```
+
+**The request path never calls out.** The two live sites fetch ESPN from the
+browser on every page load, which is why they are never stale — and it puts a
+third party in the request path, needs client script this repo does not have,
+and breaks when ESPN does. Here the timer writes to Postgres and the game cache
+picks the rows up on its own, because it is already keyed on
+`max(observed_at)`.
+
+**One poller, however many containers.** A Postgres advisory lock decides which
+replica refreshes; the rest are turned away rather than queued, so a refresh
+already running is skipped instead of stacking up. Verified with two servers
+against one database: one wrote five times, the other never.
+
+The manual load still exists and is what a deployment wants if it would rather
+schedule the work itself:
+
+
+
 Retrosheet is authoritative and published annually — the file supplied on
 2026-08-30 ends at the 2025 World Series. So on any day of a season the
 authoritative source has nothing for it, and a club page answers about a season

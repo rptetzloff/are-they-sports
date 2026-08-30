@@ -240,6 +240,12 @@ export const sport = {
 	gameRow,
 	isScoringPlay,
 	scoringRow,
+	// The live feed's mappers belong here too. `loadSports` hands the server
+	// each adapter's DEFAULT export, and these were only named exports — the
+	// command-line loader imported the whole module namespace, so nothing showed
+	// until the server tried to call them. Declared below and hoisted.
+	liveGameRow,
+	numberEvents,
 	gameKey: 'gid',
 };
 
