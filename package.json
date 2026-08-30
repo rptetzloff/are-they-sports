@@ -12,7 +12,9 @@
     "build": "node --max-old-space-size=3000 scripts/build.mjs",
     "test": "node --test",
     "start": "node server.js",
-    "dev": "node server.js"
+    "dev": "node server.js",
+    "migrate": "node scripts/migrate.mjs",
+    "load": "node scripts/load.mjs"
   },
   "dependencies": {
     "pg": "^8.23.0"

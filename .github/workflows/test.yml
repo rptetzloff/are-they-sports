@@ -1,0 +1,72 @@
+# Tests, with a real Postgres.
+#
+# The database tests skip without DATABASE_URL, which meant nothing was checking
+# the schema, the constraints or the upsert rule. A service container fixes that
+# for everything except the assertions that need loaded data — those want 490MB
+# of fetched sources, so they skip here and say why.
+#
+# Postgres 18 because that is what the server runs. The schema applies cleanly to
+# 17 as well and was developed against it, but CI should match production rather
+# than match the laptop.
+
+name: test
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: ats_test
+        ports:
+          - 5432:5432
+        # Without this the job can connect before the server is accepting
+        # connections, which fails intermittently and looks like a flaky test.
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgres://postgres:test@localhost:5432/ats_test
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      # `ci`, not `install`: it fails on a lockfile that disagrees with
+      # package.json rather than quietly resolving something new.
+      - run: npm ci
+
+      - name: Apply migrations
+        run: node scripts/migrate.mjs
+
+      - name: Migrations are idempotent
+        # A second run must do nothing. If this ever fails, a migration is not
+        # safe to point at a server.
+        run: node scripts/migrate.mjs
+
+      - run: npm test
+
+      - name: Report what this run could not cover
+        if: always()
+        # Loud rather than implied. A green run here does NOT mean the loaded-data
+        # assertions passed — the Packers record and the Bears series need
+        # scripts/load.mjs, which needs sources this job does not fetch.
+        run: |
+          echo "Covered: pure functions, rendering, scope, routing, schema constraints, upsert rules."
+          echo "NOT covered: assertions against loaded data (Packers 856-639-39, Bears series 213)."
+          echo "Those need 490MB of fetched sources and are skipped with a reason."
