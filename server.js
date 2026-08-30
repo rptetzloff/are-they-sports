@@ -31,8 +31,10 @@ import { readdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { availability, close, connect, franchiseForCodes, franchisesWithGames, gamesFor, health } from './lib/store.js';
-import { latestSeason, recordText, seasonTally, seasonVerdict, verdictText } from './lib/core.js';
-import { NEUTRAL, clubPage, selectorPage } from './lib/render.js';
+import {
+	lastLosslessSeason, latestSeason, recordText, seasons, seasonTally, seasonVerdict, streakBanner, verdictText,
+} from './lib/core.js';
+import { NEUTRAL, clubPage, scheduleHtml, seasonNav, selectorPage } from './lib/render.js';
 import { resolver } from './lib/names.js';
 import { SPORTS, loadTeams } from './lib/teams.js';
 import { matchRoute, parseView, routeTable } from './lib/routes.js';
@@ -339,26 +341,71 @@ function main() {
 			const view = parseView(rest);
 			if (!view) return json(res, 404, { error: 'no such view', path: url.pathname });
 
+			/** Everything a club page shows, for one season.
+			 *
+			 *  Shared by the front page (the latest season) and /{season}, so the
+			 *  two cannot drift into showing different things about the same
+			 *  club — which is how the football site ended up with a front page
+			 *  and a season page that disagreed.
+			 */
+			const renderSeason = async (season) => {
+				const team = teamsById.get(entry.teamId);
+				const all = await games(entry);
+				const allSeasons = seasons(all);
+				const rows = all.filter((g) => g.season === season);
+				if (!rows.length) return null;
+
+				const played = rows.filter((g) => g.result);
+				const isPastSeason = rows.every((g) => g.result !== '');
+				const tally = seasonTally(rows, team);
+				const verdict = seasonVerdict({ ...tally, isPastSeason });
+
+				// Opponent names are resolved here because resolution is per
+				// sport and dated: a 1969 Brewers opponent is not called what it
+				// is called now, and the renderer should not know that.
+				const resolve = namers[entry.sport];
+				const withNames = rows.map((g) => ({ ...g, opponentName: resolve(g.Opponent, g.date).name }));
+
+				const allPlayed = all.filter((g) => g.result);
+				return clubPage({
+					team,
+					season,
+					tally,
+					verdict,
+					answer: verdictText(verdict, team),
+					recordLabel: recordText(tally),
+					banner: streakBanner(played.filter((g) => g.regular_season === '1'), { isPastSeason, team }),
+					schedule: scheduleHtml(withNames, { heading: `${season} schedule` }),
+					nav: seasonNav(allSeasons, season, entry.base),
+					lastLossless: lastLosslessSeason(all),
+					allTime: {
+						record: recordText({
+							wins: allPlayed.filter((g) => g.result === 'WIN').length,
+							losses: allPlayed.filter((g) => g.result === 'LOSS').length,
+							ties: allPlayed.filter((g) => g.result === 'TIE').length,
+						}),
+						played: allPlayed.length,
+						first: allSeasons[0],
+						last: allSeasons.at(-1),
+					},
+				});
+			};
+
 			try {
 				if (view.view === 'summary') {
 					if (wantsJson(url)) return json(res, 200, await summary(entry, origin, entry.base));
-					const team = teamsById.get(entry.teamId);
 					const latest = latestSeason(await games(entry));
-					const tally = seasonTally(latest.rows, team);
-					const verdict = seasonVerdict({ ...tally, isPastSeason: latest.isPastSeason });
-					return html(res, 200, clubPage({
-						team,
-						season: latest.season,
-						tally,
-						verdict,
-						answer: verdictText(verdict, team),
-						recordLabel: recordText(tally),
-					}));
+					return html(res, 200, await renderSeason(latest.season));
 				}
 				if (view.view === 'season') {
-					const rows = await games(entry, view.season);
-					if (!rows.length) return json(res, 404, { error: 'no such season', season: view.season });
-					return json(res, 200, { team: entry.teamId, season: view.season, games: rows });
+					if (wantsJson(url)) {
+						const rows = await games(entry, view.season);
+						if (!rows.length) return json(res, 404, { error: 'no such season', season: view.season });
+						return json(res, 200, { team: entry.teamId, season: view.season, games: rows });
+					}
+					const body = await renderSeason(view.season);
+					if (!body) return json(res, 404, { error: 'no such season', season: view.season });
+					return html(res, 200, body);
 				}
 				// records and vs need the shared core, which has not been ported.
 				// Saying so beats an empty 200 that looks like a club with no

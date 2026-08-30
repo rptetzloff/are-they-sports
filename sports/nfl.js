@@ -126,16 +126,22 @@ export function seedGameRow(r, teamId) {
 	const scoreFor = isHome ? r.score1 : r.score2;
 	const scoreAgainst = isHome ? r.score2 : r.score1;
 	const f = parseInt(scoreFor, 10), a = parseInt(scoreAgainst, 10);
-	// `playoff` is empty for regular-season games and otherwise a round code.
-	const isPlayoff = Boolean(r.playoff);
+	// `playoff` is "0" or "1" in this file. It is NOT empty-or-a-round-code,
+	// which is what this line assumed for months: Boolean('0') is true, so every
+	// pre-1999 game was marked a playoff game — all 1,064 of the Packers'.
+	// `playoff === '1'` gives 32, which is what the live site's data says.
+	const isPlayoff = r.playoff === '1';
 
 	return {
 		date: r.date,
 		season: r.season,
 		regular_season: isPlayoff ? '0' : '1',
 		playoff: isPlayoff ? '1' : '0',
-		// 's' is the Super Bowl in this file's round codes.
-		championship: r.playoff === 's' ? String(r.season) : '',
+		// Never set from this source. The file has a 0/1 playoff flag and no round
+		// detail at all, so 's' — which this line looked for — appears nowhere in
+		// it. Marking a championship needs either era-correct naming for the
+		// pre-Super-Bowl titles or a curated table; see scripts/load.mjs.
+		championship: '',
 		Opponent: isHome ? away : home,
 		result: f > a ? 'WIN' : f < a ? 'LOSS' : 'TIE',
 		scoreFor,
@@ -145,6 +151,19 @@ export function seedGameRow(r, teamId) {
 		location: r.neutral === '1' ? 'neutral' : isHome ? 'home' : 'away',
 		gid: `${r.date}-${home}-${away}`,
 	};
+}
+
+/** Which round a FiveThirtyEight row belongs to.
+ *
+ *  Exported because scripts/load.mjs had its own copy of this decision, which is
+ *  how the same wrong reading of the `playoff` column ended up in two places —
+ *  and only one of them had a test.
+ *
+ *  The column holds "0" or "1" and nothing else: 16,220 and 590 rows. It is not
+ *  empty-or-a-round-code, so there is no championship to read here at all.
+ */
+export function seedRound(r) {
+	return r.playoff === '1' ? 'playoff' : 'regular';
 }
 
 /** Whether a play-by-play row is one the site would ever display.
@@ -218,6 +237,7 @@ export const sport = {
 	seedGameRow,
 	isScoringPlay,
 	scoringRow,
+	seedRound,
 	/** The column identifying a game across sources, so the builder can key an
 	 *  index without knowing the sport. */
 	gameKey: 'game_id',
