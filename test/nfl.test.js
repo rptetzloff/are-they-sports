@@ -166,3 +166,26 @@ test('no seed row ever yields a NaN score', () => {
 		assert.ok(Number.isFinite(parseInt(r.scoreAgainst, 10)), `scoreAgainst NaN for ${JSON.stringify(over)}`)
 	}
 })
+
+test('both football sources produce the same row shape', () => {
+	// The seam is asserted from baseball's side in mlb.test.js against a list
+	// written out by hand. Football has TWO sources feeding one shape, and they
+	// have drifted before — so they are compared to each other here, which is
+	// the check that would have caught `week` being added to nflverse rows and
+	// not to the pre-1999 seed.
+	const modern = Object.keys(gameRow(sched(), 'GB')).sort()
+	const fromSeed = Object.keys(seedGameRow(seed(), 'GB')).sort()
+	assert.deepEqual(fromSeed, modern)
+	assert.ok(modern.includes('week'), 'week is missing from the row shape')
+})
+
+test('the week comes from nflverse and is absent from the seed', () => {
+	// Asserted as values, not just as a key. Two mutants survived a run that
+	// only checked the shape: one made nflverse rows carry no week, the other
+	// gave every pre-1999 game week 1. Both are silent — the schedule page just
+	// groups differently.
+	assert.equal(gameRow(sched({ week: '5' }), 'GB').week, 5)
+	assert.equal(gameRow(sched({ week: '' }), 'GB').week, null)
+	// The FiveThirtyEight file has no week column at all, and null says so.
+	assert.equal(seedGameRow(seed(), 'GB').week, null)
+})

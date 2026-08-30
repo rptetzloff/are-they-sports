@@ -98,6 +98,12 @@ export function gameRow(r, teamId) {
 		scoreAgainst,
 		location: isHome ? 'home' : 'away',
 		gid: r.game_id,
+		// The real week, never derived. Deriving it from dates was measured
+		// against these very rows and is wrong for 17.7% of games (322 of 1,816
+		// across four clubs), because a postponement shifts every week after it:
+		// 2001 lost week 2 to 9/11 and replayed it at the end of the season, so
+		// a 7-day bucket is off by one from that point on.
+		week: r.week ? Number(r.week) : null,
 	};
 }
 
@@ -150,6 +156,10 @@ export function seedGameRow(r, teamId) {
 		// is neither home nor away and says so.
 		location: r.neutral === '1' ? 'neutral' : isHome ? 'home' : 'away',
 		gid: `${r.date}-${home}-${away}`,
+		// Null, not zero and not a guess. This source has no week column, so
+		// every pre-1999 season genuinely has no week numbers and the schedule
+		// page says so rather than inventing them.
+		week: null,
 	};
 }
 
@@ -225,6 +235,17 @@ export const defaults = {
 		 *  a sport playing seventeen games a year has empty calendar dates by
 		 *  the hundred and an exact match would hide the panel most days. */
 		onThisDayWindowDays: 3,
+		/** How a whole-league schedule is grouped. Football plays one round a
+		 *  week and everyone means "week 4" when they say it; baseball plays
+		 *  most days and a week is not a unit anyone uses.
+		 *
+		 *  Declared rather than branched on, because "if sport is football" in a
+		 *  renderer is exactly the seam this repo keeps moving out of code. A
+		 *  sport whose source has no week still declares `week` — the schedule
+		 *  falls back to dates per season and says the weeks are unknown, which
+		 *  is what pre-1999 football does.
+		 */
+		schedulePeriod: 'week',
 	},
 };
 
