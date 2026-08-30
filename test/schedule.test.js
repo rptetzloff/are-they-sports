@@ -216,3 +216,38 @@ test('the period is the sport\'s, even when the rows carry weeks', () => {
 	assert.equal(s.periods.length, 2, 'two dates were collapsed into one week')
 	assert.deepEqual(s.periods.map((p) => p.kind), ['date', 'date'])
 })
+
+test('both clubs in a fixture are identified, not just one', () => {
+	// Ids came from whichever perspective won the dedupe, so exactly one side of
+	// every game carried one and the other rendered as plain text — even when
+	// both clubs were in scope with pages of their own. Half the links on a
+	// league schedule were silently missing.
+	const s = computeSchedule([
+		{ team: club('packers', 'GB'), rows: [g({ gid: 'x', Opponent: 'CHI', location: 'home' })] },
+		{ team: club('bears', 'CHI'), rows: [g({ gid: 'x', Opponent: 'GB', location: 'away' })] },
+	])
+	const [fixture] = s.periods[0].games
+	assert.equal(fixture.homeId, 'packers')
+	assert.equal(fixture.awayId, 'bears')
+})
+
+test('a club outside the scope has no id, because it has no page here', () => {
+	// The other half. An opponent this deployment does not serve must render as
+	// a name rather than a link to a 404.
+	const s = computeSchedule([
+		{ team: club('packers', 'GB'), rows: [g({ gid: 'x', Opponent: 'DAL', location: 'home' })] },
+	])
+	const [fixture] = s.periods[0].games
+	assert.equal(fixture.homeId, 'packers')
+	assert.equal(fixture.awayId, null)
+})
+
+test('a club is identified by any code it has ever used', () => {
+	// The Raiders are OAK and LV, and a schedule row may carry either.
+	const raiders = { id: 'raiders', sport: 'nfl', sourceIds: ['OAK', 'LV'], nouns: { team: 'Raiders', fullName: 'Raiders' } }
+	const s = computeSchedule([
+		{ team: club('packers', 'GB'), rows: [g({ gid: 'x', Opponent: 'LV', location: 'home' })] },
+		{ team: raiders, rows: [] },
+	])
+	assert.equal(s.periods[0].games[0].awayId, 'raiders')
+})

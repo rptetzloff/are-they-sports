@@ -150,7 +150,26 @@ test('the title table counts wins, and clubs with none are absent', () => {
 	])
 	assert.deepEqual(l.titles.map((t) => `${t.club} ${t.won}/${t.appearances}`),
 		['Packers 2/3', 'Bears 1/1'])
-	assert.deepEqual(l.titles[0].seasons, [1966, 1967])
+	// The championships themselves, newest first, each carrying what it was —
+	// "2 of 3" alone reads as a title count and for the Packers collides with
+	// their thirteen actual championships and thirteen title-game appearances.
+	assert.deepEqual(l.titles[0].wins.map((w) => w.season), [1967, 1966])
+	assert.deepEqual(l.titles[0].lost.map((w) => w.season), [1997])
+	assert.equal(l.titles[0].superBowls, 2)
+	assert.equal(l.titles[0].wins[0].title, 'Super Bowl')
+})
+
+test('a club with more Super Bowls outranks one with the same total', () => {
+	// Equal championships, and the modern one is what anyone is counting.
+	const win = (year, title) => season(year, 'W', {
+		regular_season: '0', playoff: '1', championship: String(year),
+		championshipTitle: title, gid: `t${year}`,
+	})
+	const l = computeLeague([
+		{ team: club('CHI', 'Bears'), rows: [...win(1940, 'NFL Championship'), ...win(1985, 'Super Bowl')] },
+		{ team: club('NYG', 'Giants'), rows: [...win(1986, 'Super Bowl'), ...win(1990, 'Super Bowl')] },
+	])
+	assert.deepEqual(l.titles.map((t) => `${t.club} ${t.superBowls}`), ['Giants 2', 'Bears 1'])
 })
 
 test('a club can place more than one entry in a league list', () => {
