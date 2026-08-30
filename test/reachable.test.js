@@ -109,3 +109,54 @@ test('a league page carries the nav above its content', () => {
 	const firstCard = html.indexOf('record-card', html.indexOf('</style>'))
 	assert.ok(firstNav > 0 && firstNav < firstCard, 'the nav is not above the content')
 })
+
+// --- one block per sport ---
+
+test('a scope covering two sports renders them separately, each labelled', () => {
+	// It used to rank football seasons against baseball ones in one list and
+	// print a note admitting the lists compared clubs that never played each
+	// other. The note was true and the page was still a pile.
+	const html = leagueRecordsPage({
+		league: { ...EMPTY_LEAGUE, clubs: 32, seasonRange: { first: 1920, last: 2025 } },
+		label: 'NFL',
+		more: [{ label: 'MLB', league: { ...EMPTY_LEAGUE, clubs: 30, seasonRange: { first: 1897, last: 2025 } } }],
+		heading: 'Every club', colors: COLORS, clubs: [],
+	})
+	const labels = [...html.matchAll(/<h2 class="league-heading">([^<]*)<\/h2>/g)].map((m) => m[1])
+	assert.deepEqual(labels, ['NFL', 'MLB'])
+	// Two season ranges, one per block, rather than one spanning both sports.
+	assert.ok(html.includes('1920–2025'))
+	assert.ok(html.includes('1897–2025'))
+})
+
+test('a single-sport scope is not labelled at all', () => {
+	// Nothing to tell it apart from, so a heading would be noise. This is also
+	// what every existing deployment sees, and it must not change.
+	const html = leagueRecordsPage({
+		league: EMPTY_LEAGUE, label: 'NFL', heading: 'NFC North', colors: COLORS, clubs: [],
+	})
+	assert.equal(html.includes('league-heading'), false)
+})
+
+test('each sport keeps its own period rule on the schedule', () => {
+	// Football groups by week and baseball by date. Merged, the page claimed
+	// weeks were known because SOME games had them, and sorted 22 week-periods
+	// against 209 date-periods.
+	const wk = (n) => ({ key: `w${n}`, kind: 'week', week: n, date: null, games: [] })
+	const dy = (d) => ({ key: `d${d}`, kind: 'date', week: null, date: d, games: [] })
+	const html = leagueSchedulePage({
+		schedule: { season: 2025, seasons: [2025], periods: [wk(1)], weeksKnown: true, games: 285 },
+		label: 'NFL', periodNoun: 'Week',
+		more: [{
+			label: 'MLB', periodNoun: 'Games',
+			schedule: { season: 2025, seasons: [2025], periods: [dy('2025-03-18')], weeksKnown: false, games: 2228 },
+		}],
+		heading: 'Every club', colors: COLORS, resolve: (c) => ({ name: c }), clubs: [],
+	})
+	assert.deepEqual([...html.matchAll(/<h2 class="league-heading">([^<]*)<\/h2>/g)].map((m) => m[1]), ['NFL', 'MLB'])
+	assert.ok(html.includes('<h2>Week 1</h2>'), 'football is not grouped by week')
+	assert.ok(/<h2>[A-Z][a-z]{2}, Mar 18<\/h2>/.test(html), 'baseball is not grouped by date')
+	// And the "no weeks recorded" note belongs to baseball, not to the page.
+	assert.equal((html.match(/No week numbers are recorded/g) ?? []).length, 0,
+		'the note fired for a sport that does not use weeks')
+})

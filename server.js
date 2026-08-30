@@ -425,21 +425,38 @@ function main() {
 				for (const e of withGames) {
 					clubs.push({ team: clubFor(e), rows: await games(e) });
 				}
-				// The sport's own unit, declared in sports/<id>.js — football
-				// plays a round a week, baseball plays most days. Mixed scopes
-				// take the first club's, which is the same compromise /records
-				// makes and is why `all` is not a sensible schedule scope.
-				const first = clubFor(withGames[0]);
-				const period = first?.rules.schedulePeriod ?? 'week';
-				const schedule = computeSchedule(clubs, { season: sched, period });
-				if (wantsJson(url)) return json(res, 200, schedule);
+				// One schedule per sport, each grouped by its own unit. Football
+				// plays a round a week and baseball plays most days, and a mixed
+				// scope used to take the first club's rule for everything — so an
+				// `all` scope put 22 NFL week-periods and 209 MLB date-periods in
+				// one list, sorted against each other.
+				const bySport = [...new Set(withGames.map((e) => e.sport))].map((sport) => {
+					const inSport = clubs.filter((c) => c.team?.sport === sport);
+					const period = inSport[0]?.team?.rules.schedulePeriod ?? 'week';
+					return {
+						label: sport.toUpperCase(),
+						periodNoun: period === 'week' ? 'Week' : 'Games',
+						schedule: computeSchedule(inSport, { season: sched, period }),
+					};
+				});
+				const [firstSport, ...otherSports] = bySport;
+				const schedule = firstSport.schedule;
+				if (wantsJson(url)) {
+					// Keyed by sport in JSON too, rather than one merged list that
+					// a reader would have to unpick.
+					return json(res, 200, bySport.length > 1
+						? Object.fromEntries(bySport.map((g) => [g.label.toLowerCase(), g.schedule]))
+						: schedule);
+				}
 				return html(res, 200, leagueSchedulePage({
 					schedule,
 					heading: scopeHeading(scope, table),
 					colors: NEUTRAL,
 					resolve: namers[withGames[0]?.sport ?? 'nfl'],
 					clubs: clubList(),
-					periodNoun: period === 'week' ? 'Week' : 'Games',
+					periodNoun: firstSport.periodNoun,
+					label: firstSport.label,
+					more: otherSports,
 					switcher: clubSwitcher(clubList(), null, ''),
 				}));
 			}
@@ -454,17 +471,38 @@ function main() {
 				for (const e of withGames) {
 					clubs.push({ team: clubFor(e), rows: await games(e) });
 				}
-				// One sport's rule, and only one sport's. A scope spanning both
-				// would have to pick, and the honest answer is that a combined
-				// football-and-baseball record book is not a thing anyone wants —
-				// so `all` gets the league table per sport and nothing merged.
+				// One league per sport, never merged. A scope spanning both used
+				// to rank football seasons against baseball ones and print a note
+				// admitting the lists compared clubs that never played each
+				// other — the note was true and the page was still a pile.
+				//
+				// It also fixes a rule that had to be fudged: streaks span
+				// seasons in football and not in baseball, and a merged league
+				// had to pick one. Per sport, each uses its own.
 				const sports = [...new Set(withGames.map((e) => e.sport))];
-				const league = computeLeague(clubs, {
-					top: 10,
-					streaksSpanSeasons: sports.length === 1
-						? (clubFor(withGames[0])?.rules.streaksSpanSeasons ?? true)
-						: true,
+				const leagues = sports.map((sport) => {
+					const inSport = clubs.filter((c) => c.team?.sport === sport);
+					return {
+						// The scope's own word for the sport, uppercased: NFL, MLB,
+						// and NBA or MLS when those arrive. The adapter's `name` is
+						// "football" and "baseball", which reads oddly as a heading
+						// over a table of clubs.
+						label: sport.toUpperCase(),
+						league: computeLeague(inSport, {
+							top: 10,
+							// Each sport's own rule now, rather than one picked for
+							// a merged league: streaks span seasons in football and
+							// stop at the boundary in baseball.
+							streaksSpanSeasons: inSport[0]?.team?.rules.streaksSpanSeasons ?? true,
+						}),
+					};
 				});
+				const [first, ...rest] = leagues;
+				const league = first.league;
+				// The first league needs its label too. Passing only the REST of
+				// them left the primary block headed "League" while the second
+				// said "MLB" — the label was computed and then dropped.
+				const label = first.label;
 				if (wantsJson(url)) return json(res, 200, league);
 				return html(res, 200, leagueRecordsPage({
 					league,
@@ -472,7 +510,9 @@ function main() {
 					heading: scopeHeading(scope, table),
 					colors: NEUTRAL,
 					clubs: clubList(),
-					mixedSports: sports.length > 1,
+					more: rest,
+					label,
+					resolve: namers[withGames[0]?.sport ?? 'nfl'],
 					// The same control a club page carries, so a league page is
 					// not a dead end for anyone wanting one club.
 					switcher: clubSwitcher(clubList(), null, ''),
