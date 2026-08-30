@@ -1,0 +1,58 @@
+# Club colours for baseball.
+#
+# CURATED FROM KNOWLEDGE, NOT FROM A PUBLISHED SOURCE, and that is the
+# difference between this file and data/reference/nfl-franchise-history.csv.
+# That one arrived as data — every franchise, every era, colours included. This
+# one was written by hand because Retrosheet publishes no colours at all, and it
+# should be replaced by a real table the moment one exists.
+#
+# Two consequences worth knowing before trusting it:
+#
+#   no eras      one row per franchise, current colours only. Football renders a
+#                1930 page in the palette of 1930; baseball cannot, and will
+#                show a 1969 Pilots page in Brewers navy until this file grows a
+#                season span like the football one has.
+#   unverified   MIL is the exception: #12284b and #ffc52f are taken from
+#                arethebrewersontv.com's own stylesheet, where #ffc52f appears
+#                111 times. Every other row is a best recollection of a club's
+#                primary and secondary and has not been checked against
+#                anything.
+#
+# `base` is the page ground and wants to be the darker of a club's two colours;
+# `accent` is the bright one. That is not always a club's own primary — the
+# Cardinals lead with red, but red as a full-page ground is unreadable, so navy
+# is the base and red the accent. Where a club's palette is genuinely dark on
+# dark, black is used as the ground.
+#
+# `code` is the Retrosheet franchise code.
+code,name,base,accent,verified
+ARI,Arizona Diamondbacks,#1D1D1D,#A71930,no
+ATL,Atlanta Braves,#13274F,#CE1141,no
+BAL,Baltimore Orioles,#1D1D1D,#DF4601,no
+BOS,Boston Red Sox,#0C2340,#BD3039,no
+CHA,Chicago White Sox,#27251F,#C4CED4,no
+CHN,Chicago Cubs,#0E3386,#CC3433,no
+CIN,Cincinnati Reds,#1D1D1D,#C6011F,no
+CLE,Cleveland Guardians,#0C2340,#E31937,no
+COL,Colorado Rockies,#33006F,#C4CED4,no
+DET,Detroit Tigers,#0C2340,#FA4616,no
+HOU,Houston Astros,#002D62,#EB6E1F,no
+KCA,Kansas City Royals,#004687,#BD9B60,no
+ANA,Los Angeles Angels,#003263,#BA0021,no
+LAN,Los Angeles Dodgers,#005A9C,#EF3E42,no
+MIA,Miami Marlins,#1D1D1D,#00A3E0,no
+MIL,Milwaukee Brewers,#12284b,#ffc52f,yes
+MIN,Minnesota Twins,#002B5C,#D31145,no
+NYA,New York Yankees,#003087,#E4002C,no
+NYN,New York Mets,#002D72,#FF5910,no
+ATH,Athletics,#003831,#EFB21E,no
+PHI,Philadelphia Phillies,#002D72,#E81828,no
+PIT,Pittsburgh Pirates,#27251F,#FDB827,no
+SDN,San Diego Padres,#2F241D,#FFC425,no
+SFN,San Francisco Giants,#27251F,#FD5A1E,no
+SEA,Seattle Mariners,#0C2C56,#C4CED4,no
+SLN,St. Louis Cardinals,#0C2340,#C41E3A,no
+TBA,Tampa Bay Rays,#092C5C,#8FBCE6,no
+TEX,Texas Rangers,#003278,#C0111F,no
+TOR,Toronto Blue Jays,#134A8E,#E8291C,no
+WAS,Washington Nationals,#14225A,#AB0003,no

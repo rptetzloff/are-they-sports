@@ -17,7 +17,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import pg from 'pg';
 import { csvRows, parseCsv } from '../lib/csv.js';
-import { loadHistory, mlbIndex, nflIndex } from '../lib/names.js';
+import { loadHistory, mlbIndex, nflIndex, resolver } from '../lib/names.js';
 import { download } from './fetch.mjs';
 import { isoDate } from '../sports/mlb.js';
 import { seedRound } from '../sports/nfl.js';
@@ -211,6 +211,69 @@ async function main() {
 				neutral: false, status: played ? 'final' : 'scheduled', source: 'retrosheet',
 			});
 		}
+	}
+
+	// Championship games, marked after the fact.
+	//
+	// Neither football source says which playoff game was the title. nflverse
+	// has a game_type of SB from 1999; the FiveThirtyEight file has a 0/1
+	// playoff flag and nothing else. But the last playoff game of a league in a
+	// season is that league's championship, and that is derivable.
+	//
+	// Per LEAGUE, not per season, and the difference is not academic: in 1960
+	// and 1963 the AFL title game was played after the NFL one, so taking the
+	// last game of the season alone would mark the AFL championship and miss the
+	// NFL one — including the Bears' 1963 title.
+	//
+	// A season's final game between clubs of DIFFERENT leagues is the Super
+	// Bowl, which is what 1966 through 1969 looked like: an NFL championship, an
+	// AFL championship, and then the two winners meeting.
+	if (sportId === 'nfl') {
+		const resolve = resolver('nfl');
+
+		// Reset first, so this is idempotent and so the search sees every
+		// postseason game.
+		//
+		// Without the reset it saw only round='playoff' — and nflverse already
+		// marks Super Bowls as championships from 1999, so the real final was
+		// invisible and the CONFERENCE championship got promoted in its place.
+		// The Packers' 2020 page claimed a title game they lost in January.
+		await client.query(
+			`UPDATE game SET round = 'playoff', title = NULL WHERE sport = 'nfl' AND round = 'championship'`);
+
+		const { rows: playoffs } = await client.query(
+			`SELECT id, season, date, home, away FROM game
+			 WHERE sport = 'nfl' AND round = 'playoff' ORDER BY season, date, id`);
+
+		const leagueOf = (franchise, season) => resolve(franchise, { season: String(season) }).league ?? '';
+		const finals = new Map();
+		for (const g of playoffs) {
+			const h = leagueOf(g.home, g.season);
+			const a = leagueOf(g.away, g.season);
+			// An inter-league final is the Super Bowl and is keyed on its own, so
+			// it never displaces either league's championship.
+			const key = h === a ? `${g.season}|${h}` : `${g.season}|inter`;
+			finals.set(key, g);
+		}
+
+		let marked = 0;
+		for (const [key, g] of finals) {
+			// The name, decided here because here is where the leagues are
+			// known. An inter-league final is the Super Bowl; so is every final
+			// from 1970, when the leagues merged and there was only one left.
+			// Otherwise it is that league's own championship.
+			const league = key.split('|')[1];
+			const title = league === 'inter' || Number(g.season) >= 1970
+				? 'Super Bowl'
+				: league === 'American Football League' ? 'AFL Championship'
+					: league === 'National Football League' ? 'NFL Championship'
+						: null;
+			const r = await client.query(
+				`UPDATE game SET round = 'championship', title = $2 WHERE sport = 'nfl' AND id = $1`,
+				[g.id, title]);
+			marked += r.rowCount;
+		}
+		console.log(`  championships ${marked} title games identified`);
 	}
 
 	for (const d of divisions) {

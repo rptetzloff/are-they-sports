@@ -230,3 +230,30 @@ test('a whitespace-only championship is not a championship', () => {
 	assert.equal(seasonTally([post({ championship: '   ', result: 'WIN' })], packers).championshipName, null)
 	assert.equal(seasonTally([post({ championship: '', result: 'WIN' })], packers).championshipName, null)
 })
+
+test('a championship is named by what it was, not by what the club plays for now', () => {
+	// 1936 was the NFL Championship. Calling it a Super Bowl because the club
+	// competes for one today would be wrong by thirty years — which is exactly
+	// what the manifest's noun alone would have produced.
+	const won = seasonTally([
+		post({ championship: '1936', championshipTitle: 'NFL Championship', result: 'WIN' }),
+	], packers)
+	assert.equal(won.championshipName, 'NFL Championship 1936')
+})
+
+test('the manifest noun is the fallback when the data has no title', () => {
+	// Baseball has no title column populated, and a football game whose league
+	// could not be determined gets null. Neither should render "null 1982".
+	const won = seasonTally([post({ championship: '1982', result: 'WIN' })], brewers)
+	assert.equal(won.championshipName, 'World Series 1982')
+})
+
+test('a title is only claimed when the round was won', () => {
+	// The series rule, which is what stops a losing finalist claiming a title —
+	// and it is why the Packers' 1938 and 1997 appear as title games without
+	// being titles.
+	const lost = seasonTally([
+		post({ championship: '1938', championshipTitle: 'NFL Championship', result: 'LOSS' }),
+	], packers)
+	assert.equal(lost.championshipName, null)
+})
