@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { latestSeason, recordText, seasonTally, seasonVerdict, verdictText } from '../lib/core.js'
+import { daysToNextGame, latestSeason, recordText, seasonTally, seasonVerdict, verdictText } from '../lib/core.js'
 import { loadIndex } from '../lib/indices.js'
 import { loadTeam } from '../lib/teams.js'
 
@@ -94,9 +94,46 @@ test('a season with ties and no losses is still undefeated', () => {
 test('a season that has not started gets its own answer', () => {
 	// It used to be NO. The site told a team that had not lost a game that it
 	// was not undefeated, because only two answers existed.
-	assert.equal(seasonVerdict({ wins: 0, losses: 0 }), 'not-started')
+	assert.equal(seasonVerdict({ wins: 0, losses: 0, daysToNextGame: 3 }), 'not-started')
 	assert.equal(verdictText('not-started', packers), 'GO PACK GO')
 	assert.equal(verdictText('not-started', brewers), 'GO BREW CREW')
+})
+
+test('the deep offseason is a different answer from the week before the opener', () => {
+	// Four states, not three. The football site says OFFSEASON in August and
+	// GO PACK GO once a game is close, and collapsing them made this repo
+	// answer GO PACK GO on a day the live site said OFFSEASON.
+	assert.equal(seasonVerdict({ wins: 0, losses: 0, daysToNextGame: 60 }), 'offseason')
+	assert.equal(seasonVerdict({ wins: 0, losses: 0, daysToNextGame: null }), 'offseason')
+	assert.equal(seasonVerdict({ wins: 0, losses: 0, daysToNextGame: 30 }), 'not-started')
+	assert.equal(verdictText('offseason', packers), 'OFFSEASON')
+	// Not vocabulary: both sites say the same word, and it is not a cheer.
+	assert.equal(verdictText('offseason', brewers), 'OFFSEASON')
+})
+
+test('days to the next game is measured from a given date, not the clock', () => {
+	const rows = [
+		{ result: 'WIN', date: '2026-01-01' },
+		{ result: '', date: '2026-09-13' },
+		{ result: '', date: '2026-09-20' },
+	]
+	assert.equal(daysToNextGame(rows, new Date('2026-08-29T00:00:00Z')), 15)
+	// A club with nothing left to play has no next game, which is the deep
+	// offseason rather than a season about to start.
+	assert.equal(daysToNextGame([{ result: 'WIN', date: '2026-01-01' }], new Date('2026-08-29T00:00:00Z')), null)
+})
+
+test('an unplayed game in the past is not the next game', () => {
+	// A postponed or abandoned fixture keeps its original date and never gets a
+	// result. Without the date filter it becomes "the next game", forever, and
+	// the club never reaches its offseason again.
+	const rows = [
+		{ result: '', date: '2026-03-01' },
+		{ result: '', date: '2026-09-13' },
+	]
+	assert.equal(daysToNextGame(rows, new Date('2026-08-29T00:00:00Z')), 15)
+	// And with only the stale one left, there is no next game at all.
+	assert.equal(daysToNextGame([rows[0]], new Date('2026-08-29T00:00:00Z')), null)
 })
 
 test('a finished season with no games is a data gap, not a season about to begin', () => {
@@ -106,7 +143,8 @@ test('a finished season with no games is a data gap, not a season about to begin
 
 test('no losses and at least one win is yes', () => {
 	assert.equal(seasonVerdict({ wins: 3, losses: 0 }), 'undefeated')
-	assert.equal(verdictText('undefeated', packers), 'YES')
+	// Three exclamation marks, which is what both sites say.
+	assert.equal(verdictText('undefeated', packers), 'YES!!!')
 })
 
 test('one loss is no', () => {
@@ -145,7 +183,7 @@ test('a season that has not started at all is not past', () => {
 	const l = latestSeason([g({ season: '2026', result: '' }), g({ season: '2026', result: '' })])
 	assert.equal(l.isPastSeason, false)
 	const t = seasonTally(l.rows, packers)
-	assert.equal(seasonVerdict({ ...t, isPastSeason: l.isPastSeason }), 'not-started')
+	assert.equal(seasonVerdict({ ...t, isPastSeason: l.isPastSeason, daysToNextGame: 5 }), 'not-started')
 })
 
 test('no rows at all is null rather than a crash', () => {
@@ -168,11 +206,11 @@ test('the clubs this checkout has built produce a coherent verdict', () => {
 		assert.ok(latest, `${team.id} has no seasons`)
 		const tally = seasonTally(latest.rows, team)
 		const verdict = seasonVerdict({ ...tally, isPastSeason: latest.isPastSeason })
-		assert.ok(['undefeated', 'not-started', 'no'].includes(verdict))
+		assert.ok(['undefeated', 'offseason', 'not-started', 'no'].includes(verdict))
 		// The invariant that ties the two together: the three answers are
 		// mutually exclusive and the tally has to agree with the one chosen.
 		if (verdict === 'undefeated') assert.equal(tally.losses, 0)
-		if (verdict === 'not-started') assert.equal(tally.wins + tally.losses + tally.ties, 0)
+		if (verdict === 'not-started' || verdict === 'offseason') assert.equal(tally.wins + tally.losses + tally.ties, 0)
 		assert.ok(verdictText(verdict, team).length > 0, `${team.id} renders an empty verdict`)
 	}
 })
