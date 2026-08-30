@@ -282,6 +282,19 @@ $env:MLB_SCHEDULES_URL = 'https://…/mlb-games.csv.gz'
 npm run load mlb
 ```
 
+Object storage works: the URL is whatever serves the file, including a bucket on
+the same host. **Upload it however you like** — `download` decides from the
+first two bytes of the response, not from a declared flag, so an object stored
+with `Content-Encoding: gzip` (which `fetch` transparently decompresses) and one
+stored without it both arrive as CSV. That flag existed and was exactly the
+wrong thing to trust: the file is identical either way and only the metadata
+differs.
+
+The fetch is unauthenticated, so the object needs to be readable by the
+container — anonymous read on that one object, or a bucket the internal network
+can reach. A presigned URL works but expires, which makes it a poor value for a
+persistent environment variable.
+
 Serve **only the eight columns the loader reads** — `gid, season, date,
 gametype, hometeam, visteam, hruns, vruns` — gzipped. That is **1.6MB** against
 the full file's 43MB; the other thirty-five columns are umpires, weather and

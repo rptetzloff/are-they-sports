@@ -61,7 +61,6 @@ export const sources = {
 		// appear in any scope, because scopes come from the divisions table.
 		file: 'gameinfo.csv',
 		perSeason: false,
-		gzipped: true,
 		/** Where to fetch it from, named rather than written here.
 		 *
 		 *  There is no public URL to hardcode: Retrosheet publishes downloads
