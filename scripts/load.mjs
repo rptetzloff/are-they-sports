@@ -17,6 +17,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import pg from 'pg';
 import { csvRows, parseCsv } from '../lib/csv.js';
+import { loadHistory, mlbIndex, nflIndex } from '../lib/names.js';
 import { download } from './fetch.mjs';
 import { isoDate } from '../sports/mlb.js';
 import { seedRound } from '../sports/nfl.js';
@@ -25,51 +26,39 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const SOURCE_DIR = join(ROOT, 'data', 'sources');
 const REFERENCE_DIR = join(ROOT, 'data', 'reference');
 
-/** Every franchise code seen in the sources, mapped to a canonical franchise.
+/** Every source code mapped to its canonical franchise, plus the names each
+ *  franchise carried and when.
  *
- *  The canonical id is the code the *current* club uses, which is what the
- *  divisions table lists. Everything else is an alias: SD and LAC are the same
- *  franchise, and so are MIL and SE1.
+ *  Both sports now come from a real history table — football's is
+ *  data/reference/nfl-franchise-history.csv, the file that did not exist until
+ *  it did — so the name-grouping heuristic this used to need is gone. It split
+ *  a franchise on every rename, which is how SE1 and MIL became two clubs and
+ *  the Brewers lost 163 games.
  */
-export function franchiseMap(nameRows, divisionRows) {
-	const current = new Set(divisionRows.map((r) => r.code));
-
-	// Retrosheet already answers this, in a `current` column naming the
-	// franchise a historical code belongs to. Use it when it is there.
-	//
-	// Not using it grouped by display name instead, which splits a franchise
-	// every time it was renamed: SE1 "Seattle Pilots" and MIL "Milwaukee
-	// Brewers" became two clubs, the 1969 season was orphaned, and the Brewers
-	// came back 8,904 games and 4366-4535-3 against the artifacts' 9,067 and
-	// 4430-4633-4. Football has no such column and still needs the name
-	// grouping below, which is why both paths exist.
-	if (nameRows.some((r) => r.current)) {
-		const canonical = new Map();
-		for (const r of nameRows) {
-			if (!r.code || !r.name) continue;
-			canonical.set(r.code, { franchise: r.current || r.code, name: r.name });
+export function franchiseMap(sportId, dir) {
+	const idx = sportId === 'nfl'
+		? nflIndex(loadHistory('nfl', dir))
+		: mlbIndex(loadHistory('mlb', dir));
+	const byCode = new Map();
+	const names = new Map();
+	for (const [code, spans] of idx) {
+		byCode.set(code, spans[0].franchise);
+		for (const s of spans) {
+			// One row per franchise and name, widened to the whole span that
+			// name was used. A club that took a name, dropped it and took it
+			// back — Buffalo were Bisons, Rangers, then Bisons again — is one
+			// row rather than two, which is a small lie about the gap and a
+			// large simplification for a label.
+			const key = `${s.franchise}|${s.name}`;
+			const cur = names.get(key);
+			if (!cur) names.set(key, { franchise: s.franchise, name: s.name, from: s.from, to: s.to });
+			else {
+				if (s.from < cur.from) cur.from = s.from;
+				if (s.to > cur.to) cur.to = s.to;
+			}
 		}
-		return canonical;
 	}
-
-	const byName = new Map();
-	// Group by display name, which is what ties an alias to its franchise —
-	// "Los Angeles Rams" appears under LA, LAR and STL.
-	for (const r of nameRows) {
-		if (!r.name) continue;
-		if (!byName.has(r.name)) byName.set(r.name, []);
-		byName.get(r.name).push(r.code);
-	}
-	const canonical = new Map();
-	for (const [name, codes] of byName) {
-		// The current code wins as canonical; failing that, the first listed.
-		const pick = codes.find((c) => current.has(c)) ?? codes[0];
-		for (const c of codes) canonical.set(c, { franchise: pick, name });
-	}
-	// A code with no name is still a franchise — 62 football codes are defunct
-	// clubs nobody has traced. They get themselves as canonical rather than
-	// being dropped, because a game that references them still has to load.
-	return canonical;
+	return { byCode, names: [...names.values()] };
 }
 
 const SQL_UPSERT_GAME = `
@@ -121,9 +110,8 @@ async function main() {
 	const client = new pg.Client({ connectionString: url });
 	await client.connect();
 
-	const names = parseCsv(readFileSync(join(REFERENCE_DIR, `${sportId}-names.csv`), 'utf8'));
 	const divisions = parseCsv(readFileSync(join(REFERENCE_DIR, `${sportId}-divisions.csv`), 'utf8'));
-	const canonical = franchiseMap(names, divisions);
+	const { byCode, names } = franchiseMap(sportId);
 
 	await client.query('BEGIN');
 	await client.query('INSERT INTO sport VALUES ($1,$2) ON CONFLICT DO NOTHING',
@@ -133,20 +121,20 @@ async function main() {
 	const known = new Set();
 	const franchiseFor = async (code) => {
 		if (!code) return null;
-		const entry = canonical.get(code) ?? { franchise: code, name: null };
-		if (!known.has(entry.franchise)) {
-			known.add(entry.franchise);
-			await client.query('INSERT INTO franchise VALUES ($1,$2) ON CONFLICT DO NOTHING', [sportId, entry.franchise]);
-			if (entry.name) {
+		const franchise = byCode.get(code) ?? code;
+		if (!known.has(franchise)) {
+			known.add(franchise);
+			await client.query('INSERT INTO franchise VALUES ($1,$2) ON CONFLICT DO NOTHING', [sportId, franchise]);
+			for (const n of names.filter((x) => x.franchise === franchise)) {
 				await client.query(
-					`INSERT INTO franchise_name (sport, franchise, name, source) VALUES ($1,$2,$3,$4)`,
-					[sportId, entry.franchise, entry.name, 'manual']);
+					'INSERT INTO franchise_name (sport, franchise, name, source) VALUES ($1,$2,$3,$4)',
+					[sportId, franchise, n.name, 'manual']);
 			}
 		}
 		await client.query(
 			'INSERT INTO franchise_code (sport, code, franchise) VALUES ($1,$2,$3) ON CONFLICT DO NOTHING',
-			[sportId, code, entry.franchise]);
-		return entry.franchise;
+			[sportId, code, franchise]);
+		return franchise;
 	};
 
 	let loaded = 0, skipped = 0;
@@ -226,7 +214,7 @@ async function main() {
 	}
 
 	for (const d of divisions) {
-		const f = canonical.get(d.code)?.franchise ?? d.code;
+		const f = byCode.get(d.code) ?? d.code;
 		await client.query(
 			`INSERT INTO division_membership VALUES ($1,$2,$3,$4)
 			 ON CONFLICT (sport, franchise) DO UPDATE SET conference = EXCLUDED.conference, division = EXCLUDED.division`,

@@ -16,56 +16,58 @@ import { parseCsv } from '../lib/csv.js'
 //                 someone has run scripts/load.mjs into. Needs 490MB of fetched
 //                 sources, so CI cannot do it and skips with a reason.
 
-const names = (rows) => rows.map(([code, name, kind]) => ({ code, name, kind }))
-const divs = (codes) => codes.map((code) => ({ code }))
-
 // --- franchise mapping ---
+//
+// franchiseMap reads the committed history tables directly now, so its input is
+// a file rather than a literal. The era resolution it rests on is covered in
+// names.test.js; what is asserted here is the mapping it produces.
+//
+// The heuristic these tests used to cover is gone. It grouped codes by display
+// name, which splits a franchise on every rename — how SE1 and MIL became two
+// clubs and the Brewers lost 163 games.
 
-test('codes sharing a display name become one franchise', () => {
-	// The alias problem, solved by a join rather than a fallback chain. The two
-	// football sources disagree — FiveThirtyEight writes LAR and STL where
-	// nflverse writes LA — and all three are the Rams.
-	const m = franchiseMap(
-		names([['LA', 'Los Angeles Rams', 'current'], ['LAR', 'Los Angeles Rams', 'alias'], ['STL', 'Los Angeles Rams', 'alias']]),
-		divs(['LA']))
-	assert.equal(m.get('LA').franchise, 'LA')
-	assert.equal(m.get('LAR').franchise, 'LA')
-	assert.equal(m.get('STL').franchise, 'LA')
+test('every source code maps to a canonical franchise', () => {
+	const { byCode } = franchiseMap('nfl')
+	// The two football sources disagree on codes for the same club.
+	assert.equal(byCode.get('SD'), byCode.get('LAC'))
+	assert.equal(byCode.get('STL'), byCode.get('LAR'))
+	assert.equal(byCode.get('LV'), byCode.get('OAK'))
+	assert.equal(byCode.get('WAS'), byCode.get('WSH'))
+	// And a franchise that changed identity entirely is still one franchise:
+	// Detroit were the Heralds, the Tigers, the Panthers and the Wolverines.
+	assert.equal(byCode.get('DTI'), byCode.get('DHR'))
+	assert.equal(byCode.get('DPN'), byCode.get('DHR'))
 })
 
-test('the canonical id is the code the current club uses', () => {
-	// Not the first seen, and not alphabetical. A franchise is keyed by what it
-	// is called now, because that is what the division table and every URL says.
-	const m = franchiseMap(
-		names([['OAK', 'Las Vegas Raiders', 'alias'], ['LV', 'Las Vegas Raiders', 'current']]),
-		divs(['LV']))
-	assert.equal(m.get('OAK').franchise, 'LV')
+test('there are fewer franchises than codes, and both are plausible', () => {
+	const { byCode } = franchiseMap('nfl')
+	const franchises = new Set(byCode.values())
+	assert.ok(byCode.size > franchises.size, 'no codes collapsed at all')
+	assert.ok(franchises.size > 100, `only ${franchises.size} franchises`)
 })
 
-test('a franchise no longer in the league still resolves', () => {
-	// 62 football codes are defunct clubs, none in a division table. They must
-	// still map to something: a game referencing them has to load.
-	assert.equal(franchiseMap(names([['AKR', 'Akron Pros', 'derived']]), divs([])).get('AKR').franchise, 'AKR')
+test('a franchise carries every name it has held', () => {
+	const { names } = franchiseMap('nfl')
+	const chi = names.filter((n) => n.franchise === 'CHI').map((n) => n.name)
+	for (const want of ['Decatur Staleys', 'Chicago Staleys', 'Chicago Bears']) {
+		assert.ok(chi.includes(want), `${want} missing from ${chi.join(', ')}`)
+	}
 })
 
-test('a code with no name is not silently merged with another', () => {
-	// Grouping is by display name, so a nameless code has nothing to group with.
-	// Merging them under one empty name would collapse every unnamed club into a
-	// single franchise that had played itself.
-	const m = franchiseMap(names([['AKR', '', ''], ['RAC', '', '']]), divs([]))
-	assert.equal(m.get('AKR'), undefined)
-	assert.equal(m.get('RAC'), undefined)
+test('a name held twice with a gap is one row, not two', () => {
+	// Buffalo were Bisons, then Rangers, then Bisons again. One row is a small
+	// lie about the gap and a large simplification for a label.
+	const { names } = franchiseMap('nfl')
+	const bisons = names.filter((n) => n.franchise === 'BFF' && n.name === 'Buffalo Bisons')
+	assert.equal(bisons.length, 1)
+	assert.equal(bisons[0].from, 1924)
+	assert.equal(bisons[0].to, 1929)
 })
 
-test('the real football tables collapse the aliases and nothing else', () => {
-	const m = franchiseMap(
-		parseCsv(readFileSync(new URL('../data/reference/nfl-names.csv', import.meta.url), 'utf8')),
-		parseCsv(readFileSync(new URL('../data/reference/nfl-divisions.csv', import.meta.url), 'utf8')))
-	assert.equal(m.get('SD').franchise, 'LAC')
-	assert.equal(m.get('STL').franchise, 'LA')
-	assert.equal(m.get('OAK').franchise, 'LV')
-	assert.equal(m.get('WSH').franchise, 'WAS')
-	for (const code of ['GB', 'CHI', 'DET', 'MIN']) assert.equal(m.get(code).franchise, code)
+test('baseball maps the Pilots and the Brewers to one franchise', () => {
+	// The bug that orphaned 163 games when this grouped by display name.
+	const { byCode } = franchiseMap('mlb')
+	assert.equal(byCode.get('SE1'), byCode.get('MIL'))
 })
 
 // --- migration planning ---

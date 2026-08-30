@@ -255,8 +255,15 @@ baseball plays to 64,051 that scored, 49,492 league football plays to 238 for
 one team — and only then is anything compressed.
 
 **Reference data is curated and committed**, because for football nobody
-publishes it. See `data/reference/nfl-franchises.csv`, and read its header before
-trusting a date in it.
+publishes it. `data/reference/nfl-franchise-history.csv` is the worked example:
+264 hand-curated rows giving every franchise, code, era, name and colour, which
+is what Retrosheet gives baseball for free.
+
+It replaced a generated table whose dates were explicitly *not* eras and a
+hand-written list of current names. Both were honest about their limits and both
+were workarounds for a file that did not exist yet. When the real thing arrives,
+delete the workaround rather than keeping it alongside — two sources for one fact
+is the drift this file keeps warning about.
 
 A build must be reproducible from sources and a checkout. If an artifact cannot
 be rebuilt, it is not derived data, it is a source of record and belongs in the

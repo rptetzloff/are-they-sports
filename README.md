@@ -158,6 +158,91 @@ Every opponent either built club has ever played now resolves — 66 of 66 for t
 Packers, 34 of 34 for the Brewers — and a test asserts it against the real
 indices rather than against the tables agreeing with themselves.
 
+## The franchise problem, solved
+
+Retrosheet publishes `CurrentNames.csv` for baseball: code, name, start, end.
+Nothing equivalent was published for football, so this repo spent a while
+resolving NFL codes to *current* names whatever the date — a 1995 Rams game
+labelled "Los Angeles Rams", which is what arethepackersundefeated.com still
+does.
+
+`data/reference/nfl-franchise-history.csv` is the file that did not exist.
+Curated by hand: franchise, source code, league, city, name, seasons, and
+colours. **264 rows, 119 franchises, 128 codes.**
+
+So both sports resolve by era now and the asymmetry is gone:
+
+| | |
+|---|---|
+| `CHI` in 1921 | Chicago Staleys |
+| `DET` in 1930 | Portsmouth Spartans |
+| `ARI` in 1925 | Chicago Cardinals |
+| `LAR` in 1995 | St. Louis Rams |
+| `WSH` in 2020 | Washington Football Team |
+
+It also settles the alias problem structurally. The two football sources
+disagree — FiveThirtyEight writes `LAC`/`LAR`/`OAK`/`WSH` where nflverse writes
+`SD`/`STL`/`LA`/`LV`/`WAS` — and `franchiseAbbrv` maps every code to one
+franchise, so 128 codes collapse to 119 clubs by join rather than by a fallback
+chain.
+
+The two sources key differently and neither can be derived from the other:
+Retrosheet gives exact dates, the football history gives seasons, and an NFL
+season crosses the new year — a January 2011 game belongs to the 2010 season. So
+callers pass both and each resolver takes what it needs.
+
+## Adding a club
+
+A club manifest is its sport, its id, the codes the sources call it by, its
+name, its colours and what it shouts before the season starts. Twelve lines.
+
+```js
+export const team = {
+	sport: 'nfl',
+	id: 'bears',
+	sourceIds: ['CHI'],
+	firstSeason: 1920,
+	nouns: { team: 'Bears', fullName: 'Chicago Bears' },
+	colors: { accent: '#c83803', base: '#0b162a', baseDeep: '#060d18' },
+	copy: { seasonNotStarted: 'BEAR DOWN' },
+};
+```
+
+Everything else — points, Super Bowl, coach, meetings, whether streaks span
+seasons — comes from `sports/nfl.js`, because those are facts about football
+rather than about Chicago. Any of them can be overridden. Then
+`npm run build bears`.
+
+## Names
+
+Two sports, two answers, because only one has a source that publishes eras.
+
+**Baseball resolves names by date.** Retrosheet's `CurrentNames.csv` carries
+franchise code, name, and the exact span each applied, so a 1969 Brewers game is
+labelled **Seattle Pilots** — which is what it was. `scripts/names.mjs` turns it
+into `data/reference/mlb-names.csv`, collapsing rows that differ only by league
+or division: 125 upstream rows become 88 name spans across 30 franchises.
+
+**Football resolves to the current name, whatever the date.** No equivalent
+source exists, so a 1995 Rams game says "Los Angeles Rams" even though it was
+played in St. Louis. That is wrong as history and is exactly what
+arethepackersundefeated.com has always done. `nameFor` returns `isHistorical` so
+a caller can tell the two apart rather than a function quietly meaning two
+things.
+
+The two football sources also **disagree on codes for the same club**:
+FiveThirtyEight writes `LAC`, `LAR`, `OAK`, `WSH`; nflverse writes `SD`, `STL`,
+`LA`, `LV`, `WAS`. One club's games contain both, because the eras come from
+different files, so `data/reference/nfl-names.csv` carries alias rows. Without
+them five of the Packers' own opponent codes resolve to nothing.
+
+Resolution is per sport, and it has to be: **`MIL` is the Milwaukee Badgers in
+football and the Milwaukee Brewers in baseball.**
+
+Every opponent either built club has ever played now resolves — 66 of 66 for the
+Packers, 34 of 34 for the Brewers — and a test asserts it against the real
+indices rather than against the tables agreeing with themselves.
+
 ## The franchise problem
 
 Retrosheet publishes `CurrentNames.csv`: franchise code, name, start date, end
