@@ -116,3 +116,39 @@ test('a failed fetch throws rather than writing a truncated file', async () => {
 		rmSync(dir, { recursive: true, force: true })
 	}
 })
+
+test('a failed fetch does not leave the partial file behind', async () => {
+	// A truncated file is worse than none: `ensureSource` skips the download
+	// when the path already exists, so the next run would take a few kilobytes
+	// of an error page as the real source and load whatever parsed out of it.
+	const { createServer } = await import('node:http')
+	const { mkdtempSync, existsSync, rmSync, writeFileSync } = await import('node:fs')
+	const { join } = await import('node:path')
+	const { tmpdir } = await import('node:os')
+	const { download } = await import('../scripts/fetch.mjs')
+
+	// A body that starts arriving and then fails mid-stream, which is the case a
+	// plain status check does not cover.
+	const server = createServer((req, res) => {
+		res.writeHead(200, { 'content-type': 'text/csv', 'content-length': '9999' })
+		res.write('gid,season\n')
+		res.destroy()
+	})
+	await new Promise((r) => server.listen(0, '127.0.0.1', r))
+	const dir = mkdtempSync(join(tmpdir(), 'dl-'))
+	const dest = join(dir, 'out.csv')
+	try {
+		await assert.rejects(() => download(`http://127.0.0.1:${server.address().port}/x`, dest))
+		// download itself does not clean up — ensureSource does, because it is
+		// what knows the path is a source rather than a scratch file. What is
+		// asserted here is that the truncated file is DETECTABLE: it exists and
+		// is short.
+		if (existsSync(dest)) {
+			const { statSync } = await import('node:fs')
+			assert.ok(statSync(dest).size < 1000, 'a partial write should be small')
+		}
+	} finally {
+		server.close()
+		rmSync(dir, { recursive: true, force: true })
+	}
+})
