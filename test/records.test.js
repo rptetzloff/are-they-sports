@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { computeRecords, rec } from '../lib/records.js'
+import { computeRecords, pct, rec } from '../lib/records.js'
 import { titleHeading } from '../lib/render.js'
 import { loadIndex } from '../lib/indices.js'
 import { loadTeam } from '../lib/teams.js'
@@ -291,4 +291,39 @@ test('a single-final season is unchanged by that', () => {
 	const r = computeRecords([post(1965, 'W', { championship: '1965', championshipTitle: 'NFL Championship' })])
 	assert.deepEqual(r.championshipAppearances[0].titleNames, ['NFL Championship'])
 	assert.equal(r.championshipAppearances[0].title, 'NFL Championship')
+})
+
+test('a winning percentage has no leading zero', () => {
+	assert.equal(pct(0.5714), '.5714')
+	assert.equal(pct(0.4633), '.4633')
+	assert.equal(pct(0.0625), '.0625')
+	assert.equal(pct(0), '.0000')
+})
+
+test('four decimals, because three cannot separate the clubs', () => {
+	// Measured against all 32 current clubs: three decimals collides three
+	// times — Cowboys and Packers, Vikings and Dolphins and Chiefs, Saints and
+	// Lions. Four collides none. These are the real all-time figures for the
+	// pair that prompted it, and a table whose job is ranking must not print
+	// one number for two clubs.
+	const cowboys = (576 + 7 / 2) / (576 + 432 + 7)
+	const packers = (819 + 39 / 2) / (819 + 611 + 39)
+	assert.equal(cowboys.toFixed(3), packers.toFixed(3), 'the premise no longer holds')
+	assert.notEqual(pct(cowboys), pct(packers))
+	assert.equal(pct(cowboys), '.5709')
+	assert.equal(pct(packers), '.5708')
+})
+
+test('a perfect record keeps its leading one', () => {
+	// "1.0000" is read instantly and ".0000" is the opposite number, so
+	// stripping the zero cannot be unconditional.
+	assert.equal(pct(1), '1.0000')
+})
+
+test('the percentage rounds rather than truncating', () => {
+	assert.equal(pct(0.96155), '.9616')
+	// And an exact-looking half is not one. 0.55555 is stored slightly BELOW
+	// half, so it rounds down — JavaScript's number representation rather than
+	// anything this function decides, pinned so it is not read as a bug.
+	assert.equal(pct(0.55555), '.5555')
 })
