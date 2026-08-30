@@ -1,7 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { NEUTRAL, clubPage, escapeHtml, page, paletteCss, questionFor, selectorPage } from '../lib/render.js'
-import { colorsFor, loadColors, resolver } from '../lib/names.js'
+import { colorsFor, resolver } from '../lib/names.js'
 import { choosePalette, contrast } from '../lib/palette.js'
 import { loadDivisions } from '../lib/scope.js'
 import { recordText, seasonTally, verdictText } from '../lib/core.js'
@@ -68,30 +68,37 @@ test('the palette comes from data, never from a literal', () => {
 	assert.ok(css.includes('--accent: #FFB612'), css)
 	// Baseball's come from a separate curated table, because Retrosheet
 	// publishes no colours.
-	assert.ok(paletteCss(loadColors('mlb').get('MIL')).includes('--accent: #FFC52F'))
+	// Baseball's come from its own franchise history, which now carries colours
+	// per era exactly as football's does.
+	assert.ok(paletteCss(colorsFor(resolver('mlb'), 'MIL', { date: '2025-06-01' }, NEUTRAL)).includes('--accent: #FFC52F'))
 })
 
 test('a club rendered in an older era gets the colours of that era', () => {
 	// The reason to take colours from a dated table rather than a manifest.
 	const nfl = resolver('nfl')
-	assert.equal(colorsFor(nfl, 'GB', '1955', NEUTRAL).base, '#175E33')
-	assert.equal(colorsFor(nfl, 'GB', '2024', NEUTRAL).base, '#203731')
+	assert.equal(colorsFor(nfl, 'GB', { season: '1955' }, NEUTRAL).base, '#175E33')
+	assert.equal(colorsFor(nfl, 'GB', { season: '2024' }, NEUTRAL).base, '#203731')
 	// And the Lions were the Portsmouth Spartans, in purple.
-	assert.equal(colorsFor(nfl, 'DET', '1930', NEUTRAL).base, '#582C83')
+	assert.equal(colorsFor(nfl, 'DET', { season: '1930' }, NEUTRAL).base, '#582C83')
+	// Baseball does this now too, which it could not before its history table
+	// arrived: the 1969 Pilots in their own blue and gold, not Brewers navy.
+	const mlb = resolver('mlb')
+	assert.equal(colorsFor(mlb, 'SE1', { date: '1969-06-01' }, NEUTRAL).base, '#0033A0')
+	assert.equal(colorsFor(mlb, 'MIL', { date: '2025-06-01' }, NEUTRAL).base, '#12284B')
 })
 
 test('a franchise with no colours on record falls back', () => {
 	// Many 1920s clubs have none, so a fallback is required rather than
 	// optional — and an unknown code has to reach it too.
 	const nfl = resolver('nfl')
-	assert.deepEqual(colorsFor(nfl, 'ZZZ', '1920', NEUTRAL), NEUTRAL)
-	assert.equal(colorsFor(nfl, 'MUT', '1920', NEUTRAL).base, NEUTRAL.base)
+	assert.deepEqual(colorsFor(nfl, 'ZZZ', { season: '1920' }, NEUTRAL), NEUTRAL)
+	assert.equal(colorsFor(nfl, 'MUT', { season: '1920' }, NEUTRAL).base, NEUTRAL.base)
 })
 
 test('the status colours are shared, not per club', () => {
 	// Comparing the two sites showed they had independently arrived at the same
 	// values, so a win is #4caf50 for everyone and it is not team vocabulary.
-	for (const colors of [NEUTRAL, loadColors('mlb').get('MIL')]) {
+	for (const colors of [NEUTRAL, colorsFor(resolver('mlb'), 'MIL', { date: '2025-06-01' }, NEUTRAL)]) {
 		assert.ok(paletteCss(colors).includes('--win: #4caf50'))
 		assert.ok(paletteCss(colors).includes('--loss: #f44336'))
 	}
@@ -227,26 +234,6 @@ test('the lossless-season noun comes from the manifest, not the code', () => {
 	assert.equal(questionFor(perfectionists), 'Are the Dolphins Perfect?')
 })
 
-test('every baseball club has colours, and the Brewers are navy and gold', () => {
-	// Curated from knowledge rather than published, unlike football's — which
-	// arrived as data with colours already in it. The file says so, and marks
-	// which single row was checked against anything.
-	const m = loadColors('mlb')
-	assert.equal(m.size, 30)
-	assert.deepEqual(m.get('MIL'), { base: '#12284B', accent: '#FFC52F' })
-	for (const [code, c] of m) {
-		assert.match(c.base, /^#[0-9a-fA-F]{6}$/, `${code} base`)
-		assert.match(c.accent, /^#[0-9a-fA-F]{6}$/, `${code} accent`)
-		assert.notEqual(c.base.toLowerCase(), c.accent.toLowerCase(), `${code} has one colour twice`)
-	}
-})
-
-test('football colours do not come from that table', () => {
-	// It is baseball-only on purpose: football's ride along with its franchise
-	// history and are era-correct, which this cannot be.
-	assert.equal(loadColors('nfl').size, 0)
-})
-
 test('the page ground is the darkest colour a club publishes', () => {
 	// The page is dark, so the ground has to be. The Cardinals lead with red and
 	// red as a full-page ground is unreadable.
@@ -273,11 +260,13 @@ test('an illegible palette falls back rather than rendering unreadably', () => {
 test('every club in both sports gets a legible pair', () => {
 	// The assertion that matters, over the real tables rather than examples.
 	const nfl = resolver('nfl')
-	for (const [code, p] of loadColors('mlb')) {
+	const mlb = resolver('mlb')
+	for (const code of loadDivisions('mlb').map((r) => r.code)) {
+		const p = colorsFor(mlb, code, { date: '2025-06-01' }, NEUTRAL)
 		assert.ok(contrast(p.base, p.accent) >= 3, `mlb ${code} is ${contrast(p.base, p.accent).toFixed(2)}:1`)
 	}
 	for (const code of loadDivisions('nfl').map((r) => r.code)) {
-		const p = colorsFor(nfl, code, '2024', NEUTRAL)
+		const p = colorsFor(nfl, code, { season: '2024' }, NEUTRAL)
 		assert.ok(contrast(p.base, p.accent) >= 3, `nfl ${code} is ${contrast(p.base, p.accent).toFixed(2)}:1`)
 	}
 })
