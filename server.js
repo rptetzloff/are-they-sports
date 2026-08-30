@@ -195,7 +195,7 @@ function main() {
 		// `all` scope covers are unbuilt and would otherwise be bare codes.
 		const namers = Object.fromEntries(SPORTS.map((s) => [s, resolver(s)]));
 		const table = routeTable(scope, resolved);
-		const available = table.filter((e) => e.available);
+		let available = table.filter((e) => e.available);
 
 		// Say what is missing every time, at boot. A scope of sixteen clubs
 		// serving two is a legitimate state of this repo today and an illegitimate
@@ -239,7 +239,41 @@ function main() {
 		const strict = process.env.STRICT_SCOPE === '1';
 		const healthy = () => dbHealth.ok && (!strict || available.length === table.length);
 
+		/** Bring every entry's franchise and availability up to date.
+		 *
+		 *  Called once per request, and cheap: the availability map is cached for
+		 *  thirty seconds, and a franchise is resolved only while it is still
+		 *  null — which is only before the first successful load.
+		 *
+		 *  This used to happen for the one club being requested, which fixed the
+		 *  club route and nothing else. After a load, /nfl/packers rendered
+		 *  correctly while /healthz said "0 of 62 available" and the selector
+		 *  showed every club as not built. The pages worked and everything that
+		 *  described them was wrong, which is worse than either alone.
+		 */
+		let refreshedAt = 0;
+		async function refresh(now) {
+			if (now - refreshedAt < 30_000) return;
+			refreshedAt = now;
+			const live = await availability(now);
+			for (const e of table) {
+				if (!e.franchise && e.teamId) {
+					const team = teamsById.get(e.teamId);
+					// Booting against an empty database leaves this null, because
+					// there are no franchise_code rows to resolve against yet.
+					if (team) {
+						try { e.franchise = await franchiseForCodes(team.sport, team.sourceIds); } catch { /* reported at boot */ }
+					}
+				}
+				if (e.franchise) e.available = (live.get(`${e.sport}/${e.franchise}`) ?? 0) > 0;
+			}
+			available = table.filter((e) => e.available);
+		}
+
 		const server = createServer(async (req, res) => {
+			// Before anything reads `available`, including /healthz and the
+			// selector.
+			if (dbHealth.ok) await refresh(Date.now());
 			const url = new URL(req.url, 'http://placeholder');
 			const origin = originOf(req);
 
@@ -294,28 +328,6 @@ function main() {
 			if (!match) return json(res, 404, { error: 'no such path', path: url.pathname });
 
 			const { entry, rest } = match;
-			// Re-checked rather than trusted from boot, so a load against a
-			// running deployment is served within the cache window instead of
-			// waiting for a restart.
-			//
-			// The franchise has to be re-resolved too, not just the availability.
-			// Booting against an empty database leaves franchise null — there are
-			// no franchise_code rows to resolve against yet — and a first version
-			// of this guard required a franchise before re-checking, so a club
-			// stayed 503 after a successful load. Which is the one case the
-			// re-check exists for.
-			if (!entry.available) {
-				const team = teamsById.get(entry.teamId);
-				if (team) {
-					try {
-						entry.franchise ??= await franchiseForCodes(team.sport, team.sourceIds);
-					} catch { /* reported at boot; a page is not the place to explain it */ }
-				}
-				if (entry.franchise) {
-					const live = await availability(Date.now());
-					if ((live.get(`${entry.sport}/${entry.franchise}`) ?? 0) > 0) entry.available = true;
-				}
-			}
 			if (!entry.available) {
 				return json(res, 503, {
 					error: 'club is in scope but has no games in the database',
