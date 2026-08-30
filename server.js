@@ -386,7 +386,10 @@ function main() {
 				const series = seriesRecords(all);
 				const withNames = rows.map((g) => ({
 					...g,
-					opponentName: resolve(g.Opponent, g.date).name,
+					// Season and date both: football's history is keyed on seasons
+					// and baseball's on dates, and an NFL season crosses the new
+					// year, so neither can be derived from the other.
+					opponentName: resolve(g.Opponent, { season: g.season, date: g.date }).name,
 					seriesRecord: series.get(g.Opponent) ?? null,
 				}));
 
