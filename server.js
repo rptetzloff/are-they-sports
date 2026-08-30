@@ -322,7 +322,12 @@ function main() {
 				// every club with a manifest, so there is nothing to resolve late.
 				// It used to be read from the database here, which meant a club
 				// booted against an empty database stayed unresolved forever.
-				if (e.franchise) e.available = (live.get(`${e.sport}/${e.franchise}`) ?? 0) > 0;
+				// A club whose games are split across an alias stays unavailable until
+			// the load is re-run. Without this the boot-time marking lasted until
+			// the first request and was then silently undone here — measured: the
+			// log said STALE and /raiders answered 200 with half a history.
+			if (e.stale) { e.available = false; continue; }
+			if (e.franchise) e.available = (live.get(`${e.sport}/${e.franchise}`) ?? 0) > 0;
 			}
 			available = table.filter((e) => e.available);
 		}

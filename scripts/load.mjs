@@ -107,6 +107,68 @@ async function ensureSource(sportId, path, cfg, label) {
 	return true;
 }
 
+/** Repair rows stored under a code that has since become an alias.
+ *
+ *  Without this, "re-run the load" does not fix a database loaded against an
+ *  older reference table: new games land under OAK while the old ones stay
+ *  under LV, and the club serves half its history with no error at all. The
+ *  five nflverse codes moved from rows to a column in the history table, so any
+ *  database loaded before that has exactly this problem.
+ *
+ *  Safe to run every time: on an already-correct database it matches nothing.
+ *  Exported because the first two attempts at this failed on the server and
+ *  passed every local check, both times because nothing here was ever executed
+ *  against a database.
+ */
+export async function repairAliasFranchises(client, sportId, codes) {
+	// Which tables point at `franchise`, asked of the catalogue rather than
+	// remembered. The first version listed game, franchise_code and
+	// franchise_name from memory and missed division_membership, so the delete
+	// hit a foreign key and rolled the whole load back. Naming them by hand is
+	// how the NEXT table gets missed; an unhandled one now stops the load and
+	// says which it is.
+	const REMAP = { game: ['home', 'away'] }; // rewritten to point at the canonical id
+	const CLEAR = new Set(['franchise_code', 'franchise_name', 'division_membership']); // rebuilt by the load
+	const { rows: referencing } = await client.query(
+		`SELECT DISTINCT c.conrelid::regclass::text AS table_name
+		   FROM pg_constraint c
+		  WHERE c.contype = 'f' AND c.confrelid = 'franchise'::regclass`);
+	const unhandled = referencing.map((r) => r.table_name).filter((t) => !REMAP[t] && !CLEAR.has(t));
+	if (unhandled.length) {
+		throw new Error(`franchise is referenced by ${unhandled.join(', ')}, which this repair does not handle`);
+	}
+
+	const { rows: dbFranchises } = await client.query(
+		'SELECT id FROM franchise WHERE sport = $1', [sportId]);
+	const repaired = [];
+	for (const { id } of dbFranchises) {
+		const canonical = codes.franchiseOf(id);
+		if (canonical === id) continue;
+		// The canonical franchise must exist before anything can point at it.
+		await client.query(
+			'INSERT INTO franchise (sport, id) VALUES ($1,$2) ON CONFLICT DO NOTHING',
+			[sportId, canonical]);
+		for (const [table, cols] of Object.entries(REMAP)) {
+			for (const col of cols) {
+				const { rowCount } = await client.query(
+					`UPDATE ${table} SET ${col} = $1 WHERE sport = $2 AND ${col} = $3`,
+					[canonical, sportId, id]);
+				if (rowCount) console.log(`  remapped ${rowCount} ${table}.${col} ${id} -> ${canonical}`);
+			}
+		}
+		// Deleted rather than remapped: every one of these is derived data that the
+		// load rewrites from the reference table, and remapping would collide with
+		// the canonical franchise's own row on the primary key.
+		for (const table of CLEAR) {
+			await client.query(`DELETE FROM ${table} WHERE sport = $1 AND franchise = $2`, [sportId, id]);
+		}
+		await client.query('DELETE FROM franchise WHERE sport = $1 AND id = $2', [sportId, id]);
+		console.log(`  removed alias franchise ${id} -> ${canonical}`);
+		repaired.push({ from: id, to: canonical });
+	}
+	return repaired;
+}
+
 async function main() {
 	const sportId = process.argv[2] ?? 'nfl';
 	const url = process.env.DATABASE_URL;
@@ -124,36 +186,7 @@ async function main() {
 	await client.query('INSERT INTO sport VALUES ($1,$2) ON CONFLICT DO NOTHING',
 		[sportId, sportId === 'nfl' ? 'football' : 'baseball']);
 
-	// Repair games stored under a code that has since become an alias.
-	//
-	// Without this, "re-run the load" does not actually fix a database loaded
-	// against an older reference table: the new rows land under OAK while the
-	// old ones stay under LV, and the club serves half its history with no error.
-	// The five nflverse codes moved from rows to a column in the history table,
-	// so any database loaded before that has exactly this problem.
-	//
-	// Safe to run every time: on an already-correct database it matches nothing.
-	const codes = codeTable(sportId, loadHistory(sportId));
-	const { rows: dbFranchises } = await client.query(
-		'SELECT id FROM franchise WHERE sport = $1', [sportId]);
-	for (const { id } of dbFranchises) {
-		const canonical = codes.franchiseOf(id);
-		if (canonical === id) continue;
-		// The canonical franchise must exist before anything can point at it.
-		await client.query(
-			'INSERT INTO franchise (sport, id) VALUES ($1,$2) ON CONFLICT DO NOTHING',
-			[sportId, canonical]);
-		for (const side of ['home', 'away']) {
-			const { rowCount } = await client.query(
-				`UPDATE game SET ${side} = $1 WHERE sport = $2 AND ${side} = $3`,
-				[canonical, sportId, id]);
-			if (rowCount) console.log(`  remapped ${rowCount} ${side} games ${id} -> ${canonical}`);
-		}
-		await client.query('DELETE FROM franchise_code WHERE sport = $1 AND franchise = $2', [sportId, id]);
-		await client.query('DELETE FROM franchise_name WHERE sport = $1 AND franchise = $2', [sportId, id]);
-		await client.query('DELETE FROM franchise WHERE sport = $1 AND id = $2', [sportId, id]);
-		console.log(`  removed alias franchise ${id}`);
-	}
+	await repairAliasFranchises(client, sportId, codeTable(sportId, loadHistory(sportId)));
 
 	/** Register a code, inventing a franchise for it if it is unknown. */
 	const known = new Set();
