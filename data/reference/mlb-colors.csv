@@ -1,58 +1,52 @@
-# Club colours for baseball.
+# Club colours for baseball, from teamcolorcodes.com — the same source as the
+# colours in data/reference/nfl-franchise-history.csv.
 #
-# CURATED FROM KNOWLEDGE, NOT FROM A PUBLISHED SOURCE, and that is the
-# difference between this file and data/reference/nfl-franchise-history.csv.
-# That one arrived as data — every franchise, every era, colours included. This
-# one was written by hand because Retrosheet publishes no colours at all, and it
-# should be replaced by a real table the moment one exists.
+# An earlier version of this file was written from recollection and said so.
+# Several rows were wrong: Cleveland was #0C2340 where the source says #00385D,
+# Colorado #33006F where it says #333366. Recollection is not a source, and the
+# fix was to read the one that already existed.
 #
-# Two consequences worth knowing before trusting it:
+# Colours are published as-is, in the club's own order, up to five. Which one
+# becomes the page ground and which the accent is decided by lib/palette.js,
+# because that is a rendering question and both sports answer it the same way:
+# the darkest is the ground, and the accent is the FIRST of the rest that is
+# legible on it. First, not most legible — maximum contrast gave the Brewers
+# white over their own gold, which is more readable and less theirs.
 #
-#   no eras      one row per franchise, current colours only. Football renders a
-#                1930 page in the palette of 1930; baseball cannot, and will
-#                show a 1969 Pilots page in Brewers navy until this file grows a
-#                season span like the football one has.
-#   unverified   MIL is the exception: #12284b and #ffc52f are taken from
-#                arethebrewersontv.com's own stylesheet, where #ffc52f appears
-#                111 times. Every other row is a best recollection of a club's
-#                primary and secondary and has not been checked against
-#                anything.
-#
-# `base` is the page ground and wants to be the darker of a club's two colours;
-# `accent` is the bright one. That is not always a club's own primary — the
-# Cardinals lead with red, but red as a full-page ground is unreadable, so navy
-# is the base and red the accent. Where a club's palette is genuinely dark on
-# dark, black is used as the ground.
+# ONE THING THIS STILL LACKS: eras. One row per franchise, current colours only.
+# Football renders a 1930 page in the palette of 1930 because its history table
+# carries colours per span; baseball will show a 1969 Pilots page in Brewers
+# navy until this file grows the same.
 #
 # `code` is the Retrosheet franchise code.
-code,name,base,accent,verified
-ARI,Arizona Diamondbacks,#1D1D1D,#A71930,no
-ATL,Atlanta Braves,#13274F,#CE1141,no
-BAL,Baltimore Orioles,#1D1D1D,#DF4601,no
-BOS,Boston Red Sox,#0C2340,#BD3039,no
-CHA,Chicago White Sox,#27251F,#C4CED4,no
-CHN,Chicago Cubs,#0E3386,#CC3433,no
-CIN,Cincinnati Reds,#1D1D1D,#C6011F,no
-CLE,Cleveland Guardians,#0C2340,#E31937,no
-COL,Colorado Rockies,#33006F,#C4CED4,no
-DET,Detroit Tigers,#0C2340,#FA4616,no
-HOU,Houston Astros,#002D62,#EB6E1F,no
-KCA,Kansas City Royals,#004687,#BD9B60,no
-ANA,Los Angeles Angels,#003263,#BA0021,no
-LAN,Los Angeles Dodgers,#005A9C,#EF3E42,no
-MIA,Miami Marlins,#1D1D1D,#00A3E0,no
-MIL,Milwaukee Brewers,#12284b,#ffc52f,yes
-MIN,Minnesota Twins,#002B5C,#D31145,no
-NYA,New York Yankees,#003087,#E4002C,no
-NYN,New York Mets,#002D72,#FF5910,no
-ATH,Athletics,#003831,#EFB21E,no
-PHI,Philadelphia Phillies,#002D72,#E81828,no
-PIT,Pittsburgh Pirates,#27251F,#FDB827,no
-SDN,San Diego Padres,#2F241D,#FFC425,no
-SFN,San Francisco Giants,#27251F,#FD5A1E,no
-SEA,Seattle Mariners,#0C2C56,#C4CED4,no
-SLN,St. Louis Cardinals,#0C2340,#C41E3A,no
-TBA,Tampa Bay Rays,#092C5C,#8FBCE6,no
-TEX,Texas Rangers,#003278,#C0111F,no
-TOR,Toronto Blue Jays,#134A8E,#E8291C,no
-WAS,Washington Nationals,#14225A,#AB0003,no
+code,name,colorA,colorB,colorC,colorD,colorE
+ARI,Arizona Diamondbacks,#A71930,#E3D4AD,#000000,,
+ATL,Atlanta Braves,#CE1141,#13274F,#EAAA00,,
+BAL,Baltimore Orioles,#DF4601,#000000,#FFFFFF,,
+BOS,Boston Red Sox,#BD3039,#0C2340,#FFFFFF,,
+CHN,Chicago Cubs,#0E3386,#CC3433,#FFFFFF,,
+CHA,Chicago White Sox,#27251F,#C4CED4,#FFFFFF,,
+CIN,Cincinnati Reds,#C6011F,#000000,#FFFFFF,,
+CLE,Cleveland Guardians,#00385D,#E50022,#FFFFFF,,
+COL,Colorado Rockies,#333366,#C4CED4,#131413,,
+DET,Detroit Tigers,#0C2340,#FA4616,#FFFFFF,,
+HOU,Houston Astros,#002D62,#EB6E1F,#F4911E,,
+KCA,Kansas City Royals,#004687,#BD9B60,#FFFFFF,,
+ANA,Los Angeles Angels,#003263,#BA0021,#862633,,
+LAN,Los Angeles Dodgers,#005A9C,#EF3E42,#A5ACAF,,
+MIA,Miami Marlins,#00A3E0,#EF3340,#41748D,,
+MIL,Milwaukee Brewers,#12284B,#FFC52F,#FFFFFF,,
+MIN,Minnesota Twins,#002B5C,#D31145,#B9975B,,
+NYN,New York Mets,#002D72,#FF5910,#FFFFFF,,
+NYA,New York Yankees,#003087,#E4002C,#0C2340,,
+ATH,Athletics,#003831,#EFB21E,#A2AAAD,,
+PHI,Philadelphia Phillies,#E81828,#002D72,#FFFFFF,,
+PIT,Pittsburgh Pirates,#27251F,#FDB827,#FFFFFF,,
+SDN,San Diego Padres,#2F241D,#FFC425,#FFFFFF,,
+SFN,San Francisco Giants,#FD5A1E,#27251F,#EFD19F,,
+SEA,Seattle Mariners,#0C2C56,#005C5C,#C4CED4,,
+SLN,St. Louis Cardinals,#C41E3A,#0C2340,#FEDB00,,
+TBA,Tampa Bay Rays,#092C5C,#8FBCE6,#F5D130,,
+TEX,Texas Rangers,#003278,#C0111F,#FFFFFF,,
+TOR,Toronto Blue Jays,#134A8E,#1D2D5C,#E8291C,,
+WAS,Washington Nationals,#AB0003,#14225A,#FFFFFF,,

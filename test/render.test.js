@@ -2,6 +2,8 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { NEUTRAL, clubPage, escapeHtml, page, paletteCss, questionFor, selectorPage } from '../lib/render.js'
 import { colorsFor, loadColors, resolver } from '../lib/names.js'
+import { choosePalette, contrast } from '../lib/palette.js'
+import { loadDivisions } from '../lib/scope.js'
 import { recordText, seasonTally, verdictText } from '../lib/core.js'
 import { loadTeam } from '../lib/teams.js'
 
@@ -66,7 +68,7 @@ test('the palette comes from data, never from a literal', () => {
 	assert.ok(css.includes('--accent: #FFB612'), css)
 	// Baseball's come from a separate curated table, because Retrosheet
 	// publishes no colours.
-	assert.ok(paletteCss(loadColors('mlb').get('MIL')).includes('--accent: #ffc52f'))
+	assert.ok(paletteCss(loadColors('mlb').get('MIL')).includes('--accent: #FFC52F'))
 })
 
 test('a club rendered in an older era gets the colours of that era', () => {
@@ -225,13 +227,13 @@ test('the lossless-season noun comes from the manifest, not the code', () => {
 	assert.equal(questionFor(perfectionists), 'Are the Dolphins Perfect?')
 })
 
-test('every baseball club has colours, and the verified row is the Brewers', () => {
+test('every baseball club has colours, and the Brewers are navy and gold', () => {
 	// Curated from knowledge rather than published, unlike football's — which
 	// arrived as data with colours already in it. The file says so, and marks
 	// which single row was checked against anything.
 	const m = loadColors('mlb')
 	assert.equal(m.size, 30)
-	assert.deepEqual(m.get('MIL'), { base: '#12284b', accent: '#ffc52f' })
+	assert.deepEqual(m.get('MIL'), { base: '#12284B', accent: '#FFC52F' })
 	for (const [code, c] of m) {
 		assert.match(c.base, /^#[0-9a-fA-F]{6}$/, `${code} base`)
 		assert.match(c.accent, /^#[0-9a-fA-F]{6}$/, `${code} accent`)
@@ -243,4 +245,52 @@ test('football colours do not come from that table', () => {
 	// It is baseball-only on purpose: football's ride along with its franchise
 	// history and are era-correct, which this cannot be.
 	assert.equal(loadColors('nfl').size, 0)
+})
+
+test('the page ground is the darkest colour a club publishes', () => {
+	// The page is dark, so the ground has to be. The Cardinals lead with red and
+	// red as a full-page ground is unreadable.
+	assert.equal(choosePalette(['#C41E3A', '#0C2340', '#FEDB00'], NEUTRAL).base, '#0C2340')
+	assert.equal(choosePalette(['#12284B', '#FFC52F'], NEUTRAL).base, '#12284B')
+})
+
+test('the accent is the first legible colour, not the most legible', () => {
+	// Maximum contrast gave the Brewers white over their own gold — more
+	// readable and less theirs. Clubs list colours in order of identity, so the
+	// first that clears the bar is both.
+	assert.equal(choosePalette(['#12284B', '#FFC52F', '#FFFFFF'], NEUTRAL).accent, '#FFC52F')
+	assert.equal(choosePalette(['#203731', '#FFB612', '#FFFFFF'], NEUTRAL).accent, '#FFB612')
+})
+
+test('an illegible palette falls back rather than rendering unreadably', () => {
+	// The Angels publish three dark colours whose best pair is 1.9:1. A heading
+	// nobody can read is not a club's identity either.
+	const p = choosePalette(['#003263', '#BA0021', '#862633'], NEUTRAL)
+	assert.equal(p.accent, NEUTRAL.accent)
+	assert.ok(contrast(p.base, p.accent) > 4.5)
+})
+
+test('every club in both sports gets a legible pair', () => {
+	// The assertion that matters, over the real tables rather than examples.
+	const nfl = resolver('nfl')
+	for (const [code, p] of loadColors('mlb')) {
+		assert.ok(contrast(p.base, p.accent) >= 3, `mlb ${code} is ${contrast(p.base, p.accent).toFixed(2)}:1`)
+	}
+	for (const code of loadDivisions('nfl').map((r) => r.code)) {
+		const p = colorsFor(nfl, code, '2024', NEUTRAL)
+		assert.ok(contrast(p.base, p.accent) >= 3, `nfl ${code} is ${contrast(p.base, p.accent).toFixed(2)}:1`)
+	}
+})
+
+test('a club publishing four or five colours does not lose the extras', () => {
+	// Reading a fixed three silently dropped whatever came after.
+	const five = choosePalette(['#000010', '#000020', '#000030', '#000040', '#EEEEEE'], NEUTRAL)
+	assert.equal(five.accent, '#EEEEEE')
+})
+
+test('no colours at all is the fallback, and one colour keeps its ground', () => {
+	assert.deepEqual(choosePalette([], NEUTRAL), NEUTRAL)
+	assert.deepEqual(choosePalette(['#800000'], NEUTRAL), { base: '#800000', accent: NEUTRAL.accent })
+	// A malformed value is not a colour.
+	assert.deepEqual(choosePalette(['nope', ''], NEUTRAL), NEUTRAL)
 })
