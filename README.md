@@ -63,6 +63,18 @@ DATABASE_URL=postgres://user:pass@host:5432/ats npm run migrate
 DATABASE_URL=... npm run load nfl
 ```
 
+Both work **inside the deployed container**, which is usually where the database
+is reachable from. `load` fetches the sources it needs if they are absent — the
+image excludes `data/sources` because play-by-play is 95MB a season, but a game
+load needs only schedules (2.1MB) and, for football, the pre-1999 seed (1.2MB).
+
+`load mlb` is the exception: Retrosheet has no fetcher here, so the file has to
+be put in place by hand. It says so rather than failing on an `open()`.
+
+Order does not matter. A deployment against an empty database comes up healthy,
+answers 503 on club routes naming the fix, and starts serving within thirty
+seconds of a load — no redeploy.
+
 `migrate` applies numbered files from `db/migrations` in order, each in its own
 transaction, and records what it applied. Running it twice does nothing the
 second time — the only property that makes it safe to point at a server. It also
