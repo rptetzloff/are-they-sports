@@ -17,6 +17,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import pg from 'pg';
 import { csvRows, parseCsv } from '../lib/csv.js';
+import { codeTable } from '../lib/codes.js';
 import { loadHistory, mlbIndex, nflIndex, resolver } from '../lib/names.js';
 import { download } from './fetch.mjs';
 import { isoDate } from '../sports/mlb.js';
@@ -39,10 +40,16 @@ export function franchiseMap(sportId, dir) {
 	const idx = sportId === 'nfl'
 		? nflIndex(loadHistory('nfl', dir))
 		: mlbIndex(loadHistory('mlb', dir));
+	// Codes come from lib/codes.js, not from the index keys. The index is keyed
+	// by teamAbbrv — our own per-era spelling — and a game arrives labelled with
+	// whatever nflverse called that club, which for five franchises is a
+	// different string. Those five used to be extra ROWS in the history table,
+	// so the index happened to carry them; they are a column now.
+	const codes = codeTable(sportId, loadHistory(sportId, dir));
 	const byCode = new Map();
 	const names = new Map();
-	for (const [code, spans] of idx) {
-		byCode.set(code, spans[0].franchise);
+	for (const c of codes.franchises()) for (const alias of codes.codesOf(c)) byCode.set(alias, c);
+	for (const [, spans] of idx) {
 		for (const s of spans) {
 			// One row per franchise and name, widened to the whole span that
 			// name was used. A club that took a name, dropped it and took it

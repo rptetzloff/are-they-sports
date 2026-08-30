@@ -268,6 +268,28 @@ publishes it. `data/reference/nfl-franchise-history.csv` is the worked example:
 264 hand-curated rows giving every franchise, code, era, name and colour, which
 is what Retrosheet gives baseball for free.
 
+**A row is an era; a column is a spelling.** `franchiseAbbrv` joins a club's
+eras together, `teamAbbrv` names one era, and any further `<provider>Abbrv` —
+`nflverseAbbrv` is WAS where ours is WSH — is what some other source calls that
+same era. Adding a provider is a column, and `lib/codes.js` reads every column
+ending in `Abbrv` without being told the new one exists.
+
+It was five extra ROWS first, one per code nflverse spells differently, each
+duplicating a club's name, city and colours so the second code would resolve.
+That put the Rams' palette in the file twice where it could drift, let an era
+row and its alias row disagree about which years they covered, and made the
+file 269 rows while this document, the README and `lib/names.js` all said 264.
+Nothing failed; three documents were simply wrong for as long as the workaround
+lasted.
+
+Both sports use these names now. Baseball's used to be different and
+misleading — `teamName` was the CODE and `team` the nickname — and the first
+version of `lib/codes.js`, written against football's columns, therefore built
+an **empty** MLB table: every row skipped, no error raised. An empty table
+resolves every code to itself, which is exactly what the repo did before that
+file existed, so nothing broke and nothing said so. Renaming the columns is
+what let one rule read both sports.
+
 It replaced a generated table whose dates were explicitly *not* eras and a
 hand-written list of current names. Both were honest about their limits and both
 were workarounds for a file that did not exist yet. When the real thing arrives,

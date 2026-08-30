@@ -92,7 +92,7 @@ test('a history table with no recognisable code column is a configuration error'
 	// how the empty MLB table stayed invisible.
 	assert.throws(
 		() => codeTables(['nhl'], () => [{ club: 'Bruins', firstYear: '1924' }]),
-		/no code column/)
+		/no \*Abbrv code column/)
 })
 
 // --- what it fixes ---
