@@ -295,6 +295,13 @@ container — anonymous read on that one object, or a bucket the internal networ
 can reach. A presigned URL works but expires, which makes it a poor value for a
 persistent environment variable.
 
+Both ways of getting this wrong say so. An unreachable URL names the URL, the
+cause and the variable to set, and deletes the partial file rather than leaving
+something the next run would mistake for the source. An unreachable database
+names the host, port and database — never the password — and exits 2 rather
+than 1, so a wrapper can tell "the database is not there" from "the source is
+not there".
+
 Serve **only the eight columns the loader reads** — `gid, season, date,
 gametype, hometeam, visteam, hruns, vruns` — gzipped. That is **1.6MB** against
 the full file's 43MB; the other thirty-five columns are umpires, weather and

@@ -12,7 +12,7 @@
 // replaces the capture with the authoritative version, and running it twice in
 // a row changes nothing. Authority is a column in `source`, not a branch here.
 
-import { existsSync, mkdirSync, readFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, rmSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import pg from 'pg';
@@ -113,8 +113,24 @@ async function ensureSource(sportId, path, cfg, label) {
 	}
 	mkdirSync(dirname(path), { recursive: true });
 	console.log(`  fetching     ${label} ...`);
-	const bytes = await download(url, path);
-	console.log(`  fetched      ${label}  ${(bytes / 1048576).toFixed(1)} MB`);
+	try {
+		const bytes = await download(url, path);
+		console.log(`  fetched      ${label}  ${(bytes / 1048576).toFixed(1)} MB`);
+	} catch (e) {
+		// Naming the URL matters more than the stack. "TypeError: fetch failed"
+		// is what an unreachable host produces, and on its own it does not say
+		// which host, which source, or that a URL was involved at all.
+		console.error(`could not fetch ${label}`);
+		console.error(`  ${url}`);
+		console.error(`  ${e.cause?.message ?? e.message}`);
+		if (cfg?.env) {
+			console.error(`  Set ${cfg.env} to something this machine can reach, or put the`);
+			console.error(`  file at ${path} by hand.`);
+		}
+		// A half-written file would be taken as the real source on the next run.
+		rmSync(path, { force: true });
+		return false;
+	}
 	return true;
 }
 
@@ -188,7 +204,22 @@ async function main() {
 		return 2;
 	}
 	const client = new pg.Client({ connectionString: url });
-	await client.connect();
+	try {
+		await client.connect();
+	} catch (e) {
+		// A misconfigured DATABASE_URL is the most likely way this is run wrong,
+		// and it used to answer with an uncaught ECONNREFUSED stack that never
+		// said what had been dialled. The host and port are echoed; the password
+		// is not, which is why this reads them off the parsed URL rather than
+		// printing the string.
+		let where = 'the configured database';
+		try { const u = new URL(url); where = `${u.hostname}:${u.port || 5432}${u.pathname}`; } catch { /* unparseable */ }
+		console.error(`cannot reach ${where}`);
+		console.error(`  ${e.message}`);
+		console.error('  Check DATABASE_URL. This runs where the database is reachable from,');
+		console.error('  which for a server-only database is not a laptop.');
+		return 2;
+	}
 
 	const divisions = parseCsv(readFileSync(join(REFERENCE_DIR, `${sportId}-divisions.csv`), 'utf8'));
 	const { byCode, names } = franchiseMap(sportId);
