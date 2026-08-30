@@ -223,6 +223,38 @@ on it, because the column names were guessed rather than read. Retrosheet has a
 and the baseball site's own collector had been reading it for years three
 directories away.
 
+## A club is a sport and an id, never an id
+
+Six times now the same bug: something keyed, cached, looked up or chosen without
+the sport, when the sport is what tells two clubs apart. Every one was silent,
+and most produced a plausible wrong answer rather than an error.
+
+- `codeIndex` keyed on the code alone, so an `all` scope listed 60 clubs
+  instead of 62 — the Twins and the Tigers deduplicated away into the Vikings
+  and the Lions.
+- `resolveScope`'s dedupe keyed on the club id, so the second Cardinals and the
+  second Giants vanished. 62 loaded, 60 resolved.
+- The server found clubs with `teams.find((t) => t.id === e.teamId)`, and
+  `teams/mlb` sorts first, so the NFL Giants resolved to the baseball Giants and
+  went unavailable.
+- The game cache keyed on the franchise code, and the same-city pairs share
+  one — the MLB Orioles were served the Ravens' rows and showed 276-208-1 since
+  1996 in a record book starting in 1901.
+- A page covering two sports took one name resolver, from the first club in
+  scope, so the baseball schedule read "Lansing Oldsmobiles", "Cincinnati
+  Bengals", "Milwaukee Badgers". Every one a real football club that really used
+  that code.
+- `computeLeague` and `computeSchedule` built a code-to-club map across whatever
+  they were handed, and merged an NFL game and an MLB game into one fixture.
+
+The rule: **anything that identifies a club carries the sport with it.** A bare
+code, a bare id or a bare franchise is a bug waiting for a second sport, and
+there are four more sports of data sitting in `data/sources/sportsdata`.
+
+Where a function cannot carry it, it refuses: `computeLeague` and
+`computeSchedule` throw on clubs from two sports rather than producing something
+that looks right. A configuration error, not a data gap — no build fixes it.
+
 ## The scope is data too, and so is what it cannot serve
 
 One deployment shows a set of clubs, named by a single `SCOPE`: a club, a

@@ -4,6 +4,8 @@ import * as fs from 'node:fs'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 import { loadTeams } from '../lib/teams.js'
+import { computeLeague } from '../lib/league.js'
+import { computeSchedule } from '../lib/schedule.js'
 import { loadDivisions, parseScope, resolveScope } from '../lib/scope.js'
 import { codeTables, franchisesForClub } from '../lib/codes.js'
 
@@ -213,4 +215,44 @@ test('a shared franchise code names different clubs in each sport', () => {
 	assert.equal(byKey.get('mlb/BAL').id, 'orioles')
 	assert.equal(byKey.get('nfl/MIN').id, 'vikings')
 	assert.equal(byKey.get('mlb/MIN').id, 'twins')
+})
+
+// --- one sport per league ---
+
+test('a league or schedule computed across two sports is refused', () => {
+	// Both build a code-to-club map and deduplicate by game id, and neither
+	// means anything across sports: CIN is the Bengals and the Reds. Handed a
+	// mixed list, computeSchedule merged an NFL game and an MLB game into ONE
+	// fixture — measured before this guard existed, not feared.
+	//
+	// A configuration error rather than a data gap: no build fixes it and the
+	// wrong answer looks like a right one.
+	const club = (id, sport, code) => ({ id, sport, sourceIds: [code], nouns: { team: id, fullName: id } })
+	const mixed = [
+		{ team: club('bengals', 'nfl', 'CIN'), rows: [] },
+		{ team: club('reds', 'mlb', 'CIN'), rows: [] },
+	]
+	assert.throws(() => computeLeague(mixed), /computeLeague takes clubs from one sport; got mlb, nfl/)
+	assert.throws(() => computeSchedule(mixed), /computeSchedule takes clubs from one sport/)
+})
+
+test('one sport, or none at all, is fine', () => {
+	// The guard must not reject the ordinary case, nor an empty scope.
+	const club = (id, sport, code) => ({ id, sport, sourceIds: [code], nouns: { team: id, fullName: id } })
+	assert.equal(computeLeague([{ team: club('reds', 'mlb', 'CIN'), rows: [] }]).clubs, 0)
+	assert.equal(computeLeague([]).clubs, 0)
+	assert.equal(computeSchedule([]).games, 0)
+	// And a club with no manifest alongside one that has a sport does not trip
+	// it. A scope reports unbuilt clubs rather than filtering them out, so an
+	// entry with no team reaches here — counting `undefined` as a sport would
+	// make it look like a second one. One such club alone proves nothing,
+	// because a single value cannot be a mixture.
+	assert.equal(computeSchedule([
+		{ team: club('reds', 'mlb', 'CIN'), rows: [] },
+		{ team: undefined, rows: [] },
+	]).games, 0)
+	assert.equal(computeLeague([
+		{ team: club('reds', 'mlb', 'CIN'), rows: [] },
+		{ team: undefined, rows: [] },
+	]).clubs, 0)
 })
