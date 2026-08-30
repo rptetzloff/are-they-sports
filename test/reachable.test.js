@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { leagueNav, leagueRecordsPage, leagueSchedulePage, selectorPage, siteNav } from '../lib/render.js'
+import { leagueNav, leagueRecordsPage, leagueSchedulePage, selectorPage, siteNav, sportTabs } from '../lib/render.js'
 
 // Can you actually get there? Every route in this repo is tested by asking for
 // it directly, which is why /records and /schedule shipped answering 200 with
@@ -159,4 +159,46 @@ test('each sport keeps its own period rule on the schedule', () => {
 	// And the "no weeks recorded" note belongs to baseball, not to the page.
 	assert.equal((html.match(/No week numbers are recorded/g) ?? []).length, 0,
 		'the note fired for a sport that does not use weeks')
+})
+
+// --- per-sport league pages ---
+
+test('sport tabs appear only when there is more than one sport', () => {
+	// A single-sport deployment has nothing to switch between, and a tab bar
+	// with one tab is furniture.
+	assert.equal(sportTabs(['nfl'], null, 'records'), '')
+	assert.equal(sportTabs([], null, 'records'), '')
+	assert.notEqual(sportTabs(['nfl', 'mlb'], null, 'records'), '')
+})
+
+test('the tabs link each sport and mark the current one', () => {
+	const tabs = sportTabs(['nfl', 'mlb'], 'nfl', 'records')
+	assert.deepEqual(hrefs(tabs), ['/records', '/mlb/records'])
+	// The one you are on is named, not linked to itself.
+	assert.ok(tabs.includes('<span class="here">NFL</span>'))
+	// And "All" is a real destination, because the stacked view still exists.
+	assert.ok(tabs.includes('>All<'))
+})
+
+test('the tabs follow the view they are on', () => {
+	assert.deepEqual(hrefs(sportTabs(['nfl', 'mlb'], 'mlb', 'schedule')), ['/schedule', '/nfl/schedule'])
+})
+
+test('the unqualified page marks All as current', () => {
+	const tabs = sportTabs(['nfl', 'mlb'], null, 'records')
+	assert.ok(tabs.includes('<span class="here">All</span>'))
+	assert.deepEqual(hrefs(tabs), ['/nfl/records', '/mlb/records'])
+})
+
+test('a sport-qualified schedule keeps its prefix on every season link', () => {
+	// The season nav builds links from `base`. Left empty, a sport-qualified
+	// page linked back to the unqualified one and dropped the sport on every
+	// season change — measured: /nfl/schedule/2024 offered /schedule/2023.
+	const html = leagueSchedulePage({
+		schedule: { season: 2024, seasons: [2023, 2024, 2025], periods: [], weeksKnown: true, games: 0 },
+		heading: 'Every club', colors: COLORS, resolve: (c) => ({ name: c }), clubs: [], base: '/nfl',
+	})
+	const seasons = hrefs(html).filter((h) => /schedule\/\d{4}$/.test(h))
+	assert.ok(seasons.length > 0, 'no season links at all')
+	for (const h of seasons) assert.ok(h.startsWith('/nfl/'), `${h} lost the sport`)
 })
