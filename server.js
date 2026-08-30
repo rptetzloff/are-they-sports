@@ -32,7 +32,8 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { computeHeadToHead } from './lib/headtohead.js';
 import { computeRecords } from './lib/records.js';
-import { availability, close, connect, franchiseForCodes, franchisesWithGames, gamesFor, health, lastUpdated } from './lib/store.js';
+import { codeTables, franchisesForClub, staleFranchises } from './lib/codes.js';
+import { availability, close, connect, franchisesWithGames, gamesFor, health, lastUpdated } from './lib/store.js';
 import {
 	daysToNextGame, lastLosslessSeason, latestSeason, recordText, seasons, seasonTally, seasonVerdict,
 	seasonWinPct, seriesRecords, streakBanner, verdictText,
@@ -199,19 +200,54 @@ function main() {
 			return die(e.message);
 		}
 
-		// Resolve each club's canonical franchise, so a manifest listing MIL and
-		// SE1 asks the database one question rather than two.
+		// Resolve each club's canonical franchise from the CHECKOUT, not from the
+		// database.
+		//
+		// This used to ask `franchise_code`, a copy of the reference table that
+		// the loader writes. Two sources for one fact, loaded at different times,
+		// and they disagreed the moment the Raiders got a manifest: the server's
+		// copy still mapped LV to LV, so the boot check saw one club claiming two
+		// franchises and called die(). One club's stale row took down all
+		// thirty-two, and no amount of redeploying fixed it, because the wrong
+		// data was in the database rather than the image.
+		//
+		// The reference table ships with the code, so it cannot be out of step
+		// with the manifests that were written against it.
+		const codes = codeTables(Object.keys(divisionsBySport));
 		for (const e of resolved) {
 			const team = teams.find((t) => t.id === e.teamId);
 			if (!team) continue;
-			try {
-				e.franchise = dbHealth.ok ? await franchiseForCodes(team.sport, team.sourceIds) : null;
-			} catch (err) {
-				// Two franchises for one club's codes is a load-time error that
-				// would silently halve a club's history. It is worth stopping for.
-				return die(`${team.id}: ${err.message}`);
+			const distinct = franchisesForClub(team, codes.franchiseOf);
+			if (distinct.length > 1) {
+				// Still fatal, but now it means the reference table itself
+				// disagrees about a club, which no build or load can fix.
+				return die(`${team.id}: codes ${team.sourceIds.join(',')} are ${distinct.length} franchises: ${distinct.join(', ')}`);
 			}
+			e.franchise = distinct[0] ?? null;
 			e.available = Boolean(e.franchise) && (withGames.get(`${e.sport}/${e.franchise}`) ?? 0) > 0;
+		}
+
+		// Games sitting under a franchise the reference table now calls an alias.
+		// That means the database was loaded against an older reference table, and
+		// the club would serve half its history — the Raiders' 2020-on seasons
+		// under LV while OAK holds everything before.
+		//
+		// Reported, not fatal: re-running the load fixes it, which by this repo's
+		// rule makes it a data gap. It is named at boot, counted by /healthz, and
+		// the affected clubs answer 503 rather than a page that is quietly missing
+		// six seasons.
+		const stale = staleFranchises([...withGames.keys()], codes.franchiseOf);
+		if (stale.length) {
+			console.error(`STALE: ${stale.length} database franchises are aliases in the reference table: `
+				+ `${stale.map((x) => `${x.sport}/${x.franchise} -> ${x.canonical}`).join(', ')}`
+				+ '. Re-run: node scripts/load.mjs');
+			const affected = new Set(stale.map((x) => x.canonical));
+			for (const e of resolved) {
+				if (e.franchise && affected.has(e.franchise)) {
+					e.available = false;
+					e.stale = true;
+				}
+			}
 		}
 
 		const teamsById = new Map(teams.map((t) => [t.id, t]));
@@ -282,14 +318,10 @@ function main() {
 			refreshedAt = now;
 			const live = await availability(now);
 			for (const e of table) {
-				if (!e.franchise && e.teamId) {
-					const team = teamsById.get(e.teamId);
-					// Booting against an empty database leaves this null, because
-					// there are no franchise_code rows to resolve against yet.
-					if (team) {
-						try { e.franchise = await franchiseForCodes(team.sport, team.sourceIds); } catch { /* reported at boot */ }
-					}
-				}
+				// `e.franchise` comes from the checkout now and is already set for
+				// every club with a manifest, so there is nothing to resolve late.
+				// It used to be read from the database here, which meant a club
+				// booted against an empty database stayed unresolved forever.
 				if (e.franchise) e.available = (live.get(`${e.sport}/${e.franchise}`) ?? 0) > 0;
 			}
 			available = table.filter((e) => e.available);

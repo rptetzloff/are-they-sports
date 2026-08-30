@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { codeTable, codeTables } from '../lib/codes.js'
+import { codeTable, codeTables, franchisesForClub, staleFranchises } from '../lib/codes.js'
 import { loadDivisions, parseScope, resolveScope } from '../lib/scope.js'
 import { loadTeams } from '../lib/teams.js'
 
@@ -142,6 +142,62 @@ test('all three alias clubs resolve, not just the one that was checked', () => {
 		const got = resolveScope(parseScope(scope), { divisionsBySport, teams, built })
 		assert.ok(got.find((e) => e.teamId === id), `${id} missing from ${scope}`)
 	}
+})
+
+// --- the deploy that rolled back ---
+
+test('a club listing a code and its alias is one franchise, not two', () => {
+	// The exact boot failure: "raiders: codes OAK,LV map to 2 franchises: LV,
+	// OAK". The server asked the DATABASE, whose copy of the reference table was
+	// written by an older load and still mapped LV to LV. One club's stale row
+	// called die() and took all thirty-two down, and redeploying could not fix
+	// it because the wrong data was in the database, not the image.
+	const raiders = TEAMS.find((t) => t.id === 'raiders')
+	assert.deepEqual(franchisesForClub(raiders, codeTables(['nfl']).franchiseOf), ['OAK'])
+})
+
+test('every committed club resolves to exactly one franchise', () => {
+	// Checking only the Raiders is how the next one gets missed.
+	const franchiseOf = codeTables(['nfl', 'mlb']).franchiseOf
+	const broken = TEAMS
+		.map((t) => [t.id, franchisesForClub(t, franchiseOf)])
+		.filter(([, fs]) => fs.length !== 1)
+	assert.deepEqual(broken, [])
+})
+
+test('a club whose codes really are two franchises is still caught', () => {
+	// The check had a real job and keeps it. What changed is which source
+	// answers, and that this now means the reference table contradicts itself
+	// rather than the database being out of date.
+	const franchiseOf = codeTables(['nfl']).franchiseOf
+	const wrong = { id: 'x', sport: 'nfl', sourceIds: ['GB', 'CHI'] }
+	assert.deepEqual(franchisesForClub(wrong, franchiseOf).sort(), ['CHI', 'GB'])
+})
+
+test('games under a code that has become an alias are reported stale', () => {
+	// A database loaded before LV became an alias stores the Raiders' 2020-on
+	// seasons under LV and everything earlier under OAK. Serving that club would
+	// quietly drop six seasons.
+	const franchiseOf = codeTables(['nfl']).franchiseOf
+	const got = staleFranchises(['nfl/GB', 'nfl/OAK', 'nfl/LV', 'nfl/WAS'], franchiseOf)
+	assert.deepEqual(got, [
+		{ sport: 'nfl', franchise: 'LV', canonical: 'OAK' },
+		{ sport: 'nfl', franchise: 'WAS', canonical: 'WSH' },
+	])
+})
+
+test('a database that agrees with the reference table is not stale', () => {
+	// Without this the function could return everything and still pass above.
+	const franchiseOf = codeTables(['nfl', 'mlb']).franchiseOf
+	assert.deepEqual(staleFranchises(['nfl/GB', 'nfl/OAK', 'mlb/MIL'], franchiseOf), [])
+})
+
+test('an unknown franchise is not called stale', () => {
+	// An unknown code resolves to itself, so it must not look like an alias.
+	// Otherwise a sport with no history table would report every club stale and
+	// mark the whole deployment unavailable.
+	const franchiseOf = codeTables(['nhl'], () => { throw new Error('none') }).franchiseOf
+	assert.deepEqual(staleFranchises(['nhl/BOS', 'nhl/MTL'], franchiseOf), [])
 })
 
 test('an entire league resolves to one club per division row', () => {

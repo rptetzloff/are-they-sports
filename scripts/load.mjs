@@ -124,6 +124,37 @@ async function main() {
 	await client.query('INSERT INTO sport VALUES ($1,$2) ON CONFLICT DO NOTHING',
 		[sportId, sportId === 'nfl' ? 'football' : 'baseball']);
 
+	// Repair games stored under a code that has since become an alias.
+	//
+	// Without this, "re-run the load" does not actually fix a database loaded
+	// against an older reference table: the new rows land under OAK while the
+	// old ones stay under LV, and the club serves half its history with no error.
+	// The five nflverse codes moved from rows to a column in the history table,
+	// so any database loaded before that has exactly this problem.
+	//
+	// Safe to run every time: on an already-correct database it matches nothing.
+	const codes = codeTable(sportId, loadHistory(sportId));
+	const { rows: dbFranchises } = await client.query(
+		'SELECT id FROM franchise WHERE sport = $1', [sportId]);
+	for (const { id } of dbFranchises) {
+		const canonical = codes.franchiseOf(id);
+		if (canonical === id) continue;
+		// The canonical franchise must exist before anything can point at it.
+		await client.query(
+			'INSERT INTO franchise (sport, id) VALUES ($1,$2) ON CONFLICT DO NOTHING',
+			[sportId, canonical]);
+		for (const side of ['home', 'away']) {
+			const { rowCount } = await client.query(
+				`UPDATE game SET ${side} = $1 WHERE sport = $2 AND ${side} = $3`,
+				[canonical, sportId, id]);
+			if (rowCount) console.log(`  remapped ${rowCount} ${side} games ${id} -> ${canonical}`);
+		}
+		await client.query('DELETE FROM franchise_code WHERE sport = $1 AND franchise = $2', [sportId, id]);
+		await client.query('DELETE FROM franchise_name WHERE sport = $1 AND franchise = $2', [sportId, id]);
+		await client.query('DELETE FROM franchise WHERE sport = $1 AND id = $2', [sportId, id]);
+		console.log(`  removed alias franchise ${id}`);
+	}
+
 	/** Register a code, inventing a franchise for it if it is unknown. */
 	const known = new Set();
 	const franchiseFor = async (code) => {
@@ -138,8 +169,13 @@ async function main() {
 					[sportId, franchise, n.name, 'manual']);
 			}
 		}
+		// Upsert, not DO NOTHING. The primary key used to include `franchise`, so
+		// "LV is LV" and "LV is OAK" were two rows rather than a contradiction,
+		// nothing ever conflicted, and a wrong mapping could not be corrected by
+		// re-running this. See db/migrations/0003.
 		await client.query(
-			'INSERT INTO franchise_code (sport, code, franchise) VALUES ($1,$2,$3) ON CONFLICT DO NOTHING',
+			`INSERT INTO franchise_code (sport, code, franchise) VALUES ($1,$2,$3)
+			 ON CONFLICT (sport, code) DO UPDATE SET franchise = EXCLUDED.franchise`,
 			[sportId, code, franchise]);
 		return franchise;
 	};
