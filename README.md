@@ -270,13 +270,27 @@ inside the deployed container, because nflverse and FiveThirtyEight publish
 stable URLs and the two files are 2.1MB and 1.2MB.
 
 Baseball does not. Retrosheet publishes downloads rather than a release URL, so
-`data/sources/mlb/schedules.csv` is **supplied, not pulled**, and a container has
-no way to obtain it. The load therefore runs where the file is, pointing at the
-server's database:
+there is nothing to hardcode — and on a host where the database is reachable
+only from the server, the CSV and the database are never in the same place.
 
+So the URL is **named rather than written**: `sports/mlb.js` declares
+`env: 'MLB_SCHEDULES_URL'`, and the container fetches from wherever that points,
+exactly as it fetches nflverse. A private host stays out of a public repository.
+
+```powershell
+$env:MLB_SCHEDULES_URL = 'https://…/mlb-games.csv.gz'
+npm run load mlb
 ```
-DATABASE_URL=postgres://…/appdb node scripts/load.mjs mlb
-```
+
+Serve **only the eight columns the loader reads** — `gid, season, date,
+gametype, hometeam, visteam, hruns, vruns` — gzipped. That is **1.6MB** against
+the full file's 43MB; the other thirty-five columns are umpires, weather and
+attendance that nothing here looks at. `data/sources/mlb-games.csv.gz` is built
+by trimming `gameinfo.csv` and is gitignored like every other source.
+
+With neither the variable nor the file, the load exits 1 naming the variable.
+Putting the file at `data/sources/mlb/schedules.csv` by hand still works and
+skips the fetch.
 
 The file is Retrosheet's `gameinfo`: one row per game with both clubs, 226,221
 rows covering 1897–2025.
