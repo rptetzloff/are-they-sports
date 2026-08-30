@@ -80,9 +80,15 @@ ENV SCOPE=""
 # canonical, which is how a preview domain publishes itself as the real one.
 ENV PUBLIC_ORIGIN=""
 
-# Where the database lives. Reads happen at request time, so a deployment
-# without this is not self-contained the way earlier ones were — that is the
-# cost of the reversal recorded in db/schema.sql, taken deliberately.
+# Where the database lives. REQUIRED: games are read at request time, and the
+# server exits rather than starting without it. A deployment is no longer
+# self-contained — that is the cost of the reversal recorded in
+# db/migrations/0001_initial.sql, taken deliberately.
+#
+# A database that is unreachable is a different case and is NOT fatal: the
+# server starts, /healthz answers 503 naming the connection error, and every
+# club route answers 503 rather than a wrong page. Config errors die, data gaps
+# report. Both paths are tested.
 ENV DATABASE_URL=""
 
 # server.js reads PORT and falls back to 3000. Coolify sets what it expects.

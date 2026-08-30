@@ -17,6 +17,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import pg from 'pg';
 import { csvRows, parseCsv } from '../lib/csv.js';
+import { isoDate } from '../sports/mlb.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const SOURCE_DIR = join(ROOT, 'data', 'sources');
@@ -30,6 +31,25 @@ const REFERENCE_DIR = join(ROOT, 'data', 'reference');
  */
 export function franchiseMap(nameRows, divisionRows) {
 	const current = new Set(divisionRows.map((r) => r.code));
+
+	// Retrosheet already answers this, in a `current` column naming the
+	// franchise a historical code belongs to. Use it when it is there.
+	//
+	// Not using it grouped by display name instead, which splits a franchise
+	// every time it was renamed: SE1 "Seattle Pilots" and MIL "Milwaukee
+	// Brewers" became two clubs, the 1969 season was orphaned, and the Brewers
+	// came back 8,904 games and 4366-4535-3 against the artifacts' 9,067 and
+	// 4430-4633-4. Football has no such column and still needs the name
+	// grouping below, which is why both paths exist.
+	if (nameRows.some((r) => r.current)) {
+		const canonical = new Map();
+		for (const r of nameRows) {
+			if (!r.code || !r.name) continue;
+			canonical.set(r.code, { franchise: r.current || r.code, name: r.name });
+		}
+		return canonical;
+	}
+
 	const byName = new Map();
 	// Group by display name, which is what ties an alias to its franchise —
 	// "Los Angeles Rams" appears under LA, LAR and STL.
@@ -135,6 +155,26 @@ async function main() {
 				home: r.home_team, away: r.away_team,
 				homeScore: played ? +r.home_score : null, awayScore: played ? +r.away_score : null,
 				neutral: false, status: played ? 'final' : 'scheduled', source: 'nflverse',
+			});
+		}
+	}
+
+	if (sportId === 'mlb') {
+		// Retrosheet's gameinfo is one row per game with both clubs, and unlike
+		// football there is no second era to splice in — coverage runs the whole
+		// length of every franchise.
+		for await (const r of csvRows(join(SOURCE_DIR, 'mlb', 'schedules.csv'))) {
+			const played = r.vruns !== '' && r.hruns !== '';
+			// gametype is a word here rather than a two-letter code, and only the
+			// World Series is the championship round: an LCS game must not set it
+			// or a pennant becomes a title.
+			const round = r.gametype === 'worldseries' ? 'championship'
+				: r.gametype === 'regular' ? 'regular' : 'playoff';
+			await put({
+				id: r.gid, season: +r.season, date: isoDate(r.date), round,
+				home: r.hometeam, away: r.visteam,
+				homeScore: played ? +r.hruns : null, awayScore: played ? +r.vruns : null,
+				neutral: false, status: played ? 'final' : 'scheduled', source: 'retrosheet',
 			});
 		}
 	}

@@ -30,7 +30,7 @@ import { createServer } from 'node:http';
 import { readdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { builtTeams, loadIndex, readManifest } from './lib/indices.js';
+import { close, connect, franchiseForCodes, franchisesWithGames, gamesFor, health } from './lib/store.js';
 import { latestSeason, recordText, seasonTally, seasonVerdict, verdictText } from './lib/core.js';
 import { NEUTRAL, clubPage, selectorPage } from './lib/render.js';
 import { resolver } from './lib/names.js';
@@ -87,14 +87,26 @@ const html = (res, code, body) => {
  */
 const wantsJson = (url) => url.searchParams.get('format') === 'json';
 
-/** A club's games, filtered to a season when asked. */
-function games(teamId, season) {
-	const { entries } = loadIndex(teamId, 'games');
-	return season ? entries.filter((g) => g.season === season) : entries;
+/** A club's games, filtered to a season when asked.
+ *
+ *  Cached per franchise for the life of the process. A club's history changes
+ *  when a game finishes, not between requests, and re-querying 9,067 rows on
+ *  every page load would be work done for nothing. The cost is that a finished
+ *  game is not visible until the next deploy — which is a real limitation and
+ *  the reason a TTL or an invalidation hook is the next thing this needs.
+ */
+const gameCache = new Map();
+
+async function games(entry, season) {
+	if (!gameCache.has(entry.franchise)) {
+		gameCache.set(entry.franchise, await gamesFor(entry.sport, entry.franchise));
+	}
+	const rows = gameCache.get(entry.franchise);
+	return season ? rows.filter((g) => g.season === season) : rows;
 }
 
-function summary(entry, origin, base) {
-	const all = games(entry.teamId);
+async function summary(entry, origin, base) {
+	const all = await games(entry);
 	const played = all.filter((g) => g.result);
 	const seasons = [...new Set(all.map((g) => g.season))].sort();
 	return {
@@ -110,7 +122,6 @@ function summary(entry, origin, base) {
 			losses: played.filter((g) => g.result === 'LOSS').length,
 			ties: played.filter((g) => g.result === 'TIE').length,
 		},
-		sources: readManifest(entry.teamId).sources,
 		links: { self: `${origin}${base || '/'}`, latestSeason: `${origin}${base}/${seasons.at(-1)}` },
 	};
 }
@@ -135,13 +146,47 @@ function main() {
 		try { divisionsBySport[s] = loadDivisions(s); } catch (e) { return die(`division table for ${s}: ${e.message}`); }
 	}
 
-	return loadTeams().then((teams) => {
-		const built = builtTeams();
+	if (!process.env.DATABASE_URL) {
+		return die('DATABASE_URL is required; games are read from the database at request time');
+	}
+	connect();
+
+	return loadTeams().then(async (teams) => {
+		// Availability now means "this franchise has games in the database",
+		// not "someone ran a build". A club with a manifest and no rows is in
+		// scope and unavailable, exactly as before — the source of the fact
+		// changed, not the reporting of it.
+		const dbHealth = await health();
+		if (!dbHealth.ok) {
+			// Not fatal. A database that is down is a data gap, not a
+			// configuration error, and the distinction is the one drawn when the
+			// first version of this file exited on an empty scope: exiting turns
+			// a readable failure into a crash loop with the reason one restart
+			// back in the logs.
+			console.error(`  UNHEALTHY    database unreachable: ${dbHealth.error}`);
+		}
+		const withGames = dbHealth.ok ? await franchisesWithGames() : new Map();
+
 		let resolved;
 		try {
-			resolved = resolveScope(scope, { divisionsBySport, teams, built });
+			resolved = resolveScope(scope, { divisionsBySport, teams, built: new Set() });
 		} catch (e) {
 			return die(e.message);
+		}
+
+		// Resolve each club's canonical franchise, so a manifest listing MIL and
+		// SE1 asks the database one question rather than two.
+		for (const e of resolved) {
+			const team = teams.find((t) => t.id === e.teamId);
+			if (!team) continue;
+			try {
+				e.franchise = dbHealth.ok ? await franchiseForCodes(team.sport, team.sourceIds) : null;
+			} catch (err) {
+				// Two franchises for one club's codes is a load-time error that
+				// would silently halve a club's history. It is worth stopping for.
+				return die(`${team.id}: ${err.message}`);
+			}
+			e.available = Boolean(e.franchise) && (withGames.get(`${e.sport}/${e.franchise}`) ?? 0) > 0;
 		}
 
 		const teamsById = new Map(teams.map((t) => [t.id, t]));
@@ -159,7 +204,7 @@ function main() {
 		console.log(`  scope        ${process.env.SCOPE}`);
 		console.log(`  clubs        ${available.length} of ${table.length} available`);
 		for (const e of table.filter((e) => !e.available)) {
-			console.log(`  missing      ${e.sport}/${e.code} — ${e.teamId ? 'manifest but no build' : 'no manifest'}`);
+			console.log(`  missing      ${e.sport}/${e.code} — ${e.teamId ? 'manifest, but no games in the database' : 'no manifest'}`);
 		}
 		// Not fatal, deliberately, and this is a reversal: the first version
 		// exited here. A configuration error and a data gap are different
@@ -171,15 +216,15 @@ function main() {
 		//
 		// So: config errors die above, data gaps serve and report unhealthy.
 		if (!available.length) {
-			console.error('  UNHEALTHY    no club in scope has built artifacts; run: npm run build <team>');
+			console.error('  UNHEALTHY    no club in scope has games in the database; run: npm run load <sport>');
 		}
 		// Partial availability is healthy by default, because building clubs one
 		// at a time is how this repo works today. A deployment that means to
 		// promise the whole scope sets STRICT_SCOPE=1 and any gap is unhealthy.
 		const strict = process.env.STRICT_SCOPE === '1';
-		const healthy = () => (strict ? available.length === table.length : available.length > 0);
+		const healthy = () => dbHealth.ok && (strict ? available.length === table.length : available.length > 0);
 
-		const server = createServer((req, res) => {
+		const server = createServer(async (req, res) => {
 			const url = new URL(req.url, 'http://placeholder');
 			const origin = originOf(req);
 
@@ -189,6 +234,7 @@ function main() {
 				return json(res, healthy() ? 200 : 503, {
 					ok: healthy(),
 					build: BUILD,
+					database: dbHealth.ok ? { games: dbHealth.games, migrations: dbHealth.migrations } : { error: dbHealth.error },
 					strict,
 					scope: process.env.SCOPE,
 					inScope: table.length,
@@ -225,9 +271,9 @@ function main() {
 			const { entry, rest } = match;
 			if (!entry.available) {
 				return json(res, 503, {
-					error: 'club is in scope but has no built artifacts',
+					error: 'club is in scope but has no games in the database',
 					team: entry.teamId, code: entry.code,
-					fix: entry.teamId ? `npm run build ${entry.teamId}` : `write teams/<id>.js for ${entry.code}`,
+					fix: entry.teamId ? `npm run load ${entry.sport}` : `write teams/<id>.js for ${entry.code}`,
 				});
 			}
 
@@ -236,9 +282,9 @@ function main() {
 
 			try {
 				if (view.view === 'summary') {
-					if (wantsJson(url)) return json(res, 200, summary(entry, origin, entry.base));
+					if (wantsJson(url)) return json(res, 200, await summary(entry, origin, entry.base));
 					const team = teamsById.get(entry.teamId);
-					const latest = latestSeason(games(entry.teamId));
+					const latest = latestSeason(await games(entry));
 					const tally = seasonTally(latest.rows, team);
 					const verdict = seasonVerdict({ ...tally, isPastSeason: latest.isPastSeason });
 					return html(res, 200, clubPage({
@@ -251,7 +297,7 @@ function main() {
 					}));
 				}
 				if (view.view === 'season') {
-					const rows = games(entry.teamId, view.season);
+					const rows = await games(entry, view.season);
 					if (!rows.length) return json(res, 404, { error: 'no such season', season: view.season });
 					return json(res, 200, { team: entry.teamId, season: view.season, games: rows });
 				}

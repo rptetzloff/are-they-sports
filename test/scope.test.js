@@ -109,11 +109,38 @@ test('a division name is qualified by conference', () => {
 
 test('every source code a club used maps back to the club', () => {
 	const idx = codeIndex(TEAMS)
-	assert.equal(idx.get('GB'), 'packers')
-	assert.equal(idx.get('MIL'), 'brewers')
+	assert.equal(idx.get('nfl/GB'), 'packers')
+	assert.equal(idx.get('mlb/MIL'), 'brewers')
 	// The Seattle Pilots season.
-	assert.equal(idx.get('SE1'), 'brewers')
-	assert.equal(idx.get('CHI'), undefined)
+	assert.equal(idx.get('mlb/SE1'), 'brewers')
+	assert.equal(idx.get('nfl/CHI'), undefined)
+})
+
+test('a code means different clubs in different sports', () => {
+	// MIN is the Vikings and the Twins; DET is the Lions and the Tigers; MIL is
+	// the Milwaukee Badgers in football and the Brewers in baseball. A code-only
+	// index made an `all` scope list 60 clubs rather than 62, because the two
+	// baseball clubs resolved to football teams already seen and were
+	// deduplicated away — and without the dedupe they would have been served as
+	// the wrong club entirely.
+	const twins = { id: 'twins', sport: 'mlb', sourceIds: ['MIN'] }
+	const vikings = { id: 'vikings', sport: 'nfl', sourceIds: ['MIN'] }
+	const idx = codeIndex([twins, vikings])
+	assert.equal(idx.get('mlb/MIN'), 'twins')
+	assert.equal(idx.get('nfl/MIN'), 'vikings')
+})
+
+test('a scope spanning both sports keeps every club', () => {
+	// The end-to-end form of the same bug, which is how it was noticed: the
+	// selector said 60.
+	const both = {
+		nfl: [div('MIN', 'NFC', 'North')],
+		mlb: [div('MIN', 'AL', 'Central')],
+	}
+	const teams = [{ id: 'vikings', sport: 'nfl', sourceIds: ['MIN'] }, { id: 'twins', sport: 'mlb', sourceIds: ['MIN'] }]
+	const got = resolveScope(parseScope('all'), { divisionsBySport: both, teams, built: new Set() })
+	assert.equal(got.length, 2)
+	assert.deepEqual(got.map((e) => e.teamId).sort(), ['twins', 'vikings'])
 })
 
 test('two clubs claiming one code is an error, not a race', () => {
@@ -162,8 +189,8 @@ test('a team scope naming an unknown club throws and lists what exists', () => {
 })
 
 test('a club with two codes appears once', () => {
-	const twice = { nl: [div('MIL', 'NL', 'Central'), div('SE1', 'NL', 'Central')] }
-	const got = resolveScope({ kind: 'sport', sport: 'nl', id: null },
+	const twice = { mlb: [div('MIL', 'NL', 'Central'), div('SE1', 'NL', 'Central')] }
+	const got = resolveScope({ kind: 'sport', sport: 'mlb', id: null },
 		{ divisionsBySport: twice, teams: TEAMS, built: new Set(['brewers']) })
 	assert.equal(got.filter((e) => e.teamId === 'brewers').length, 1)
 })
