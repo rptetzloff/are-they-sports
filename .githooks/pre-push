@@ -1,0 +1,43 @@
+#!/bin/sh
+# Refuse to push to a branch whose pull request has already been merged.
+#
+# This has happened three times. A work branch is merged and deleted on GitHub,
+# the local checkout still has it, and a commit made afterwards pushes cleanly
+# to a branch nothing will ever merge again. Nothing fails: the push succeeds,
+# CI runs and passes, and the work is simply not in `dev`. It was found the
+# third time only because someone asked whether a merge was needed.
+#
+# Checked rather than remembered, because the state changes without the person
+# pushing doing anything.
+#
+# Fails OPEN when `gh` is missing or offline: a guard that blocks work when the
+# network is down would be turned off within a day, and this cannot be the only
+# line of defence anyway.
+
+branch=$(git rev-parse --abbrev-ref HEAD)
+case "$branch" in
+	dev|main|HEAD) exit 0 ;;
+esac
+
+command -v gh >/dev/null 2>&1 || exit 0
+
+state=$(gh pr list --head "$branch" --state merged --json number,mergedAt \
+	--jq '.[0] | select(.number) | "\(.number) \(.mergedAt)"' 2>/dev/null) || exit 0
+[ -n "$state" ] || exit 0
+
+pr=${state%% *}
+merged=${state#* }
+cat >&2 <<MSG
+
+  refusing to push: PR #$pr for "$branch" was merged at $merged.
+
+  Anything committed here after that will not reach dev. Move it:
+
+      git checkout dev && git pull
+      git checkout -b <new-branch>
+      git cherry-pick <sha>
+
+  To push anyway: git push --no-verify
+
+MSG
+exit 1

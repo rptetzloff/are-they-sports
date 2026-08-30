@@ -419,6 +419,23 @@ squashed one, and the two looked like unrelated work. The residue was 220 commit
 that `main` carried and `dev` did not, so every release PR afterwards computed
 its diff against a base missing most of `main`'s history.
 
+**Check whether the PR is already merged before committing to its branch.**
+Three times now, a work branch has been merged and a commit made afterwards has
+pushed cleanly to it. Nothing fails: the push succeeds, CI runs green, and the
+work is simply not in `dev`. The third one was the fix for a load that was
+crashing on the server, and it was found only because someone asked whether a
+merge was still needed.
+
+The trap is that this is not a mistake about git. It is treating "I opened this
+PR, so it is open" as a standing fact, when it is a thing that changes without
+the person pushing doing anything — which is the same shape as every other bug
+in this file. `gh pr view <n> --json state` is one command.
+
+`.githooks/pre-push` now refuses it, and `git config core.hooksPath .githooks`
+turns that on in a fresh checkout. It fails open when `gh` is missing or
+offline, because a guard that blocks work when the network is down gets
+disabled within a day. So it is a backstop, not the rule.
+
 **Branch from `dev`, not from another work branch.** A stacked PR was merged 21
 seconds after its own base, before GitHub retargeted it, and landed on the wrong
 branch.

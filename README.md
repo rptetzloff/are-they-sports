@@ -307,7 +307,15 @@ npm run build packers                 # derive committed artifacts (no longer re
 npm test                              # no sources needed, ~190ms
 
 SCOPE=team:packers npm run dev        # http://127.0.0.1:3000
+
+git config core.hooksPath .githooks    # once per checkout, see below
 ```
+
+`core.hooksPath` turns on `.githooks/pre-push`, which refuses a push to a
+branch whose PR has already been merged. That has happened three times: the
+push succeeds, CI passes, and the work is simply not in `dev`. It fails open
+when `gh` is missing or offline, so it is a backstop rather than the rule —
+the rule is in CLAUDE.md.
 
 ### Container
 
