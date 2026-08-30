@@ -30,13 +30,15 @@ import { createServer } from 'node:http';
 import { readdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { computeRecords } from './lib/records.js';
 import { availability, close, connect, franchiseForCodes, franchisesWithGames, gamesFor, health, lastUpdated } from './lib/store.js';
 import {
 	daysToNextGame, lastLosslessSeason, latestSeason, recordText, seasons, seasonTally, seasonVerdict,
 	seasonWinPct, seriesRecords, streakBanner, verdictText,
 } from './lib/core.js';
 import {
-	NEUTRAL, clubPage, clubSwitcher, scheduleHtml, seasonNav, selectorPage, siteNav, sparklineHtml,
+	NEUTRAL, clubPage, clubSwitcher, recordsPage, scheduleHtml, seasonNav, selectorPage, siteNav,
+	sparklineHtml,
 } from './lib/render.js';
 import { colorsFor, resolver } from './lib/names.js';
 import { SPORTS, loadTeams } from './lib/teams.js';
@@ -462,10 +464,31 @@ function main() {
 					if (!body) return json(res, 404, { error: 'no such season', season: view.season });
 					return html(res, 200, body);
 				}
-				// records and vs need the shared core, which has not been ported.
-				// Saying so beats an empty 200 that looks like a club with no
-				// records.
-				return json(res, 501, { error: `${view.view} needs the record core, which is not ported yet` });
+				if (view.view === 'records') {
+					const team = teamsById.get(entry.teamId);
+					const all = await games(entry);
+					const records = computeRecords(all, {
+						// Declared per sport: football's longest streak is 15
+						// games across the 2010 and 2011 seasons, and ending runs
+						// at the boundary would erase it. Baseball says the
+						// opposite, on purpose.
+						streaksSpanSeasons: team.rules.streaksSpanSeasons,
+					});
+					if (wantsJson(url)) return json(res, 200, records);
+					const latest = latestSeason(all);
+					return html(res, 200, recordsPage({
+						team,
+						colors: team.colors ?? colorsFor(namers[entry.sport], entry.code, { season: latest?.season, date: all.at(-1)?.date }, NEUTRAL),
+						records,
+						resolve: namers[entry.sport],
+						base: entry.base,
+						siteNavHtml: siteNav(entry.base, team),
+						switcher: clubSwitcher(clubList(), entry.teamId),
+					}));
+				}
+				// vs and history still need porting. Saying so beats an empty 200
+				// that looks like a club with nothing to show.
+				return json(res, 501, { error: `${view.view} is not ported yet` });
 			} catch (e) {
 				console.error(e);
 				return json(res, 500, { error: e.message });

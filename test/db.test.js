@@ -337,6 +337,21 @@ test('loaded data', { skip: !isLoaded && 'database has no loaded games — run s
 		assert.equal(r.n, 213)
 	})
 
+	await t.test('the record book sees every title game', async () => {
+		// Championships are identified at load time from the last playoff game of
+		// each league in a season, so they exist in the database and not in the
+		// committed artifacts.
+		//
+		// Fifteen GAMES across thirteen SEASONS, and the difference is real
+		// rather than an off-by-two: the Packers won the NFL Championship and the
+		// Super Bowl in both 1966 and 1967, so those seasons have two title games
+		// each. Asserting one number for both is what made this fail first.
+		const r = await one(`SELECT count(*)::int games, count(DISTINCT season)::int seasons
+			FROM game WHERE sport='nfl' AND round='championship' AND (home='GB' OR away='GB')`)
+		assert.equal(r.games, 15)
+		assert.equal(r.seasons, 13)
+	})
+
 	await t.test('the aliases collapsed', async () => {
 		const r = await one(`SELECT count(DISTINCT franchise)::int f, count(DISTINCT code)::int c
 			FROM franchise_code WHERE sport='nfl'`)
