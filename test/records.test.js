@@ -1,0 +1,253 @@
+import test from 'node:test'
+import assert from 'node:assert/strict'
+import { computeRecords, rec } from '../lib/records.js'
+import { titleHeading } from '../lib/render.js'
+import { loadIndex } from '../lib/indices.js'
+import { loadTeam } from '../lib/teams.js'
+
+const packers = await loadTeam('packers')
+const REAL = loadIndex('packers', 'games').entries
+
+const RESULTS = { W: 'WIN', L: 'LOSS', T: 'TIE' }
+
+/** A season's worth of regular-season games from a pattern. */
+const season = (year, pattern, over = {}) => pattern.split('').map((c, i) => ({
+	result: RESULTS[c] ?? '',
+	date: `${year}-09-${String(i + 1).padStart(2, '0')}`,
+	season: String(year),
+	regular_season: '1',
+	playoff: '0',
+	championship: '',
+	Opponent: 'CHI',
+	scoreFor: '20',
+	scoreAgainst: '10',
+	location: 'home',
+	...over,
+}))
+
+test('a record is written with en-dashes, and ties only when there are some', () => {
+	assert.equal(rec(12, 0, 1), '12–0–1')
+	assert.equal(rec(15, 1, 0), '15–1')
+})
+
+// --- settled seasons ---
+
+test('a season with a game left to play is excluded from every ranking', () => {
+	// A club sitting at 3-0 in September would otherwise top the best-seasons
+	// list at 1.000 and claim an undefeated season it has not finished.
+	const rows = [
+		...season(1929, 'WWWWW'),
+		...season(2026, 'WWW'),
+		...season(2026, '', {}), // nothing
+		{ ...season(2026, 'W')[0], result: '', date: '2026-12-01' },
+	]
+	const r = computeRecords(rows)
+	assert.deepEqual(r.bestSeasons.map((s) => s.season), [1929])
+	assert.deepEqual(r.losslessSeasons.map((s) => s.season), [1929])
+})
+
+test('settledness comes from the data, not from a calendar', () => {
+	// The football site decided this by date — a season labelled Y is over by
+	// March of Y+1 — which is football's calendar and wrong for baseball, whose
+	// season ends in the October of its own year. A season with no unplayed
+	// games is finished in either sport.
+	const finished = computeRecords(season(2026, 'WWWW'))
+	assert.deepEqual(finished.losslessSeasons.map((s) => s.season), [2026])
+})
+
+// --- seasons ---
+
+test('best and worst seasons rank by win percentage, ties counting half', () => {
+	// 1929 at 12-0-1 is .962 and outranks a 15-1 at .938, which is the order the
+	// live site shows.
+	const r = computeRecords([...season(1929, 'WWWWWWWWWWWWT'), ...season(2011, 'WWWWWWWWWWWWWWWL')])
+	assert.deepEqual(r.bestSeasons.map((s) => s.season), [1929, 2011])
+	assert.deepEqual(r.worstSeasons.map((s) => s.season), [2011, 1929])
+})
+
+test('a lossless season needs a win, and tolerates ties', () => {
+	// 1929 went 12-0-1: undefeated, not perfect. A season of nothing but ties is
+	// neither.
+	const r = computeRecords([...season(1929, 'WWT'), ...season(1930, 'TT')])
+	assert.deepEqual(r.losslessSeasons.map((s) => s.season), [1929])
+})
+
+// --- starts ---
+
+test('a start is the leading run of one result, and stops at the first other', () => {
+	const r = computeRecords([...season(2011, 'WWWWWLWWW'), ...season(1929, 'WWLWW')])
+	assert.deepEqual(r.bestStarts, [{ season: 2011, games: 5 }, { season: 1929, games: 2 }])
+})
+
+test('a season that opens with a loss has no winning start at all', () => {
+	const r = computeRecords(season(1986, 'LLWWW'))
+	assert.deepEqual(r.bestStarts, [])
+	assert.deepEqual(r.worstStarts, [{ season: 1986, games: 2 }])
+})
+
+// --- streaks ---
+
+test('a streak spans seasons when the sport says it does', () => {
+	// Football's longest is 15 games from December 2010 into December 2011, and
+	// ending runs at the boundary would erase the record the list exists to
+	// show.
+	const rows = [...season(2010, 'LWWWW'), ...season(2011, 'WWWWL')]
+	const spanning = computeRecords(rows, { streaksSpanSeasons: true })
+	assert.equal(spanning.winStreaks[0].games, 8)
+	assert.equal(spanning.winStreaks[0].startSeason, 2010)
+	assert.equal(spanning.winStreaks[0].endSeason, 2011)
+})
+
+test('and does not when it says it does not', () => {
+	// Across 162 baseball games the within-season run is what anyone means.
+	const rows = [...season(2010, 'LWWWW'), ...season(2011, 'WWWWL')]
+	const split = computeRecords(rows, { streaksSpanSeasons: false })
+	assert.equal(split.winStreaks[0].games, 4)
+	assert.equal(split.winStreaks[0].startSeason, split.winStreaks[0].endSeason)
+})
+
+test('a tie ends a win streak, by record-book convention', () => {
+	const r = computeRecords(season(1929, 'WWWTWW'))
+	assert.equal(r.winStreaks[0].games, 3)
+})
+
+test('losing streaks are computed by the same function', () => {
+	// Written twice is how the two lists drift apart.
+	const r = computeRecords(season(1958, 'LLLLWL'))
+	assert.equal(r.loseStreaks[0].games, 4)
+	assert.equal(r.winStreaks[0].games, 1)
+})
+
+// --- games ---
+
+test('the biggest wins rank by margin, then by the winner\'s score', () => {
+	const rows = [
+		{ ...season(1966, 'W')[0], scoreFor: '56', scoreAgainst: '3' },
+		{ ...season(2005, 'W')[0], scoreFor: '52', scoreAgainst: '3' },
+		{ ...season(1962, 'W')[0], scoreFor: '49', scoreAgainst: '0' },
+	]
+	// 53, then 49 and 49 — and the tiebreaker is the winner's score, so 2005's
+	// 52 outranks 1962's 49. This test first expected the reverse, which was the
+	// expectation being wrong rather than the rule.
+	assert.deepEqual(computeRecords(rows).lopsidedWins.map((g) => g.season), [1966, 2005, 1962])
+})
+
+test('every tie is listed, newest first, rather than a top five', () => {
+	const rows = [...season(1970, 'T'), ...season(1980, 'T'), ...season(1990, 'T')]
+	const r = computeRecords(rows)
+	assert.equal(r.ties.length, 3)
+	assert.deepEqual(r.ties.map((g) => g.season), [1990, 1980, 1970])
+})
+
+// --- postseason ---
+
+const post = (year, result, over = {}) => ({
+	...season(year, 'W')[0], regular_season: '0', playoff: '1', result: RESULTS[result], ...over,
+})
+
+test('a title is decided by the round, not by the last game played', () => {
+	// More championship-round wins than losses, which is the series rule
+	// seasonTally uses. The football site asked whether the LAST postseason game
+	// was a win — the same answer for single elimination and the wrong one for a
+	// best-of-seven.
+	const won = computeRecords([
+		post(1982, 'W', { championship: '1982' }),
+		post(1982, 'W', { championship: '1982' }),
+		post(1982, 'W', { championship: '1982' }),
+		post(1982, 'W', { championship: '1982' }),
+		post(1982, 'L', { championship: '1982' }),
+		post(1982, 'L', { championship: '1982' }),
+		post(1982, 'L', { championship: '1982' }),
+	])
+	assert.equal(won.championshipAppearances[0].won, true)
+})
+
+test('losing the series is not winning it, however the last game went', () => {
+	const lost = computeRecords([
+		post(1982, 'L', { championship: '1982' }),
+		post(1982, 'L', { championship: '1982' }),
+		post(1982, 'L', { championship: '1982' }),
+		post(1982, 'L', { championship: '1982' }),
+		post(1982, 'W', { championship: '1982' }),
+	])
+	assert.equal(lost.championshipAppearances[0].won, false)
+})
+
+test('a postseason without a title game is an appearance, not a championship', () => {
+	const r = computeRecords([post(2020, 'W'), post(2020, 'L')])
+	assert.equal(r.playoffAppearances[0].record, '1–1')
+	assert.equal(r.playoffAppearances[0].championship, false)
+	assert.deepEqual(r.championshipAppearances, [])
+})
+
+test('the postseason is excluded from season records', () => {
+	// Otherwise a club that went 13-3 and lost a playoff game ranks below one
+	// that went 13-3 and missed out.
+	const r = computeRecords([...season(2011, 'WWWW'), post(2011, 'L')])
+	assert.equal(r.bestSeasons[0].record, '4–0')
+})
+
+// --- the heading ---
+
+test('the title list is named from the data when the data agrees', () => {
+	// "Super Bowl appearances" over a list that is mostly NFL Championships is
+	// wrong by thirty years: the manifest noun is what the club plays for now.
+	assert.equal(titleHeading([{ title: 'World Series' }, { title: 'World Series' }], packers),
+		'World Series appearances')
+	assert.equal(titleHeading([{ title: 'Super Bowl' }, { title: 'NFL Championship' }], packers),
+		'Championship games')
+	// And falls back to the manifest when the data says nothing.
+	assert.equal(titleHeading([{ title: null }], packers), 'Super Bowl appearances')
+	assert.equal(titleHeading([], packers), 'Super Bowl appearances')
+})
+
+// --- against the real club ---
+
+test('the Packers record book matches what is known about it', () => {
+	// Relations and known facts, not a snapshot: 1929 is the only unbeaten
+	// season, 1958 the worst, and the longest win streak is the 15 games from
+	// 2010 into 2011 that CLAUDE.md cites as the reason streaks span seasons in
+	// football.
+	const r = computeRecords(REAL, { streaksSpanSeasons: packers.rules.streaksSpanSeasons })
+	assert.deepEqual(r.losslessSeasons.map((s) => s.season), [1929])
+	assert.equal(r.bestSeasons[0].season, 1929)
+	assert.equal(r.worstSeasons[0].season, 1958)
+	assert.equal(r.winStreaks[0].games, 15)
+	assert.equal(r.winStreaks[0].startSeason, 2010)
+	assert.equal(r.winStreaks[0].endSeason, 2011)
+	assert.equal(r.ties.length, 39)
+	// Not the championship count. Title games are identified at load time and
+	// written to the database; the committed artifacts carry championship only
+	// where nflverse marked a Super Bowl, so this source knows about one. The
+	// thirteen are asserted against the database in db.test.js.
+	assert.ok(r.playoffAppearances.length > 30)
+})
+
+
+test('seasons tied on percentage break by extremity, then by the earlier year', () => {
+	// Untested, a mutant deleting both tiebreakers survived: nothing in the
+	// fixtures had two seasons at the same percentage.
+	//
+	// Best: more wins first, because 15-0 is a better season than 4-0 at the
+	// same 1.000. Then the earlier year, so the list is stable.
+	//
+	// The big season has to sit in a MIDDLE year for this to test anything.
+	// Seasons reach the sort in year order and Array#sort is stable, so with the
+	// biggest first the tiebreakers can be deleted without changing the output —
+	// which is exactly what let a mutant survive here.
+	const best = computeRecords([
+		...season(1929, 'WWWW'),
+		...season(1930, 'WWWWWWWW'),
+		...season(1931, 'WWWW'),
+	]).bestSeasons
+	assert.deepEqual(best.map((s) => s.season), [1930, 1929, 1931])
+
+	// Worst: fewer losses first, because 0-4 is a worse season than 0-12 is at
+	// the same .000 — the shorter one lost less and still won nothing.
+	const worst = computeRecords([
+		...season(1930, 'LLLL'),
+		...season(1929, 'LLLLLLLL'),
+		...season(1931, 'LLLL'),
+	]).worstSeasons
+	assert.deepEqual(worst.map((s) => s.season), [1930, 1931, 1929])
+})
