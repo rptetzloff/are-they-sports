@@ -263,6 +263,44 @@ are unresolved today, all clubs the Packers never played — a number that falls
 as teams are added, since a club the Packers never met probably played the
 Bears.
 
+## Baseball data, and why its load runs differently
+
+Football fetches its own sources: `scripts/load.mjs nfl` runs anywhere, including
+inside the deployed container, because nflverse and FiveThirtyEight publish
+stable URLs and the two files are 2.1MB and 1.2MB.
+
+Baseball does not. Retrosheet publishes downloads rather than a release URL, so
+`data/sources/mlb/schedules.csv` is **supplied, not pulled**, and a container has
+no way to obtain it. The load therefore runs where the file is, pointing at the
+server's database:
+
+```
+DATABASE_URL=postgres://…/appdb node scripts/load.mjs mlb
+```
+
+The file is Retrosheet's `gameinfo`: one row per game with both clubs, 226,221
+rows covering 1897–2025.
+
+**2,566 of those rows are not games between two clubs.** All-star and exhibition
+games are skipped at load. They were invisible while the only baseball source
+here was one club's slice — which contains neither — and the round mapping would
+have filed every one of them as a *playoff* game, inflating the postseason record
+of all thirty clubs. The all-star rows also name sides that are not clubs:
+`NLS` and `ALS` for the two league squads, `ASE` and `ASW` for East and West.
+223,655 games remain.
+
+The coverage is much wider than the thirty current clubs: **117 franchises**, 87
+of which the franchise history does not name, across 8,517 games —
+nineteenth-century clubs, the Federal League, and the **Negro Leagues**, which
+MLB recognised as major leagues in 2020 and Retrosheet carries as regular-season
+games. `CUW` is the Cuban Stars (West), not an exhibition side; an earlier note
+here said otherwise. None of them appear in any scope, because a scope is built
+from the divisions table.
+
+`championship` is a game type here and is **not** the title: it is the 1900
+Chronicle-Telegraph Cup and its like, played before the World Series existed.
+Only `worldseries` sets the championship round.
+
 ## Getting to the league pages
 
 `/records` and `/schedule` are linked from the club selector at the root, from

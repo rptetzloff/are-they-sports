@@ -7,16 +7,32 @@ import { fileURLToPath } from 'node:url'
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 const DIRS = ['scripts', 'sports', 'teams', 'test']
 
-const files = DIRS.flatMap((d) =>
-	readdirSync(join(ROOT, d))
+/** Every source file under a directory, including one level of subdirectory.
+ *
+ *  It listed only the top level, and `teams/` gained per-sport subdirectories —
+ *  so the moment the manifests moved, this scanned NONE of them. Every check in
+ *  this file would still have passed, over nothing, which is precisely the
+ *  failure the file exists to catch. The count assertion below is what noticed.
+ */
+const sources = (d) => readdirSync(join(ROOT, d), { withFileTypes: true }).flatMap((e) => (e.isDirectory()
+	? readdirSync(join(ROOT, d, e.name))
 		.filter((f) => f.endsWith('.js') || f.endsWith('.mjs'))
-		.map((f) => d + '/' + f))
+		.map((f) => `${d}/${e.name}/${f}`)
+	: (e.name.endsWith('.js') || e.name.endsWith('.mjs') ? [`${d}/${e.name}`] : [])))
+
+const files = DIRS.flatMap(sources)
 
 test('the scan is actually looking at the source', () => {
 	// The failure this whole file exists to prevent is a check that passes
 	// because it is looking at nothing. Name the count and the known files.
 	assert.ok(files.length >= 8, `only found ${files.length} source files`)
-	for (const expected of ['scripts/build.mjs', 'sports/nfl.js', 'teams/packers.js']) {
+	// Named per directory, because a total can stay healthy while one directory
+	// silently drops to zero — which is what happened when teams/ gained
+	// subdirectories and this scanner did not follow.
+	for (const d of DIRS) {
+		assert.ok(sources(d).length > 0, `no source files found under ${d}/`)
+	}
+	for (const expected of ['scripts/build.mjs', 'sports/nfl.js', 'teams/nfl/packers.js']) {
 		assert.ok(files.includes(expected), `not scanning ${expected}`)
 	}
 })

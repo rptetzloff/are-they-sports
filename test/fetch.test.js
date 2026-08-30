@@ -3,8 +3,8 @@ import assert from 'node:assert/strict'
 import { coveredSeasons, seasonRange } from '../scripts/fetch.mjs'
 import nfl from '../sports/nfl.js'
 import mlb from '../sports/mlb.js'
-import packers from '../teams/packers.js'
-import brewers from '../teams/brewers.js'
+import packers from '../teams/nfl/packers.js'
+import brewers from '../teams/mlb/brewers.js'
 
 // Argument parsing and coverage bounds. Both decide how much of a 95MB-per-
 // season source gets downloaded, so getting them wrong is expensive rather than

@@ -1,7 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { REQUIRED_NOUNS, REQUIRED_RULES, resolveTeam } from '../lib/manifest.js'
-import { readFileSync } from 'node:fs'
+import { readFileSync, readdirSync } from 'node:fs'
 import { loadTeams } from '../lib/teams.js'
 import nfl from '../sports/nfl.js'
 import mlb from '../sports/mlb.js'
@@ -171,10 +171,36 @@ test('every committed club ends up with every noun and rule', () => {
 test('a club manifest stays small', () => {
 	// The whole point of the change. If a club file grows back past a couple of
 	// dozen lines, something sport-level has been copied into it again.
-	for (const id of ['bears', 'lions', 'vikings']) {
-		const lines = readFileSync(new URL(`../teams/${id}.js`, import.meta.url), 'utf8').split('\n').length
-		assert.ok(lines < 30, `teams/${id}.js is ${lines} lines`)
+	// Every manifest, not three named ones, and found by walking the per-sport
+	// directories. Naming three meant the other fifty-seven could grow without
+	// anything noticing — and when the files moved, the three named paths simply
+	// stopped existing.
+	//
+	// Counted as CODE lines, comments and blanks stripped. Raw line count is the
+	// wrong measure and excluding packers.js is how the old version hid that:
+	// that file is 43 lines of which 16 are data, because it is the worked
+	// example and carries the reasoning. Counting raw lines fails a
+	// well-documented manifest and passes an undocumented bloated one, which is
+	// backwards.
+	const code = (src) => src
+		.replace(/\/\*[\s\S]*?\*\//g, '')
+		.split('\n')
+		.map((l) => l.trim())
+		.filter((l) => l && !l.startsWith('//'))
+		.length
+	const root = new URL('../teams/', import.meta.url)
+	let checked = 0
+	for (const entry of readdirSync(root, { withFileTypes: true })) {
+		const names = entry.isDirectory()
+			? readdirSync(new URL(`${entry.name}/`, root)).map((f) => `${entry.name}/${f}`)
+			: [entry.name]
+		for (const name of names.filter((n) => n.endsWith('.js'))) {
+			const lines = code(readFileSync(new URL(name, root), 'utf8'))
+			assert.ok(lines < 25, `teams/${name} is ${lines} lines of data`)
+			checked++
+		}
 	}
+	assert.ok(checked >= 30, `only checked ${checked} manifests`)
 })
 
 test('clubs in one sport agree on everything their sport supplies', () => {

@@ -252,7 +252,12 @@ function main() {
 			}
 		}
 
-		const teamsById = new Map(teams.map((t) => [t.id, t]));
+		// Keyed by sport AND id. A club id is unique only within a sport — the
+		// Cardinals and the Giants are each two different clubs — and a global
+		// map returned whichever manifest loaded last, so half of one pair would
+		// have rendered with the other's name, nouns and rules.
+		const teamsById = new Map(teams.map((t) => [`${t.sport}/${t.id}`, t]));
+		const clubFor = (e) => (e?.teamId ? teamsById.get(`${e.sport}/${e.teamId}`) : undefined);
 		// One resolver per sport, loaded once. A club in scope with no manifest
 		// still has a name — that is the whole point, since 60 of the 62 clubs an
 		// `all` scope covers are unbuilt and would otherwise be bare codes.
@@ -370,7 +375,7 @@ function main() {
 			// a single-club scope serves that club at the root instead.
 			const clubList = () => table.map((e) => ({
 				teamId: e.teamId, sport: e.sport, code: e.code,
-				name: teamsById.get(e.teamId)?.nouns.fullName ?? namers[e.sport](e.code).name,
+				name: clubFor(e)?.nouns.fullName ?? namers[e.sport](e.code).name,
 				available: e.available,
 				url: e.available ? `${origin}${e.base}` : null,
 			}));
@@ -381,7 +386,7 @@ function main() {
 					// The manifest's own name when there is one, because a club
 					// that has been given a manifest has been given a preferred
 					// name; the reference table otherwise.
-					name: teamsById.get(e.teamId)?.nouns.fullName ?? namers[e.sport](e.code).name,
+					name: clubFor(e)?.nouns.fullName ?? namers[e.sport](e.code).name,
 					conference: e.conference ?? null, division: e.division ?? null,
 					available: e.available,
 					url: e.available ? `${origin}${e.base}` : null,
@@ -407,13 +412,13 @@ function main() {
 				const withGames = table.filter((e) => e.available && e.teamId);
 				const clubs = [];
 				for (const e of withGames) {
-					clubs.push({ team: teamsById.get(e.teamId), rows: await games(e) });
+					clubs.push({ team: clubFor(e), rows: await games(e) });
 				}
 				// The sport's own unit, declared in sports/<id>.js — football
 				// plays a round a week, baseball plays most days. Mixed scopes
 				// take the first club's, which is the same compromise /records
 				// makes and is why `all` is not a sensible schedule scope.
-				const first = teamsById.get(withGames[0]?.teamId);
+				const first = clubFor(withGames[0]);
 				const period = first?.rules.schedulePeriod ?? 'week';
 				const schedule = computeSchedule(clubs, { season: sched, period });
 				if (wantsJson(url)) return json(res, 200, schedule);
@@ -435,7 +440,7 @@ function main() {
 				const withGames = table.filter((e) => e.available && e.teamId);
 				const clubs = [];
 				for (const e of withGames) {
-					clubs.push({ team: teamsById.get(e.teamId), rows: await games(e) });
+					clubs.push({ team: clubFor(e), rows: await games(e) });
 				}
 				// One sport's rule, and only one sport's. A scope spanning both
 				// would have to pick, and the honest answer is that a combined
@@ -445,7 +450,7 @@ function main() {
 				const league = computeLeague(clubs, {
 					top: 10,
 					streaksSpanSeasons: sports.length === 1
-						? (teamsById.get(withGames[0].teamId)?.rules.streaksSpanSeasons ?? true)
+						? (clubFor(withGames[0])?.rules.streaksSpanSeasons ?? true)
 						: true,
 				});
 				if (wantsJson(url)) return json(res, 200, league);
@@ -489,7 +494,7 @@ function main() {
 			 *  and a season page that disagreed.
 			 */
 			const renderSeason = async (season) => {
-				const team = teamsById.get(entry.teamId);
+				const team = clubFor(entry);
 				const all = await games(entry);
 				const allSeasons = seasons(all);
 				const rows = all.filter((g) => g.season === season);
@@ -576,7 +581,7 @@ function main() {
 					// Reachable by switching clubs from a season page — the
 					// Vikings have no 1929 — so it explains itself and offers the
 					// seasons this club does have.
-					const team = teamsById.get(entry.teamId);
+					const team = clubFor(entry);
 					const all = seasons(await games(entry));
 					return html(res, 404, missingSeasonPage({
 						team,
@@ -590,7 +595,7 @@ function main() {
 					}));
 				}
 				if (view.view === 'records') {
-					const team = teamsById.get(entry.teamId);
+					const team = clubFor(entry);
 					const all = await games(entry);
 					const records = computeRecords(all, {
 						// Declared per sport: football's longest streak is 15
@@ -612,7 +617,7 @@ function main() {
 					}));
 				}
 				if (view.view === 'vs') {
-					const team = teamsById.get(entry.teamId);
+					const team = clubFor(entry);
 					const all = await games(entry);
 					const h2h = computeHeadToHead(all);
 					const resolve = namers[entry.sport];

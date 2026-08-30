@@ -40,6 +40,25 @@ export const sources = {
 	schedules: {
 		// Retrosheet's gameinfo is one row per game with both clubs, so like
 		// nflverse schedules it serves every team from one file.
+		//
+		// 226,221 rows covering 1897-2025 and 178 side codes. There is no
+		// fetcher: Retrosheet publishes downloads rather than a stable release
+		// URL, so this file is supplied rather than pulled, and a container has
+		// no way to obtain it. That is why `npm run load mlb` runs where the file
+		// is and points DATABASE_URL at the server, rather than running IN the
+		// server the way football does.
+		//
+		// 2,566 of those rows are all-star and exhibition games and are skipped
+		// at load: they are not one club playing another, and the all-star rows
+		// name sides that are not clubs — NLS and ALS for the two league squads,
+		// ASE and ASW for East and West. 223,655 games remain.
+		//
+		// The coverage is wider than the thirty current clubs: 117 franchises
+		// end up in the database, 87 of which the franchise history does not
+		// name, across 8,517 games. Nineteenth-century clubs, the Federal
+		// League, and the Negro Leagues — which MLB recognised as major leagues
+		// in 2020 and Retrosheet includes as regular-season games. None of them
+		// appear in any scope, because scopes come from the divisions table.
 		file: 'gameinfo.csv',
 		perSeason: false,
 	},
