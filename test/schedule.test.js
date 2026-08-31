@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { computeSchedule } from '../lib/schedule.js'
+import { computeSchedule, selectPeriod } from '../lib/schedule.js'
 
 // A whole league's season, grouped into the periods that sport plays in.
 
@@ -250,4 +250,78 @@ test('a club is identified by any code it has ever used', () => {
 		{ team: raiders, rows: [] },
 	])
 	assert.equal(s.periods[0].games[0].awayId, 'raiders')
+})
+
+// --- which period the page opens on ---
+
+// A league schedule is one page per period, not one page per season. Measured
+// before the change: /mlb/schedule rendered 184 periods and 2,431 games as
+// 878KB of HTML. The server built it in 68ms, so no server timing showed a
+// problem; the cost was the browser being handed most of a megabyte of DOM.
+
+const period = (key, dates) => ({ key, kind: key[0] === 'w' ? 'week' : 'date', games: dates.map((d) => ({ date: d })) })
+const PERIODS = [
+	period('w1', ['2026-09-10', '2026-09-13']),
+	period('w2', ['2026-09-17', '2026-09-20']),
+	period('w3', ['2026-09-24', '2026-09-27']),
+]
+
+test('a named period is the one shown', () => {
+	const got = selectPeriod(PERIODS, { key: 'w2' })
+	assert.equal(got.period.key, 'w2')
+	assert.equal(got.index, 1)
+	assert.equal(got.count, 3)
+})
+
+test('a period the season does not have is reported, not replaced', () => {
+	// Serving week 1 under a URL naming week 25 is a plausible wrong answer, and
+	// the caller cannot tell it apart from a real page.
+	const got = selectPeriod(PERIODS, { key: 'w25' })
+	assert.equal(got.unknown, true)
+	assert.equal(got.period, null)
+	assert.equal(got.index, -1)
+})
+
+test('with no period named, the one holding today opens', () => {
+	// The whole point during a season: land on the games being played.
+	assert.equal(selectPeriod(PERIODS, { today: '2026-09-20' }).period.key, 'w2')
+	assert.equal(selectPeriod(PERIODS, { today: '2026-09-24' }).period.key, 'w3')
+})
+
+test('a week is matched by its games, not by one date on the period', () => {
+	// A football week spans Thursday to Monday, so it has no single date to
+	// compare against and the Sunday of it is what someone means. Every day of
+	// the week must find it.
+	for (const d of ['2026-09-17', '2026-09-20']) {
+		assert.equal(selectPeriod(PERIODS, { today: d }).period.key, 'w2', `${d} did not find its week`)
+	}
+})
+
+test('out of season, the season opens at its start', () => {
+	// Deliberately not "the period nearest to today", which for every past season
+	// means its last — landing on the World Series when someone asks for 1962
+	// answers a question they did not put.
+	assert.equal(selectPeriod(PERIODS, { today: '2027-06-01' }).period.key, 'w1')
+	assert.equal(selectPeriod(PERIODS, {}).period.key, 'w1')
+})
+
+test('a season with no games selects nothing rather than throwing', () => {
+	const got = selectPeriod([], { today: '2026-09-20' })
+	assert.equal(got.period, null)
+	assert.equal(got.count, 0)
+	assert.equal(got.unknown, undefined)
+})
+
+test('the period key is the one computeSchedule produced', () => {
+	// The URL segment and the grouping key are the same string. If they drift,
+	// every period link 404s and the tests above still pass, because they build
+	// their own fixtures.
+	const s = computeSchedule([{ team: club('packers', 'GB'), rows: [
+		g({ gid: 'a', season: '2026', date: '2026-09-13', week: 1 }),
+		g({ gid: 'b', season: '2026', date: '2026-09-20', week: 2 }),
+	] }], { season: 2026, period: 'week' })
+	assert.ok(s.periods.length > 0)
+	for (const p of s.periods) {
+		assert.equal(selectPeriod(s.periods, { key: p.key }).period, p)
+	}
 })

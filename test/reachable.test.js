@@ -149,11 +149,14 @@ test('each sport keeps its own period rule on the schedule', () => {
 	const wk = (n) => ({ key: `w${n}`, kind: 'week', week: n, date: null, games: [] })
 	const dy = (d) => ({ key: `d${d}`, kind: 'date', week: null, date: d, games: [] })
 	const html = leagueSchedulePage({
-		schedule: { season: 2025, seasons: [2025], periods: [wk(1)], weeksKnown: true, games: 285 },
+		// `period` is the one being shown. The page renders a single period now
+		// rather than the whole season — baseball's 2026 was 184 of them and
+		// 878KB of HTML — so a schedule with none selected renders no fixtures.
+		schedule: { season: 2025, seasons: [2025], periods: [wk(1)], period: wk(1), index: 0, weeksKnown: true, games: 285 },
 		label: 'NFL', periodNoun: 'Week',
 		more: [{
 			label: 'MLB', periodNoun: 'Games',
-			schedule: { season: 2025, seasons: [2025], periods: [dy('2025-03-18')], weeksKnown: false, games: 2228 },
+			schedule: { season: 2025, seasons: [2025], periods: [dy('2025-03-18')], period: dy('2025-03-18'), index: 0, weeksKnown: false, games: 2228 },
 		}],
 		heading: 'Every club', colors: COLORS, resolve: (c) => ({ name: c }), clubs: [],
 	})
@@ -226,7 +229,7 @@ test('each block resolves names with its own sport', () => {
 		label: 'NFL', periodNoun: 'Week', resolve: football,
 		more: [{
 			label: 'MLB', periodNoun: 'Games', resolve: baseball,
-			schedule: { season: 2025, seasons: [2025], periods: [period], weeksKnown: false, games: 1 },
+			schedule: { season: 2025, seasons: [2025], periods: [period], period, index: 0, weeksKnown: false, games: 1 },
 		}],
 		heading: 'Every club', colors: COLORS, clubs: [],
 	})
@@ -354,4 +357,75 @@ test('a club under a multi-club scope can reach the standings', () => {
 	// league pages, and not from any club page.
 	const links = hrefs(siteNav('', teamFor('nfl'), { league: true }))
 	for (const r of LEAGUE_ROUTES) assert.ok(links.includes(r), `no link to ${r}`)
+})
+
+// --- one period per page ---
+
+const wkP = (n, dates = ['2026-09-13']) => ({
+	key: `w${n}`, kind: 'week', week: n, date: null,
+	games: dates.map((d) => ({
+		gid: `g${n}`, date: d, week: n, round: 'regular',
+		home: 'GB', away: 'CHI', homeId: null, awayId: null,
+		homeScore: 20, awayScore: 10, neutral: false, played: true,
+	})),
+})
+
+const sched = (periods, index = 0, season = 2026) => ({
+	season, seasons: [season], periods, period: periods[index], index,
+	weeksKnown: true, games: periods.reduce((n, p) => n + p.games.length, 0),
+})
+
+test('the page renders one period, not the whole season', () => {
+	// The measurement: /mlb/schedule was 184 periods, 2,431 games and 878KB of
+	// HTML in one response. Every fixture in this file had a single period, so
+	// rendering all of them and rendering the selected one looked identical and
+	// a mutant restoring the old behaviour survived.
+	const html = leagueSchedulePage({
+		schedule: sched([wkP(1), wkP(2), wkP(3)], 1),
+		heading: 'Every club', colors: COLORS, resolve: (c) => ({ name: c }), clubs: [], base: '/nfl',
+	})
+	assert.ok(html.includes('<h2>Week 2</h2>'), 'the selected period is not shown')
+	assert.equal(html.includes('<h2>Week 1</h2>'), false, 'a period that was not selected was rendered')
+	assert.equal(html.includes('<h2>Week 3</h2>'), false, 'a period that was not selected was rendered')
+})
+
+test('the whole season is still available on request', () => {
+	// Sometimes it is genuinely what is wanted. It is just no longer what
+	// everybody pays for.
+	const html = leagueSchedulePage({
+		schedule: sched([wkP(1), wkP(2), wkP(3)], 1), all: true,
+		heading: 'Every club', colors: COLORS, resolve: (c) => ({ name: c }), clubs: [], base: '/nfl',
+	})
+	for (const n of [1, 2, 3]) assert.ok(html.includes(`<h2>Week ${n}</h2>`), `week ${n} missing from the full season`)
+})
+
+test('the period nav keeps its sport, like every other link here', () => {
+	// A bare /schedule/2026/w3 under a two-sport scope means football's week 3
+	// and baseball's, which are different pages. This is the same failure as the
+	// season nav dropping its prefix, and as one namer serving two sports.
+	const html = leagueSchedulePage({
+		schedule: sched([wkP(1), wkP(2), wkP(3)], 1),
+		heading: 'Every club', colors: COLORS, resolve: (c) => ({ name: c }), clubs: [], base: '/nfl',
+	})
+	const periodLinks = hrefs(html).filter((h) => /\/schedule\/\d{4}\/[wd]/.test(h))
+	assert.ok(periodLinks.length >= 2, 'no period links at all')
+	for (const h of periodLinks) assert.ok(h.startsWith('/nfl/'), `${h} lost the sport`)
+	// And the way out to the whole season keeps it too.
+	const full = hrefs(html).filter((h) => h.includes('all=1'))
+	assert.ok(full.length > 0, 'no link to the whole season')
+	for (const h of full) assert.ok(h.startsWith('/nfl/'), `${h} lost the sport`)
+})
+
+test('two sports each get their own period nav, pointing at their own sport', () => {
+	// The combined page carries two of these. One base for the page would point
+	// both at the same URL.
+	const html = leagueSchedulePage({
+		schedule: sched([wkP(1), wkP(2)], 0), label: 'NFL', base: '/nfl',
+		more: [{ label: 'MLB', periodNoun: 'Games', base: '/mlb', schedule: sched([wkP(8), wkP(9)], 0) }],
+		heading: 'Every club', colors: COLORS, resolve: (c) => ({ name: c }), clubs: [],
+	})
+	const links = hrefs(html).filter((h) => /\/schedule\/\d{4}\/[wd]/.test(h))
+	assert.ok(links.some((h) => h.startsWith('/nfl/')), 'no football period links')
+	assert.ok(links.some((h) => h.startsWith('/mlb/')), 'no baseball period links')
+	for (const h of links) assert.ok(h.startsWith('/nfl/') || h.startsWith('/mlb/'), `${h} is not sport-qualified`)
 })

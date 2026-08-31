@@ -116,6 +116,28 @@ test('no colour literal appears outside the palette block', () => {
 	assert.deepEqual(literals, [], `colour literals outside :root — ${literals.join(' ')}`)
 })
 
+test('an anchor with no class is still legible', () => {
+	// Four times now: a link goes in without a class, falls through to the
+	// browser's default anchor blue, and renders barely readable on a dark
+	// ground. The stylesheet comment recording the third time says every one was
+	// caught by a screenshot rather than a test — this is that test.
+	//
+	// Each previous fix added a colour to one more class, which is a list that
+	// has to be remembered. A base rule cannot be forgotten, so what is asserted
+	// here is the base rule, not the list.
+	const css = clubPage({
+		team: packers, season: '2026', tally: tally(), verdict: 'no', answer: 'NO', recordLabel: '13-3',
+		colors: NEUTRAL,
+	})
+	// Anchored to the start of a line. The first version of this allowed any
+	// whitespace before the `a`, which matched `.season-nav a {` — a rule about
+	// one nav, not a base rule — and passed with the base rule deleted. That is
+	// the failure this whole file is about, committed while writing the test for
+	// it.
+	assert.match(css, /^a\s*\{[^}]*color:/m,
+		'no base rule colours a class-less anchor, so the next unclassed link is browser-blue again')
+})
+
 test('the page is a whole document', () => {
 	const out = page({ title: 'T', colors: NEUTRAL, body: '<p>x</p>' })
 	assert.ok(out.startsWith('<!doctype html>'))

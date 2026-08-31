@@ -536,6 +536,47 @@ The same gap ran the other way for `/standings`: it was linked from the club
 selector and from the other league pages, and not from any club page, because
 the club nav's league block listed records and schedule and was never revisited.
 
+## What the league pages cost
+
+Measured, because two different things were slow and only one of them showed up
+in a server timing.
+
+**`/records` was 235ms warm, and 232ms of that was one call.** The rows are
+already cached per franchise and cost 0ms once read; `computeLeague` over 62
+clubs and 471,453 rows ran again on every request, over data that changes a few
+times a day. It is memoised now — 235ms to 2.6ms — along with the schedule and
+the standings.
+
+The memo is keyed on the clubs' own row stamps, not on a timer. `server.js`
+records why: caching for the life of the process hid a playoff-flag correction
+once and a franchise remapping once, and both times the site looked right and was
+quietly wrong. The per-franchise game cache already tracks `max(observed_at)` and
+re-reads when it moves, so this reads those same stamps and joins them — no extra
+queries, and the memo is invalid the instant any club's rows are re-read,
+including by the server's own live refresh. Verified against a real write: a
+Brewers win edited to a loss in Postgres changed the standings page from 85-52 to
+84-53 within the cache's check window, without a restart.
+
+It is bounded at 64 entries, because the key carries the season and there are a
+hundred and some of those per sport times three views. Unbounded would be a slow
+leak that only shows on a long-lived deployment, which is the only kind this has.
+
+**`/mlb/schedule` was 878KB of HTML.** 184 periods and 2,431 games in one
+response. The server built it in 68ms, so no server timing showed anything wrong
+— the cost was entirely the browser being handed most of a megabyte of DOM. The
+page now renders one period, which is 26KB.
+
+Which period: the one holding today, else the start of the season. Deliberately
+not "the period nearest to today", which for every past season means its last —
+landing on the World Series when someone asks for 1962 answers a question they
+did not put. `?all=1` still renders the whole season, because sometimes that is
+what is wanted; it is just no longer what everybody pays for.
+
+A period is addressed by its own grouping key — `/nfl/schedule/2026/w3`,
+`/mlb/schedule/2026/d2026-08-29` — so the URL segment and the group key cannot
+drift apart. Asked for a period the season does not have, the route 404s and
+lists the ones it does, rather than serving week 1 under a URL naming week 25.
+
 ## Standings
 
 `/standings` is where every club in a division finished, for a season. The

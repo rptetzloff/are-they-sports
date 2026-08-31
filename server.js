@@ -33,8 +33,9 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { computeHeadToHead } from './lib/headtohead.js';
 import { computeRecords } from './lib/records.js';
 import { computeLeague } from './lib/league.js';
-import { computeSchedule } from './lib/schedule.js';
+import { computeSchedule, selectPeriod } from './lib/schedule.js';
 import { computeStandings, playedSeasons } from './lib/standings.js';
+import { Lru, memo, versionOf } from './lib/derived.js';
 import { historyPoints } from './lib/history.js';
 import { codeTables, franchisesForClub, staleFranchises } from './lib/codes.js';
 import { availability, close, connect, franchisesWithGames, gamesFor, health, lastUpdated, withClient } from './lib/store.js';
@@ -145,6 +146,32 @@ async function games(entry, season) {
 	}
 
 	return season ? rows.filter((g) => g.season === season) : rows;
+}
+
+/** What the game cache last recorded for a club, or null if it has none.
+ *
+ *  This is the version the derived cache keys on. Reading it rather than
+ *  querying again is the point: `games()` has just run for every club on the
+ *  page, so the stamps are already correct and already paid for.
+ */
+const stampOf = (entry) => gameCache.get(`${entry.sport}/${entry.franchise}`)?.stamp ?? null;
+
+/** Memoised league computations. Sixty-four is a few seasons of each view for
+ *  each sport in scope, which is what anyone clicking through a season nav
+ *  touches; the whole point of the bound is that a hundred-season nav cannot
+ *  grow it without limit. */
+const derivedCache = new Lru(64);
+
+/** Today, as the games themselves are dated.
+ *
+ *  LOCAL, not UTC. Game dates in this database are the local day the game was
+ *  played — that distinction cost a 76% id match against Retrosheet before it
+ *  was found — and `toISOString()` here would put every evening game on
+ *  tomorrow's schedule for the five hours after midnight UTC.
+ */
+function todayLocal(now = new Date()) {
+	const pad = (n) => String(n).padStart(2, '0');
+	return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
 }
 
 async function summary(entry, origin, base) {
@@ -504,12 +531,16 @@ function main() {
 			// called "records" or "schedule".
 			const inScopeSports = [...new Set(table.map((e) => e.sport))];
 			const leagueRoute = (() => {
-				const m = url.pathname.match(/^(?:\/([a-z0-9]+))?\/(records|schedule|standings)(?:\/(\d{4}))?$/);
+				// The fourth segment is the schedule's period — `w3`, `d2026-08-29`,
+				// the period's own key. Only the schedule takes one; /records/2011
+				// and /standings/2011 are whole seasons by definition.
+				const m = url.pathname.match(/^(?:\/([a-z0-9]+))?\/(records|schedule|standings)(?:\/(\d{4})(?:\/([wd][\w-]+))?)?$/);
 				if (!m) return null;
-				const [, sport, view, season] = m;
+				const [, sport, view, season, period] = m;
+				if (period && view !== 'schedule') return null;
 				if (sport && !inScopeSports.includes(sport)) return null;
 				if (view === 'records' && season) return null;
-				return { sport: sport ?? null, view, season: season ?? null };
+				return { sport: sport ?? null, view, season: season ?? null, period: period ?? null };
 			})();
 
 			// Where every club finished, for one season. Computed from games rather
@@ -524,16 +555,18 @@ function main() {
 				for (const e of withGames) {
 					entries.push({ ...e, team: clubFor(e), rows: await games(e) });
 				}
+				const version = versionOf(withGames, stampOf);
 				const bySport = wanted.map((sport) => {
 					const inSport = entries.filter((c) => c.team?.sport === sport);
 					// The season shown is the latest any club in that sport has
 					// played, which is the one being played now.
-					const years = playedSeasons(inSport);
+					const years = memo(derivedCache, `seasons/${sport}`, version, () => playedSeasons(inSport));
 					const season = leagueRoute.season ? Number(leagueRoute.season) : years.at(-1);
 					return {
 						label: sport.toUpperCase(),
 						seasons: years,
-						standings: computeStandings(inSport, { season }),
+						standings: memo(derivedCache, `standings/${sport}/${season}`, version,
+							() => computeStandings(inSport, { season })),
 					};
 				});
 				const [firstSport, ...otherSports] = bySport;
@@ -577,18 +610,52 @@ function main() {
 				// `all` scope put 22 NFL week-periods and 209 MLB date-periods in
 				// one list, sorted against each other.
 				const wanted = leagueRoute.sport ? [leagueRoute.sport] : [...new Set(withGames.map((e) => e.sport))];
+				const version = versionOf(withGames, stampOf);
+				// Today, for choosing which period to open on. Read once for the
+				// page so two sports cannot land on different days.
+				const today = todayLocal();
+				const showAll = url.searchParams.get('all') === '1';
 				const bySport = wanted.map((sport) => {
 					const inSport = clubs.filter((c) => c.team?.sport === sport);
 					const period = inSport[0]?.team?.rules.schedulePeriod ?? 'week';
+					// The season is memoised whole and the period picked from it.
+					// Keying the memo on the period instead would hold one entry
+					// per day of a baseball season — 184 of them — to save a
+					// findIndex.
+					const schedule = memo(derivedCache, `schedule/${sport}/${sched ?? 'latest'}`, version,
+						() => computeSchedule(inSport, { season: sched, period }));
+					// A period is named for ONE sport, so it only selects on that
+					// sport's block. On the combined page football opens on its own
+					// current week and baseball on its own current day.
+					const wantKey = leagueRoute.sport === sport ? leagueRoute.period : null;
+					const picked = selectPeriod(schedule.periods, { key: wantKey, today });
 					return {
 						label: sport.toUpperCase(),
 						periodNoun: period === 'week' ? 'Week' : 'Games',
 						// This sport's namer. Taking one for the whole page
 						// resolved baseball codes against the football table.
 						resolve: namers[sport],
-						schedule: computeSchedule(inSport, { season: sched, period }),
+						// Each block's period nav points at its own sport, never at
+						// the combined URL, where week 3 would mean two things.
+						base: leagueRoute.sport ? `/${leagueRoute.sport}` : `/${sport}`,
+						unknownPeriod: Boolean(picked.unknown),
+						schedule: { ...schedule, period: picked.period, index: picked.index },
 					};
 				});
+				// A URL naming a period the season does not have is a broken link
+				// or a changed season. Serving week 1 under it would be the kind of
+				// plausible wrong answer this repo keeps finding.
+				const missing = bySport.find((g) => g.unknownPeriod);
+				if (missing) {
+					// Listing what there IS beats a bare 404, the same as an
+					// unknown head-to-head opponent does.
+					return json(res, 404, {
+						error: 'no such period',
+						period: leagueRoute.period,
+						season: missing.schedule.season,
+						periods: missing.schedule.periods.map((p) => p.key),
+					});
+				}
 				const [firstSport, ...otherSports] = bySport;
 				const schedule = firstSport.schedule;
 				if (wantsJson(url)) {
@@ -612,6 +679,7 @@ function main() {
 					// sport-qualified page linked back to the unqualified one and
 					// silently dropped the sport on every season change.
 					base: leagueRoute.sport ? '/' + leagueRoute.sport : '',
+					all: showAll,
 					switcher: clubSwitcher(clubList(), null, ''),
 				}));
 			}
@@ -639,6 +707,7 @@ function main() {
 				const sports = leagueRoute.sport
 					? [leagueRoute.sport]
 					: [...new Set(withGames.map((e) => e.sport))];
+				const version = versionOf(withGames, stampOf);
 				const leagues = sports.map((sport) => {
 					const inSport = clubs.filter((c) => c.team?.sport === sport);
 					return {
@@ -648,13 +717,16 @@ function main() {
 						// over a table of clubs.
 						label: sport.toUpperCase(),
 						resolve: namers[sport],
-						league: computeLeague(inSport, {
+						// Memoised on the clubs' own row stamps. 232ms of the
+						// 235ms this route cost warm was this call, recomputed
+						// per request over rows that had not changed.
+						league: memo(derivedCache, `records/${sport}`, version, () => computeLeague(inSport, {
 							top: 10,
 							// Each sport's own rule now, rather than one picked for
 							// a merged league: streaks span seasons in football and
 							// stop at the boundary in baseball.
 							streaksSpanSeasons: inSport[0]?.team?.rules.streaksSpanSeasons ?? true,
-						}),
+						})),
 					};
 				});
 				const [first, ...rest] = leagues;
