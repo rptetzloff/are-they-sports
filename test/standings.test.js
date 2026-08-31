@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { computeStandings, gamesBack, playedSeasons } from '../lib/standings.js'
+import { computeStandings, divisionPeers, gamesBack, playedSeasons } from '../lib/standings.js'
 
 // Where every club finished, for a season. Computed from games rather than
 // fetched, so a season from 1962 works exactly as one being played does.
@@ -215,4 +215,73 @@ test('a playoff run is not a season of its own', () => {
 test('played seasons survives clubs with no rows at all', () => {
 	assert.deepEqual(playedSeasons([{ rows: [] }, {}]), [])
 	assert.deepEqual(playedSeasons(undefined), [])
+})
+
+// --- the division behind a club's record ---
+
+// Built from the DATABASE, not from the scope. Under SCOPE=team:mlb/brewers the
+// Cubs and the Cardinals are not in the scope's table at all, and a standings
+// modal with one row in it is not a standings table.
+
+const NL_CENTRAL = [
+	{ code: 'MIL', conference: 'NL', division: 'Central' },
+	{ code: 'CHN', conference: 'NL', division: 'Central' },
+	{ code: 'SLN', conference: 'NL', division: 'Central' },
+	{ code: 'CIN', conference: 'AL', division: 'Central' },   // same division NAME, other league
+	{ code: 'BOS', conference: 'AL', division: 'East' },
+]
+
+const peersFor = (code, over = {}) => divisionPeers('mlb', code, NL_CENTRAL, {
+	teamFor: () => null,
+	nameFor: (c) => `Club ${c}`,
+	...over,
+})
+
+test('a division is the clubs sharing BOTH conference and division', () => {
+	// AL Central is not NL Central, and AFC North is not NFC North. Matching on
+	// the division name alone puts eight clubs in a four-club table.
+	assert.deepEqual(peersFor('MIL').map((p) => p.code), ['MIL', 'CHN', 'SLN'])
+})
+
+test('the club itself is in its own division', () => {
+	assert.ok(peersFor('MIL').some((p) => p.code === 'MIL'))
+})
+
+test('a code with no division on record has no peers', () => {
+	// A club the divisions table does not list gets no modal rather than a table
+	// of everybody.
+	assert.deepEqual(peersFor('XXX'), [])
+})
+
+test('a club outside the scope gets a name and no id', () => {
+	// There is no page here to link to, and inventing one would be a 404 inside
+	// a table. The id is what the renderer keys the link on.
+	const [mil] = peersFor('MIL')
+	assert.equal(mil.team.id, null)
+	assert.equal(mil.team.nouns.team, 'Club MIL')
+	assert.equal(mil.team.sport, 'mlb')
+})
+
+test('a club inside the scope keeps its id, so its row can link', () => {
+	const peers = peersFor('MIL', { teamFor: (c) => (c === 'MIL' ? { id: 'brewers', sport: 'mlb' } : null) })
+	const byCode = new Map(peers.map((p) => [p.code, p]))
+	assert.equal(byCode.get('MIL').team.id, 'brewers')
+	assert.equal(byCode.get('CHN').team.id, null)
+})
+
+test('every club in the table is named by the resolver, including the served one', () => {
+	// Mixing manifest nouns with resolver names gave a table reading "Chicago
+	// Cubs, St. Louis Cardinals, Brewers" — four full names and one nickname.
+	// The resolver is also season-aware, so a 1965 table names clubs as they were
+	// called in 1965.
+	const peers = peersFor('MIL', { teamFor: () => ({ id: 'brewers', sport: 'mlb', nouns: { team: 'Brewers', fullName: 'Milwaukee Brewers' } }) })
+	for (const p of peers) assert.equal(p.team.nouns.team, `Club ${p.code}`)
+})
+
+test('the sport travels with every peer', () => {
+	// BAL is the Orioles and the Ravens; a peer identified by code alone would
+	// fetch the wrong club's games.
+	for (const p of divisionPeers('nfl', 'MIL', NL_CENTRAL, { teamFor: () => null, nameFor: (c) => c })) {
+		assert.equal(p.team.sport, 'nfl')
+	}
 })

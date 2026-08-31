@@ -34,7 +34,7 @@ import { computeHeadToHead } from './lib/headtohead.js';
 import { computeRecords } from './lib/records.js';
 import { computeLeague } from './lib/league.js';
 import { computeSchedule, selectPeriod } from './lib/schedule.js';
-import { computeStandings, playedSeasons } from './lib/standings.js';
+import { computeStandings, divisionPeers, playedSeasons } from './lib/standings.js';
 import { Lru, memo, versionOf } from './lib/derived.js';
 import { historyPoints } from './lib/history.js';
 import { codeTables, franchisesForClub, staleFranchises } from './lib/codes.js';
@@ -45,7 +45,7 @@ import {
 	seasonWinPct, seriesRecords, streakBanner, verdictText,
 } from './lib/core.js';
 import {
-	NEUTRAL, clubPage, clubSwitcher, headToHeadPage, historyPage, leagueNav, leagueRecordsPage, leagueSchedulePage, sportTabs, missingSeasonPage, opponentPage, recordsPage, standingsPage,
+	NEUTRAL, clubPage, clubSwitcher, standingsModal, headToHeadPage, historyPage, leagueNav, leagueRecordsPage, leagueSchedulePage, sportTabs, missingSeasonPage, opponentPage, recordsPage, standingsPage,
 	scheduleHtml, seasonNav, selectorPage, siteNav, sparklineHtml,
 } from './lib/render.js';
 import { colorsFor, resolver } from './lib/names.js';
@@ -314,6 +314,51 @@ function main() {
 		// still has a name — that is the whole point, since 60 of the 62 clubs an
 		// `all` scope covers are unbuilt and would otherwise be bare codes.
 		const namers = Object.fromEntries(SPORTS.map((s) => [s, resolver(s)]));
+
+		/** The division table behind a club's record, for one season.
+		 *
+		 *  Built from the DATABASE, not from the scope. Under
+		 *  `SCOPE=team:mlb/brewers` the Cubs and the Cardinals are not in the
+		 *  table at all, and a standings modal with one row in it is not a
+		 *  standings table — the scope decides which clubs get pages, not which
+		 *  games exist.
+		 *
+		 *  Returns null rather than an empty table when the club has no division
+		 *  on record or did not play that season, so the record stays plain text
+		 *  instead of linking to an empty box.
+		 */
+		async function divisionStandings(entry, season) {
+			const divisions = divisionsBySport[entry.sport];
+			if (!divisions) return null;
+			const resolve = namers[entry.sport];
+			const peers = divisionPeers(entry.sport, entry.code, divisions, {
+				teamFor: (code) => clubFor(table.find((e) => e.sport === entry.sport && e.code === code)),
+				nameFor: (code) => resolve(code, { season: String(season) }).name,
+			});
+			if (peers.length < 2) return null;
+			const withRows = [];
+			for (const peer of peers) {
+				// Each peer's own franchise, resolved from the checkout the same
+				// way the scope's clubs are. A division-mate is a sport and a
+				// code; taking the code alone would fetch the Ravens' rows for
+				// the Orioles.
+				const franchise = codes.franchiseOf(entry.sport, peer.code);
+				withRows.push({ ...peer, franchise, rows: await games({ sport: entry.sport, franchise }) });
+			}
+			const version = versionOf(withRows, stampOf);
+			const standings = memo(derivedCache, `division/${entry.sport}/${entry.code}/${season}`, version,
+				() => computeStandings(withRows, { season: Number(season) }));
+			if (!standings.groups.length) return null;
+			// Mark the club whose page this is, and link the ones this deployment
+			// actually serves. A club with no manifest has no page here, and a
+			// link to one would be a 404 inside a table.
+			for (const line of standings.groups[0].clubs) {
+				line.here = line.teamId === entry.teamId && line.sport === entry.sport;
+				const served = line.teamId ? table.find((e) => e.sport === line.sport && e.teamId === line.teamId) : null;
+				line.url = served?.available ? (served.base || '/') : null;
+			}
+			return standings;
+		}
 		const table = routeTable(scope, resolved);
 		let available = table.filter((e) => e.available);
 
@@ -826,6 +871,17 @@ function main() {
 					verdict,
 					answer: verdictText(verdict, team),
 					recordLabel: recordText(tally),
+					// The division table behind the record. Absent for a club with
+					// no division on record or a season it did not play, which is
+					// what keeps the record from linking to an empty box.
+					standings: standingsModal({
+						standings: await divisionStandings(entry, season),
+						season,
+						// The same caveat the standings page carries: divisions
+						// here are today's, so a 1962 table is grouped by an
+						// arrangement that season never had.
+						caveat: true,
+					}),
 					// The club's colours for the season being rendered, so a
 					// 1950s page uses the green they used then. A manifest may
 					// override; most no longer need to.

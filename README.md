@@ -611,6 +611,39 @@ people mean: a club level on percentage but with games in hand is half a game
 back. Ties count half, as everywhere else here, and the postseason is not in it —
 a club that went 13-3 and won three playoff games did not finish 16-3.
 
+### The record opens the division table
+
+Clicking a club's record opens its division standings for that season, as a
+modal. The baseball site does this by fetching ESPN's standings endpoint when the
+modal opens, which is why it can only ever show the season being played; this is
+computed from games already in the database, so the modal on a 1982 page shows
+1982.
+
+**No JavaScript.** This repo ships no client bundle, and adding one to open a box
+would be a bad trade. The modal is the `:target` pseudo-class and nothing else —
+the record is a link to a fragment, the modal is hidden until it matches, and the
+scrim and the close are both links back to `#`. It is last in the document, so a
+browser that never applies the stylesheet shows the table at the foot of the page
+rather than over the top of it.
+
+**Built from the database, not from the scope.** Under `SCOPE=team:mlb/brewers`
+the Cubs and the Cardinals are not in the scope's table at all, but their games
+are in the same database — and a standings table with one row in it is not a
+standings table. The scope decides which clubs get pages, not which games exist.
+Division-mates the deployment does not serve appear as plain text, because there
+is no page here to link to and inventing one would be a 404 inside a table.
+
+Every club in the table is named by the resolver, including the ones with a
+manifest. Mixing the two sources gave a table reading "Chicago Cubs, St. Louis
+Cardinals, Brewers"; the resolver is also season-aware, so an old season names
+the clubs as they were called then.
+
+The cost is five clubs' histories instead of one, which under a single-club scope
+is 287ms on the first request of a process and 12-20ms after — the game cache and
+the derived memo both apply. A club with no division on record, or a season it
+did not play, gets no modal and the record stays plain text rather than linking
+to an empty box.
+
 ## League-wide records
 
 `/records` at the scope root is the record book for every club in scope, where
