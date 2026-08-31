@@ -48,6 +48,53 @@ export const sources = {
 		useBefore: 1999,
 	},
 
+	/** ESPN's public scoreboard, for the season being played.
+	 *
+	 *  nflverse is authoritative and refreshes weekly, so an in-season result can
+	 *  be days old — the same gap baseball had, at a smaller scale. This is the
+	 *  same `live` shape the baseball adapter uses.
+	 *
+	 *  A day at a time, because the request date is the game's LOCAL date and the
+	 *  event timestamp is UTC. A Sunday night game kicks off at 20:20 Eastern and
+	 *  is stamped the following Monday; read off the event it would be filed a
+	 *  day late and its id would not match nflverse's.
+	 */
+	live: {
+		url: (yyyymmdd) => `https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard?dates=${yyyymmdd}&limit=200`,
+		/** Every day a season could have a game on: September through February,
+		 *  which crosses the new year. */
+		daysOf(season) {
+			const out = [];
+			const add = (year, month) => {
+				const days = new Date(Date.UTC(year, month, 0)).getUTCDate();
+				for (let d = 1; d <= days; d++) {
+					out.push(`${year}${String(month).padStart(2, '0')}${String(d).padStart(2, '0')}`);
+				}
+			};
+			for (let m = 9; m <= 12; m++) add(season, m);
+			for (let m = 1; m <= 2; m++) add(season + 1, m);
+			return out;
+		},
+		/** Three days around now, for the same reason baseball needs three: the
+		 *  dates are local and the clock is UTC. */
+		recentDays(now) {
+			const day = (offset) => {
+				const d = new Date(now);
+				d.setUTCDate(d.getUTCDate() + offset);
+				return d.toISOString().slice(0, 10).replace(/-/g, '');
+			};
+			return [day(-2), day(-1), day(0)];
+		},
+		/** Which season a date belongs to.
+		 *
+		 *  An NFL season crosses the new year: the 2024 season ends with a Super
+		 *  Bowl in February 2025. January and February belong to the season
+		 *  named for the PREVIOUS year, which is the whole reason this is
+		 *  declared per sport rather than assumed to be the calendar year.
+		 */
+		seasonOf: (date) => (date.getUTCMonth() < 6 ? date.getUTCFullYear() - 1 : date.getUTCFullYear()),
+		source: 'espn',
+	},
 	playByPlay: {
 		// .csv.gz rather than .csv: 18.5MB against 95MB, and the build has to
 		// decompress either way.
@@ -255,6 +302,9 @@ export const sport = {
 	defaults,
 	gameRow,
 	seedGameRow,
+	liveGameRow,
+	liveWeek,
+	numberEvents,
 	isScoringPlay,
 	scoringRow,
 	seedRound,
@@ -264,3 +314,90 @@ export const sport = {
 };
 
 export default sport;
+
+/** nflverse's week number for an ESPN event, or null if it is not a game.
+ *
+ *  The regular season lines up: ESPN's week 1 is nflverse's week 1. The
+ *  postseason does not. ESPN restarts at 1 for the wild card round, and
+ *  nflverse continues from 18 — but skips the Pro Bowl, which ESPN counts.
+ *
+ *      ESPN type 3 week 1  wild card      nflverse 19
+ *      ESPN type 3 week 2  divisional     nflverse 20
+ *      ESPN type 3 week 3  conference     nflverse 21
+ *      ESPN type 3 week 4  Pro Bowl       not a game
+ *      ESPN type 3 week 5  Super Bowl     nflverse 22
+ *
+ *  Verified against both: the 2024 Super Bowl is `2024_22_KC_PHI` and ESPN has
+ *  it as type 3 week 5, and the divisional round is nflverse 20 and ESPN week 2.
+ */
+export function liveWeek(event) {
+	const type = event?.season?.type ?? 2;
+	const week = event?.week?.number;
+	if (!Number.isFinite(week)) return null;
+	if (type < 2) return null;            // preseason is not the season
+	if (type === 2) return week;
+	if (week <= 3) return 18 + week;      // wild card, divisional, conference
+	if (week === 4) return null;          // the Pro Bowl is not two clubs anyway
+	return 22;                            // the final
+}
+
+/** One ESPN scoreboard event as a game row, or null.
+ *
+ *  The id is nflverse's — `2024_22_KC_PHI`, season, week, away, home — because
+ *  games are keyed on (sport, id) and an ESPN id would make the same game a
+ *  second row the moment nflverse published the week. That needs each club's
+ *  NFLVERSE code rather than its franchise code: the Rams are LAR here and LA
+ *  there, Washington is WSH here and WAS there.
+ */
+export function liveGameRow(event, { franchiseOf, knows, codeIn, queryDate = null }) {
+	const comp = event?.competitions?.[0];
+	if (!comp) return null;
+
+	const week = liveWeek(event);
+	if (week == null) return null;
+
+	// Postponed games are not fixtures on this date; they are replayed, and the
+	// authoritative source has no record of them on the original day.
+	if (comp.status?.type?.name === 'STATUS_POSTPONED') return null;
+
+	const home = comp.competitors?.find((c) => c.homeAway === 'home');
+	const away = comp.competitors?.find((c) => c.homeAway === 'away');
+	if (!home?.team?.abbreviation || !away?.team?.abbreviation) return null;
+	// Both sides must be clubs. The Pro Bowl arrives as AFC against NFC.
+	if (knows && (!knows(home.team.abbreviation) || !knows(away.team.abbreviation))) return null;
+
+	const date = queryDate
+		? `${queryDate.slice(0, 4)}-${queryDate.slice(4, 6)}-${queryDate.slice(6, 8)}`
+		: String(event.date).slice(0, 10);
+	const played = comp.status?.type?.completed === true;
+	const nfl = (abbr) => codeIn(abbr, 'nflverse');
+
+	return {
+		id: `${event.season.year}_${String(week).padStart(2, '0')}_${nfl(away.team.abbreviation)}_${nfl(home.team.abbreviation)}`,
+		season: Number(event.season.year),
+		date,
+		// Never `championship` from here. Which game was the final is decided by
+		// the load's championship pass, which knows the leagues and their eras;
+		// a live feed guessing it would promote a conference title the way the
+		// first version of that pass did.
+		round: (event.season?.type ?? 2) > 2 ? 'playoff' : 'regular',
+		home: franchiseOf(home.team.abbreviation),
+		away: franchiseOf(away.team.abbreviation),
+		homeScore: played ? Number(home.score) : null,
+		awayScore: played ? Number(away.score) : null,
+		neutral: Boolean(comp.neutralSite),
+		status: played ? 'final' : 'scheduled',
+		source: 'espn',
+		week,
+	};
+}
+
+/** Football has no doubleheaders, so every game is its own.
+ *
+ *  Present because the live refresh calls it for every sport. The number it
+ *  yields is unused here — an nflverse id carries no game number — and saying so
+ *  is better than the refresh needing to know which sports have one.
+ */
+export function numberEvents(events) {
+	return (events ?? []).filter((e) => e?.competitions?.[0]).map((event) => ({ event, number: 0 }));
+}

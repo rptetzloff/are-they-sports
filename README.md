@@ -265,6 +265,42 @@ Bears.
 
 ## The season being played
 
+Both sports. nflverse refreshes weekly and Retrosheet publishes annually, so
+in-season results are days or months behind the authoritative source; the live
+feed fills the gap and is superseded when the real one publishes.
+
+```
+npm run load nfl -- --live          # the season being played
+npm run load mlb -- --live 2026     # a named one, backfilled
+```
+
+**The ids are the authoritative source's, not ESPN's.** Games are keyed on
+`(sport, id)`, so an ESPN id would make the same game a second row rather than
+replacing it. Football's are nflverse's `2024_22_KC_PHI` — season, week, away,
+home, in **nflverse** codes, which are not the franchise codes: the Rams are
+`LAR` here and `LA` there, Washington `WSH` and `WAS`. Checked against a whole
+published season: **285 of 285 ids match**.
+
+Two things about football that baseball does not have:
+
+- **the season crosses the new year.** The 2024 season ends with a Super Bowl in
+  February 2025, so January and February belong to the previous year's season
+  and a backfill runs September through February.
+- **the postseason week numbering does not line up.** ESPN restarts at 1 for the
+  wild card; nflverse continues from 18 but skips the Pro Bowl, which ESPN
+  counts as week 4. So ESPN weeks 1-3 are nflverse 19-21, ESPN week 5 is
+  nflverse 22, and week 4 is not a game — it is also AFC against NFC, which the
+  club check rejects anyway.
+
+A live row may **finish** a game but not re-attribute one. nflverse publishes a
+whole season's schedule before it starts, so 272 authoritative rows sit there as
+`scheduled`; without that rule a refresh overwrote every one with an equally
+scheduled ESPN row, adding nothing and turning 272 reproducible rows into
+non-reproducible ones. Measured after: 285 games seen, **1 written** — the one
+that needed finishing.
+
+
+
 The server keeps it current itself, and paces itself from the schedule — a
 season is six months of the year and a game day a few hours of it, so a fixed
 interval is mostly requests that learn nothing.
