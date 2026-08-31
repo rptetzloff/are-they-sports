@@ -1,6 +1,10 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { leagueNav, leagueRecordsPage, leagueSchedulePage, selectorPage, siteNav, sportTabs, standingsPage } from '../lib/render.js'
+import { matchRoute, parseView, routeTable } from '../lib/routes.js'
+import { parseScope } from '../lib/scope.js'
+import mlb from '../sports/mlb.js'
+import nfl from '../sports/nfl.js'
 
 // Can you actually get there? Every route in this repo is tested by asking for
 // it directly, which is why /records and /schedule shipped answering 200 with
@@ -299,4 +303,55 @@ test('the standings page links back to the clubs and the other league pages', ()
 	assert.ok(links.includes('/'), 'no way back to the clubs')
 	assert.ok(links.includes('/records'), 'no link to the league records')
 	assert.ok(links.includes('/schedule'), 'no link to the league schedule')
+})
+
+// --- the other direction: is every link a route? ---
+
+// The tests above ask whether every route is linked. Nothing asked the reverse,
+// and `/managers` was in every club page's site nav, answering 404, for as long
+// as the nav existed. The leaders page needs a curated coaches/managers table
+// nobody publishes; the link went in ahead of the page.
+
+const LEAGUE_ROUTES = new Set(['/records', '/schedule', '/standings'])
+
+const teamFor = (sport) => ({
+	id: sport === 'mlb' ? 'brewers' : 'packers',
+	sport,
+	nouns: { ...(sport === 'mlb' ? mlb : nfl).defaults.nouns, team: 'Club', fullName: 'The Club' },
+})
+
+const resolves = (href, sport) => {
+	if (href === '' || href.startsWith('http')) return true
+	if (LEAGUE_ROUTES.has(href)) return true
+	const id = sport === 'mlb' ? 'brewers' : 'packers'
+	const table = routeTable(parseScope(`team:${sport}/${id}`), [{ sport, teamId: id, code: 'X', available: true }])
+	const m = matchRoute(href, table)
+	return Boolean(m && parseView(m.rest))
+}
+
+for (const sport of ['nfl', 'mlb']) {
+	test(`every link in the ${sport} club nav is a route that renders`, () => {
+		for (const league of [false, true]) {
+			const html = siteNav('', teamFor(sport), { league })
+			for (const href of hrefs(html)) {
+				assert.ok(resolves(href, sport), `${href} is linked and does not resolve (league: ${league})`)
+			}
+		}
+	})
+}
+
+test('the nav test can fail — an unbuilt page is caught', () => {
+	// Guards the guard. `resolves` returning true for everything would make the
+	// two tests above pass on the nav that shipped the 404.
+	assert.equal(resolves('/managers', 'mlb'), false)
+	assert.equal(resolves('/coaches', 'nfl'), false)
+	assert.equal(resolves('/records', 'nfl'), true)
+})
+
+test('a club under a multi-club scope can reach the standings', () => {
+	// /records and /schedule were both in this list and /standings was not, so
+	// the page added last week was reachable from the selector and from the other
+	// league pages, and not from any club page.
+	const links = hrefs(siteNav('', teamFor('nfl'), { league: true }))
+	for (const r of LEAGUE_ROUTES) assert.ok(links.includes(r), `no link to ${r}`)
 })

@@ -435,6 +435,11 @@ sparkline and last-updated; `/records`, `/history`, `/vs`, `/schedule` and
 cards, the on-this-day panel, share buttons, the data credit, the photo gallery,
 box scores and TV listings.
 
+The leaders page was *linked* the whole time, from every club page, answering
+404 — the reverse of the reachability failure this file already records, and
+invisible for the same reason: the test asks whether every route is linked, never
+whether every link is a route. It asks both now.
+
 The credit line is in that list because writing this paragraph from memory put it
 in the other one, and grepping the rendered page is what found it. Both sites
 carry one; this repo has never rendered any, and the sources it would credit —
