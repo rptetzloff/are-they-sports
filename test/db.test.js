@@ -393,6 +393,78 @@ test('schema', { skip: !DATABASE_URL && 'no DATABASE_URL — constraints and the
 		}
 	})
 
+	await t.test('the refresh slows down when nothing is being played', async () => {
+		// Polling every minute around the clock is mostly pointless: a baseball
+		// season is six months of the year and a game day a few hours of it. The
+		// question is already answerable from the data.
+		const { nextDelay } = await import('../lib/live.js')
+		const rates = { live: 1000, between: 2000, idle: 3000 }
+		await inRollback(async () => {
+			await fixture()
+			await client.query("INSERT INTO source (id,authority,reproducible,note) VALUES ('t',1,true,'x') ON CONFLICT DO NOTHING")
+
+			// Nothing near today at all — the offseason.
+			assert.equal((await nextDelay(client, 'nfl', rates)).ms, 3000)
+
+			const add = (offsetDays, status) => client.query(
+				`INSERT INTO game (sport,id,season,date,round,home,away,home_score,away_score,status,source)
+				 VALUES ('nfl',$1,2026,current_date + ($2)::int,'regular','GB','CHI',$3,$4,$5,'t')`,
+				[`g${offsetDays}${status}`, offsetDays,
+					status === 'final' ? 10 : null, status === 'final' ? 7 : null, status])
+
+			// A game today that is finished: in season, but nothing to watch.
+			await add(0, 'final')
+			assert.equal((await nextDelay(client, 'nfl', rates)).ms, 2000)
+
+			// One still to be played: watch it closely.
+			await add(0, 'scheduled')
+			const live = await nextDelay(client, 'nfl', rates)
+			assert.equal(live.ms, 1000)
+			assert.match(live.why, /unfinished/)
+		})
+	})
+
+	await t.test('yesterday and tomorrow count, not just today', async () => {
+		// A game starting at 7pm local finishes after midnight UTC, and a
+		// suspended game is completed the next day — so yesterday can still
+		// change. Tomorrow counts because a season that resumes in the morning
+		// should not be found six hours late.
+		const { nextDelay } = await import('../lib/live.js')
+		const rates = { live: 1000, between: 2000, idle: 3000 }
+		await inRollback(async () => {
+			await fixture()
+			await client.query("INSERT INTO source (id,authority,reproducible,note) VALUES ('t',1,true,'x') ON CONFLICT DO NOTHING")
+			await client.query(
+				`INSERT INTO game (sport,id,season,date,round,home,away,status,source)
+				 VALUES ('nfl','y',2026,current_date - 1,'regular','GB','CHI','scheduled','t')`)
+			assert.equal((await nextDelay(client, 'nfl', rates)).ms, 1000)
+		})
+		await inRollback(async () => {
+			await fixture()
+			await client.query("INSERT INTO source (id,authority,reproducible,note) VALUES ('t',1,true,'x') ON CONFLICT DO NOTHING")
+			await client.query(
+				`INSERT INTO game (sport,id,season,date,round,home,away,home_score,away_score,status,source)
+				 VALUES ('nfl','tm',2026,current_date + 1,'regular','GB','CHI',3,0,'final','t')`)
+			assert.equal((await nextDelay(client, 'nfl', rates)).ms, 2000)
+		})
+	})
+
+	await t.test('another sport being live does not speed this one up', async () => {
+		const { nextDelay } = await import('../lib/live.js')
+		const rates = { live: 1000, between: 2000, idle: 3000 }
+		await inRollback(async () => {
+			await fixture()
+			await client.query("INSERT INTO sport VALUES ('mlb','baseball') ON CONFLICT DO NOTHING")
+			await client.query("INSERT INTO franchise VALUES ('mlb','MIL'),('mlb','CHN') ON CONFLICT DO NOTHING")
+			await client.query("INSERT INTO source (id,authority,reproducible,note) VALUES ('t',1,true,'x') ON CONFLICT DO NOTHING")
+			await client.query(
+				`INSERT INTO game (sport,id,season,date,round,home,away,status,source)
+				 VALUES ('mlb','m',2026,current_date,'regular','MIL','CHN','scheduled','t')`)
+			assert.equal((await nextDelay(client, 'mlb', rates)).ms, 1000)
+			assert.equal((await nextDelay(client, 'nfl', rates)).ms, 3000)
+		})
+	})
+
 	await t.test('a refresh that throws still releases the lock', async () => {
 		const { lockKeyFor, withLock } = await import('../lib/live.js')
 		const key = lockKeyFor('test-throw')

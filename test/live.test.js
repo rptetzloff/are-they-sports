@@ -57,14 +57,17 @@ test('ESPN codes resolve to Retrosheet franchises', () => {
 
 // --- what is not a played game ---
 
-test('a postponed game is not final, whatever its state says', () => {
-	// STATUS_POSTPONED is also state `post` and carries a 0-0 score. Reading the
-	// state stored thirteen postponements in three months as nil-nil finals and
-	// gave the Brewers 140 games by August 30 when they had played 137.
-	const r = liveGameRow(withStatus({ state: 'post', name: 'STATUS_POSTPONED', completed: false }), ctx)
-	assert.equal(r.status, 'scheduled')
-	assert.equal(r.homeScore, null)
-	assert.equal(r.awayScore, null)
+test('a postponed game is not stored at all', () => {
+	// Two things wrong with it. STATUS_POSTPONED is also state `post` and carries
+	// a 0-0 score, so reading the state stored thirteen postponements in three
+	// months as nil-nil finals — the Brewers had 140 games by August 30 when they
+	// had played 137.
+	//
+	// And it is not a fixture on that date either: it is replayed later, usually
+	// as half of a doubleheader. Boston's April 5th 2025 game against St. Louis
+	// became the second game of April 6th, and Retrosheet has no record of it on
+	// the 5th at all. Kept as `scheduled` it was a row nothing would supersede.
+	assert.equal(liveGameRow(withStatus({ state: 'post', name: 'STATUS_POSTPONED', completed: false }), ctx), null)
 })
 
 test('a game in progress is not final', () => {
@@ -145,10 +148,40 @@ test('a lone game is numbered zero', () => {
 	assert.deepEqual(numberEvents([event()]).map((n) => n.number), [0])
 })
 
-test('games on different days are both zero', () => {
-	const a = event({ event: { id: 'a', date: '2026-08-29T17:05Z' } })
-	const b = event({ event: { id: 'b', date: '2026-08-30T17:05Z' } })
+test('different clubs on the same day are each zero', () => {
+	// numberEvents is given ONE day's events, so it groups by club alone. It used
+	// to group by the event's own date as well, which splits a doubleheader
+	// whenever the second game runs past midnight UTC: a Colorado double on April
+	// 20th 2025 had games at 20:10Z and 01:10Z, landed in two groups, and both
+	// came out numbered 0 with the same id.
+	const a = event({ competition: { competitors: [
+		{ homeAway: 'home', team: { abbreviation: 'NYY' }, score: '1' },
+		{ homeAway: 'away', team: { abbreviation: 'BOS' }, score: '0' },
+	] } })
+	const b = event({ competition: { competitors: [
+		{ homeAway: 'home', team: { abbreviation: 'CHC' }, score: '2' },
+		{ homeAway: 'away', team: { abbreviation: 'STL' }, score: '3' },
+	] } })
 	assert.deepEqual(numberEvents([a, b]).map((n) => n.number), [0, 0])
+})
+
+test('a doubleheader spanning midnight UTC is still one doubleheader', () => {
+	const early = event({ event: { id: 'a', date: '2025-04-20T20:10Z' } })
+	const late = event({ event: { id: 'b', date: '2025-04-21T01:10Z' } })
+	assert.deepEqual(numberEvents([early, late]).map((n) => n.number).sort(), [1, 2])
+})
+
+test('the date comes from the request, not the event', () => {
+	// Event timestamps are UTC and Retrosheet files the LOCAL date. A 7:05pm
+	// game in Texas is stamped 2025-03-29T00:05Z and belongs to the 28th; read
+	// off the event it was filed a day late, collided with the next day's game,
+	// and only 76% of a season's ids matched what Retrosheet had published.
+	const e = event({ event: { date: '2025-03-29T00:05Z' } })
+	assert.equal(liveGameRow(e, { ...ctx, queryDate: '20250328' }).date, '2025-03-28')
+	assert.equal(liveGameRow(e, { ...ctx, queryDate: '20250328' }).id, 'NYA202503280')
+	// Without one it falls back to the event, which is what the id would have
+	// been before.
+	assert.equal(liveGameRow(e, ctx).date, '2025-03-29')
 })
 
 test('an event with no competition is skipped rather than throwing', () => {
@@ -165,7 +198,8 @@ test('the adapter exposes the live mappers on its default export', () => {
 	assert.equal(typeof mlb.numberEvents, 'function')
 	assert.equal(typeof mlb.sources.live?.url, 'function')
 	assert.equal(typeof mlb.sources.live?.seasonOf, 'function')
-	assert.ok(Array.isArray(mlb.sources.live?.months))
+	assert.equal(typeof mlb.sources.live?.daysOf, 'function')
+	assert.equal(typeof mlb.sources.live?.recentDays, 'function')
 })
 
 test('a sport with no live feed says so rather than half-declaring one', () => {
@@ -222,4 +256,42 @@ test('a sport with no live source is reported, not thrown', () => {
 		assert.equal(r.ran, false)
 		assert.match(r.reason, /no live source/)
 	})
+})
+
+test('the refresh window covers local yesterday whatever the UTC hour', () => {
+	// These dates are LOCAL and the clock is UTC. North American local dates lag
+	// UTC by up to eight hours, so during a US evening the UTC date has already
+	// rolled over — a two-day window covered local today and tomorrow and missed
+	// local yesterday, which is exactly when last night's late game finishes.
+	const days = (iso) => mlb.sources.live.recentDays(new Date(iso))
+	// Mid-afternoon UTC: local yesterday and today are both in range.
+	assert.deepEqual(days('2026-08-30T18:00Z'), ['20260828', '20260829', '20260830'])
+	// Just past midnight UTC, which is a US evening on the 30th.
+	assert.deepEqual(days('2026-08-31T01:00Z'), ['20260829', '20260830', '20260831'])
+	// In both cases the local day before "now" is present.
+	for (const iso of ['2026-08-30T18:00Z', '2026-08-31T01:00Z']) {
+		assert.ok(days(iso).includes('20260829'), `${iso} missed the 29th`)
+	}
+})
+
+test('a season backfill covers March through November', () => {
+	// The World Series runs into November and openers are in March. A window
+	// that stops in October loses the finals, which is the part of a season
+	// anyone checks — and a mutant trimming the last month survived until this
+	// asserted the ends.
+	const days = mlb.sources.live.daysOf(2025)
+	assert.equal(days[0], '20250301')
+	assert.equal(days.at(-1), '20251130')
+	assert.equal(days.length, 275)
+	// Every day, not every month: February and December are out, and no day is
+	// listed twice.
+	assert.equal(new Set(days).size, days.length)
+	assert.equal(days.filter((d) => d.slice(4, 6) === '11').length, 30)
+	assert.equal(days.filter((d) => d.slice(4, 6) === '02').length, 0)
+})
+
+test('a leap February does not shift the season', () => {
+	// The month lengths are computed, so a leap year is worth one assertion.
+	assert.equal(mlb.sources.live.daysOf(2024).length, 275)
+	assert.equal(mlb.sources.live.daysOf(2024).filter((d) => d.slice(4, 6) === '03').length, 31)
 })

@@ -37,7 +37,7 @@ import { computeSchedule } from './lib/schedule.js';
 import { historyPoints } from './lib/history.js';
 import { codeTables, franchisesForClub, staleFranchises } from './lib/codes.js';
 import { availability, close, connect, franchisesWithGames, gamesFor, health, lastUpdated, withClient } from './lib/store.js';
-import { lockKeyFor, refreshLive, withLock } from './lib/live.js';
+import { lockKeyFor, nextDelay, refreshLive, withLock } from './lib/live.js';
 import {
 	daysToNextGame, lastLosslessSeason, latestSeason, recordText, seasons, seasonTally, seasonVerdict,
 	seasonWinPct, seriesRecords, streakBanner, verdictText,
@@ -356,7 +356,7 @@ function main() {
 		//
 		// LIVE_REFRESH_MS=0 turns it off, which is what a deployment wants if it
 		// runs the loader on a schedule of its own.
-		const liveEvery = Number(process.env.LIVE_REFRESH_MS ?? 120_000);
+		const liveEvery = Number(process.env.LIVE_REFRESH_MS ?? 60_000);
 		const adapters = await loadSports();
 		const liveSports = [...new Set(resolved.map((e) => e.sport))]
 			.filter((id) => adapters[id]?.sources?.live);
@@ -377,12 +377,30 @@ function main() {
 					}
 				}
 			};
-			const timer = setInterval(tick, liveEvery);
-			// Never hold the process open: a container should stop when told to,
-			// not wait out the interval.
-			timer.unref();
-			console.log(`  live         refreshing ${liveSports.join(', ')} every ${Math.round(liveEvery / 1000)}s`);
-			tick();
+			// Self-scheduling rather than a fixed interval, because how often this
+			// is worth doing depends on whether anything is being played. A
+			// season is six months of the year and a game day a few hours of it;
+			// polling every two minutes in February is nine requests to learn
+			// nothing. `liveEvery` is the LIVE rate — the others are derived.
+			let timer = null;
+			const schedule = (ms, why) => {
+				timer = setTimeout(loop, ms);
+				// Never hold the process open: a container should stop when told
+				// to, not wait out the interval.
+				timer.unref();
+				return why;
+			};
+			const loop = async () => {
+				await tick();
+				try {
+					const next = await withClient((client) => nextDelay(client, liveSports[0], { live: liveEvery }));
+					schedule(next.ms, next.why);
+				} catch {
+					schedule(liveEvery, 'could not read the schedule');
+				}
+			};
+			console.log(`  live         refreshing ${liveSports.join(', ')}, ${Math.round(liveEvery / 1000)}s while games are on`);
+			loop();
 		}
 
 		let refreshedAt = 0;

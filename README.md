@@ -265,8 +265,23 @@ Bears.
 
 ## The season being played
 
-The server keeps it current itself. Every two minutes by default; set
-`LIVE_REFRESH_MS=0` to turn it off, or to something else in milliseconds.
+The server keeps it current itself, and paces itself from the schedule — a
+season is six months of the year and a game day a few hours of it, so a fixed
+interval is mostly requests that learn nothing.
+
+| what the data says | how often |
+|---|---|
+| a game near today is not final | `LIVE_REFRESH_MS`, default **60s** |
+| in season, nothing pending | 30 minutes |
+| no games within a day either side | 6 hours |
+
+`LIVE_REFRESH_MS=0` turns it off entirely.
+
+A refresh is **three requests**, not nine: only the days that can still change.
+Three rather than two because game dates are LOCAL and the clock is UTC — during
+a US evening the UTC date has already rolled over, and a two-day window covered
+local today and tomorrow while missing local yesterday, which is exactly when
+last night's late game finishes.
 
 ```
 live         refreshing mlb every 120s
@@ -300,8 +315,14 @@ npm run load mlb -- --live          # the season being played
 npm run load mlb -- --live 2026     # a named one
 ```
 
-Nine requests rather than two hundred: ESPN's scoreboard takes `dates=YYYYMM`
-and returns the month. Rows are written as `espn` — authority 10,
+A **day** at a time, and that is correctness rather than cost. `dates=YYYYMM`
+returns a month in one request and the event timestamps are UTC, while
+Retrosheet files the LOCAL date: a 7:05pm game in Texas is `2025-03-29T00:05Z`,
+so reading the date off the event filed it a day late, collided it with the next
+day's game, and the pair became a fake doubleheader. Only **76%** of a season's
+ids matched what Retrosheet had published for the same games. `dates=YYYYMMDD`
+returns that local day, and the figure is **99.75%** — the remainder are
+suspended games the two sources genuinely file differently. Rows are written as `espn` — authority 10,
 `reproducible = false` — and the upsert rule replaces them with Retrosheet's the
 next time the annual file loads, so the count of non-reproducible rows returns
 to zero on its own.
