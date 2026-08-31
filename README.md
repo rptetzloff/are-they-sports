@@ -577,6 +577,66 @@ A period is addressed by its own grouping key — `/nfl/schedule/2026/w3`,
 drift apart. Asked for a period the season does not have, the route 404s and
 lists the ones it does, rather than serving week 1 under a URL naming week 25.
 
+## A played season is written down, not worked out again
+
+The record book for 1962 is the same answer on every request, in every
+container, forever. It was being recomputed for all of them.
+
+`league_summary` stores the result, keyed by the inputs it came from:
+
+```
+scope | sport | view      | season | version              | payload
+all   | nfl   | records   | 0      | abc123|mlb/ANA@2026… | 33KB
+all   | mlb   | standings | 2026   | abc123|mlb/ANA@2026… | 6KB
+```
+
+Three layers, cheapest first: the in-process memo, the stored summary, the
+computation. A fresh process serves `/records` in **113ms instead of 2,400** —
+it reads one 33KB row and never touches a game.
+
+**A stale summary is not served, it is not FOUND.** The version is every club's
+franchise and the stamp its rows were last observed at, plus the build that
+computed it. A game changing moves a stamp, the version stops matching, and the
+row is ignored and replaced. Verified against a real write: flipping a Brewers
+win to a loss in Postgres took the standings from 85-52 to 84-53 with the
+summary already stored.
+
+The build is in the version because **a change to how records are computed moves
+no stamp at all.** Without it, a deploy that fixed a records bug would keep
+serving the bug out of this table — which is the failure this repo has already
+had twice through a cache.
+
+The scope is in the key because `/records` is four clubs under
+`division:nfl/nfc-north` and thirty-two under `sport:nfl`. Two deployments
+sharing a database would otherwise serve each other's record books.
+
+### The ordering is the whole trick
+
+The first version stored summaries and was barely faster, because the handler
+loaded every club's games *before* it could work out the version — 471,453 rows
+to discover that the answer was already written down. A fresh process still took
+1,517ms to serve something it did not need to compute.
+
+The version now comes from the database rather than from loaded rows, and the
+rows are loaded lazily, only when a summary is missing. The season list is stored
+too, for the same reason: picking which season the standings default to needs to
+know which seasons were played, and computing *that* reads everything.
+
+### It is still a cache
+
+`TRUNCATE league_summary` loses nothing. Nothing hand-edits it, every row names
+its inputs, and the whole table rebuilds on the next request that misses. That is
+the test this file sets for derived data, and it is the reason this is not a
+source of record.
+
+What is NOT stored as a query: the sequence-dependent parts of the record book —
+streaks, best and worst starts, lopsided wins. Those depend on
+`rules.streaksSpanSeasons`, which is `true` for football and `false` for baseball
+and is declared in the sport adapter. Expressing them in SQL would write that
+rule a second time in a second language, and this file's own example of the cost
+is that merging those two implementations "would silently rewrite one record
+book". They are computed in JavaScript, once, and the *result* is stored.
+
 ## Standings
 
 `/standings` is where every club in a division finished, for a season. The

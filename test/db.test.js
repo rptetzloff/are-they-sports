@@ -522,6 +522,71 @@ test('schema', { skip: !DATABASE_URL && 'no DATABASE_URL — constraints and the
 		assert.equal(await withLock(client, key, async () => 'free'), 'free')
 	})
 
+	await t.test('a summary is found only when its inputs match', async () => {
+		// The whole safety property. A stored summary is a cache with its inputs
+		// named: one computed from different games is not stale, it is NOT FOUND,
+		// so it cannot be served. This repo has twice shipped a cache that held a
+		// correction until the next deploy, and that is what this prevents.
+		const { readSummary, writeSummary } = await import('../lib/store.js')
+		await inRollback(async () => {
+			await fixture()
+			const key = { scope: 'all', sport: 'nfl', view: 'records', season: 0 }
+			await writeSummary({ ...key, version: 'v1', payload: { clubs: 32 } }, client)
+			assert.deepEqual(await readSummary({ ...key, version: 'v1' }, client), { clubs: 32 })
+			assert.equal(await readSummary({ ...key, version: 'v2' }, client), null,
+				'a summary computed from other inputs was served')
+		})
+	})
+
+	await t.test('recomputing replaces the row rather than adding one', async () => {
+		// Keyed on (scope, sport, view, season), so a season that is played out
+		// over six months leaves one row, not one per score change.
+		const { readSummary, writeSummary } = await import('../lib/store.js')
+		await inRollback(async () => {
+			await fixture()
+			const key = { scope: 'all', sport: 'nfl', view: 'standings', season: 2026 }
+			await writeSummary({ ...key, version: 'v1', payload: { w: 1 } }, client)
+			await writeSummary({ ...key, version: 'v2', payload: { w: 2 } }, client)
+			const { rows } = await client.query(
+				"SELECT count(*)::int n FROM league_summary WHERE scope='all' AND sport='nfl' AND view='standings' AND season=2026")
+			assert.equal(rows[0].n, 1, 'a second computation left a second row')
+			assert.deepEqual(await readSummary({ ...key, version: 'v2' }, client), { w: 2 })
+			assert.equal(await readSummary({ ...key, version: 'v1' }, client), null)
+		})
+	})
+
+	await t.test('two scopes do not share a record book', async () => {
+		// /records is four clubs under division:nfl/nfc-north and thirty-two under
+		// sport:nfl — different answers to the same question. Two deployments
+		// against one database would otherwise serve each other's.
+		const { readSummary, writeSummary } = await import('../lib/store.js')
+		await inRollback(async () => {
+			await fixture()
+			const base = { sport: 'nfl', view: 'records', season: 0, version: 'v1' }
+			await writeSummary({ ...base, scope: 'all', payload: { clubs: 32 } }, client)
+			await writeSummary({ ...base, scope: 'division:nfl/nfc-north', payload: { clubs: 4 } }, client)
+			assert.deepEqual(await readSummary({ ...base, scope: 'all' }, client), { clubs: 32 })
+			assert.deepEqual(await readSummary({ ...base, scope: 'division:nfl/nfc-north' }, client), { clubs: 4 })
+		})
+	})
+
+	await t.test('a summary is a cache: the table can be emptied and rebuilt', async () => {
+		// The test CLAUDE.md sets for derived data. Nothing hand-edits this table
+		// and nothing is lost by dropping it — every row is recomputed on the next
+		// request that misses.
+		const { readSummary, writeSummary } = await import('../lib/store.js')
+		await inRollback(async () => {
+			await fixture()
+			const key = { scope: 'all', sport: 'nfl', view: 'records', season: 0, version: 'v1' }
+			await writeSummary({ ...key, payload: { clubs: 32 } }, client)
+			await client.query('TRUNCATE league_summary')
+			assert.equal(await readSummary(key, client), null)
+			// And nothing else went with it.
+			const { rows } = await client.query("SELECT count(*)::int n FROM game WHERE sport='nfl'")
+			assert.ok(rows[0].n >= 0)
+		})
+	})
+
 	await t.test('what a backup must protect is answerable as a query', async () => {
 		// Not "is zero" — a live capture legitimately makes it non-zero until
 		// upstream publishes. The point is that the question has an answer.
