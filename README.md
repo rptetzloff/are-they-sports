@@ -577,6 +577,38 @@ A period is addressed by its own grouping key — `/nfl/schedule/2026/w3`,
 drift apart. Asked for a period the season does not have, the route 404s and
 lists the ones it does, rather than serving week 1 under a URL naming week 25.
 
+## One nav grammar
+
+Every nav that steps through an ordered list is the same builder: seasons on a
+club page, seasons and periods on a schedule, seasons on the standings. There
+were four of these, written at different times in two grammars, and a schedule
+page carried three at once — seasons at the top, days in the middle, seasons
+again at the foot — with two of the three using identical glyphs on different
+axes. Nothing but the value between the arrows said which was which.
+
+```
+SEASON  |‹  ‹‹  ‹   1998   ›  ››  ›|
+DAY     |‹  ‹‹  ‹  Wed, Jun 15  ›  ››  ›|
+```
+
+**One chevron family.** The same glyph at the same weight throughout: a bar
+marks the ends, doubling means ten. The club page used to mix U+22D8, U+00AB and
+U+2039 for first, back-ten and back-one — and the first of those is a
+*mathematical* symbol drawn to different proportions, so it never matched the
+other two at any size, which is what made the row read as three unrelated
+buttons.
+
+**Every row is named**, so a page can carry two and neither is ambiguous. That
+name also replaces the old "1998 Season" in the middle, which said the same thing
+in the one place it could not be scanned.
+
+**Ends are dimmed in place, not dropped.** The club page dropped them, so the row
+changed width as you moved through the seasons — which reads as a rendering fault
+rather than a boundary.
+
+The ten-jump appears only above twenty items. It earns its place across a hundred
+seasons and is clutter on four.
+
 ## Standings
 
 `/standings` is where every club in a division finished, for a season. The
