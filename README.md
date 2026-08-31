@@ -536,6 +536,33 @@ The same gap ran the other way for `/standings`: it was linked from the club
 selector and from the other league pages, and not from any club page, because
 the club nav's league block listed records and schedule and was never revisited.
 
+## Run the tests against an empty database too
+
+`npm test` against a developer database and `npm test` in CI are different runs,
+and each catches defects the other cannot. Both kinds have shipped:
+
+- Three assertions passed only against an EMPTY database. They were written when
+  the tables held nothing but the fixture, and silently became claims about the
+  whole league once real data arrived — `count(*) WHERE home='WAS'` with no
+  `sport` read 9,208 rather than 0 the moment baseball was loaded. Nobody saw
+  them, because CI runs on an empty database.
+- Then one passed only against a LOADED one, in the very commit that fixed those
+  three: it inserted an `mlb` franchise without creating the `mlb` sport, which
+  exists on a developer's machine from a real load and nowhere else. CI caught it
+  within a minute.
+
+A test resting on state it did not create is the same defect either way. To check
+both, point `DATABASE_URL` at a second, empty database and run again:
+
+```sh
+createdb ats_ci                     # or CREATE DATABASE ats_ci
+DATABASE_URL=...//ats_ci npm run migrate
+DATABASE_URL=...//ats_ci npm test
+```
+
+Expect a lower pass count, not a lower fail count — the "loaded data" block skips
+itself with a reason, which is how it says so out loud.
+
 ## What the league pages cost
 
 Measured, because two different things were slow and only one of them showed up
