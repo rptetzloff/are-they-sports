@@ -38,14 +38,14 @@ import { computeStandings, divisionPeers, playedSeasons } from './lib/standings.
 import { Lru, memo, mergeGames, versionOf } from './lib/derived.js';
 import { historyPoints } from './lib/history.js';
 import { codeTables, franchisesForClub, staleFranchises } from './lib/codes.js';
-import { availability, close, connect, franchisesWithGames, gamesFor, gamesSince, health, lastUpdated, lastUpdatedAll, withClient } from './lib/store.js';
+import { availability, close, connect, franchisesWithGames, gamesFor, gamesSince, health, lastUpdated, lastUpdatedAll, readSummary, withClient, writeSummary } from './lib/store.js';
 import { lockKeyFor, nextDelay, refreshLive, withLock } from './lib/live.js';
 import {
 	daysToNextGame, lastLosslessSeason, latestSeason, recordText, seasons, seasonTally, seasonVerdict,
 	seasonWinPct, seriesRecords, streakBanner, verdictText,
 } from './lib/core.js';
 import {
-	NEUTRAL, clubPage, clubSwitcher, standingsModal, headToHeadPage, historyPage, leagueNav, leagueRecordsPage, leagueSchedulePage, sportTabs, missingSeasonPage, opponentPage, recordsPage, standingsPage,
+	NEUTRAL, clubPage, clubSwitcher, noticePage, standingsModal, headToHeadPage, historyPage, leagueNav, leagueRecordsPage, leagueSchedulePage, sportTabs, missingSeasonPage, opponentPage, recordsPage, standingsPage,
 	scheduleHtml, seasonNav, selectorPage, siteNav, sparklineHtml,
 } from './lib/render.js';
 import { colorsFor, resolver } from './lib/names.js';
@@ -235,6 +235,106 @@ const stampOf = (entry) => gameCache.get(`${entry.sport}/${entry.franchise}`)?.s
  *  grow it without limit. */
 const derivedCache = new Lru(64);
 
+/** The same memo, one layer out: Postgres, shared by every process.
+ *
+ *  The in-process cache above is per container and dies with it, so the first
+ *  request after every deploy recomputed everything, and a second replica
+ *  recomputed it again. A played season does not change — the record book for
+ *  1962 is the same answer on every request, in every container, forever — so
+ *  it is written down.
+ *
+ *  Three layers, cheapest first: the process memo (microseconds), the stored
+ *  summary (2-5ms), the computation (232-400ms over 471,453 rows). The stored
+ *  row carries the version it was computed from, so a stale one is not served,
+ *  it is not FOUND — and the computation that replaces it writes itself back.
+ *
+ *  A write failure is logged and swallowed. The page has already been computed
+ *  at that point and is correct; a database that will not accept a cache row is
+ *  a reason to be slow, not a reason to fail.
+ */
+async function summarised(key, { scope, sport, view, season = 0 }, version, compute) {
+	const hit = derivedCache.get(key);
+	if (hit && hit.version === version) return hit.value;
+
+	const stored = await readSummary({ scope, sport, view, season, version }).catch((e) => {
+		console.error(`  summary      read ${sport}/${view}: ${e.message}`);
+		return null;
+	});
+	if (stored) {
+		derivedCache.set(key, { version, value: stored });
+		return stored;
+	}
+
+	const value = await compute();
+	derivedCache.set(key, { version, value });
+	// Awaited, not fired and forgotten. The request that computes this has
+	// already paid seconds for it, so the milliseconds to write it down are not
+	// the cost worth saving — and an un-awaited write is lost when the process
+	// stops, which is exactly what happened while measuring this: a container
+	// killed just after serving a page left nothing behind, and the next one
+	// recomputed from scratch. A deploy is a process stopping just after serving
+	// pages.
+	await writeSummary({ scope, sport, view, season, version, payload: value })
+		.catch((e) => console.error(`  summary      write ${sport}/${view}: ${e.message}`));
+	return value;
+}
+
+/** A league page with no clubs behind it, which is a database nobody has loaded.
+ *
+ *  Every league handler read `leagues[0].league` and crashed the PROCESS on a
+ *  freshly migrated deployment — the request died, and so did every request
+ *  after it. That has been true for as long as these routes have existed and
+ *  nothing noticed, because no test had ever asked the server for a route; the
+ *  renderers were all tested directly, and one of them even has an EMPTY_LEAGUE
+ *  fixture proving it handles this case.
+ *
+ *  503, not an empty page. A scope resolving sixty-two clubs and finding games
+ *  for none of them is the same data gap a club page reports, and this repo's
+ *  rule is to report the gap rather than render something that looks complete
+ *  and is empty. The message names the command that fixes it.
+ */
+const noClubsLoaded = (res, url, view) => (wantsJson(url)
+	? json(res, 503, { error: 'no games loaded', view, run: 'npm run load <sport>' })
+	: html(res, 503, noticePage({
+		heading: 'No games loaded',
+		message: 'No club in scope has any games in the database yet. Run npm run load <sport> to load them.',
+		colors: NEUTRAL,
+	})));
+
+/** What the stored summaries are keyed on, beyond the clubs' own row stamps.
+ *
+ *  A change to HOW records are computed moves no stamp at all. Without the build
+ *  in the key, a deploy that fixed a records bug would go on serving the bug out
+ *  of the table, which is the exact failure this repo has already had twice
+ *  through a cache. Locally BUILD is "unknown" and never changes, so the process
+ *  start stands in for it — a restart is the local equivalent of a deploy.
+ */
+const CODE_VERSION = BUILD === 'unknown' ? `dev-${process.hrtime.bigint()}` : BUILD;
+
+/** The version a summary is stored against: what the clubs' rows were, and what
+ *  computed them.
+ *
+ *  Read from the DATABASE, not from the game cache. That distinction is the
+ *  whole point: `stampOf` answers from rows already loaded, so asking it first
+ *  meant loading 471,453 rows before discovering the answer was already stored.
+ *  Measured: a fresh process still took 1,517ms to serve a summary it did not
+ *  need to compute, because it read every game to work out whether it needed to.
+ *
+ *  Asking Postgres instead costs one round trip per club and lets a hit skip the
+ *  rows entirely.
+ */
+async function summaryVersion(entries) {
+	const parts = await Promise.all(entries.map(async (e) => {
+		// stampFor, not lastUpdated: one query for every franchise, shared and
+		// refreshed no more often than the cache checks. Per club it was 62 round
+		// trips on every league page — which showed up as a 50-100ms floor under
+		// a page whose whole point is that it reads one row.
+		const at = await stampFor(e.sport, e.franchise);
+		return `${e.sport}/${e.franchise}@${at ? at.toISOString() : '-'}`;
+	}));
+	return `${CODE_VERSION}|${parts.sort().join(',')}`;
+}
+
 /** Today, as the games themselves are dated.
  *
  *  LOCAL, not UTC. Game dates in this database are the local day the game was
@@ -282,6 +382,13 @@ function main() {
 	const scope = (() => {
 		try { return parseScope(process.env.SCOPE); } catch (e) { return die(e.message); }
 	})();
+	// The scope, verbatim, as part of every stored summary's key. `/records` is
+	// four clubs under division:nfl/nfc-north and thirty-two under sport:nfl —
+	// different answers to the same question, and two deployments sharing a
+	// database would otherwise serve each other's record books. Normalised only
+	// for case and surrounding space, so "all" and " ALL " are one key rather
+	// than two copies of the same answer.
+	const scopeKey = String(process.env.SCOPE ?? '').trim().toLowerCase();
 
 	const divisionsBySport = {};
 	for (const s of SPORTS) {
@@ -666,27 +773,37 @@ function main() {
 			// a modal and can only ever show the season being played.
 			if (leagueRoute?.view === 'standings' && needsSelector(table)) {
 				const withGames = table.filter((e) => e.available && e.teamId);
+				if (!withGames.length) return noClubsLoaded(res, url, 'standings');
 				const wanted = leagueRoute.sport
 					? [leagueRoute.sport]
 					: [...new Set(withGames.map((e) => e.sport))];
-				const entries = [];
-				for (const e of withGames) {
-					entries.push({ ...e, team: clubFor(e), rows: await games(e) });
-				}
-				const version = versionOf(withGames, stampOf);
-				const bySport = wanted.map((sport) => {
-					const inSport = entries.filter((c) => c.team?.sport === sport);
-					// The season shown is the latest any club in that sport has
-					// played, which is the one being played now.
-					const years = memo(derivedCache, `seasons/${sport}`, version, () => playedSeasons(inSport));
+				// Lazy, as on /records: nothing reads a game row unless a summary
+				// is missing.
+				let loaded = null;
+				const clubRows = async () => (loaded ??= await Promise.all(
+					withGames.map(async (e) => ({ ...e, team: clubFor(e), rows: await games(e) }))));
+				const version = await summaryVersion(withGames);
+				const bySport = await Promise.all(wanted.map(async (sport) => {
+					const inSport = () => clubRows().then((all) => all.filter((c) => c.team?.sport === sport));
+					// Stored too, and not only memoised. Picking the default season
+					// needs to know which seasons were played, and computing THAT
+					// reads every row — so a stored standings table would still have
+					// been paid for with a full read before it could be looked up.
+					const years = await summarised(`seasons/${sport}`,
+						{ scope: scopeKey, sport, view: 'seasons' }, version,
+						async () => playedSeasons(await inSport()));
 					const season = leagueRoute.season ? Number(leagueRoute.season) : years.at(-1);
 					return {
 						label: sport.toUpperCase(),
 						seasons: years,
-						standings: memo(derivedCache, `standings/${sport}/${season}`, version,
-							() => computeStandings(inSport, { season })),
+						// Keyed by season, because they go stale on different
+						// schedules: 2011 never moves again and the season being
+						// played moves every time a game ends.
+						standings: await summarised(`standings/${sport}/${season}`,
+							{ scope: scopeKey, sport, view: 'standings', season: season ?? 0 }, version,
+							async () => computeStandings(await inSport(), { season })),
 					};
-				});
+				}));
 				const [firstSport, ...otherSports] = bySport;
 				if (wantsJson(url)) {
 					return json(res, 200, bySport.length > 1
@@ -718,30 +835,39 @@ function main() {
 			const sched = leagueRoute?.view === 'schedule' ? leagueRoute.season : undefined;
 			if (sched !== undefined && needsSelector(table)) {
 				const withGames = table.filter((e) => e.available && e.teamId);
-				const clubs = [];
-				for (const e of withGames) {
-					clubs.push({ team: clubFor(e), rows: await games(e) });
-				}
+				if (!withGames.length) return noClubsLoaded(res, url, 'schedule');
+				// LAZY. Loading every club's games is 471,453 rows and about a
+				// second and a half, and it was happening before anything asked
+				// whether the answer was already stored — so a stored summary saved
+				// the 400ms computation and none of the read that preceded it.
+				// Nothing here touches a game row unless a summary is missing.
+				let loaded = null;
+				const clubRows = async () => (loaded ??= await Promise.all(
+					withGames.map(async (e) => ({ team: clubFor(e), rows: await games(e) }))));
 				// One schedule per sport, each grouped by its own unit. Football
 				// plays a round a week and baseball plays most days, and a mixed
 				// scope used to take the first club's rule for everything — so an
 				// `all` scope put 22 NFL week-periods and 209 MLB date-periods in
 				// one list, sorted against each other.
 				const wanted = leagueRoute.sport ? [leagueRoute.sport] : [...new Set(withGames.map((e) => e.sport))];
-				const version = versionOf(withGames, stampOf);
+				const version = await summaryVersion(withGames);
 				// Today, for choosing which period to open on. Read once for the
 				// page so two sports cannot land on different days.
 				const today = todayLocal();
 				const showAll = url.searchParams.get('all') === '1';
-				const bySport = wanted.map((sport) => {
-					const inSport = clubs.filter((c) => c.team?.sport === sport);
-					const period = inSport[0]?.team?.rules.schedulePeriod ?? 'week';
-					// The season is memoised whole and the period picked from it.
-					// Keying the memo on the period instead would hold one entry
-					// per day of a baseball season — 184 of them — to save a
-					// findIndex.
-					const schedule = memo(derivedCache, `schedule/${sport}/${sched ?? 'latest'}`, version,
-						() => computeSchedule(inSport, { season: sched, period }));
+				const bySport = await Promise.all(wanted.map(async (sport) => {
+					const inSport = () => clubRows().then((all) => all.filter((c) => c.team?.sport === sport));
+					// The sport's own unit comes from a MANIFEST, not from rows, so
+					// asking for it must not drag the whole season into memory. Any
+					// club of that sport answers it, and the scope's table has them
+					// without a query.
+					const period = clubFor(withGames.find((e) => e.sport === sport))?.rules.schedulePeriod ?? 'week';
+					// The season is stored whole and the period picked from it.
+					// Keying on the period instead would hold one row per day of a
+					// baseball season — 184 of them — to save a findIndex.
+					const schedule = await summarised(`schedule/${sport}/${sched ?? 'latest'}`,
+						{ scope: scopeKey, sport, view: 'schedule', season: sched ?? 0 }, version,
+						async () => computeSchedule(await inSport(), { season: sched, period }));
 					// A period is named for ONE sport, so it only selects on that
 					// sport's block. On the combined page football opens on its own
 					// current week and baseball on its own current day.
@@ -759,7 +885,7 @@ function main() {
 						unknownPeriod: Boolean(picked.unknown),
 						schedule: { ...schedule, period: picked.period, index: picked.index },
 					};
-				});
+				}));
 				// A URL naming a period the season does not have is a broken link
 				// or a changed season. Serving week 1 under it would be the kind of
 				// plausible wrong answer this repo keeps finding.
@@ -808,10 +934,15 @@ function main() {
 			// view there would be the same page under a second name.
 			if (leagueRoute?.view === 'records' && needsSelector(table)) {
 				const withGames = table.filter((e) => e.available && e.teamId);
-				const clubs = [];
-				for (const e of withGames) {
-					clubs.push({ team: clubFor(e), rows: await games(e) });
-				}
+				if (!withGames.length) return noClubsLoaded(res, url, 'records');
+				// LAZY. Loading every club's games is 471,453 rows and about a
+				// second and a half, and it was happening before anything asked
+				// whether the answer was already stored — so a stored summary saved
+				// the 400ms computation and none of the read that preceded it.
+				// Nothing here touches a game row unless a summary is missing.
+				let loaded = null;
+				const clubRows = async () => (loaded ??= await Promise.all(
+					withGames.map(async (e) => ({ team: clubFor(e), rows: await games(e) }))));
 				// One league per sport, never merged. A scope spanning both used
 				// to rank football seasons against baseball ones and print a note
 				// admitting the lists compared clubs that never played each
@@ -825,9 +956,9 @@ function main() {
 				const sports = leagueRoute.sport
 					? [leagueRoute.sport]
 					: [...new Set(withGames.map((e) => e.sport))];
-				const version = versionOf(withGames, stampOf);
-				const leagues = sports.map((sport) => {
-					const inSport = clubs.filter((c) => c.team?.sport === sport);
+				const version = await summaryVersion(withGames);
+				const leagues = await Promise.all(sports.map(async (sport) => {
+					const inSport = () => clubRows().then((all) => all.filter((c) => c.team?.sport === sport));
 					return {
 						// The scope's own word for the sport, uppercased: NFL, MLB,
 						// and NBA or MLS when those arrive. The adapter's `name` is
@@ -838,15 +969,21 @@ function main() {
 						// Memoised on the clubs' own row stamps. 232ms of the
 						// 235ms this route cost warm was this call, recomputed
 						// per request over rows that had not changed.
-						league: memo(derivedCache, `records/${sport}`, version, () => computeLeague(inSport, {
-							top: 10,
-							// Each sport's own rule now, rather than one picked for
-							// a merged league: streaks span seasons in football and
-							// stop at the boundary in baseball.
-							streaksSpanSeasons: inSport[0]?.team?.rules.streaksSpanSeasons ?? true,
-						})),
+						league: await summarised(`records/${sport}`,
+							{ scope: scopeKey, sport, view: 'records' }, version,
+							async () => {
+								const set = await inSport();
+								return computeLeague(set, {
+									top: 10,
+									// Each sport's own rule now, rather than one
+									// picked for a merged league: streaks span
+									// seasons in football and stop at the boundary
+									// in baseball.
+									streaksSpanSeasons: set[0]?.team?.rules.streaksSpanSeasons ?? true,
+								});
+							}),
 					};
-				});
+				}));
 				const [first, ...rest] = leagues;
 				const league = first.league;
 				// The first league needs its label too. Passing only the REST of
