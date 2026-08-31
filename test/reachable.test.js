@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { leagueNav, leagueRecordsPage, leagueSchedulePage, selectorPage, siteNav, sportTabs, standingsPage } from '../lib/render.js'
+import { clubPage, leagueNav, leagueRecordsPage, leagueSchedulePage, selectorPage, siteNav, sportTabs, standingsModal, standingsPage } from '../lib/render.js'
 import { matchRoute, parseView, routeTable } from '../lib/routes.js'
 import { parseScope } from '../lib/scope.js'
 import mlb from '../sports/mlb.js'
@@ -428,4 +428,91 @@ test('two sports each get their own period nav, pointing at their own sport', ()
 	assert.ok(links.some((h) => h.startsWith('/nfl/')), 'no football period links')
 	assert.ok(links.some((h) => h.startsWith('/mlb/')), 'no baseball period links')
 	for (const h of links) assert.ok(h.startsWith('/nfl/') || h.startsWith('/mlb/'), `${h} is not sport-qualified`)
+})
+
+// --- the standings modal on a club page ---
+
+const LINES = [
+	{ club: 'Milwaukee Brewers', teamId: 'brewers', sport: 'mlb', w: 85, l: 52, t: 0, pct: 0.620, gb: 0, here: true, url: '/mlb/brewers' },
+	{ club: 'Chicago Cubs', teamId: 'cubs', sport: 'mlb', w: 77, l: 59, t: 0, pct: 0.566, gb: 7.5, here: false, url: '/mlb/cubs' },
+	{ club: 'St. Louis Cardinals', teamId: null, sport: 'mlb', w: 68, l: 70, t: 0, pct: 0.493, gb: 17.5, here: false, url: null },
+]
+const DIVISION = { groups: [{ conference: 'NL', division: 'Central', clubs: LINES }], season: 2026, clubs: 3 }
+
+const clubTeam = {
+	id: 'brewers', sport: 'mlb',
+	nouns: { team: 'Brewers', fullName: 'Milwaukee Brewers', question: 'Are the Brewers Undefeated?', championship: 'World Series', losslessSeasonNoun: 'perfect', scoreForLabel: 'Runs Scored', scoreAgainstLabel: 'Runs Allowed', meeting: 'meeting', meetingPlural: 'meetings', leaderPlural: 'managers', opponentPossessive: "opponent's" },
+	rules: { streaksSpanSeasons: false, schedulePeriod: 'date' },
+}
+
+test('the modal names the division and the season', () => {
+	const html = standingsModal({ standings: DIVISION, season: 2026 })
+	assert.ok(html.includes('NL Central 2026'))
+})
+
+test('a club in the deployment links, one outside it does not', () => {
+	// A division-mate with no manifest has no page here, and a link to one would
+	// be a 404 inside a table.
+	const html = standingsModal({ standings: DIVISION, season: 2026 })
+	assert.ok(hrefs(html).includes('/mlb/cubs'), 'a served club is not linked')
+	assert.equal(html.includes('>St. Louis Cardinals<') || html.includes('St. Louis Cardinals'), true)
+	assert.equal(hrefs(html).some((h) => h.includes('cardinals')), false, 'an unserved club was linked')
+})
+
+test('the club whose page it is, is marked', () => {
+	// Without it the table is five rows of equals and the reader has to find
+	// themselves in it.
+	const html = standingsModal({ standings: DIVISION, season: 2026 })
+	assert.match(html, /<tr class="here">[\s\S]*?Milwaukee Brewers/)
+	assert.equal((html.match(/<tr class="here">/g) ?? []).length, 1, 'more than one club marked as here')
+})
+
+test('no standings means no modal at all', () => {
+	// A club with no division on record, or a season it did not play. The record
+	// must not link to an empty box.
+	assert.equal(standingsModal({ standings: null, season: 2026 }), '')
+	assert.equal(standingsModal({ standings: { groups: [] }, season: 2026 }), '')
+})
+
+test('the record links to the modal only when there is one', () => {
+	const withModal = clubPage({
+		team: clubTeam, season: '2026', tally: { w: 85, l: 52, t: 0 }, verdict: 'no', answer: 'NO',
+		recordLabel: '85-52', colors: COLORS, standings: standingsModal({ standings: DIVISION, season: 2026 }),
+	})
+	assert.ok(hrefs(withModal).includes('#standings'), 'the record does not open the modal')
+	assert.ok(withModal.includes('id="standings"'), 'the modal is not on the page')
+
+	const without = clubPage({
+		team: clubTeam, season: '1901', tally: { w: 0, l: 0, t: 0 }, verdict: 'no', answer: 'NO',
+		recordLabel: '0-0', colors: COLORS,
+	})
+	assert.equal(hrefs(without).includes('#standings'), false, 'the record links to a modal that is not there')
+	assert.equal(without.includes('id="standings"'), false)
+})
+
+test('the modal is last in the document', () => {
+	// Hidden by :target, so a browser that never applies the stylesheet shows the
+	// table at the FOOT of the page rather than over the top of it.
+	const html = clubPage({
+		team: clubTeam, season: '2026', tally: { w: 85, l: 52, t: 0 }, verdict: 'no', answer: 'NO',
+		recordLabel: '85-52', colors: COLORS, siteNavHtml: siteNav('', clubTeam),
+		standings: standingsModal({ standings: DIVISION, season: 2026 }),
+	})
+	// Compared against the nav's TAG, not the string "site-nav" — which also
+	// appears in the stylesheet at the top of every page, so the first version of
+	// this passed with the modal moved to the front of the body.
+	const nav = html.indexOf('<nav class="site-nav')
+	assert.ok(nav > 0, 'no site nav in the page, so this compares nothing')
+	assert.ok(html.indexOf('id="standings"') > nav, 'the modal is not after the page content')
+})
+
+test('the modal needs no script', () => {
+	// This repo ships no client bundle, and adding one to open a box would be a
+	// bad trade. :target does it from the URL fragment alone.
+	const html = clubPage({
+		team: clubTeam, season: '2026', tally: { w: 85, l: 52, t: 0 }, verdict: 'no', answer: 'NO',
+		recordLabel: '85-52', colors: COLORS, standings: standingsModal({ standings: DIVISION, season: 2026 }),
+	})
+	assert.equal(/<script/.test(html), false, 'the club page grew a script tag')
+	assert.ok(html.includes('.modal:target'), 'nothing opens the modal')
 })

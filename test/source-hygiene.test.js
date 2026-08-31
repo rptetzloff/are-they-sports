@@ -74,3 +74,43 @@ test('no source file has a UTF-8 replacement character', () => {
 		assert.ok(!readFileSync(join(ROOT, f), 'utf8').includes(REPLACEMENT), `${f} has mangled bytes`)
 	}
 })
+
+test('the stylesheet contains no backtick outside its own template markers', () => {
+	// lib/style.js is one big template literal. A backtick anywhere inside it —
+	// including inside a CSS comment, quoting a selector the way prose does —
+	// ends the literal, and everything after it is parsed as JavaScript. The
+	// error points at the next colon, which is a CSS property somewhere below,
+	// so the message never names the real cause.
+	//
+	// Third occurrence. CLAUDE.md records two, and the third happened while
+	// writing the comment that warns about it: the prose quoted the :target
+	// pseudo-class in backticks. A screenshot cannot catch this one — the module
+	// does not load at all — but nothing failed until a page was requested,
+	// because no test imported the stylesheet on its own.
+	const lines = readFileSync(join(ROOT, 'lib/style.js'), 'utf8').split(/\r?\n/)
+	// Between the line that OPENS the template and the line that closes it,
+	// there may be no backtick at all. Outside those bounds the file's own JSDoc
+	// quotes selectors and filenames freely, which is fine and is why this is
+	// bounded rather than a whole-file scan.
+	const open = lines.findIndex((l) => /^export const STYLE = `$/.test(l.trim()))
+	const close = lines.findIndex((l, i) => i > open && l.trim().startsWith('`'))
+	assert.ok(open >= 0, 'did not find the stylesheet template — this is not reading the file')
+	assert.ok(close > open, 'did not find the end of the stylesheet template')
+	assert.ok(close - open > 100, `the template is only ${close - open} lines, which cannot be the stylesheet`)
+	const offenders = lines.slice(open + 1, close)
+		.map((line, i) => [open + 2 + i, line.trim()])
+		.filter(([, line]) => line.includes('`'))
+	assert.deepEqual(offenders.map(([n]) => n), [],
+		`backtick inside the stylesheet: ${offenders.map(([n, l]) => `line ${n}: ${l}`).join(' | ')}`)
+})
+
+test('every lib module actually parses', () => {
+	// The stylesheet broke and the failure surfaced as one test file refusing to
+	// load, several imports away from the file at fault. Importing each module
+	// on its own names the file that is broken.
+	const libs = readdirSync(join(ROOT, 'lib')).filter((f) => f.endsWith('.js'))
+	assert.ok(libs.length >= 10, `only found ${libs.length} lib modules`)
+	return Promise.all(libs.map((f) => import(`../lib/${f}`).catch((e) => {
+		assert.fail(`lib/${f} does not parse: ${e.message}`)
+	})))
+})
