@@ -232,10 +232,19 @@ test('the live upsert keeps the same authority rule as the loader', () => {
 		.trim()
 	assert.equal(clause(SQL_UPSERT_LIVE), clause(loader),
 		'the live upsert and the loader disagree about when a row may be replaced')
-	// And it is the rule that matters: a lower-authority source may only write
-	// over something that is not final.
+	// And it is the rule that matters. A row may be replaced when the incoming
+	// source is at least as authoritative, OR when what is there is not final —
+	// and in that second case only if the incoming row FINISHES it or already
+	// belongs to that source.
+	//
+	// The last part was missing and cost nothing until football gained a live
+	// feed: nflverse publishes a whole season's schedule before it starts, so
+	// 272 authoritative `scheduled` rows were overwritten by equally scheduled
+	// ESPN ones, adding no information and turning 272 reproducible rows into
+	// non-reproducible ones.
 	assert.match(SQL_UPSERT_LIVE, /authority FROM source WHERE id = EXCLUDED\.source\)\s*>=/)
-	assert.match(SQL_UPSERT_LIVE, /OR game\.status <> 'final'/)
+	assert.match(SQL_UPSERT_LIVE, /game\.status <> 'final'/)
+	assert.match(SQL_UPSERT_LIVE, /EXCLUDED\.status = 'final' OR game\.source = EXCLUDED\.source/)
 })
 
 test('every sport gets its own lock key, and the same one every time', () => {

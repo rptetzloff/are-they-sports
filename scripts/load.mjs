@@ -68,6 +68,19 @@ export function franchiseMap(sportId, dir) {
 	return { byCode, names: [...names.values()] };
 }
 
+/* A row may be replaced when the incoming source is at least as authoritative,
+   OR when what is there is not final yet — and in that second case only if the
+   incoming row FINISHES it, or already belongs to that source.
+
+   The last clause was missing and cost nothing until football gained a live
+   feed. nflverse publishes the whole schedule before a season starts, so 272
+   games sat there as `scheduled` from an authoritative source; a live refresh
+   then overwrote every one of them with an equally scheduled ESPN row, adding
+   no information and turning 272 reproducible rows into non-reproducible ones.
+
+   A live capture exists to finish a game before the authoritative source
+   publishes the result. Finishing one is worth a write; restating that it has
+   not started is not. */
 const SQL_UPSERT_GAME = `
 INSERT INTO game (sport, id, season, date, round, home, away, home_score, away_score, neutral, status, source, week)
 VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
@@ -83,7 +96,8 @@ ON CONFLICT (sport, id) DO UPDATE SET
 	source = EXCLUDED.source, observed_at = now()
 WHERE (SELECT authority FROM source WHERE id = EXCLUDED.source)
    >= (SELECT authority FROM source WHERE id = game.source)
-   OR game.status <> 'final'`;
+   OR (game.status <> 'final'
+       AND (EXCLUDED.status = 'final' OR game.source = EXCLUDED.source))`;
 
 /** Make sure a source file is present, fetching it if the adapter knows where
  *  it lives.
@@ -231,6 +245,7 @@ async function loadLive(client, sportId, cfg, season, put) {
 		for (const { event, number } of sport.numberEvents(events)) {
 			const row = sport.liveGameRow(event, {
 				eraCodeOf: codes.eraCodeOf, franchiseOf: codes.franchiseOf, knows: codes.knows,
+					codeIn: codes.codeIn,
 				number, queryDate: day,
 			});
 			if (!row) continue;

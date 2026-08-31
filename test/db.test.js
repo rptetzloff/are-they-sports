@@ -359,6 +359,55 @@ test('schema', { skip: !DATABASE_URL && 'no DATABASE_URL — constraints and the
 		})
 	})
 
+	await t.test('a live source may finish a game but not re-attribute one', async () => {
+		// nflverse publishes a whole season's schedule before it starts, so an
+		// authoritative source owns 272 rows that are merely `scheduled`. A live
+		// refresh used to overwrite every one of them with an equally scheduled
+		// ESPN row: no new information, and 272 reproducible rows became
+		// non-reproducible.
+		//
+		// A live capture exists to finish a game before the authoritative source
+		// publishes the result. Finishing one is worth a write; restating that it
+		// has not started is not.
+		await inRollback(async () => {
+			await fixture()
+			const put = (id, source, status, score) => client.query(
+				`INSERT INTO game (sport,id,season,date,round,home,away,home_score,away_score,status,source)
+				 VALUES ('nfl',$1,2026,'2026-09-13','regular','GB','CHI',$2,$2,$3,$4)
+				 ON CONFLICT (sport, id) DO UPDATE SET
+					home_score = EXCLUDED.home_score, away_score = EXCLUDED.away_score,
+					status = EXCLUDED.status, source = EXCLUDED.source
+				 WHERE (SELECT authority FROM source WHERE id = EXCLUDED.source)
+					>= (SELECT authority FROM source WHERE id = game.source)
+					OR (game.status <> 'final'
+						AND (EXCLUDED.status = 'final' OR game.source = EXCLUDED.source))`,
+				[id, score, status, source])
+			const read = async (id) => (await client.query(
+				'SELECT status, source FROM game WHERE sport=$1 AND id=$2', ['nfl', id])).rows[0]
+
+			// An authoritative schedule, then a live row saying the same thing.
+			await put('g1', 'nflverse', 'scheduled', null)
+			await put('g1', 'espn', 'scheduled', null)
+			assert.deepEqual(await read('g1'), { status: 'scheduled', source: 'nflverse' },
+				'a live row re-attributed a game it did not finish')
+
+			// The same live source finishing it IS worth a write.
+			await put('g1', 'espn', 'final', 21)
+			assert.deepEqual(await read('g1'), { status: 'final', source: 'espn' })
+
+			// And once authoritative and final, a live row cannot touch it.
+			await put('g2', 'nflverse', 'final', 17)
+			await put('g2', 'espn', 'final', 99)
+			assert.deepEqual(await read('g2'), { status: 'final', source: 'nflverse' })
+
+			// A live source may still update its OWN unfinished row — a kickoff
+			// time moving, or a score arriving mid-game.
+			await put('g3', 'espn', 'scheduled', null)
+			await put('g3', 'espn', 'scheduled', null)
+			assert.deepEqual(await read('g3'), { status: 'scheduled', source: 'espn' })
+		})
+	})
+
 	await t.test('only one process refreshes at a time', async () => {
 		// The server refreshes the season being played on a timer. Every replica
 		// runs that timer, so without a lock they would all fetch the same nine
