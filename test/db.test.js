@@ -588,6 +588,13 @@ test('schema', { skip: !DATABASE_URL && 'no DATABASE_URL — constraints and the
 		await inRollback(async () => {
 			await fixture()
 			await client.query("INSERT INTO source (id,authority,reproducible,note) VALUES ('t',1,true,'test') ON CONFLICT DO NOTHING")
+			// The second sport is created HERE, not assumed. fixture() makes only
+			// nfl, and this passed locally because a developer database has mlb in
+			// it from a real load — the exact mistake this commit fixes three of,
+			// arriving from the other direction: a test that only passes against a
+			// database somebody has loaded. CI has neither, which is why CI is what
+			// caught it.
+			await client.query("INSERT INTO sport VALUES ('mlb','baseball') ON CONFLICT DO NOTHING")
 			// BAL is the Orioles and the Ravens. A map keyed on the bare code would
 			// give one of them the other's stamp, and the cache would then either
 			// re-read forever or never.
