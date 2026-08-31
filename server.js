@@ -34,6 +34,7 @@ import { computeHeadToHead } from './lib/headtohead.js';
 import { computeRecords } from './lib/records.js';
 import { computeLeague } from './lib/league.js';
 import { computeSchedule } from './lib/schedule.js';
+import { computeStandings, playedSeasons } from './lib/standings.js';
 import { historyPoints } from './lib/history.js';
 import { codeTables, franchisesForClub, staleFranchises } from './lib/codes.js';
 import { availability, close, connect, franchisesWithGames, gamesFor, health, lastUpdated, withClient } from './lib/store.js';
@@ -43,7 +44,7 @@ import {
 	seasonWinPct, seriesRecords, streakBanner, verdictText,
 } from './lib/core.js';
 import {
-	NEUTRAL, clubPage, clubSwitcher, headToHeadPage, historyPage, leagueNav, leagueRecordsPage, leagueSchedulePage, sportTabs, missingSeasonPage, opponentPage, recordsPage,
+	NEUTRAL, clubPage, clubSwitcher, headToHeadPage, historyPage, leagueNav, leagueRecordsPage, leagueSchedulePage, sportTabs, missingSeasonPage, opponentPage, recordsPage, standingsPage,
 	scheduleHtml, seasonNav, selectorPage, siteNav, sparklineHtml,
 } from './lib/render.js';
 import { colorsFor, resolver } from './lib/names.js';
@@ -503,13 +504,62 @@ function main() {
 			// called "records" or "schedule".
 			const inScopeSports = [...new Set(table.map((e) => e.sport))];
 			const leagueRoute = (() => {
-				const m = url.pathname.match(/^(?:\/([a-z0-9]+))?\/(records|schedule)(?:\/(\d{4}))?$/);
+				const m = url.pathname.match(/^(?:\/([a-z0-9]+))?\/(records|schedule|standings)(?:\/(\d{4}))?$/);
 				if (!m) return null;
 				const [, sport, view, season] = m;
 				if (sport && !inScopeSports.includes(sport)) return null;
 				if (view === 'records' && season) return null;
 				return { sport: sport ?? null, view, season: season ?? null };
 			})();
+
+			// Where every club finished, for one season. Computed from games rather
+			// than fetched: the baseball site pulls ESPN's standings endpoint into
+			// a modal and can only ever show the season being played.
+			if (leagueRoute?.view === 'standings' && needsSelector(table)) {
+				const withGames = table.filter((e) => e.available && e.teamId);
+				const wanted = leagueRoute.sport
+					? [leagueRoute.sport]
+					: [...new Set(withGames.map((e) => e.sport))];
+				const entries = [];
+				for (const e of withGames) {
+					entries.push({ ...e, team: clubFor(e), rows: await games(e) });
+				}
+				const bySport = wanted.map((sport) => {
+					const inSport = entries.filter((c) => c.team?.sport === sport);
+					// The season shown is the latest any club in that sport has
+					// played, which is the one being played now.
+					const years = playedSeasons(inSport);
+					const season = leagueRoute.season ? Number(leagueRoute.season) : years.at(-1);
+					return {
+						label: sport.toUpperCase(),
+						seasons: years,
+						standings: computeStandings(inSport, { season }),
+					};
+				});
+				const [firstSport, ...otherSports] = bySport;
+				if (wantsJson(url)) {
+					return json(res, 200, bySport.length > 1
+						? Object.fromEntries(bySport.map((g) => [g.label.toLowerCase(), g.standings]))
+						: firstSport.standings);
+				}
+				return html(res, 200, standingsPage({
+					standings: firstSport.standings,
+					// Every season either sport played, so the nav still steps
+					// through years the other one has and this one does not.
+					seasons: otherSports.length
+						? [...new Set(bySport.flatMap((g) => g.seasons))].sort((a, b) => a - b)
+						: firstSport.seasons,
+					season: leagueRoute.season ? Number(leagueRoute.season) : null,
+					label: firstSport.label,
+					more: otherSports,
+					heading: scopeHeading(scope, table),
+					colors: NEUTRAL,
+					clubs: clubList(),
+					base: leagueRoute.sport ? `/${leagueRoute.sport}` : '',
+					tabs: sportTabs(inScopeSports, leagueRoute.sport, 'standings'),
+					switcher: clubSwitcher(clubList(), null, ''),
+				}));
+			}
 
 			// A whole league's season, week by week. Same rule as /records: only
 			// where the scope holds more than one club, since under

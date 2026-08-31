@@ -476,9 +476,9 @@ Only `worldseries` sets the championship round.
 Under a scope covering more than one sport:
 
 ```
-/records          /schedule          /schedule/2025      every sport, stacked
-/nfl/records      /nfl/schedule      /nfl/schedule/2025  one sport
-/mlb/records      /mlb/schedule      /mlb/schedule/2025
+/records   /schedule   /schedule/2025   /standings   /standings/2025   stacked
+/nfl/...   /nfl/...    /nfl/...         /nfl/...     /nfl/...          one sport
+/mlb/...   /mlb/...    /mlb/...         /mlb/...     /mlb/...
 ```
 
 Tabs across the top switch between them, and the qualified pages keep their
@@ -495,7 +495,8 @@ nothing to switch between.
 
 ## A scope covering two sports shows two leagues
 
-`/records` and `/schedule` render **one block per sport**, never merged. A
+`/records`, `/schedule` and `/standings` render **one block per sport**, never
+merged. A
 football season ranked against a baseball season is not a comparison, and the
 earlier version did exactly that and printed a note admitting the lists compared
 clubs that never played each other. The note was true and the page was still a
@@ -512,8 +513,8 @@ every existing deployment sees.
 
 ## Getting to the league pages
 
-`/records` and `/schedule` are linked from the club selector at the root, from
-each other, and from every club page's site nav — under a multi-club scope only,
+`/records`, `/schedule` and `/standings` are linked from the club selector at
+the root, from each other, and from every club page's site nav — under a multi-club scope only,
 because under `SCOPE=team:packers` those routes do not exist and linking to them
 would be worse than not having them.
 
@@ -521,6 +522,40 @@ Worth saying because the first version had none of that. Both pages answered
 200, every route test passed, and nothing anywhere pointed at them: a working
 page nobody can reach. No test noticed, because every test already knew the URL.
 `test/reachable.test.js` is the one that asks the other question.
+
+## Standings
+
+`/standings` is where every club in a division finished, for a season. The
+baseball site fetches ESPN's standings endpoint into a modal, so it can only ever
+show the season being played; computed from the games already in the database
+this works for 1962 as well as for today, and makes no request at all.
+
+Two decisions worth knowing about, because both look like bugs:
+
+**Grouped by today's divisions, including for seasons that predate them.** The
+1962 National League had no divisions, so a 1962 table under "NL Central" is a
+grouping this repo imposes rather than one the season had. It is the same
+decision a division scope makes — a division means today's clubs, each with its
+whole history — and the page says so at the foot rather than presenting it
+silently. A 2011 NL Central shows five clubs, not six, because the Astros were in
+it that year and are grouped under today's AL West. Realignment history would fix
+it and nobody publishes it, which is why `nfl-divisions.csv` is a snapshot.
+
+**The season shown is the latest one PLAYED, not the latest one on record.** Next
+season's fixtures are published months before a snap: 272 unplayed 2026 football
+games were in the database in August 2026. Taking the last season with rows
+headed the page "NFL 2026" over "no games on record for this season" — a season
+every visitor would read as current.
+
+Under a scope covering two sports the season is named on each league's block
+rather than once at the top, because in August football's latest played season is
+last winter's and baseball's is the one being played. One heading over both names
+one of them and is wrong about the other.
+
+Games back is half the sum of the win gap and the loss gap, which is the number
+people mean: a club level on percentage but with games in hand is half a game
+back. Ties count half, as everywhere else here, and the postseason is not in it —
+a club that went 13-3 and won three playoff games did not finish 16-3.
 
 ## League-wide records
 
