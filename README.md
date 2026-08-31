@@ -523,6 +523,19 @@ Worth saying because the first version had none of that. Both pages answered
 page nobody can reach. No test noticed, because every test already knew the URL.
 `test/reachable.test.js` is the one that asks the other question.
 
+It now asks both. "Is every route linked?" was the only question being asked, so
+the opposite failure sat in plain sight: `/managers` was in **every** club page's
+site nav, answering 404, for as long as the nav existed. The leaders page needs a
+curated coaches/managers table nobody publishes, and the link went in ahead of
+the page. Every link the nav emits is now resolved through the real router, and a
+test guards the guard by asserting `/managers` still fails to resolve — otherwise
+a check that returned true for everything would pass on the nav that shipped the
+404.
+
+The same gap ran the other way for `/standings`: it was linked from the club
+selector and from the other league pages, and not from any club page, because
+the club nav's league block listed records and schedule and was never revisited.
+
 ## Standings
 
 `/standings` is where every club in a division finished, for a season. The

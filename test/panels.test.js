@@ -40,6 +40,29 @@ test('an unbeaten season reports its real record, ties and all', () => {
 	assert.match(streakBanner(run('WWWW'), { isPastSeason: true, team: packers }), /<strong>4-0<\/strong>/)
 })
 
+test('a club that just lost is not on a 0-game win streak', () => {
+	// Every fixture in this file ended in a win — WWLWW, WWWWW, LWWW — so the
+	// trailing-run counter only ever counted wins. The Brewers' own page read
+	// "Currently on a 0-game win streak" at 85-52.
+	const b = streakBanner(run('WWLLL'), { isPastSeason: false, team: packers })
+	assert.match(b, /<strong>3-game<\/strong> losing streak/)
+	assert.doesNotMatch(b, /0-game/)
+})
+
+test('the run counts only the games since it started', () => {
+	assert.match(streakBanner(run('WWLW'), { isPastSeason: false, team: packers }), /<strong>1-game<\/strong> win streak/)
+	assert.match(streakBanner(run('WLLWWW'), { isPastSeason: false, team: packers }), /<strong>3-game<\/strong> win streak/)
+})
+
+test('a club coming off a tie is on neither streak', () => {
+	// A tie is not a win and not a loss, and calling it a 0-game win streak is
+	// the same conflation this file already fixed once, in the other direction.
+	const b = streakBanner(run('WWLWT'), { isPastSeason: false, team: packers })
+	assert.match(b, /coming off a <strong>tie<\/strong>/)
+	assert.doesNotMatch(b, /streak/)
+	assert.match(streakBanner(run('WWLTT'), { isPastSeason: false, team: packers }), /<strong>2-game<\/strong> run of ties/)
+})
+
 test('a live unbeaten run with a tie is not called a win streak', () => {
 	// Undefeated and winning are different, which is the distinction the whole
 	// site rests on.
