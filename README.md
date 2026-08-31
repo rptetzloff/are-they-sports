@@ -561,6 +561,35 @@ It is bounded at 64 entries, because the key carries the season and there are a
 hundred and some of those per sport times three views. Unbounded would be a slow
 leak that only shows on a long-lived deployment, which is the only kind this has.
 
+**That was not the whole story**, and the rest only showed up on a deployment
+with the live poller running. Three more costs, each measured:
+
+*The staleness check scaled with the number of clubs, not with what changed.* The
+game cache asked `max(observed_at)` once per franchise every thirty seconds —
+429ms for the 236 franchises that have games, paid before a single row was read.
+One query is 73ms.
+
+*One changed game re-read a club's whole history.* The live refresh rewrites
+today's games every sixty seconds and each write sets `observed_at`, so a club
+playing today looks changed once a minute. The Brewers are 9,229 rows and the
+feed touched one of them. Only rows observed since the cached stamp are fetched
+now, and merged by game id. A stamp that moves BACKWARDS still reloads outright:
+`max(observed_at)` can only fall if the row holding it was deleted, and nothing
+about a deletion can be inferred from the rows that remain.
+
+*The first visitor after every deploy paid the cold read.* 489,184 rows, about
+two seconds. The cache is filled after `listen()` now, eight clubs at a time, so
+the server answers `/healthz` throughout and nobody waits for it. Sequential is
+1,475ms and unbounded parallel is 1,056ms; eight gets most of that and leaves the
+pool room to serve pages.
+
+| | before | after |
+|---|---|---|
+| first `/records` after boot | ~2,400ms | 412ms |
+| warm | 3ms | 19ms |
+| first request after the check window | 429ms+ | 4–153ms |
+| boot warm (background) | — | 900ms |
+
 **`/mlb/schedule` was 878KB of HTML.** 184 periods and 2,431 games in one
 response. The server built it in 68ms, so no server timing showed anything wrong
 — the cost was entirely the browser being handed most of a megabyte of DOM. The
