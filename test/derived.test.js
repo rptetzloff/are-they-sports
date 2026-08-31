@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { Lru, memo, versionOf } from '../lib/derived.js'
+import { Lru, memo, mergeGames, versionOf } from '../lib/derived.js'
 
 // Memoising the league computations. The measurement that motivated it:
 // /records under SCOPE=all is 62 clubs and 471,453 rows, the rows cost 0ms warm
@@ -136,4 +136,56 @@ test('eviction is least-recently-USED, not least-recently-inserted', () => {
 test('an Lru with no room is a bug, not a cache', () => {
 	assert.throws(() => new Lru(0), /no room/)
 	assert.throws(() => new Lru(-1), /no room/)
+})
+
+// --- folding in only what changed ---
+
+// A live refresh rewrites today's games every sixty seconds and each write sets
+// observed_at, so a club playing today looks changed once a minute. Re-reading
+// its whole history to pick that up is the waste: the Brewers are 9,229 rows and
+// the feed touched one of them.
+
+const row = (gid, date, over = {}) => ({ gid, date, result: 'WIN', ...over })
+
+test('a changed row replaces the one held, rather than joining it', () => {
+	// The live case: a game goes from scheduled to final. Appending would show it
+	// twice, once at 0-0 and once with the score.
+	const held = [row('g1', '2026-08-30', { result: '' }), row('g2', '2026-08-31', { result: '' })]
+	const merged = mergeGames(held, [row('g1', '2026-08-30', { result: 'WIN' })])
+	assert.equal(merged.length, 2)
+	assert.equal(merged.find((r) => r.gid === 'g1').result, 'WIN')
+})
+
+test('a new row is added', () => {
+	const merged = mergeGames([row('g1', '2026-08-30')], [row('g2', '2026-08-31')])
+	assert.deepEqual(merged.map((r) => r.gid), ['g1', 'g2'])
+})
+
+test('nothing changed returns what was held, untouched', () => {
+	const held = [row('g1', '2026-08-30')]
+	assert.equal(mergeGames(held, []), held)
+})
+
+test('the result is in the order the full query returns', () => {
+	// (date, gid) — the same ORDER BY. An incrementally-updated list and a freshly
+	// read one have to be the same list, or every page that walks games in order
+	// disagrees with itself depending on how the cache was filled.
+	const held = [row('b', '2026-08-30'), row('d', '2026-09-02')]
+	const merged = mergeGames(held, [row('a', '2026-08-29'), row('c', '2026-09-01')])
+	assert.deepEqual(merged.map((r) => r.gid), ['a', 'b', 'c', 'd'])
+})
+
+test('a game whose date was corrected moves', () => {
+	// Not left where it was first read. A postponement rewrites the date, and a
+	// schedule grouped by date would otherwise show it under the old one.
+	const held = [row('g1', '2026-08-30'), row('g2', '2026-08-31')]
+	const merged = mergeGames(held, [row('g1', '2026-09-05')])
+	assert.deepEqual(merged.map((r) => r.gid), ['g2', 'g1'])
+})
+
+test('two games on one date are ordered by id, stably', () => {
+	// Doubleheaders. Without the tiebreak the order depends on Map insertion,
+	// which differs between a full read and an incremental one.
+	const merged = mergeGames([row('MIL2', '2026-08-30')], [row('MIL1', '2026-08-30')])
+	assert.deepEqual(merged.map((r) => r.gid), ['MIL1', 'MIL2'])
 })
