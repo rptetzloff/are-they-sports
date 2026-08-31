@@ -516,3 +516,41 @@ test('the modal needs no script', () => {
 	assert.equal(/<script/.test(html), false, 'the club page grew a script tag')
 	assert.ok(html.includes('.modal:target'), 'nothing opens the modal')
 })
+
+// --- one nav grammar ---
+
+test('a page carrying two steppers names both', () => {
+	// The schedule page has three nav rows: seasons at the top, days in the
+	// middle, seasons again at the foot. Two of the three stepped different axes
+	// with identical glyphs, and the only thing telling them apart was the value
+	// between the arrows.
+	const html = leagueSchedulePage({
+		schedule: sched([wkP(1), wkP(2), wkP(3)], 1),
+		heading: 'Every club', colors: COLORS, resolve: (c) => ({ name: c }), clubs: [], base: '/nfl',
+		periodNoun: 'Week',
+	})
+	const labels = [...html.matchAll(/<span class="nav-label">([^<]*)<\/span>/g)].map((m) => m[1])
+	assert.ok(labels.includes('Season'), 'the season nav is not named')
+	assert.ok(labels.includes('Week'), 'the period nav is not named')
+})
+
+test('the period row is named for what it steps, not for the column header', () => {
+	// periodNoun is "Games" for baseball, which is the heading over a list. The
+	// row steps one DAY at a time and has to say so.
+	const html = leagueSchedulePage({
+		schedule: sched([wkP(1), wkP(2)], 0),
+		heading: 'Every club', colors: COLORS, resolve: (c) => ({ name: c }), clubs: [], base: '/mlb',
+		periodNoun: 'Games',
+	})
+	const labels = [...html.matchAll(/<span class="nav-label">([^<]*)<\/span>/g)].map((m) => m[1])
+	assert.ok(labels.includes('Day'), `period row named ${labels.join(', ')}`)
+	assert.equal(labels.includes('Games'), false)
+})
+
+test('the standings nav is named too, so every stepper reads alike', () => {
+	const html = standingsPage({
+		standings: standingsFor(2025, [LINE]), label: 'NFL', seasons: [2024, 2025],
+		heading: 'Every NFL club', colors: COLORS, clubs: [],
+	})
+	assert.ok(html.includes('<span class="nav-label">Season</span>'), 'the standings nav is not named')
+})

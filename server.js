@@ -35,17 +35,17 @@ import { computeRecords } from './lib/records.js';
 import { computeLeague } from './lib/league.js';
 import { computeSchedule, selectPeriod } from './lib/schedule.js';
 import { computeStandings, divisionPeers, playedSeasons } from './lib/standings.js';
-import { Lru, memo, versionOf } from './lib/derived.js';
+import { Lru, memo, mergeGames, versionOf } from './lib/derived.js';
 import { historyPoints } from './lib/history.js';
 import { codeTables, franchisesForClub, staleFranchises } from './lib/codes.js';
-import { availability, close, connect, franchisesWithGames, gamesFor, health, lastUpdated, readSummary, withClient, writeSummary } from './lib/store.js';
+import { availability, close, connect, franchisesWithGames, gamesFor, gamesSince, health, lastUpdated, lastUpdatedAll, readSummary, withClient, writeSummary } from './lib/store.js';
 import { lockKeyFor, nextDelay, refreshLive, withLock } from './lib/live.js';
 import {
 	daysToNextGame, lastLosslessSeason, latestSeason, recordText, seasons, seasonTally, seasonVerdict,
 	seasonWinPct, seriesRecords, streakBanner, verdictText,
 } from './lib/core.js';
 import {
-	NEUTRAL, clubPage, clubSwitcher, standingsModal, headToHeadPage, historyPage, leagueNav, leagueRecordsPage, leagueSchedulePage, sportTabs, missingSeasonPage, opponentPage, recordsPage, standingsPage,
+	NEUTRAL, clubPage, clubSwitcher, noticePage, standingsModal, headToHeadPage, historyPage, leagueNav, leagueRecordsPage, leagueSchedulePage, sportTabs, missingSeasonPage, opponentPage, recordsPage, standingsPage,
 	scheduleHtml, seasonNav, selectorPage, siteNav, sparklineHtml,
 } from './lib/render.js';
 import { colorsFor, resolver } from './lib/names.js';
@@ -136,8 +136,23 @@ async function games(entry, season) {
 
 	let rows = hit?.rows;
 	if (!hit || now - hit.checkedAt >= CACHE_CHECK_MS) {
-		const stamp = (await lastUpdated(entry.sport, entry.franchise))?.toISOString() ?? null;
-		if (!hit || hit.stamp !== stamp) {
+		const stamp = (await stampFor(entry.sport, entry.franchise))?.toISOString() ?? null;
+		if (!hit) {
+			rows = await gamesFor(entry.sport, entry.franchise);
+			gameCache.set(key, { rows, stamp, checkedAt: now });
+		} else if (stamp && hit.stamp && stamp > hit.stamp) {
+			// Only what moved. A live refresh rewrites today's games every minute
+			// during a season and each write sets observed_at, so a club playing
+			// today looks changed once a minute — and re-reading its whole history
+			// to pick that up is the waste this exists to avoid. The Brewers are
+			// 9,229 rows and the feed touched one of them.
+			rows = mergeGames(hit.rows, await gamesSince(entry.sport, entry.franchise, hit.stamp));
+			gameCache.set(key, { rows, stamp, checkedAt: now });
+		} else if (hit.stamp !== stamp) {
+			// The stamp moved and did not move FORWARD, which means rows left:
+			// max(observed_at) can only fall if the row holding it was deleted.
+			// Nothing about a deletion can be inferred from the rows that remain,
+			// so this reloads outright rather than merging.
 			rows = await gamesFor(entry.sport, entry.franchise);
 			gameCache.set(key, { rows, stamp, checkedAt: now });
 		} else {
@@ -146,6 +161,64 @@ async function games(entry, season) {
 	}
 
 	return season ? rows.filter((g) => g.season === season) : rows;
+}
+
+/** Fill the game cache before anyone asks for it.
+ *
+ *  Reading every club in scope is 489,184 rows and about two seconds, and the
+ *  first visitor after a deploy paid all of it. That cost does not go away by
+ *  being fast — a record book IS every game ever played — but it does not have
+ *  to be paid by a person waiting for a page.
+ *
+ *  Runs after listen(), so the server is answering /healthz throughout and a
+ *  deployment is not held open by it. Failures are logged and dropped: a warm
+ *  that does not finish leaves the cache exactly as it was, and the request path
+ *  fills it on demand the way it always did.
+ *
+ *  Concurrency of 8, not 62. Measured: sequential is 1,475ms and unbounded
+ *  parallel is 1,056ms, which is a 29% saving for sixty-two simultaneous
+ *  connections against a pool that also has to serve requests. Eight gets most of
+ *  it and leaves the pool room to answer the pages this is meant to speed up.
+ */
+async function warmGames(entries) {
+	const started = Date.now();
+	const queue = [...entries];
+	let done = 0;
+	const worker = async () => {
+		for (let e = queue.pop(); e; e = queue.pop()) {
+			try { await games(e); done++; } catch (err) {
+				console.error(`  warm         ${e.sport}/${e.franchise}: ${err.message}`);
+			}
+		}
+	};
+	await Promise.all(Array.from({ length: Math.min(8, entries.length) }, worker));
+	const rows = [...gameCache.values()].reduce((n, v) => n + v.rows.length, 0);
+	console.log(`  warm         ${done} clubs, ${rows.toLocaleString()} rows in ${Date.now() - started}ms`);
+}
+
+/** Every franchise's stamp from one query, refreshed no more often than the
+ *  cache checks.
+ *
+ *  This was one query per club, which is a cost that scales with the number of
+ *  clubs rather than with what changed: 429ms for the 236 franchises that have
+ *  games, paid on any league page whose check window had expired, before a
+ *  single row was read. One query is 73ms.
+ */
+let stamps = { at: 0, byKey: new Map(), inFlight: null };
+async function stampFor(sport, franchise) {
+	const now = Date.now();
+	if (now - stamps.at >= CACHE_CHECK_MS) {
+		// Shared, so sixty clubs on one page do not each start their own scan. A
+		// page resolves its clubs in a loop and every one of them would otherwise
+		// see the window expired and issue the same query.
+		if (!stamps.inFlight) {
+			stamps.inFlight = lastUpdatedAll()
+				.then((byKey) => { stamps = { at: Date.now(), byKey, inFlight: null }; })
+				.catch((e) => { stamps.inFlight = null; throw e; });
+		}
+		await stamps.inFlight;
+	}
+	return stamps.byKey.get(`${sport}/${franchise}`) ?? null;
 }
 
 /** What the game cache last recorded for a club, or null if it has none.
@@ -206,6 +279,28 @@ async function summarised(key, { scope, sport, view, season = 0 }, version, comp
 	return value;
 }
 
+/** A league page with no clubs behind it, which is a database nobody has loaded.
+ *
+ *  Every league handler read `leagues[0].league` and crashed the PROCESS on a
+ *  freshly migrated deployment — the request died, and so did every request
+ *  after it. That has been true for as long as these routes have existed and
+ *  nothing noticed, because no test had ever asked the server for a route; the
+ *  renderers were all tested directly, and one of them even has an EMPTY_LEAGUE
+ *  fixture proving it handles this case.
+ *
+ *  503, not an empty page. A scope resolving sixty-two clubs and finding games
+ *  for none of them is the same data gap a club page reports, and this repo's
+ *  rule is to report the gap rather than render something that looks complete
+ *  and is empty. The message names the command that fixes it.
+ */
+const noClubsLoaded = (res, url, view) => (wantsJson(url)
+	? json(res, 503, { error: 'no games loaded', view, run: 'npm run load <sport>' })
+	: html(res, 503, noticePage({
+		heading: 'No games loaded',
+		message: 'No club in scope has any games in the database yet. Run npm run load <sport> to load them.',
+		colors: NEUTRAL,
+	})));
+
 /** What the stored summaries are keyed on, beyond the clubs' own row stamps.
  *
  *  A change to HOW records are computed moves no stamp at all. Without the build
@@ -230,7 +325,11 @@ const CODE_VERSION = BUILD === 'unknown' ? `dev-${process.hrtime.bigint()}` : BU
  */
 async function summaryVersion(entries) {
 	const parts = await Promise.all(entries.map(async (e) => {
-		const at = await lastUpdated(e.sport, e.franchise);
+		// stampFor, not lastUpdated: one query for every franchise, shared and
+		// refreshed no more often than the cache checks. Per club it was 62 round
+		// trips on every league page — which showed up as a 50-100ms floor under
+		// a page whose whole point is that it reads one row.
+		const at = await stampFor(e.sport, e.franchise);
 		return `${e.sport}/${e.franchise}@${at ? at.toISOString() : '-'}`;
 	}));
 	return `${CODE_VERSION}|${parts.sort().join(',')}`;
@@ -674,6 +773,7 @@ function main() {
 			// a modal and can only ever show the season being played.
 			if (leagueRoute?.view === 'standings' && needsSelector(table)) {
 				const withGames = table.filter((e) => e.available && e.teamId);
+				if (!withGames.length) return noClubsLoaded(res, url, 'standings');
 				const wanted = leagueRoute.sport
 					? [leagueRoute.sport]
 					: [...new Set(withGames.map((e) => e.sport))];
@@ -735,6 +835,7 @@ function main() {
 			const sched = leagueRoute?.view === 'schedule' ? leagueRoute.season : undefined;
 			if (sched !== undefined && needsSelector(table)) {
 				const withGames = table.filter((e) => e.available && e.teamId);
+				if (!withGames.length) return noClubsLoaded(res, url, 'schedule');
 				// LAZY. Loading every club's games is 471,453 rows and about a
 				// second and a half, and it was happening before anything asked
 				// whether the answer was already stored — so a stored summary saved
@@ -754,15 +855,19 @@ function main() {
 				// page so two sports cannot land on different days.
 				const today = todayLocal();
 				const showAll = url.searchParams.get('all') === '1';
-				const bySport = wanted.map((sport) => {
-					const inSport = clubs.filter((c) => c.team?.sport === sport);
-					const period = inSport[0]?.team?.rules.schedulePeriod ?? 'week';
-					// The season is memoised whole and the period picked from it.
-					// Keying the memo on the period instead would hold one entry
-					// per day of a baseball season — 184 of them — to save a
-					// findIndex.
-					const schedule = memo(derivedCache, `schedule/${sport}/${sched ?? 'latest'}`, version,
-						() => computeSchedule(inSport, { season: sched, period }));
+				const bySport = await Promise.all(wanted.map(async (sport) => {
+					const inSport = () => clubRows().then((all) => all.filter((c) => c.team?.sport === sport));
+					// The sport's own unit comes from a MANIFEST, not from rows, so
+					// asking for it must not drag the whole season into memory. Any
+					// club of that sport answers it, and the scope's table has them
+					// without a query.
+					const period = clubFor(withGames.find((e) => e.sport === sport))?.rules.schedulePeriod ?? 'week';
+					// The season is stored whole and the period picked from it.
+					// Keying on the period instead would hold one row per day of a
+					// baseball season — 184 of them — to save a findIndex.
+					const schedule = await summarised(`schedule/${sport}/${sched ?? 'latest'}`,
+						{ scope: scopeKey, sport, view: 'schedule', season: sched ?? 0 }, version,
+						async () => computeSchedule(await inSport(), { season: sched, period }));
 					// A period is named for ONE sport, so it only selects on that
 					// sport's block. On the combined page football opens on its own
 					// current week and baseball on its own current day.
@@ -780,7 +885,7 @@ function main() {
 						unknownPeriod: Boolean(picked.unknown),
 						schedule: { ...schedule, period: picked.period, index: picked.index },
 					};
-				});
+				}));
 				// A URL naming a period the season does not have is a broken link
 				// or a changed season. Serving week 1 under it would be the kind of
 				// plausible wrong answer this repo keeps finding.
@@ -829,6 +934,7 @@ function main() {
 			// view there would be the same page under a second name.
 			if (leagueRoute?.view === 'records' && needsSelector(table)) {
 				const withGames = table.filter((e) => e.available && e.teamId);
+				if (!withGames.length) return noClubsLoaded(res, url, 'records');
 				// LAZY. Loading every club's games is 471,453 rows and about a
 				// second and a half, and it was happening before anything asked
 				// whether the answer was already stored — so a stored summary saved
@@ -1128,7 +1234,10 @@ function main() {
 			}
 		});
 
-		server.listen(PORT, () => console.log(`  listening    http://127.0.0.1:${PORT}`));
+		server.listen(PORT, () => {
+			console.log(`  listening    http://127.0.0.1:${PORT}`);
+			warmGames(table.filter((e) => e.available && e.franchise));
+		});
 		return server;
 	});
 }

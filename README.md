@@ -536,6 +536,41 @@ The same gap ran the other way for `/standings`: it was linked from the club
 selector and from the other league pages, and not from any club page, because
 the club nav's league block listed records and schedule and was never revisited.
 
+## Run the tests against an empty database too
+
+`npm test` against a developer database and `npm test` in CI are different runs,
+and each catches defects the other cannot. Both kinds have shipped:
+
+- Three assertions passed only against an EMPTY database. They were written when
+  the tables held nothing but the fixture, and silently became claims about the
+  whole league once real data arrived — `count(*) WHERE home='WAS'` with no
+  `sport` read 9,208 rather than 0 the moment baseball was loaded. Nobody saw
+  them, because CI runs on an empty database.
+- Then one passed only against a LOADED one, in the very commit that fixed those
+  three: it inserted an `mlb` franchise without creating the `mlb` sport, which
+  exists on a developer's machine from a real load and nowhere else. CI caught it
+  within a minute.
+
+A test resting on state it did not create is the same defect either way. To check
+both, point `DATABASE_URL` at a second, empty database and run again:
+
+```sh
+createdb ats_ci                     # or CREATE DATABASE ats_ci
+DATABASE_URL=...//ats_ci npm run migrate
+DATABASE_URL=...//ats_ci npm test
+```
+
+Expect a lower pass count, not a lower fail count — the "loaded data" block skips
+itself with a reason, which is how it says so out loud.
+
+That check found a crash that had been in every deployment: `/records` on a
+freshly migrated database read `leagues[0].league`, and there is no `leagues[0]`
+when no club has games. It killed the process, so every request after it was
+refused too. The league routes answer **503** now, naming the load command,
+because a scope resolving sixty-two clubs and finding games for none of them is
+a data gap and this repo reports those rather than rendering something that looks
+complete and is empty.
+
 ## What the league pages cost
 
 Measured, because two different things were slow and only one of them showed up
@@ -561,6 +596,35 @@ It is bounded at 64 entries, because the key carries the season and there are a
 hundred and some of those per sport times three views. Unbounded would be a slow
 leak that only shows on a long-lived deployment, which is the only kind this has.
 
+**That was not the whole story**, and the rest only showed up on a deployment
+with the live poller running. Three more costs, each measured:
+
+*The staleness check scaled with the number of clubs, not with what changed.* The
+game cache asked `max(observed_at)` once per franchise every thirty seconds —
+429ms for the 236 franchises that have games, paid before a single row was read.
+One query is 73ms.
+
+*One changed game re-read a club's whole history.* The live refresh rewrites
+today's games every sixty seconds and each write sets `observed_at`, so a club
+playing today looks changed once a minute. The Brewers are 9,229 rows and the
+feed touched one of them. Only rows observed since the cached stamp are fetched
+now, and merged by game id. A stamp that moves BACKWARDS still reloads outright:
+`max(observed_at)` can only fall if the row holding it was deleted, and nothing
+about a deletion can be inferred from the rows that remain.
+
+*The first visitor after every deploy paid the cold read.* 489,184 rows, about
+two seconds. The cache is filled after `listen()` now, eight clubs at a time, so
+the server answers `/healthz` throughout and nobody waits for it. Sequential is
+1,475ms and unbounded parallel is 1,056ms; eight gets most of that and leaves the
+pool room to serve pages.
+
+| | before | after |
+|---|---|---|
+| first `/records` after boot | ~2,400ms | 412ms |
+| warm | 3ms | 19ms |
+| first request after the check window | 429ms+ | 4–153ms |
+| boot warm (background) | — | 900ms |
+
 **`/mlb/schedule` was 878KB of HTML.** 184 periods and 2,431 games in one
 response. The server built it in 68ms, so no server timing showed anything wrong
 — the cost was entirely the browser being handed most of a megabyte of DOM. The
@@ -576,6 +640,38 @@ A period is addressed by its own grouping key — `/nfl/schedule/2026/w3`,
 `/mlb/schedule/2026/d2026-08-29` — so the URL segment and the group key cannot
 drift apart. Asked for a period the season does not have, the route 404s and
 lists the ones it does, rather than serving week 1 under a URL naming week 25.
+
+## One nav grammar
+
+Every nav that steps through an ordered list is the same builder: seasons on a
+club page, seasons and periods on a schedule, seasons on the standings. There
+were four of these, written at different times in two grammars, and a schedule
+page carried three at once — seasons at the top, days in the middle, seasons
+again at the foot — with two of the three using identical glyphs on different
+axes. Nothing but the value between the arrows said which was which.
+
+```
+SEASON  |‹  ‹‹  ‹   1998   ›  ››  ›|
+DAY     |‹  ‹‹  ‹  Wed, Jun 15  ›  ››  ›|
+```
+
+**One chevron family.** The same glyph at the same weight throughout: a bar
+marks the ends, doubling means ten. The club page used to mix U+22D8, U+00AB and
+U+2039 for first, back-ten and back-one — and the first of those is a
+*mathematical* symbol drawn to different proportions, so it never matched the
+other two at any size, which is what made the row read as three unrelated
+buttons.
+
+**Every row is named**, so a page can carry two and neither is ambiguous. That
+name also replaces the old "1998 Season" in the middle, which said the same thing
+in the one place it could not be scanned.
+
+**Ends are dimmed in place, not dropped.** The club page dropped them, so the row
+changed width as you moved through the seasons — which reads as a rendering fault
+rather than a boundary.
+
+The ten-jump appears only above twenty items. It earns its place across a hundred
+seasons and is clutter on four.
 
 ## A played season is written down, not worked out again
 

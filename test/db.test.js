@@ -297,6 +297,12 @@ test('schema', { skip: !DATABASE_URL && 'no DATABASE_URL — constraints and the
 		await inRollback(async () => {
 			await fixture()
 			await client.query("INSERT INTO franchise VALUES ('nfl','WSH') ON CONFLICT DO NOTHING")
+			// Cleared first, inside the rollback. A real load writes nfl/WAS -> WSH,
+			// so this plain INSERT hit the primary key and the test failed on any
+			// database that had actually been loaded — which is every deployment
+			// and, once the data landed, every developer's. A test that only
+			// passes against an empty database is testing the empty database.
+			await client.query("DELETE FROM franchise_code WHERE sport='nfl' AND code='WAS'")
 			await client.query("INSERT INTO franchise_code (sport,code,franchise) VALUES ('nfl','WAS','GB')")
 			await client.query(`INSERT INTO franchise_code (sport,code,franchise) VALUES ('nfl','WAS','WSH')
 			                    ON CONFLICT (sport, code) DO UPDATE SET franchise = EXCLUDED.franchise`)
@@ -333,8 +339,17 @@ test('schema', { skip: !DATABASE_URL && 'no DATABASE_URL — constraints and the
 
 			const after = (await client.query("SELECT count(*)::int n FROM game WHERE sport='nfl'")).rows[0].n
 			assert.equal(after, before, 'the repair lost games')
-			assert.equal((await client.query("SELECT count(*)::int n FROM game WHERE home='WAS' OR away='WAS'")).rows[0].n, 0)
-			assert.equal((await client.query("SELECT count(*)::int n FROM game WHERE home='WSH'")).rows[0].n, 2)
+			// SPORT-QUALIFIED. Without it this counted the baseball Nationals too —
+			// 9,208 mlb/WAS games — so the assertion read 9208 instead of 0 the
+			// moment baseball was loaded. Seventh instance of the bug this repo
+			// keeps finding, and the first one inside a test: a bare franchise code
+			// is two clubs.
+			assert.equal((await client.query("SELECT count(*)::int n FROM game WHERE sport='nfl' AND (home='WAS' OR away='WAS')")).rows[0].n, 0)
+			// Its OWN two rows, not every Commanders home game ever played. Against a
+			// loaded database this counted 711 — the assertion was written when the
+			// table held only what the fixture put there, and it silently became a
+			// claim about the whole NFL the moment real data arrived.
+			assert.equal((await client.query("SELECT count(*)::int n FROM game WHERE sport='nfl' AND home='WSH' AND id IN ('r1','r2')")).rows[0].n, 2)
 			// The foreign key that rolled the load back the first time.
 			assert.equal((await client.query("SELECT count(*)::int n FROM franchise WHERE sport='nfl' AND id='WAS'")).rows[0].n, 0)
 
@@ -520,6 +535,87 @@ test('schema', { skip: !DATABASE_URL && 'no DATABASE_URL — constraints and the
 		await assert.rejects(() => withLock(client, key, async () => { throw new Error('boom') }), /boom/)
 		// If the finally clause were missing this would be skipped forever.
 		assert.equal(await withLock(client, key, async () => 'free'), 'free')
+	})
+
+	await t.test('an incremental read plus what was held equals a full read', async () => {
+		// The claim the game cache now rests on. A live refresh rewrites today's
+		// games every minute and each write sets observed_at, so re-reading a
+		// club's whole history to pick up one changed game is the waste — but only
+		// if the incremental path lands on exactly the same rows.
+		const { gamesFor, gamesSince } = await import('../lib/store.js')
+		const { mergeGames } = await import('../lib/derived.js')
+		await inRollback(async () => {
+			await fixture()
+			await client.query("INSERT INTO source (id,authority,reproducible,note) VALUES ('t',1,true,'test') ON CONFLICT DO NOTHING")
+			// Codes no real club uses. Written with GB and CHI first, where the
+			// Packers' own 1,554 games are already in the table and `held` came back
+			// 1554 rather than 3 — the same "assumes an empty database" mistake this
+			// commit fixes two tests above for.
+			for (const f of ['ZZA', 'ZZB']) {
+				await client.query('INSERT INTO franchise VALUES ($1,$2) ON CONFLICT DO NOTHING', ['nfl', f])
+			}
+			const put = (id, date, hs, as_, at) => client.query(
+				`INSERT INTO game (sport,id,season,date,round,home,away,home_score,away_score,status,source,observed_at)
+				 VALUES ('nfl',$1,2026,$2,'regular','ZZA','ZZB',$3,$4,$5,'t',$6)`,
+				[id, date, hs, as_, hs === null ? 'scheduled' : 'final', at])
+
+			const early = '2026-01-01T00:00:00Z'
+			await put('a', '2026-09-10', 10, 7, early)
+			await put('b', '2026-09-17', 21, 14, early)
+			await put('c', '2026-09-24', null, null, early)
+
+			const held = await gamesFor('nfl', 'ZZA', client)
+			assert.equal(held.length, 3)
+
+			// The live feed finishes game c and fixes a score on game a.
+			const later = '2026-06-01T00:00:00Z'
+			await client.query("UPDATE game SET home_score=3, away_score=0, status='final', observed_at=$1 WHERE sport='nfl' AND id='c'", [later])
+			await client.query("UPDATE game SET home_score=11, observed_at=$1 WHERE sport='nfl' AND id='a'", [later])
+
+			const changed = await gamesSince('nfl', 'ZZA', early, client)
+			assert.equal(changed.length, 2, 'gamesSince returned the wrong number of rows')
+			const merged = mergeGames(held, changed)
+			const full = await gamesFor('nfl', 'ZZA', client)
+			assert.deepEqual(merged, full, 'the incremental path and a full read disagree')
+		})
+	})
+
+	await t.test('every franchise stamp in one query agrees with asking one at a time', async () => {
+		// The per-club version was 429ms for 236 franchises, on any league page
+		// whose check window had expired. One query is 73ms — and has to give the
+		// same answers, including for the codes two sports share.
+		const { lastUpdated, lastUpdatedAll } = await import('../lib/store.js')
+		await inRollback(async () => {
+			await fixture()
+			await client.query("INSERT INTO source (id,authority,reproducible,note) VALUES ('t',1,true,'test') ON CONFLICT DO NOTHING")
+			// The second sport is created HERE, not assumed. fixture() makes only
+			// nfl, and this passed locally because a developer database has mlb in
+			// it from a real load — the exact mistake this commit fixes three of,
+			// arriving from the other direction: a test that only passes against a
+			// database somebody has loaded. CI has neither, which is why CI is what
+			// caught it.
+			await client.query("INSERT INTO sport VALUES ('mlb','baseball') ON CONFLICT DO NOTHING")
+			// BAL is the Orioles and the Ravens. A map keyed on the bare code would
+			// give one of them the other's stamp, and the cache would then either
+			// re-read forever or never.
+			for (const [sport, f] of [['nfl', 'BAL'], ['mlb', 'BAL']]) {
+				await client.query('INSERT INTO franchise VALUES ($1,$2) ON CONFLICT DO NOTHING', [sport, f])
+			}
+			await client.query('INSERT INTO franchise VALUES ($1,$2) ON CONFLICT DO NOTHING', ['nfl', 'GB'])
+			await client.query('INSERT INTO franchise VALUES ($1,$2) ON CONFLICT DO NOTHING', ['mlb', 'CHN'])
+			await client.query(`INSERT INTO game (sport,id,season,date,round,home,away,home_score,away_score,status,source,observed_at)
+				VALUES ('nfl','x',2026,'2026-09-10','regular','BAL','GB',1,0,'final','t','2026-01-01T00:00:00Z'),
+				       ('mlb','y',2026,'2026-04-10','regular','BAL','CHN',1,0,'final','t','2026-05-05T00:00:00Z')`)
+
+			const all = await lastUpdatedAll(client)
+			for (const [sport, f] of [['nfl', 'BAL'], ['mlb', 'BAL'], ['nfl', 'GB'], ['mlb', 'CHN']]) {
+				const one = await lastUpdated(sport, f, client)
+				assert.equal(String(all.get(`${sport}/${f}`)), String(one), `${sport}/${f} disagrees`)
+			}
+			// And the two BALs are genuinely different, so the check above is not
+			// comparing a value with itself.
+			assert.notEqual(String(all.get('nfl/BAL')), String(all.get('mlb/BAL')))
+		})
 	})
 
 	await t.test('a summary is found only when its inputs match', async () => {

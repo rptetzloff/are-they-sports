@@ -135,6 +135,16 @@ score. **A mutation harness needs a control that the unmutated suite passes unde
 the exact command the harness uses** — otherwise it is one more check that passes
 because it is not looking at anything.
 
+**Run the suite against an empty database as well as a loaded one.** They catch
+different defects and both kinds have shipped here. Three assertions passed only
+against an empty database — written when the tables held nothing but the fixture,
+they became claims about the whole league once real data arrived, and one counted
+9,208 baseball games because it had no `sport` in its WHERE. Then a test written
+in the commit that fixed those three passed only against a LOADED one, inserting
+an `mlb` franchise without creating the `mlb` sport. CI runs empty and a
+developer runs loaded, so each of them is blind to exactly one of these. A test
+resting on state it did not create is the same defect either way.
+
 Two layers, on purpose. Unit tests build their own rows and pin exact numbers.
 Tests against the real data assert relations and floors — ordered, distinct, at
 least this many — and never snapshots, because the data is refreshed and a
