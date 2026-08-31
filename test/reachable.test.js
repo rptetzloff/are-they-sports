@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { leagueNav, leagueRecordsPage, leagueSchedulePage, selectorPage, siteNav, sportTabs } from '../lib/render.js'
+import { leagueNav, leagueRecordsPage, leagueSchedulePage, selectorPage, siteNav, sportTabs, standingsPage } from '../lib/render.js'
 
 // Can you actually get there? Every route in this repo is tested by asking for
 // it directly, which is why /records and /schedule shipped answering 200 with
@@ -242,4 +242,61 @@ test('a records block names opponents with its own sport too', () => {
 	})
 	assert.ok(html.includes('Milwaukee Brewers'), 'the baseball block used the football namer')
 	assert.equal(html.includes('Milwaukee Badgers'), false)
+})
+
+// --- standings, where two sports are not at the same season ---
+
+const standingsFor = (season, clubs) => ({
+	season,
+	clubs: clubs.length,
+	groups: [{ conference: 'NFC', division: 'North', clubs: clubs.map((c) => ({
+		...c, t: 0, pf: 0, pa: 0, sport: 'nfl', teamId: c.club.toLowerCase(),
+	})) }],
+})
+const LINE = { club: 'Packers', w: 13, l: 3, record: '13–3', pct: 0.8125, gb: 0 }
+
+test('a combined standings page names the season on each league, not once on top', () => {
+	// In August football's latest played season is last winter's and baseball's
+	// is the one being played. One heading over both names one of them and is
+	// wrong about the other — which is the objection to combined records,
+	// arriving by a different route.
+	const html = standingsPage({
+		standings: standingsFor(2025, [LINE]), label: 'NFL', seasons: [2024, 2025, 2026],
+		more: [{ label: 'MLB', standings: standingsFor(2026, [LINE]) }],
+		heading: 'Every club', colors: COLORS, clubs: [],
+	})
+	assert.ok(html.includes('NFL 2025'), 'football block does not name its season')
+	assert.ok(html.includes('MLB 2026'), 'baseball block does not name its season')
+	assert.ok(!/<h1>Every club 20\d\d<\/h1>/.test(html), 'the heading names one season for two')
+})
+
+test('the nav still steps when the two leagues disagree', () => {
+	// An earlier draft looked up a deliberately-null season, found -1, and
+	// rendered all four arrows dim: a nav that cannot navigate.
+	const html = standingsPage({
+		standings: standingsFor(2025, [LINE]), label: 'NFL', seasons: [2024, 2025, 2026],
+		more: [{ label: 'MLB', standings: standingsFor(2026, [LINE]) }],
+		heading: 'Every club', colors: COLORS, clubs: [],
+	})
+	assert.ok(hrefs(html).includes('/standings/2025'), 'no way back to the previous season')
+	assert.ok(html.includes('2025 / 2026'), 'the nav does not say which seasons are shown')
+})
+
+test('one league on its own names its season once', () => {
+	const html = standingsPage({
+		standings: standingsFor(2025, [LINE]), label: 'NFL', seasons: [2024, 2025],
+		heading: 'Every NFL club', colors: COLORS, clubs: [],
+	})
+	assert.ok(html.includes('<h1>Every NFL club 2025</h1>'))
+	assert.ok(!html.includes('NFL 2025<'), 'a lone league repeats its own label')
+})
+
+test('the standings page links back to the clubs and the other league pages', () => {
+	const links = hrefs(standingsPage({
+		standings: standingsFor(2025, [LINE]), seasons: [2025],
+		heading: 'Every club', colors: COLORS, clubs: [],
+	}))
+	assert.ok(links.includes('/'), 'no way back to the clubs')
+	assert.ok(links.includes('/records'), 'no link to the league records')
+	assert.ok(links.includes('/schedule'), 'no link to the league schedule')
 })

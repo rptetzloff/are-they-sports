@@ -419,8 +419,26 @@ last-updated, a data credit, share buttons, and a photo gallery with a lightbox.
 a linescore modal, standings, and the TV-listings feature — watch modal, channel
 list, provider picker. None of that is historical data; it needs a live source.
 
-*What this repo has today.* The answer, the record, and a club selector. Two of
-about twenty-five panels, and two of the fifteen routes.
+Standings are done, and turned out not to need one. The site fetches ESPN's
+standings endpoint because it has no games to count; this repo has every game
+either club ever played, so the same table falls out of a query and works for
+1962 as well as today. The live source it does need is the one already
+built — the server's own refresh timer — which is what keeps the season being
+played current.
+
+*What this repo has today*, checked by rendering `/2011` under
+`SCOPE=team:nfl/packers` rather than remembered: the answer, the record, a club
+selector, a season selector, the schedule grid, the streak banner, the history
+sparkline and last-updated; `/records`, `/history`, `/vs`, `/schedule` and
+`/standings`, each also per sport and as JSON. What is left is the leaders page
+(which needs a curated coaches/managers table nobody publishes), the six social
+cards, the on-this-day panel, share buttons, the data credit, the photo gallery,
+box scores and TV listings.
+
+The credit line is in that list because writing this paragraph from memory put it
+in the other one, and grepping the rendered page is what found it. Both sites
+carry one; this repo has never rendered any, and the sources it would credit —
+nflverse, Retrosheet, FiveThirtyEight, teamcolorcodes.com — mostly ask for it.
 
 Two of these are genuinely hard rather than merely long. The social cards need
 `@resvg/resvg-js`, which is the one native dependency either site carries and the
