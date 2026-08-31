@@ -36,7 +36,8 @@ import { computeLeague } from './lib/league.js';
 import { computeSchedule } from './lib/schedule.js';
 import { historyPoints } from './lib/history.js';
 import { codeTables, franchisesForClub, staleFranchises } from './lib/codes.js';
-import { availability, close, connect, franchisesWithGames, gamesFor, health, lastUpdated } from './lib/store.js';
+import { availability, close, connect, franchisesWithGames, gamesFor, health, lastUpdated, withClient } from './lib/store.js';
+import { lockKeyFor, nextDelay, refreshLive, withLock } from './lib/live.js';
 import {
 	daysToNextGame, lastLosslessSeason, latestSeason, recordText, seasons, seasonTally, seasonVerdict,
 	seasonWinPct, seriesRecords, streakBanner, verdictText,
@@ -46,7 +47,7 @@ import {
 	scheduleHtml, seasonNav, selectorPage, siteNav, sparklineHtml,
 } from './lib/render.js';
 import { colorsFor, resolver } from './lib/names.js';
-import { SPORTS, loadTeams } from './lib/teams.js';
+import { SPORTS, loadSports, loadTeams } from './lib/teams.js';
 import { matchRoute, parseView, routeTable } from './lib/routes.js';
 import { loadDivisions, needsSelector, parseScope, resolveScope } from './lib/scope.js';
 
@@ -342,6 +343,66 @@ function main() {
 		 *  showed every club as not built. The pages worked and everything that
 		 *  described them was wrong, which is worse than either alone.
 		 */
+		// Keep the season being played current, from inside the server.
+		//
+		// The two live sites fetch ESPN from the browser on every page load, so
+		// they are never stale; this repo reads only from the database and was
+		// therefore exactly as fresh as the last time somebody ran the loader.
+		// That is a regression against the sites this replaces.
+		//
+		// The request path still never calls out. This writes to Postgres on a
+		// timer and the game cache picks the rows up on its own, because it is
+		// already keyed on max(observed_at).
+		//
+		// LIVE_REFRESH_MS=0 turns it off, which is what a deployment wants if it
+		// runs the loader on a schedule of its own.
+		const liveEvery = Number(process.env.LIVE_REFRESH_MS ?? 60_000);
+		const adapters = await loadSports();
+		const liveSports = [...new Set(resolved.map((e) => e.sport))]
+			.filter((id) => adapters[id]?.sources?.live);
+		if (liveEvery > 0 && liveSports.length && dbHealth.ok) {
+			const tick = async () => {
+				for (const id of liveSports) {
+					try {
+						await withClient((client) => withLock(client, lockKeyFor(id), async () => {
+							const r = await refreshLive(client, id, adapters[id]);
+							if (r.written) console.log(`  live         ${id} ${r.season}: ${r.written} rows`);
+							for (const f of r.failed ?? []) console.error(`  live         ${id} ${f}`);
+							return r;
+						}));
+					} catch (e) {
+						// A refresh that fails must not take the server with it.
+						// The pages keep serving whatever the database holds.
+						console.error(`  live         ${id} refresh failed: ${e.message}`);
+					}
+				}
+			};
+			// Self-scheduling rather than a fixed interval, because how often this
+			// is worth doing depends on whether anything is being played. A
+			// season is six months of the year and a game day a few hours of it;
+			// polling every two minutes in February is nine requests to learn
+			// nothing. `liveEvery` is the LIVE rate — the others are derived.
+			let timer = null;
+			const schedule = (ms, why) => {
+				timer = setTimeout(loop, ms);
+				// Never hold the process open: a container should stop when told
+				// to, not wait out the interval.
+				timer.unref();
+				return why;
+			};
+			const loop = async () => {
+				await tick();
+				try {
+					const next = await withClient((client) => nextDelay(client, liveSports[0], { live: liveEvery }));
+					schedule(next.ms, next.why);
+				} catch {
+					schedule(liveEvery, 'could not read the schedule');
+				}
+			};
+			console.log(`  live         refreshing ${liveSports.join(', ')}, ${Math.round(liveEvery / 1000)}s while games are on`);
+			loop();
+		}
+
 		let refreshedAt = 0;
 		async function refresh(now) {
 			if (now - refreshedAt < 30_000) return;

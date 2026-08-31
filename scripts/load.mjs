@@ -213,22 +213,25 @@ async function loadLive(client, sportId, cfg, season, put) {
 	const codes = codeTable(sportId, loadHistory(sportId));
 	const sport = (await import(`../sports/${sportId}.js`));
 	let seen = 0;
-	for (const month of cfg.months) {
-		const url = cfg.url(`${season}${String(month).padStart(2, '0')}`);
+	// A day at a time: the request date IS the game's local date, which is what
+	// Retrosheet files it under. Reading the date off the event gives UTC and
+	// files every night game a day late.
+	for (const day of cfg.daysOf(season)) {
 		let events;
 		try {
-			const res = await fetch(url);
+			const res = await fetch(cfg.url(day));
 			if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
 			events = (await res.json()).events ?? [];
 		} catch (e) {
-			// One month failing is not a reason to lose the others, and a live
-			// feed being briefly unavailable is not a configuration error.
-			console.error(`  live         ${season}-${month}: ${e.message}`);
+			// One day failing is not a reason to lose the others, and a live feed
+			// being briefly unavailable is not a configuration error.
+			console.error(`  live         ${day}: ${e.message}`);
 			continue;
 		}
 		for (const { event, number } of sport.numberEvents(events)) {
 			const row = sport.liveGameRow(event, {
-				eraCodeOf: codes.eraCodeOf, franchiseOf: codes.franchiseOf, knows: codes.knows, number,
+				eraCodeOf: codes.eraCodeOf, franchiseOf: codes.franchiseOf, knows: codes.knows,
+				number, queryDate: day,
 			});
 			if (!row) continue;
 			seen++;

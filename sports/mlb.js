@@ -90,13 +90,55 @@ export const sources = {
 	 *  Retrosheet's the next time the annual file is loaded, and the count of
 	 *  non-reproducible rows returns to zero on its own.
 	 *
-	 *  A month at a time: `dates=YYYYMM` returns the whole month, so a season is
-	 *  nine requests rather than two hundred.
+	 *  A DAY at a time, not a month, and that is a correctness decision rather
+	 *  than a cost one.
+	 *
+	 *  `dates=YYYYMM` returns a month in one request, which is cheaper — and the
+	 *  event timestamps are UTC while Retrosheet records the LOCAL date. A 7:05pm
+	 *  game in Texas is `2025-03-29T00:05Z`, so reading the date off the event
+	 *  filed it a day late, collided it with the next day's game, and the pair
+	 *  became a fake doubleheader numbered 1 and 2. Only 76% of a season's ids
+	 *  matched what Retrosheet had published for the same games.
+	 *
+	 *  `dates=YYYYMMDD` returns the games of that LOCAL day — the Texas game
+	 *  comes back from `dates=20250328` — so the date is the one asked for and
+	 *  the ids line up. It also makes a live refresh two requests rather than
+	 *  nine, because only today and yesterday can still change.
 	 */
 	live: {
-		url: (yyyymm) => `https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/scoreboard?dates=${yyyymm}&limit=1000`,
-		// March to November covers spring openers through a Game 7.
-		months: [3, 4, 5, 6, 7, 8, 9, 10, 11],
+		url: (yyyymmdd) => `https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/scoreboard?dates=${yyyymmdd}&limit=1000`,
+		/** Every day a season could have a game on. March through November
+		 *  covers openers through a Game 7. */
+		daysOf(season) {
+			const out = [];
+			for (let m = 3; m <= 11; m++) {
+				const days = new Date(Date.UTC(season, m, 0)).getUTCDate();
+				for (let d = 1; d <= days; d++) {
+					out.push(`${season}${String(m).padStart(2, '0')}${String(d).padStart(2, '0')}`);
+				}
+			}
+			return out;
+		},
+		/** What a frequent refresh needs: three days around now.
+		 *
+		 *  Three rather than two, because these dates are LOCAL and the clock
+		 *  here is UTC. North American local dates lag UTC by up to eight hours,
+		 *  so during a US evening the UTC date has already rolled over and a
+		 *  two-day window of UTC-1 and UTC-0 covers local today and tomorrow
+		 *  while missing local yesterday — which is exactly when last night's
+		 *  late game finishes and a suspended one is completed.
+		 *
+		 *  Measured: a refresh at 2026-08-31T00:xxZ fetched the 30th and the
+		 *  31st, and the 29th's late games were never revisited.
+		 */
+		recentDays(now) {
+			const day = (offset) => {
+				const d = new Date(now);
+				d.setUTCDate(d.getUTCDate() + offset);
+				return d.toISOString().slice(0, 10).replace(/-/g, '');
+			};
+			return [day(-2), day(-1), day(0)];
+		},
 		source: 'espn',
 		/** Which season a date belongs to. Baseball's is the calendar year; an
 		 *  NFL season crosses the new year and would not be, which is why this
@@ -240,6 +282,12 @@ export const sport = {
 	gameRow,
 	isScoringPlay,
 	scoringRow,
+	// The live feed's mappers belong here too. `loadSports` hands the server
+	// each adapter's DEFAULT export, and these were only named exports — the
+	// command-line loader imported the whole module namespace, so nothing showed
+	// until the server tried to call them. Declared below and hoisted.
+	liveGameRow,
+	numberEvents,
 	gameKey: 'gid',
 };
 
@@ -257,7 +305,7 @@ export default sport;
  *  nothing about which is which. Events sharing a home club and a date are
  *  ordered by start time and numbered; a lone game is 0.
  */
-export function liveGameRow(event, { eraCodeOf, franchiseOf, knows, number = 0 }) {
+export function liveGameRow(event, { eraCodeOf, franchiseOf, knows, number = 0, queryDate = null }) {
 	const comp = event?.competitions?.[0];
 	if (!comp) return null;
 	// Spring training is not the season. ESPN's scoreboard carries it as
@@ -287,7 +335,20 @@ export function liveGameRow(event, { eraCodeOf, franchiseOf, knows, number = 0 }
 	// Retrosheet's `allstar` and `exhibition` rows.
 	if (knows && (!knows(home.team.abbreviation) || !knows(away.team.abbreviation))) return null;
 
-	const date = String(event.date).slice(0, 10);
+	// The date comes from the REQUEST, not the event. Event timestamps are UTC
+	// and Retrosheet records the local date; a night game is stamped the
+	// following day and would be filed under it.
+	const date = queryDate
+		? `${queryDate.slice(0, 4)}-${queryDate.slice(4, 6)}-${queryDate.slice(6, 8)}`
+		: String(event.date).slice(0, 10);
+	// A postponed game is not a fixture on this date. It is replayed later,
+	// usually as half of a doubleheader — Boston's April 5th 2025 game against
+	// St. Louis became the second game of April 6th — and Retrosheet has no
+	// record of it on the original day at all. Stored as `scheduled` it became a
+	// row nothing would ever supersede, sitting on the schedule as a game that
+	// was never played.
+	if (comp.status?.type?.name === 'STATUS_POSTPONED') return null;
+
 	// `completed`, not `state === 'post'`. A POSTPONED game is also state `post`
 	// and is not completed, and it carries a 0-0 score — so reading the state
 	// stored thirteen postponements in three months as nil-nil finals and gave
@@ -318,16 +379,22 @@ export function liveGameRow(event, { eraCodeOf, franchiseOf, knows, number = 0 }
 	};
 }
 
-/** Group events into Retrosheet game numbers: 0 alone, 1 and 2 for a double. */
+/** Group events into Retrosheet game numbers: 0 alone, 1 and 2 for a double.
+ *
+ *  Grouped by home club ALONE, because this is given one day's events and every
+ *  one of them belongs to that day. Grouping by the event's own date instead
+ *  splits a doubleheader whenever the second game runs past midnight UTC — a
+ *  Colorado double on April 20th 2025 had games at 20:10Z and 01:10Z, landed in
+ *  two groups, and both came out numbered 0 with the same id.
+ */
 export function numberEvents(events) {
 	const byDay = new Map();
 	for (const e of events) {
 		const comp = e?.competitions?.[0];
 		const home = comp?.competitors?.find((c) => c.homeAway === 'home')?.team?.abbreviation;
 		if (!home) continue;
-		const key = `${home}|${String(e.date).slice(0, 10)}`;
-		if (!byDay.has(key)) byDay.set(key, []);
-		byDay.get(key).push(e);
+		if (!byDay.has(home)) byDay.set(home, []);
+		byDay.get(home).push(e);
 	}
 	const out = [];
 	for (const group of byDay.values()) {
