@@ -746,15 +746,19 @@ club's season history — sorts by clicking a column header. The header is a lin
 and the order is a `?sort=` query parameter the server reads, which is the same
 shape as the `?format=json` already on every route.
 
-**There is no client-side JavaScript in this repo and this did not add any.** The
-standings modal is a CSS `:target` on an anchor; sorting is links. A few lines of
-browser JavaScript would have been shorter and was rejected for the reason
-CLAUDE.md states at length: rendering that happens in the browser is not
-reachable from `node --test`, which is exactly how 118 tests passed on the
-football site while every past season rendered a 0-0 record. Sorting on the
-server makes the order a pure function of the request, so a test can assert it
-and a reader without JavaScript still gets it. The cost is a round trip per
-click.
+**There was no client-side JavaScript in this repo and this did not add any** —
+zero script tags, zero handlers, and the standings modal is a CSS `:target` on an
+anchor. That was a measured fact about the code, not a stated policy: nothing
+said browser JavaScript was unwelcome until sorting was built, and the first
+version of this section wrongly described it as a rule the project already had.
+
+Keeping it that way was a decision made here, on its own reasoning. Rendering
+that happens in the browser is not reachable from `node --test`, which is how 118
+tests passed on the football site while every past season rendered a 0-0 record.
+Sorting on the server makes the order a pure function of the request, so a test
+can assert it and a reader without JavaScript still gets it. The cost is a round
+trip per click. A feature that genuinely needs a script should add one and say
+why.
 
 Three rules the tests pin, because each was wrong once:
 
