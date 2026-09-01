@@ -320,7 +320,7 @@ test('the standings page links back to the clubs and the other league pages', ()
 // it. The leaders route is the only one whose NAME comes from the sport, and
 // anything checking routes has to carry the club the way the server does.
 
-const LEAGUE_ROUTES = new Set(['/records', '/schedule', '/standings'])
+const LEAGUE_ROUTES = new Set(['/records', '/schedule', '/standings', '/champions'])
 
 const teamFor = (sport) => ({
 	id: sport === 'mlb' ? 'brewers' : 'packers',
@@ -409,6 +409,17 @@ test('each sport answers its own leaders noun and not the other', () => {
 	// what a `leaderPlural` default of "coaches" would have produced.
 	assert.equal(resolves('/coaches', 'nfl'), true)
 	assert.equal(resolves('/managers', 'mlb'), true)
+})
+
+test('the champions page is linked and the link is a route', () => {
+	// The championship table shipped with exactly one consumer — the Titles
+	// column on the leaders page — so a title showed in one place and nowhere
+	// else, which is what the reader of the running site reported. The page
+	// exists now, and this asserts the pair: the nav links it and the router
+	// answers it.
+	const links = hrefs(leagueNav())
+	assert.ok(links.includes('/champions'), 'the league nav does not link champions')
+	assert.ok(LEAGUE_ROUTES.has('/champions'), 'champions is linked and is not a route')
 })
 
 test('a club under a multi-club scope can reach the standings', () => {

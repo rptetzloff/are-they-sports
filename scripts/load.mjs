@@ -301,7 +301,67 @@ async function loadLive(client, sportId, cfg, season, put) {
  *  look, not that one of them silently wins.
  */
 async function loadChampionships(client, sportId, byCode) {
-	if (sportId !== 'nfl') return;
+	// Rewritten every load, so a corrected row in a reference file takes effect by
+	// re-running rather than by hand-editing a table.
+	await client.query('DELETE FROM championship WHERE sport = $1', [sportId]);
+
+	// Baseball has no curated file and needs none: every World Series was played,
+	// so its champions derive from the games. It is still written here rather than
+	// left out, because `/champions` reads this table and a sport missing from it
+	// is a blank page — the "looks complete, isn't" failure, arriving as an empty
+	// table under an MLB scope.
+	if (sportId !== 'nfl') {
+		// Written as plain CTEs rather than a clever aggregate. The first version
+		// used `array_agg` over a lateral join and inserted ONE row for 121
+		// seasons of baseball — the kind of wrong that looks like a working query
+		// and reports a rowCount to prove it.
+		const { rowCount } = await client.query(`
+			WITH tally AS (
+				SELECT g.season, c.fr AS club,
+				       -- A DRAW IS NOT A WIN, and saying so takes the extra
+				       -- clause. No backticks in this comment: it lives inside a
+				       -- JS template literal, and quoting the expression the way
+				       -- prose would ended the string and made the module a
+				       -- syntax error -- the hazard lib/style.js already records.
+				       --
+				       -- The comparison home=club against home_score>away_score
+				       -- is false=false for the away side of a tied game, which
+				       -- is TRUE, so a draw counted as an away win. The 1912 World
+				       -- Series ran to eight games because game two was called
+				       -- 6-6 for darkness; Boston won it 4-3 and this made it
+				       -- 4-4, so the season came out with no champion at all.
+				       count(*) FILTER (
+				           WHERE g.home_score <> g.away_score
+				             AND (g.home = c.fr) = (g.home_score > g.away_score)) AS wins
+				  FROM game g
+				  CROSS JOIN LATERAL (VALUES (g.home), (g.away)) AS c(fr)
+				 WHERE g.sport = $1 AND g.round = 'championship' AND g.status = 'final'
+				 GROUP BY g.season, c.fr),
+			ranked AS (
+				SELECT season, club, wins,
+				       row_number() OVER (PARTITION BY season ORDER BY wins DESC, club) AS rn
+				  FROM tally),
+			clincher AS (
+				-- The last game of the round by DATE, not by id: a Retrosheet id
+				-- begins with the home club, so ordering by it sorts alphabetically
+				-- and picks whichever club happens to be last in the alphabet.
+				SELECT DISTINCT ON (season) season, id, source
+				  FROM game
+				 WHERE sport = $1 AND round = 'championship' AND status = 'final'
+				 ORDER BY season, date DESC, id DESC)
+			INSERT INTO championship (sport, season, league, champion, runner_up, method, title, game_id, source)
+			SELECT $1, w.season, upper($1), w.club, l.club, 'championship series', $2, c.id, c.source
+			  FROM ranked w
+			  JOIN ranked l ON l.season = w.season AND l.rn = 2
+			  JOIN clincher c ON c.season = w.season
+			 -- A round nobody won more of than anyone else is not a title. It does
+			 -- not happen in the data and inserting a coin-flip champion if it ever
+			 -- did would be worse than the row being absent.
+			 WHERE w.rn = 1 AND w.wins > l.wins`,
+		[sportId, sportId === 'mlb' ? 'World Series' : 'Championship']);
+		console.log(`  champions    ${rowCount} derived from games`);
+		return;
+	}
 
 	const path = join(REFERENCE_DIR, 'nfl-champions.csv');
 	if (!existsSync(path)) {
@@ -309,10 +369,6 @@ async function loadChampionships(client, sportId, byCode) {
 		console.log('               seasons decided on standings will have no champion');
 		return;
 	}
-
-	// Rewritten every load, so a corrected row in the CSV takes effect by
-	// re-running rather than by hand-editing a table.
-	await client.query('DELETE FROM championship WHERE sport = $1', [sportId]);
 
 	const { rows: haveF } = await client.query(
 		'SELECT id FROM franchise WHERE sport = $1', [sportId]);

@@ -767,6 +767,38 @@ them resolved** — `CRA` is the Chicago Rockets, `NYY` the NFL New York Bulldog
 clubs and the wrong ones. Corrected to `CLE`, `NAA`, `BBA` against the games
 themselves.
 
+### Where a title shows
+
+Everywhere a title is shown, which took a second pass. The table shipped with
+exactly **one** consumer — the Titles column on the leaders page — so a
+championship appeared in one place and nowhere else, which is not intuitive and
+was reported from the running site.
+
+| | |
+|---|---|
+| `/champions` | every champion the league has had, sortable, with how it was decided |
+| club `/records` | the championship card, so the Packers' book lists 1929, 1930, 1931 |
+| club `/history` | title markers on the chart — thirteen for Green Bay, not ten |
+| leaders | the Titles column, as before |
+
+`computeRecords` takes a `titles` option and **unions** it with what the games
+already say. Passing nothing leaves the function exactly as it was, which is what
+every test written before it relies on. A standings title has no record and no
+opponent, and the record book prints "took NFL Championship on the standings"
+rather than "won" over a blank score.
+
+Baseball is derived into the same table — 121 World Series — because a page that
+reads the table would otherwise be blank under an MLB scope, which is the "looks
+complete, isn't" failure arriving by a new route. That is storing derived data,
+and it is the same bargain `league_summary` and `game_leader` make: rewritten
+every load, hand-edited never, identical after a drop and reload.
+
+**A draw is not a win.** Deriving baseball's champions from
+`(home = club) = (home_score > away_score)` counts a tied game as an *away* win,
+because false = false is true. The 1912 World Series ran to eight games — game
+two was called 6-6 for darkness — so Boston's 4-3 became 4-4 and that season came
+out with **no champion at all** while the other 120 looked fine.
+
 ### Three things that are subtler than they look
 
 **1932's game is linked but its round is not rewritten.** The Bears and the
