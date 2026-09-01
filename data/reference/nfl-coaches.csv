@@ -22,7 +22,7 @@
 leaderId,name,nflverseName,franchiseAbbrv,firstSeason,lastSeason,statedLastSeason,w,l,t,playoffW,playoffL,titleSeasons,interim,basis,source
 driscoll-paddy,Paddy Driscoll,,ARI,1920,1922,1922,17,8,4,0,0,,FALSE,transcribed,List of Arizona Cardinals head coaches
 horween-arnold,Arnold Horween,,ARI,1923,1924,1924,13,8,1,0,0,,FALSE,transcribed,List of Arizona Cardinals head coaches
-barry-norman,Norman Barry,,ARI,1925,1926,1926,16,8,2,0,0,,FALSE,transcribed,List of Arizona Cardinals head coaches
+barry-norman,Norman Barry,,ARI,1925,1926,1926,16,8,2,0,0,1925,FALSE,transcribed,List of Arizona Cardinals head coaches
 chamberlin-guy,Guy Chamberlin,,ARI,1927,1927,1927,3,7,1,0,0,,FALSE,transcribed,List of Arizona Cardinals head coaches
 gillies-fred,Fred Gillies,,ARI,1928,1928,1928,1,5,0,0,0,,FALSE,transcribed,List of Arizona Cardinals head coaches
 scanlon-dewey,Dewey Scanlon,,ARI,1929,1929,1929,6,6,1,0,0,,FALSE,transcribed,List of Arizona Cardinals head coaches
@@ -86,8 +86,8 @@ bullough-hank,Hank Bullough,,BUF,1985,1986,1986,4,17,0,,,,FALSE,transcribed,List
 levy-marv,Marv Levy,,BUF,1986,1997,1997,112,70,0,11,8,,FALSE,transcribed,List of Buffalo Bills head coaches
 phillips-wade,Wade Phillips,,BUF,1998,2000,1998,10,6,0,0,1,,FALSE,transcribed,List of Buffalo Bills head coaches
 capers-dom,Dom Capers,,CAR,1995,1998,1998,30,34,0,1,1,,FALSE,transcribed,List of Carolina Panthers head coaches
-halas-george,George Halas,,CHI,1920,1929,1929,84,31,19,0,0,,FALSE,counted,hand-entered (Wikipedia table not parsed)
-jones-ralph,Ralph Jones,,CHI,1930,1932,1932,24,10,7,0,0,,FALSE,counted,hand-entered (Wikipedia table not parsed)
+halas-george,George Halas,,CHI,1920,1929,1929,84,31,19,0,0,1921,FALSE,counted,hand-entered (Wikipedia table not parsed)
+jones-ralph,Ralph Jones,,CHI,1930,1932,1932,24,10,7,0,0,1932,FALSE,counted,hand-entered (Wikipedia table not parsed)
 halas-george,George Halas,,CHI,1933,1942,1942,,,,,,,FALSE,unresolved,hand-entered (Wikipedia table not parsed)
 anderson-hunk,Hunk Anderson,,CHI,1942,1945,1945,,,,,,,FALSE,unresolved,hand-entered (Wikipedia table not parsed)
 johnsos-luke,Luke Johnsos,,CHI,1942,1945,1945,,,,,,,FALSE,unresolved,hand-entered (Wikipedia table not parsed)
@@ -152,7 +152,7 @@ clark-monte,Monte Clark,,DET,1978,1984,1984,43,61,1,0,2,,FALSE,transcribed,List 
 rogers-darryl,Darryl Rogers,,DET,1985,1988,1988,18,40,0,0,0,,FALSE,transcribed,List of Detroit Lions head coaches
 fontes-wayne,Wayne Fontes,,DET,1988,1996,1996,66,67,0,1,4,,FALSE,transcribed,List of Detroit Lions head coaches
 ross-bobby,Bobby Ross,,DET,1997,2000,1998,14,20,0,0,1,,FALSE,transcribed,List of Detroit Lions head coaches
-lambeau-curly,Curly Lambeau,,GB,1921,1949,1949,209,104,21,3,2,1936 1939 1944,FALSE,transcribed,List of Green Bay Packers head coaches
+lambeau-curly,Curly Lambeau,,GB,1921,1949,1949,209,104,21,3,2,1929 1930 1931 1936 1939 1944,FALSE,transcribed,List of Green Bay Packers head coaches
 ronzani-gene,Gene Ronzani,,GB,1950,1953,1953,14,31,1,0,0,,FALSE,transcribed,List of Green Bay Packers head coaches
 devore-hugh,Hugh Devore,,GB,1953,1953,1953,0,2,0,,,,FALSE,transcribed,List of Green Bay Packers head coaches
 mclean-ray,Ray McLean,,GB,1953,1953,1953,0,2,0,,,,FALSE,transcribed,List of Green Bay Packers head coaches
@@ -262,7 +262,7 @@ venturi-rick,Rick Venturi,,NO,1996,1996,1996,1,7,0,,,,FALSE,transcribed,List of 
 ditka-mike,Mike Ditka,,NO,1997,1999,1998,12,20,0,0,0,,FALSE,transcribed,List of New Orleans Saints head coaches
 folwell-bob,Bob Folwell,,NYG,1925,1925,1925,8,4,0,0,0,,FALSE,transcribed,List of New York Giants head coaches
 alexander-doc,Doc Alexander,,NYG,1926,1926,1926,8,4,1,0,0,,FALSE,transcribed,List of New York Giants head coaches
-potteiger-earl,Earl Potteiger,,NYG,1927,1928,1928,15,8,3,0,0,,FALSE,transcribed,List of New York Giants head coaches
+potteiger-earl,Earl Potteiger,,NYG,1927,1928,1928,15,8,3,0,0,1927,FALSE,transcribed,List of New York Giants head coaches
 andrews-leroy,LeRoy Andrews,,NYG,1929,1930,1930,24,5,1,0,0,,FALSE,transcribed,List of New York Giants head coaches
 friedman-benny,Benny Friedman,,NYG,1930,1930,1930,2,0,0,,,,FALSE,transcribed,List of New York Giants head coaches
 owen-steve,Steve Owen,,NYG,1931,1953,1953,153,100,17,2,8,1934 1938,FALSE,transcribed,List of New York Giants head coaches

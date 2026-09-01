@@ -170,14 +170,27 @@ export async function repairAliasFranchises(client, sportId, codes) {
 	// how the NEXT table gets missed; an unhandled one now stops the load and
 	// says which it is.
 	const REMAP = { game: ['home', 'away'] }; // rewritten to point at the canonical id
-	// Rebuilt by the load. `game_leader` and `leader_tenure` join here because
-	// loadLeaders repopulates both from source and reference files every run —
-	// and because this guard is what found them: it asks the catalogue which
-	// tables reference `franchise` rather than trusting a list written from
-	// memory, so adding the two tables without classifying them stopped the
-	// load by name instead of failing a foreign key halfway through.
-	const CLEAR = new Set(['franchise_code', 'franchise_name', 'division_membership',
-		'game_leader', 'leader_tenure']);
+	// Rebuilt by the load, and NAMING THE COLUMNS rather than assuming them.
+	//
+	// This guard asks the catalogue which tables reference `franchise` rather
+	// than trusting a list written from memory, which is what caught
+	// `game_leader` and `leader_tenure` when they arrived. But the delete below
+	// went on to assume every one of them calls the column `franchise`, and
+	// `championship` does not — it has a champion and a runner-up. Adding it to
+	// a bare list satisfied the guard and then failed on `column "franchise"
+	// does not exist`, which is the guard checking the easier half of the
+	// question.
+	//
+	// A table can point at a franchise through more than one column, so this is
+	// a list per table rather than a name per table.
+	const CLEAR = new Map([
+		['franchise_code', ['franchise']],
+		['franchise_name', ['franchise']],
+		['division_membership', ['franchise']],
+		['game_leader', ['franchise']],
+		['leader_tenure', ['franchise']],
+		['championship', ['champion', 'runner_up']],
+	]);
 	const { rows: referencing } = await client.query(
 		`SELECT DISTINCT c.conrelid::regclass::text AS table_name
 		   FROM pg_constraint c
@@ -208,8 +221,9 @@ export async function repairAliasFranchises(client, sportId, codes) {
 		// Deleted rather than remapped: every one of these is derived data that the
 		// load rewrites from the reference table, and remapping would collide with
 		// the canonical franchise's own row on the primary key.
-		for (const table of CLEAR) {
-			await client.query(`DELETE FROM ${table} WHERE sport = $1 AND franchise = $2`, [sportId, id]);
+		for (const [table, franchiseCols] of CLEAR) {
+			const where = franchiseCols.map((c) => `${c} = $2`).join(' OR ');
+			await client.query(`DELETE FROM ${table} WHERE sport = $1 AND (${where})`, [sportId, id]);
 		}
 		await client.query('DELETE FROM franchise WHERE sport = $1 AND id = $2', [sportId, id]);
 		console.log(`  removed alias franchise ${id} -> ${canonical}`);
@@ -262,6 +276,180 @@ async function loadLive(client, sportId, cfg, season, put) {
 		}
 	}
 	return seen;
+}
+
+/** Who won each league, each season.
+ *
+ *  FOOTBALL ONLY, and that is a scope rather than an oversight. This table
+ *  exists because twelve NFL seasons were decided on the final standings and one
+ *  by a tie-breaking playoff, so there is no game whose winner is the champion
+ *  and no derivation can find one. Baseball has no such gap: every World Series
+ *  since 1903 was played, so its champions fall out of `game` already and
+ *  storing them here would be a second copy of a fact nothing is missing.
+ *
+ *  Two kinds of row, and the provenance column says which:
+ *
+ *    curated   1920-1969, from data/reference/nfl-champions.csv.
+ *    derived   1970-, from the championship games the load just marked.
+ *
+ *  The overlap between them is the whole reason to keep the curated rows that
+ *  COULD be derived. The load marks a champion by finding the last playoff game
+ *  of a league in a season, and until this file existed that rule had never been
+ *  checked against anything. It is checked on every load now, and a disagreement
+ *  is reported rather than resolved: the curated file and the games are two
+ *  independent sources, and when they differ the answer is that somebody has to
+ *  look, not that one of them silently wins.
+ */
+async function loadChampionships(client, sportId, byCode) {
+	if (sportId !== 'nfl') return;
+
+	const path = join(REFERENCE_DIR, 'nfl-champions.csv');
+	if (!existsSync(path)) {
+		console.log('  champions    SKIPPED, no data/reference/nfl-champions.csv');
+		console.log('               seasons decided on standings will have no champion');
+		return;
+	}
+
+	// Rewritten every load, so a corrected row in the CSV takes effect by
+	// re-running rather than by hand-editing a table.
+	await client.query('DELETE FROM championship WHERE sport = $1', [sportId]);
+
+	const { rows: haveF } = await client.query(
+		'SELECT id FROM franchise WHERE sport = $1', [sportId]);
+	const known = new Set(haveF.map((r) => r.id));
+
+	// Every championship game already in the database, by season, with its winner.
+	const { rows: finals } = await client.query(`
+		SELECT id, season, title, home, away, home_score, away_score, source
+		  FROM game
+		 WHERE sport = $1 AND round = 'championship' AND status = 'final'
+		 ORDER BY season, date`, [sportId]);
+	const winnerOf = (g) => (g.home_score > g.away_score ? g.home : g.away);
+	const bySeason = new Map();
+	for (const g of finals) {
+		if (!bySeason.has(g.season)) bySeason.set(g.season, []);
+		bySeason.get(g.season).push(g);
+	}
+
+	/** What a league called its title in a season. Derived rather than stored:
+	 *  it is a function of the league and the year, and a column in the CSV could
+	 *  disagree with the one the game already carries. */
+	const titleFor = (league, season) => (season >= 1970 ? 'Super Bowl' : `${league} Championship`);
+
+	const rows = parseCsv(readFileSync(path, 'utf8'));
+	let wrote = 0, unknownClub = [], linked = 0, agreed = 0;
+	const disagreed = [];
+
+	for (const r of rows) {
+		const season = Number(r.season);
+		const champion = byCode.get(r.champion) ?? r.champion;
+		const runnerUp = r.runnerUp ? (byCode.get(r.runnerUp) ?? r.runnerUp) : null;
+		// A code that names no franchise this database holds cannot be stored --
+		// the foreign key would take the whole load down for one row -- so it is
+		// counted and named instead.
+		if (!known.has(champion) || (runnerUp && !known.has(runnerUp))) {
+			unknownClub.push(`${season} ${r.league} ${r.champion}${runnerUp ? `/${r.runnerUp}` : ''}`);
+			continue;
+		}
+
+		// The game that decided it, matched on the champion rather than on the
+		// season alone: 1946 through 1949 and 1960 through 1969 have two finals in
+		// the same season, one per league.
+		let played = (bySeason.get(season) ?? []).find((g) => winnerOf(g) === champion);
+
+		// 1932 is why there is a fallback. The Bears and the Spartans finished
+		// level and played an extra game indoors at Chicago Stadium to break it —
+		// the game that led to the championship-game format existing at all. It
+		// is in the data as `1932-12-18-CHI-DET`, Bears 9 Spartans 0, and its
+		// round is `regular`, because at the time it COUNTED IN THE STANDINGS.
+		//
+		// Its round is not rewritten. The game was what it was, and marking it a
+		// championship to make a join work would be editing history to suit the
+		// schema. It is linked instead, on the pair of clubs the curated file
+		// names, which is why `method` records that this one was a playoff game
+		// rather than a scheduled final.
+		if (!played && runnerUp && r.method !== 'standings') {
+			const { rows: extra } = await client.query(`
+				SELECT id FROM game
+				 WHERE sport = $1 AND season = $2 AND status = 'final'
+				   AND ((home = $3 AND away = $4) OR (home = $4 AND away = $3))
+				   AND ((home = $3 AND home_score > away_score) OR (away = $3 AND away_score > home_score))
+				 ORDER BY date DESC LIMIT 1`, [sportId, season, champion, runnerUp]);
+			if (extra[0]) played = { id: extra[0].id };
+		}
+
+		if (r.method !== 'standings') {
+			if (played) { linked++; agreed++; } else {
+				disagreed.push(`${season} ${r.league}: ${r.championName} (${champion}) won no game against ${r.runnerUpName || 'anyone'} on record`);
+			}
+		}
+
+		await client.query(
+			`INSERT INTO championship (sport, season, league, champion, runner_up, method, title, game_id, source)
+			 VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'wikipedia')`,
+			[sportId, season, r.league, champion, runnerUp, r.method,
+				titleFor(r.league, season), r.method === 'standings' ? null : played?.id ?? null]);
+		wrote++;
+	}
+
+	// A championship game the curated file does not cover. Keyed by season AND
+	// league, not by season alone.
+	//
+	// Season alone loses Super Bowls I through IV. The 1966 to 1969 seasons each
+	// have a curated NFL champion and a curated AFL champion, and THEN the two
+	// winners met — so skipping any season the file mentions dropped the four
+	// games the whole era is remembered for. Green Bay's 1966 read "NFL
+	// Championship" with no Super Bowl beside it.
+	const curated = new Set(rows.map((r) => `${r.season}|${r.league}`));
+
+	/** Which league awarded a title, from the name the load already gave it.
+	 *
+	 *  The pre-merger Super Bowl was the AFL-NFL World Championship Game and
+	 *  belonged to neither league, which is exactly why it needs a key of its
+	 *  own rather than displacing one of them. */
+	const leagueOfGame = (g) => {
+		if (g.title === 'Super Bowl') return g.season < 1970 ? 'AFL-NFL' : 'NFL';
+		if (g.title === 'AFL Championship') return 'AFL';
+		return 'NFL';
+	};
+
+	let derived = 0;
+	for (const g of finals) {
+		const league = leagueOfGame(g);
+		if (curated.has(`${g.season}|${league}`)) continue;
+		const champion = winnerOf(g);
+		const runnerUp = champion === g.home ? g.away : g.home;
+		if (!known.has(champion) || !known.has(runnerUp)) continue;
+		const { rowCount } = await client.query(
+			`INSERT INTO championship (sport, season, league, champion, runner_up, method, title, game_id, source)
+			 VALUES ($1,$2,$3,$4,$5,'championship game',$6,$7,$8)
+			 ON CONFLICT (sport, season, league) DO NOTHING`,
+			[sportId, g.season, league, champion, runnerUp,
+				g.title ?? titleFor(league, g.season), g.id, g.source]);
+		derived += rowCount;
+	}
+
+	// The AAFC finals carry no title, because the load names NFL, AFL and Super
+	// Bowl games from the leagues it can see and has never known what the AAFC
+	// called its own. The curated file does.
+	const { rowCount: named } = await client.query(`
+		UPDATE game g SET title = c.title
+		  FROM championship c
+		 WHERE c.sport = g.sport AND c.game_id = g.id AND g.title IS DISTINCT FROM c.title`);
+
+	console.log(`  champions    ${wrote} curated, ${derived} derived from games`);
+	if (linked) console.log(`  agreed       ${agreed} curated champions match the game the load marked`);
+	if (named) console.log(`  named        ${named} championship games took their title from the table`);
+	if (unknownClub.length) {
+		console.log(`  unknown club ${unknownClub.length} rows name a franchise with no games:`);
+		for (const u of unknownClub.slice(0, 8)) console.log(`               ${u}`);
+	}
+	if (disagreed.length) {
+		// Reported, never resolved. Two independent sources disagreeing is a thing
+		// for a person to look at; picking one here would hide it.
+		console.log(`  DISAGREEMENT ${disagreed.length} curated champions the games do not confirm:`);
+		for (const d of disagreed) console.log(`               ${d}`);
+	}
 }
 
 /** A directory holding Retrosheet game logs, fetching them first if needed.
@@ -920,6 +1108,10 @@ async function main() {
 
 	// After the flush above, because game_leader points at game.
 	await loadLeaders(client, sportId, (await import(`../sports/${sportId}.js`)).default, { byCode });
+
+	// After the championship pass above, because it reads the games that pass
+	// marks and links each curated row to one.
+	await loadChampionships(client, sportId, byCode);
 
 	for (const d of divisions) {
 		const f = byCode.get(d.code) ?? d.code;
