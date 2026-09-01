@@ -76,6 +76,40 @@ export const sources = {
 		 */
 		env: 'MLB_SCHEDULES_URL',
 	},
+	/** Retrosheet's game logs, which are where the managers are.
+	 *
+	 *  `gameinfo.csv` has 43 columns and not one of them names a manager, so the
+	 *  leaders page looked like it needed the curated tier — CLAUDE.md says as
+	 *  much, that it "needs a curated coaches/managers table nobody publishes".
+	 *  For baseball that is simply false, and had been for as long as the page
+	 *  404'd: the game logs carry a manager ID and name for BOTH sides of every
+	 *  game, at fields 78-81, back to 1871.
+	 *
+	 *  One file per season — `gl1871.txt` through `gl2025.txt` — plus `glws.txt`,
+	 *  `gllc.txt` and `glwc.txt` for the World Series, league championships and
+	 *  wild cards, which is why the glob is `gl*.txt` and not a year range. Drop
+	 *  the three postseason files and every October game loses its manager.
+	 *
+	 *  Headerless and positional, and the fields are mixed quoted and bare
+	 *  — `"18710504","0","Thu","CL1","NA",1,"FW1"` — so a split on `","` returns
+	 *  one field, finds nothing, and reports a confident zero. That is exactly
+	 *  what the first probe of this data did.
+	 *
+	 *  Measured against the loaded database: 217,906 of 225,713 final games get
+	 *  a manager, 96.5%. The rest is 2026, which Retrosheet has not published
+	 *  yet, and the Negro Leagues, which it publishes as .EBR event files under
+	 *  `alldata/ngl_b` rather than as game logs. Neither is a parsing bug and
+	 *  neither is closed by a wider glob.
+	 */
+	gameLogs: {
+		glob: 'gl*.txt',
+		perSeason: false,
+		/** Supplied, not fetched, for the same reason `schedules` is: Retrosheet
+		 *  publishes downloads rather than stable release URLs. A deployment
+		 *  that cannot supply these gets no leaders page and says so, rather
+		 *  than getting an empty one. */
+		env: 'MLB_GAMELOGS_DIR',
+	},
 	/** ESPN's public scoreboard, for the season currently being played.
 	 *
 	 *  Retrosheet is authoritative and, by its own note in the source table,
@@ -240,6 +274,82 @@ export function scoringRow(r) {
 	};
 }
 
+/** Retrosheet game log fields, 0-based, of the 161 on a row.
+ *
+ *  Retrosheet documents them 1-based, so every number here is its number minus
+ *  one.
+ *
+ *  REVERSED. The first version of this had the managers at 77-80, and the load
+ *  ran clean: 1,488 people, 427,433 attributions, 94.7% of final games covered.
+ *  Every number was plausible and every one of them was about UMPIRES. Fields
+ *  77-88 are six umpire slots — home plate, first, second, third, left, right —
+ *  and the managers sit after them at 89-92.
+ *
+ *  What made it convincing is worth keeping: the row it was checked against was
+ *  the first game of 1871, which had one umpire and five empty slots, so
+ *  `"boakj901","John Boake","","(none)"` five times over pushed the managers
+ *  down to exactly 77-80. Charlie Pabor and Bill Lennon really did manage that
+ *  game. The offsets were confirmed against a single row from the one era where
+ *  the wrong answer and the right one coincide.
+ *
+ *  A 2010 row says Joe West and Angel Hernandez, who are umpires, where it
+ *  should say Joe Girardi and Terry Francona. Checked now against 1871, 2010 and
+ *  2024 — all 161 fields wide, managers at 89-92 in each.
+ */
+const GL = {
+	date: 0,
+	number: 1,      // 0 for a single game, 1 and 2 for a doubleheader
+	visTeam: 3,
+	homeTeam: 6,
+	visManagerId: 89,
+	visManager: 90,
+	homeManagerId: 91,
+	homeManager: 92,
+};
+
+/** The id `gameinfo.csv` gives this game, rebuilt from a game log row.
+ *
+ *  Retrosheet's gid is home team + date + game number — `FW1187105040`,
+ *  `BSN189704190` — so it is derivable rather than needing a join on date and
+ *  club. That is what makes doubleheaders exact: the two halves are separate
+ *  keys, and 34,185 dates carry two games. Only 8 of those have a different
+ *  manager for each half, but a scheme that has to guess would be guessing on
+ *  all of them.
+ */
+export function gameLogId(fields) {
+	return `${fields[GL.homeTeam]}${fields[GL.date]}${fields[GL.number]}`;
+}
+
+/** Both managers of one game log row, in the neutral leader shape.
+ *
+ *  Returns [] for a row that names no manager. 148 of 235,607 rows carry a
+ *  blank id paired with the literal string `(none)` — Retrosheet's placeholder
+ *  for a game whose manager it does not know, not a person called None. Loading
+ *  them would create a leader who managed 148 games for 40 clubs across a
+ *  century, which is the same shape of silent, plausible wrong answer as every
+ *  bug in CLAUDE.md.
+ *
+ *  The ID is Retrosheet's and is the identity; the name is a label. Across all
+ *  1,490 (id, name) pairs in the logs, exactly one id has two spellings, and it
+ *  is the empty placeholder above. Football has no equivalent and has to assign
+ *  its own — see data/reference/nfl-coaches.csv.
+ */
+export function leaderRows(fields) {
+	if (fields.length <= GL.homeManager) return [];
+	const gameId = gameLogId(fields);
+	const out = [];
+	for (const [codeAt, idAt, nameAt] of [
+		[GL.visTeam, GL.visManagerId, GL.visManager],
+		[GL.homeTeam, GL.homeManagerId, GL.homeManager],
+	]) {
+		const leaderId = fields[idAt]?.trim();
+		const leaderName = fields[nameAt]?.trim();
+		if (!leaderId || !leaderName || leaderName === '(none)') continue;
+		out.push({ gameId, code: fields[codeAt], leaderId, leaderName });
+	}
+	return out;
+}
+
 /** What every club in this league says. Facts about baseball, not about any
  *  club; a club overrides any of them when it genuinely differs. */
 export const defaults = {
@@ -261,6 +371,37 @@ export const defaults = {
 		 *  Across 162 games the within-season run is the record anyone quotes;
 		 *  across 17 the cross-season one is. */
 		streaksSpanSeasons: false,
+		/** How long a stint can be and still be somebody covering an absence.
+		 *
+		 *  Retrosheet names the manager who RAN each game, so an ejection or an
+		 *  illness puts the bench coach in the record: Bobby Cox reads 2493-1998
+		 *  where the published figure is 2504-2001, and the difference is Bobby
+		 *  Dews and Pat Corrales standing in.
+		 *
+		 *  45 games, and it is a backstop: what folds a stint is being bracketed
+		 *  by one person who managed MORE of that season. The number only decides
+		 *  how long an absence can get before it counts as a tenure.
+		 *
+		 *  Swept against twelve managers' published career records rather than
+		 *  chosen. Total drift across all twelve, in games:
+		 *
+		 *      15 -> 648      36 -> 435      50 -> 385
+		 *      30 -> 535      40 -> 435      45 -> 350   <-
+		 *
+		 *  It was 15, to match `build_coach_tenures.py`, and 15 is too small:
+		 *  Don Zimmer managed the first 36 games of 1999 while Joe Torre was
+		 *  treated for cancer, and without them Torre is 21 wins short.
+		 *
+		 *  Above 45 it gets worse again, and Casey Stengel is why. Bob Coleman
+		 *  managed 46 games of the 1943 Braves after Stengel was hit by a taxi,
+		 *  and every published record credits Coleman with them. At 50 Stengel
+		 *  gains 20 wins he is not usually given. So the line sits between a
+		 *  36-game absence and a 46-game one, which is narrower than it looks
+		 *  and is the reason to record the sweep rather than the number.
+		 *
+		 *  What remains at 45 is not this rule: Connie Mack is short by his
+		 *  1894-96 Pittsburgh seasons, which begin before `gameinfo.csv` does. */
+		fillInMaxGames: 45,
 		/** Of every MLB season above .700, two have happened since 1955. */
 		losslessSeasonIsPlausible: false,
 		/** Exact date. Across fifty-odd seasons of near-daily baseball there is
@@ -282,6 +423,8 @@ export const sport = {
 	gameRow,
 	isScoringPlay,
 	scoringRow,
+	leaderRows,
+	gameLogId,
 	// The live feed's mappers belong here too. `loadSports` hands the server
 	// each adapter's DEFAULT export, and these were only named exports — the
 	// command-line loader imported the whole module namespace, so nothing showed

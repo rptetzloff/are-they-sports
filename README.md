@@ -525,12 +525,18 @@ page nobody can reach. No test noticed, because every test already knew the URL.
 
 It now asks both. "Is every route linked?" was the only question being asked, so
 the opposite failure sat in plain sight: `/managers` was in **every** club page's
-site nav, answering 404, for as long as the nav existed. The leaders page needs a
-curated coaches/managers table nobody publishes, and the link went in ahead of
-the page. Every link the nav emits is now resolved through the real router, and a
-test guards the guard by asserting `/managers` still fails to resolve — otherwise
-a check that returned true for everything would pass on the nav that shipped the
-404.
+site nav, answering 404, for as long as the nav existed, because the link went in
+ahead of the page. Every link the nav emits is now resolved through the real
+router, and a test guards the guard with a route that genuinely does not
+exist — otherwise a check that returned true for everything would pass on the nav
+that shipped the 404.
+
+That test then caught the other half of building the page it was complaining
+about. `/coaches` and `/managers` are the only routes whose NAME comes from the
+sport, and the reachability helper parsed paths without saying which club it
+held — so the leaders page was routable in the server and unroutable in the
+test. Anything checking routes has to carry the club the way the server does,
+which is [a club is a sport and an id](CLAUDE.md) arriving through a test helper.
 
 The same gap ran the other way for `/standings`: it was linked from the club
 selector and from the other league pages, and not from any club page, because
@@ -733,6 +739,106 @@ rule a second time in a second language, and this file's own example of the cost
 is that merging those two implementations "would silently rewrite one record
 book". They are computed in JavaScript, once, and the *result* is stored.
 
+## The leaders page, and a claim that was two-thirds wrong
+
+`/coaches` for football and `/managers` for baseball — one page, and the noun
+comes from `nouns.leaderPlural` in the sport adapter rather than a branch.
+
+This repo said for months that the page "needs a curated coaches/managers table
+nobody publishes". That was checked rather than assumed, and it survives for
+exactly one era of one sport:
+
+| | source | coverage |
+|---|---|---|
+| baseball, 1871– | Retrosheet game logs, fields 90 and 92 | 217,906 of 225,713 final games, 96.5% |
+| football, 1999– | nflverse `schedules.csv`, `home_coach` / `away_coach` | 7,548 of 7,548 rows, no misses |
+| football, 1920–1998 | **nothing.** FiveThirtyEight's file has no coach column | curated |
+
+The baseball managers had been sitting in a file the loader was not reading, and
+the modern football coaches in two columns of a file it *was* reading. Only
+`data/reference/nfl-coaches.csv` had to be written, and it is the same kind of
+file as `nfl-franchise-history.csv` for the same reason.
+
+**A leader is a person, not a name.** nflverse writes `Jim Mora` for
+Indianapolis in 1999 and Atlanta in 2004, and those are a father and a son. Key
+the page on the string and it serves one coach with an eleven-year career and
+three clubs — no error, no failing test. Retrosheet solved this long ago by
+publishing a manager id, unique across all 1,490 (id, name) pairs in the logs;
+football has no such column anywhere, so `leaderId` is assigned. That is [a club
+is a sport and an id](CLAUDE.md) arriving with a different noun.
+
+**Two kinds of number, and the page says which.** A counted record is recomputed
+from `game` and cannot drift. A stated one is transcribed from Wikipedia and
+cannot be rechecked. They are added and never reconciled, which is safe because
+the eras do not overlap — and a test asserts that rather than a comment claiming
+it. A career straddling 1999 is one row marked *part stated*.
+
+**Regular season and postseason are separate columns**, because the sources
+disagree about whether they are one. Retrosheet and nflverse count playoff games
+inside W/L and Wikipedia does not: of 175 NFL tenures the two describe in common,
+161 reconcile once the postseason is pulled out of the derived side. Bobby Cox is
+2213–1774 in Retrosheet and 2149–1709 on Wikipedia, and the difference is exactly
+his postseason.
+
+### Who held the job, not who ran the game
+
+Retrosheet names the manager of record for each game, which means it names the
+bench coach who took over on an ejection. That is the truth about the game and
+the wrong answer for a coaching record: Bobby Cox came out **2493–1998** against
+a published 2504–2001, and the difference was Bobby Dews and Pat Corrales
+covering games he was thrown out of.
+
+So `game_leader` has two columns. `leader` is who held the job and is what every
+number on the page counts; `ran` is who actually managed it, when that was
+somebody else, and is NULL on all but 2,488 baseball rows.
+
+**The fold is not a game count.** A stint is credited back only when one person
+managed a game before it and after it *and* managed more of that season than the
+stand-in did. A firing fails the first test at any length, so an interim who
+took over always keeps their own row. The second test is what stops the rule
+inverting: a manager's season is chopped into runs by every ejection, so Phil
+Garner's 2006 Astros reads `Cooper(1) Garner(37) Cooper(1)` — adjacency alone
+calls *Garner* the stand-in and hands his season to his own bench coach.
+
+The length backstop was swept against twelve managers' published career records
+rather than chosen, in total games of drift:
+
+| 15 | 30 | 36 | 40 | **45** | 50 |
+|---|---|---|---|---|---|
+| 648 | 535 | 435 | 435 | **350** | 385 |
+
+Fifteen is too small — Don Zimmer managed the first 36 games of 1999 while Joe
+Torre was treated for cancer, and without them Torre is 21 wins short. Fifty is
+too big — Bob Coleman managed 46 games of the 1943 Braves after Casey Stengel
+was hit by a taxi, and every published record credits Coleman. The line sits
+between a 36-game absence and a 46-game one.
+
+With it, Cox, Torre, Sparky Anderson and Bruce Bochy all reproduce their
+published career records **exactly**. Football folds nothing at all: nflverse
+names the head coach of record for every game and never the assistant who stood
+in, which is measured rather than assumed.
+
+### What it does not cover, said here so nobody measures it twice
+
+- **MLB 2026.** Retrosheet publishes game logs annually; the season being played
+  is not in them. 2,058 final games have no manager and will get one.
+- **The Negro Leagues.** `gameinfo.csv` includes them — about 8,220 games,
+  concentrated in 1937–1949 — but Retrosheet publishes those as `.EBR` event
+  files under `alldata/ngl_b`, not as game logs. No page is wrong, because none
+  of those clubs is in any scope. Closing it means an EBR parser, not a wider
+  glob.
+- **Fifteen pre-1999 football tenures have no record at all.** The 1942–45 Bears
+  had co-head coaches, and a handful of mid-season changes cannot be split by a
+  season span. Their counts are blank *on purpose* and the page shows the coach
+  with no numbers, which is the honest version of a table that would otherwise
+  invent them.
+- **Pre-1933 NFL titles.** The league awarded them on standings before there was
+  a championship game, so Curly Lambeau's 1929, 1930 and 1931 do not appear —
+  a title here is winning the championship *round*, and there was no round.
+- **Connie Mack's first three seasons.** He managed Pittsburgh in 1894–96 and
+  `gameinfo.csv` begins in 1897, so he is about 130 wins short of his published
+  total. A coverage gap, not an attribution one.
+
 ## Standings
 
 `/standings` is where every club in a division finished, for a season. The
@@ -913,6 +1019,7 @@ docker run -p 3000:3000 -e SCOPE=division:nfl/nfc-north are-they-sports
 | `STRICT_SCOPE` | `1` makes any unbuilt club in scope unhealthy. Unset, serving at least one club is healthy, because building clubs one at a time is how this repo works today. |
 | `PORT` | defaults to 3000. |
 | `BUILD_SHA` | stamped into `/healthz` as `build`. Coolify's `SOURCE_COMMIT` is read too. Unset reports `"unknown"` rather than guessing. |
+| `MLB_GAMELOGS_DIR` | where Retrosheet's `gl*.txt` game logs are, for `npm run load mlb`. Optional: without it the load skips managers, says so, and every other page is unaffected. |
 
 The healthcheck is `/healthz`, and it reports the gap between what the scope
 promised and what is built.

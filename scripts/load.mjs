@@ -12,12 +12,13 @@
 // replaces the capture with the authoritative version, and running it twice in
 // a row changes nothing. Authority is a column in `source`, not a branch here.
 
-import { existsSync, mkdirSync, readFileSync, rmSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import pg from 'pg';
-import { csvRows, parseCsv } from '../lib/csv.js';
+import { csvRows, parseCsv, splitCsvLine } from '../lib/csv.js';
 import { codeTable } from '../lib/codes.js';
+import { creditFillIns, nflLeaderResolver } from '../lib/leaders.js';
 import { loadHistory, mlbIndex, nflIndex, resolver } from '../lib/names.js';
 import { download } from './fetch.mjs';
 import { isoDate } from '../sports/mlb.js';
@@ -169,7 +170,14 @@ export async function repairAliasFranchises(client, sportId, codes) {
 	// how the NEXT table gets missed; an unhandled one now stops the load and
 	// says which it is.
 	const REMAP = { game: ['home', 'away'] }; // rewritten to point at the canonical id
-	const CLEAR = new Set(['franchise_code', 'franchise_name', 'division_membership']); // rebuilt by the load
+	// Rebuilt by the load. `game_leader` and `leader_tenure` join here because
+	// loadLeaders repopulates both from source and reference files every run —
+	// and because this guard is what found them: it asks the catalogue which
+	// tables reference `franchise` rather than trusting a list written from
+	// memory, so adding the two tables without classifying them stopped the
+	// load by name instead of failing a foreign key halfway through.
+	const CLEAR = new Set(['franchise_code', 'franchise_name', 'division_membership',
+		'game_leader', 'leader_tenure']);
 	const { rows: referencing } = await client.query(
 		`SELECT DISTINCT c.conrelid::regclass::text AS table_name
 		   FROM pg_constraint c
@@ -254,6 +262,253 @@ async function loadLive(client, sportId, cfg, season, put) {
 		}
 	}
 	return seen;
+}
+
+/** Load who led each side of each game, and the tenures no source counts.
+ *
+ *  Runs AFTER games are flushed, and that ordering is load-bearing rather than
+ *  tidy: `game_leader` has a foreign key onto `game`, so a buffered row is not
+ *  there yet and every insert would fail. The championship pass above learned
+ *  the same lesson the same way.
+ *
+ *  Every leader row is keyed to a game id that came out of the same source file
+ *  the game did — nflverse's `game_id`, Retrosheet's home+date+number — so this
+ *  is a lookup and never a join on date and club. Doubleheaders are the reason:
+ *  34,185 baseball dates carry two games, and matching on the date alone has to
+ *  guess for all of them.
+ *
+ *  Games the database does not have are counted and reported, never inserted
+ *  silently and never allowed to abort the load. For baseball that count is
+ *  real and expected — the Negro Leagues are in `gameinfo.csv` but published as
+ *  .EBR event files rather than game logs, so about 8,220 games have no manager
+ *  row and no page is wrong because none of those clubs is in any scope.
+ */
+async function loadLeaders(client, sportId, sport, { byCode }) {
+	const { rows: existing } = await client.query('SELECT id FROM game WHERE sport = $1', [sportId]);
+	const haveGame = new Set(existing.map((r) => r.id));
+
+	const leaders = new Map();   // id -> name
+	const attributions = [];     // { gameId, franchise, leaderId }
+	let noGame = 0, noFranchise = 0, unresolved = new Map();
+
+	if (sportId === 'nfl') {
+		// The curated table is consulted for identity only. It exists because
+		// nflverse's `Jim Mora` is two people; see lib/leaders.js.
+		const reference = loadNflCoaches();
+		const resolve = nflLeaderResolver(reference);
+		for await (const r of csvRows(join(SOURCE_DIR, 'nfl', 'schedules.csv'))) {
+			for (const row of sport.leaderRows(r)) {
+				const franchise = byCode.get(row.code) ?? row.code;
+				const id = resolve(row.leaderName, franchise, row.season);
+				if (!id) { unresolved.set(row.leaderName, (unresolved.get(row.leaderName) ?? 0) + 1); continue; }
+				leaders.set(id, row.leaderName);
+				if (!haveGame.has(row.gameId)) { noGame++; continue; }
+				attributions.push({ gameId: row.gameId, franchise, leaderId: id });
+			}
+		}
+	} else {
+		const dir = process.env[sport.sources.gameLogs.env]
+			?? join(SOURCE_DIR, 'sportsdata', 'mlb', 'alldata', 'gamelogs');
+		if (!existsSync(dir)) {
+			// A gap, not a configuration error: the rest of the load is valid and
+			// the leaders page reports itself unavailable. Exiting here would
+			// make a missing optional file fatal to every other page.
+			console.log(`  leaders      SKIPPED, no game logs at ${dir}`);
+			console.log(`               set ${sport.sources.gameLogs.env} to load managers`);
+			return;
+		}
+		const files = readdirSync(dir).filter((f) => /^gl.*\.txt$/i.test(f)).sort();
+		for (const f of files) {
+			for (const line of readFileSync(join(dir, f), 'utf8').split('\n')) {
+				if (!line.trim()) continue;
+				for (const row of sport.leaderRows(splitCsvLine(line.trim()))) {
+					const franchise = byCode.get(row.code) ?? row.code;
+					if (!franchise) { noFranchise++; continue; }
+					leaders.set(row.leaderId, row.leaderName);
+					if (!haveGame.has(row.gameId)) { noGame++; continue; }
+					attributions.push({ gameId: row.gameId, franchise, leaderId: row.leaderId });
+				}
+			}
+		}
+		console.log(`  game logs    ${files.length} files`);
+	}
+
+	// Who HELD the job, which is not who ran every game. A source that names the
+	// manager of record names the bench coach who took over on an ejection, and
+	// crediting him takes those games off the man whose tenure it was. See
+	// db/migrations/0008 and lib/leaders.js.
+	//
+	// Ordered by club and then date, because the fold reads runs of consecutive
+	// games and an unordered pass would find runs that never happened. The
+	// attributions are already in file order, which for baseball is one game log
+	// per season and for football is the schedule — neither is club-major, so
+	// this sorts rather than assuming.
+	const whenOf = new Map(
+		(await client.query('SELECT id, date, season FROM game WHERE sport = $1', [sportId]))
+			.rows.map((r) => [r.id, r]));
+	const ordered = [...attributions]
+		.map((a) => {
+			const g = whenOf.get(a.gameId);
+			return { ...a, leader: a.leaderId, date: g?.date, season: g?.season };
+		})
+		.sort((x, y) => (x.franchise < y.franchise ? -1 : x.franchise > y.franchise ? 1
+			: (x.date - y.date) || (x.gameId < y.gameId ? -1 : 1)));
+	const held = creditFillIns(ordered, sport.defaults.rules.fillInMaxGames);
+
+	let foldedGames = 0;
+	const standIns = new Set();
+	for (const a of attributions) {
+		const credit = held.get(`${a.franchise}|${a.gameId}`);
+		if (credit && credit !== a.leaderId) {
+			a.ran = a.leaderId;
+			a.leaderId = credit;
+			foldedGames++;
+			standIns.add(a.ran);
+		}
+	}
+
+	const sourceId = sportId === 'nfl' ? 'nflverse' : 'retrosheet';
+	for (const [id, name] of leaders) {
+		await client.query(
+			`INSERT INTO leader (sport, id, name, source) VALUES ($1,$2,$3,$4)
+			 ON CONFLICT (sport, id) DO UPDATE SET name = EXCLUDED.name`,
+			[sportId, id, name, sourceId]);
+	}
+
+	// A franchise the games never produced has no row to point at, and the
+	// foreign key would take the whole load down for one of them. Registering
+	// them here would invent clubs from a coaching table, which is backwards.
+	const { rows: haveFranchise } = await client.query(
+		'SELECT id FROM franchise WHERE sport = $1', [sportId]);
+	const known = new Set(haveFranchise.map((r) => r.id));
+
+	let wrote = 0, orphanFranchise = 0;
+	const BATCH = 500;
+	for (let i = 0; i < attributions.length; i += BATCH) {
+		const slice = attributions.slice(i, i + BATCH).filter((a) => {
+			if (known.has(a.franchise)) return true;
+			orphanFranchise++;
+			return false;
+		});
+		if (!slice.length) continue;
+		// One row per (game, franchise). A club appears once per game, but the
+		// three postseason log files overlap the season files for a handful of
+		// games, so the same attribution can arrive twice in one batch — which
+		// Postgres refuses inside a single ON CONFLICT DO UPDATE.
+		const byKey = new Map(slice.map((a) => [`${a.gameId}/${a.franchise}`, a]));
+		const batch = [...byKey.values()];
+		const params = [];
+		const tuples = batch.map((a) => {
+			const at = params.length;
+			params.push(sportId, a.gameId, a.franchise, a.leaderId, a.ran ?? null, sourceId);
+			return `($${at + 1},$${at + 2},$${at + 3},$${at + 4},$${at + 5},$${at + 6})`;
+		});
+		const r = await client.query(
+			`INSERT INTO game_leader (sport, game_id, franchise, leader, ran, source)
+			 VALUES ${tuples.join(',')}
+			 ON CONFLICT (sport, game_id, franchise)
+			 DO UPDATE SET leader = EXCLUDED.leader, ran = EXCLUDED.ran, source = EXCLUDED.source`,
+			params);
+		wrote += r.rowCount;
+	}
+
+	console.log(`  leaders      ${leaders.size} people, ${wrote} game attributions`);
+	// Reported, because it is the difference between this page and a published
+	// coaching record and somebody will check one against the other.
+	if (foldedGames) {
+		console.log(`  stand-ins    ${foldedGames} games credited to the leader of record,`
+			+ ` covered by ${standIns.size} people (ejections, illness, suspensions)`);
+	} else {
+		console.log('  stand-ins    none — this source names the leader of record for every game');
+	}
+	if (noGame) console.log(`  unmatched    ${noGame} source rows name a game this database does not have`);
+	if (orphanFranchise) console.log(`  unknown club ${orphanFranchise} attributions name a franchise with no games`);
+	if (noFranchise) console.log(`  no franchise ${noFranchise} rows carry a code that resolves to nothing`);
+	if (unresolved.size) {
+		// Reported by name and count, because the fix is a row in the curated
+		// file and the person writing it needs to know who.
+		console.log(`  UNRESOLVED   ${unresolved.size} coach names the curated table contradicts:`);
+		for (const [n, c] of [...unresolved].sort((a, b) => b[1] - a[1]).slice(0, 10)) {
+			console.log(`               ${n} (${c} rows)`);
+		}
+	}
+
+	if (sportId === 'nfl') await loadNflTenures(client, known);
+}
+
+/** The curated football coaches table, or [] when it does not exist yet.
+ *
+ *  Missing is a gap and not a crash: without it every coach still resolves by
+ *  `slugFor`, the modern era loads exactly as it would have, and the only thing
+ *  lost is the pre-1999 half of the page and the Mora disambiguation. Both are
+ *  reported by the load rather than assumed.
+ */
+function loadNflCoaches() {
+	const path = join(REFERENCE_DIR, 'nfl-coaches.csv');
+	if (!existsSync(path)) return [];
+	return parseCsv(readFileSync(path, 'utf8')).map((r) => ({
+		leaderId: r.leaderId,
+		name: r.name,
+		nflverseName: r.nflverseName,
+		franchiseAbbrv: r.franchiseAbbrv,
+		// The whole tenure, which is what identity resolution matches on: the
+		// two Moras are told apart by club and season, and a span truncated at
+		// 1998 could not place a `Jim Mora` row from 2001.
+		firstSeason: Number(r.firstSeason),
+		lastSeason: Number(r.lastSeason),
+		// Where the stated counts stop, which is 1998 for a tenure that crosses
+		// into the counted era. Loading `lastSeason` here instead would make a
+		// stated tenure overlap the games it was subtracted from.
+		statedLastSeason: Number(r.statedLastSeason || r.lastSeason),
+		w: Number(r.w || 0), l: Number(r.l || 0), t: Number(r.t || 0),
+		playoffW: Number(r.playoffW || 0), playoffL: Number(r.playoffL || 0),
+		// A space-separated season list, counted from games rather than stated.
+		// Empty is the common case and must not become an array holding one NaN.
+		titleSeasons: String(r.titleSeasons ?? '').trim()
+			? String(r.titleSeasons).trim().split(/\s+/).map(Number)
+			: [],
+		interim: String(r.interim).toUpperCase() === 'TRUE',
+		basis: r.basis ?? '',
+		// Blank counts mean the record is not known — a co-head-coach year, or a
+		// mid-season change this data cannot split. Those must never become a
+		// stated tenure of nought and nought, which renders as a real 0-0.
+		stated: r.w !== '' && r.w !== undefined,
+	}));
+}
+
+/** Stated tenures for the era with no per-game source.
+ *
+ *  NFL 1920-1998 only. These are added to the counted rows and never reconciled
+ *  with them, which is safe exactly because the eras do not overlap — and that
+ *  is asserted in test/leaders.test.js rather than trusted here.
+ */
+async function loadNflTenures(client, knownFranchises) {
+	const rows = loadNflCoaches().filter((r) => r.stated);
+	if (!rows.length) {
+		console.log('  tenures      none — data/reference/nfl-coaches.csv is missing or has no counts');
+		console.log('               football before 1999 will be absent from the leaders page');
+		return;
+	}
+	let wrote = 0, skippedClub = 0;
+	for (const r of rows) {
+		if (!knownFranchises.has(r.franchiseAbbrv)) { skippedClub++; continue; }
+		await client.query(
+			`INSERT INTO leader (sport, id, name, source) VALUES ('nfl',$1,$2,'wikipedia')
+			 ON CONFLICT (sport, id) DO NOTHING`, [r.leaderId, r.name]);
+		const res = await client.query(
+			`INSERT INTO leader_tenure
+			   (sport, franchise, leader, first_season, last_season, w, l, t, playoff_w, playoff_l, title_seasons, interim, source)
+			 VALUES ('nfl',$1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,'wikipedia')
+			 ON CONFLICT (sport, franchise, leader, first_season) DO UPDATE SET
+			   last_season = EXCLUDED.last_season, w = EXCLUDED.w, l = EXCLUDED.l, t = EXCLUDED.t,
+			   playoff_w = EXCLUDED.playoff_w, playoff_l = EXCLUDED.playoff_l,
+			   title_seasons = EXCLUDED.title_seasons, interim = EXCLUDED.interim`,
+			[r.franchiseAbbrv, r.leaderId, r.firstSeason, r.statedLastSeason,
+				r.w, r.l, r.t, r.playoffW, r.playoffL, r.titleSeasons, r.interim]);
+		wrote += res.rowCount;
+	}
+	console.log(`  tenures      ${wrote} stated tenures (NFL before 1999)`);
+	if (skippedClub) console.log(`  unknown club ${skippedClub} tenures name a franchise with no games`);
 }
 
 async function main() {
@@ -564,6 +819,9 @@ async function main() {
 		}
 		console.log(`  championships ${marked} title games identified`);
 	}
+
+	// After the flush above, because game_leader points at game.
+	await loadLeaders(client, sportId, (await import(`../sports/${sportId}.js`)).default, { byCode });
 
 	for (const d of divisions) {
 		const f = byCode.get(d.code) ?? d.code;

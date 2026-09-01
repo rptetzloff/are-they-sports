@@ -1,0 +1,404 @@
+# NFL head coaches before 1999, where no per-game source exists.
+#
+# CURATED AND COMMITTED. Seeded by scripts/coaches.mjs; corrections belong
+# here, in this file, and the script refuses to overwrite it without --force.
+#
+# basis says how much to trust a row:
+#   transcribed  W/L from Wikipedia. This repo cannot check it.
+#   counted      W/L counted from games over seasons no other tenure claims.
+#                Strictly better than transcribed, and used where Wikipedia
+#                gave nothing.
+#   unresolved   Neither. Co-head coaches, or a mid-season change this data
+#                cannot split. The record is blank ON PURPOSE and the page
+#                shows the coach with no numbers rather than a wrong total.
+#
+# statedLastSeason is where the transcribed record stops. It differs from
+# lastSeason only for coaches whose tenure crosses 1999, whose modern half is
+# counted from games and has been subtracted out.
+#
+# leaderId is the identity, and it is not derivable from the name: nflverse
+# writes "Jim Mora" for both the father and the son.
+#
+leaderId,name,nflverseName,franchiseAbbrv,firstSeason,lastSeason,statedLastSeason,w,l,t,playoffW,playoffL,titleSeasons,interim,basis,source
+driscoll-paddy,Paddy Driscoll,,ARI,1920,1922,1922,17,8,4,0,0,,FALSE,transcribed,List of Arizona Cardinals head coaches
+horween-arnold,Arnold Horween,,ARI,1923,1924,1924,13,8,1,0,0,,FALSE,transcribed,List of Arizona Cardinals head coaches
+barry-norman,Norman Barry,,ARI,1925,1926,1926,16,8,2,0,0,,FALSE,transcribed,List of Arizona Cardinals head coaches
+chamberlin-guy,Guy Chamberlin,,ARI,1927,1927,1927,3,7,1,0,0,,FALSE,transcribed,List of Arizona Cardinals head coaches
+gillies-fred,Fred Gillies,,ARI,1928,1928,1928,1,5,0,0,0,,FALSE,transcribed,List of Arizona Cardinals head coaches
+scanlon-dewey,Dewey Scanlon,,ARI,1929,1929,1929,6,6,1,0,0,,FALSE,transcribed,List of Arizona Cardinals head coaches
+nevers-ernie,Ernie Nevers,,ARI,1930,1931,1931,10,9,2,0,0,,FALSE,transcribed,List of Arizona Cardinals head coaches
+andrews-roy,Roy Andrews,,ARI,1931,1931,1931,0,1,0,,,,FALSE,transcribed,List of Arizona Cardinals head coaches
+chevigny-jack,Jack Chevigny,,ARI,1932,1932,1932,2,6,2,0,0,,FALSE,transcribed,List of Arizona Cardinals head coaches
+schissler-paul,Paul Schissler,,ARI,1933,1934,1934,6,15,1,0,0,,FALSE,transcribed,List of Arizona Cardinals head coaches
+creighton-milan,Milan Creighton,,ARI,1935,1938,1938,16,26,4,0,0,,FALSE,transcribed,List of Arizona Cardinals head coaches
+nevers-ernie,Ernie Nevers,,ARI,1939,1939,1939,1,10,0,0,0,,FALSE,transcribed,List of Arizona Cardinals head coaches
+conzelman-jimmy,Jimmy Conzelman,,ARI,1940,1942,1942,8,22,3,0,0,,FALSE,transcribed,List of Arizona Cardinals head coaches
+handler-phil,Phil Handler,,ARI,1943,1943,1943,0,10,0,0,0,,FALSE,transcribed,List of Arizona Cardinals head coaches
+handler-phil,Phil Handler,,ARI,1944,1944,1944,0,10,0,,,,FALSE,transcribed,List of Arizona Cardinals head coaches
+kiesling-walt,Walt Kiesling,,ARI,1944,1944,1944,0,10,0,,,,FALSE,transcribed,List of Arizona Cardinals head coaches
+handler-phil,Phil Handler,,ARI,1945,1945,1945,1,9,0,0,0,,FALSE,transcribed,List of Arizona Cardinals head coaches
+conzelman-jimmy,Jimmy Conzelman,,ARI,1946,1948,1948,26,9,0,1,1,1947,FALSE,transcribed,List of Arizona Cardinals head coaches
+parker-buddy,Buddy Parker,,ARI,1949,1949,1949,6,5,1,0,0,,FALSE,transcribed,List of Arizona Cardinals head coaches
+lambeau-curly,Curly Lambeau,,ARI,1950,1951,1951,7,15,0,0,0,,FALSE,transcribed,List of Arizona Cardinals head coaches
+isbell-cecil,Cecil Isbell,,ARI,1951,1951,1951,1,1,0,,,,FALSE,transcribed,List of Arizona Cardinals head coaches
+kuharich-joe,Joe Kuharich,,ARI,1952,1952,1952,4,8,0,0,0,,FALSE,transcribed,List of Arizona Cardinals head coaches
+stydahar-joe,Joe Stydahar,,ARI,1953,1954,1954,3,20,1,0,0,,FALSE,transcribed,List of Arizona Cardinals head coaches
+richards-ray,Ray Richards,,ARI,1955,1957,1957,14,21,1,0,0,,FALSE,transcribed,List of Arizona Cardinals head coaches
+ivy-pop,Pop Ivy,,ARI,1958,1961,1961,15,31,2,0,0,,FALSE,transcribed,List of Arizona Cardinals head coaches
+drulis-chuck,Chuck Drulis,,ARI,1961,1961,1961,2,0,0,,,,FALSE,transcribed,List of Arizona Cardinals head coaches
+prochaska-ray,Ray Prochaska,,ARI,1961,1961,1961,2,0,0,,,,FALSE,transcribed,List of Arizona Cardinals head coaches
+willsey-ray,Ray Willsey,,ARI,1961,1961,1961,2,0,0,,,,FALSE,transcribed,List of Arizona Cardinals head coaches
+lemm-wally,Wally Lemm,,ARI,1962,1965,1965,27,26,3,0,0,,FALSE,transcribed,List of Arizona Cardinals head coaches
+winner-charley,Charley Winner,,ARI,1966,1970,1970,35,30,5,0,0,,FALSE,transcribed,List of Arizona Cardinals head coaches
+hollway-bob,Bob Hollway,,ARI,1971,1972,1972,8,18,2,0,0,,FALSE,transcribed,List of Arizona Cardinals head coaches
+coryell-don,Don Coryell,,ARI,1973,1977,1977,42,27,1,0,2,,FALSE,transcribed,List of Arizona Cardinals head coaches
+wilkinson-bud,Bud Wilkinson,,ARI,1978,1979,1979,9,20,0,0,0,,FALSE,transcribed,List of Arizona Cardinals head coaches
+wilson-larry,Larry Wilson,,ARI,1979,1979,1979,2,1,0,,,,FALSE,transcribed,List of Arizona Cardinals head coaches
+hanifan-jim,Jim Hanifan,,ARI,1980,1985,1985,39,49,1,0,1,,FALSE,transcribed,List of Arizona Cardinals head coaches
+stallings-gene,Gene Stallings,,ARI,1986,1989,1989,23,34,1,0,0,,FALSE,transcribed,List of Arizona Cardinals head coaches
+kuhlmann-hank,Hank Kuhlmann,,ARI,1989,1989,1989,0,5,0,,,,FALSE,transcribed,List of Arizona Cardinals head coaches
+bugel-joe,Joe Bugel,,ARI,1990,1993,1993,20,44,0,0,0,,FALSE,transcribed,List of Arizona Cardinals head coaches
+ryan-buddy,Buddy Ryan,,ARI,1994,1995,1995,12,20,0,0,0,,FALSE,transcribed,List of Arizona Cardinals head coaches
+tobin-vince,Vince Tobin,,ARI,1996,2000,1998,19,27,0,1,1,,FALSE,transcribed,List of Arizona Cardinals head coaches
+hecker-norb,Norb Hecker,,ATL,1966,1968,1968,4,26,1,0,0,,FALSE,transcribed,List of Atlanta Falcons head coaches
+brocklin-norm-van,Norm Van Brocklin,,ATL,1968,1974,1974,37,49,3,0,0,,FALSE,transcribed,List of Atlanta Falcons head coaches
+campbell-marion,Marion Campbell,,ATL,1974,1976,1976,6,19,0,0,0,,FALSE,transcribed,List of Atlanta Falcons head coaches
+peppler-pat,Pat Peppler,,ATL,1976,1976,1976,3,6,0,,,,FALSE,transcribed,List of Atlanta Falcons head coaches
+bennett-leeman,Leeman Bennett,,ATL,1977,1982,1982,46,41,0,1,3,,FALSE,transcribed,List of Atlanta Falcons head coaches
+henning-dan,Dan Henning,,ATL,1983,1986,1986,22,41,1,0,0,,FALSE,transcribed,List of Atlanta Falcons head coaches
+campbell-marion,Marion Campbell,,ATL,1987,1989,1989,11,32,0,0,0,,FALSE,transcribed,List of Atlanta Falcons head coaches
+hanifan-jim,Jim Hanifan,,ATL,1989,1989,1989,0,4,0,,,,FALSE,transcribed,List of Atlanta Falcons head coaches
+glanville-jerry,Jerry Glanville,,ATL,1990,1993,1993,27,37,0,1,1,,FALSE,transcribed,List of Atlanta Falcons head coaches
+jones-june,June Jones,,ATL,1994,1996,1996,19,29,0,0,1,,FALSE,transcribed,List of Atlanta Falcons head coaches
+reeves-dan,Dan Reeves,,ATL,1997,2003,1998,21,11,0,2,1,,FALSE,transcribed,List of Atlanta Falcons head coaches
+marchibroda-ted,Ted Marchibroda,,BAL,1996,1998,1998,16,31,1,0,0,,FALSE,transcribed,List of Baltimore Ravens head coaches
+ramsey-buster,Buster Ramsey,,BUF,1960,1961,1961,11,16,1,0,0,,FALSE,transcribed,List of Buffalo Bills head coaches
+saban-lou,Lou Saban,,BUF,1962,1965,1965,36,17,3,2,1,1964 1965,FALSE,transcribed,List of Buffalo Bills head coaches
+collier-joe,Joe Collier,,BUF,1966,1968,1968,13,16,1,0,1,,FALSE,transcribed,List of Buffalo Bills head coaches
+johnson-harvey,Harvey Johnson,,BUF,1968,1968,1968,1,10,1,,,,FALSE,transcribed,List of Buffalo Bills head coaches
+rauch-john,John Rauch,,BUF,1969,1970,1970,7,20,1,0,0,,FALSE,transcribed,List of Buffalo Bills head coaches
+johnson-harvey,Harvey Johnson,,BUF,1971,1971,1971,1,13,0,0,0,,FALSE,transcribed,List of Buffalo Bills head coaches
+saban-lou,Lou Saban,,BUF,1972,1976,1976,32,28,1,0,1,,FALSE,transcribed,List of Buffalo Bills head coaches
+ringo-jim,Jim Ringo,,BUF,1976,1977,1977,3,20,0,0,0,,FALSE,transcribed,List of Buffalo Bills head coaches
+knox-chuck,Chuck Knox,,BUF,1978,1982,1982,37,36,0,1,2,,FALSE,transcribed,List of Buffalo Bills head coaches
+stephenson-kay,Kay Stephenson,,BUF,1983,1985,1985,10,26,0,0,0,,FALSE,transcribed,List of Buffalo Bills head coaches
+bullough-hank,Hank Bullough,,BUF,1985,1986,1986,4,17,0,,,,FALSE,transcribed,List of Buffalo Bills head coaches
+levy-marv,Marv Levy,,BUF,1986,1997,1997,112,70,0,11,8,,FALSE,transcribed,List of Buffalo Bills head coaches
+phillips-wade,Wade Phillips,,BUF,1998,2000,1998,10,6,0,0,1,,FALSE,transcribed,List of Buffalo Bills head coaches
+capers-dom,Dom Capers,,CAR,1995,1998,1998,30,34,0,1,1,,FALSE,transcribed,List of Carolina Panthers head coaches
+halas-george,George Halas,,CHI,1920,1929,1929,84,31,19,0,0,,FALSE,counted,hand-entered (Wikipedia table not parsed)
+jones-ralph,Ralph Jones,,CHI,1930,1932,1932,24,10,7,0,0,,FALSE,counted,hand-entered (Wikipedia table not parsed)
+halas-george,George Halas,,CHI,1933,1942,1942,,,,,,,FALSE,unresolved,hand-entered (Wikipedia table not parsed)
+anderson-hunk,Hunk Anderson,,CHI,1942,1945,1945,,,,,,,FALSE,unresolved,hand-entered (Wikipedia table not parsed)
+johnsos-luke,Luke Johnsos,,CHI,1942,1945,1945,,,,,,,FALSE,unresolved,hand-entered (Wikipedia table not parsed)
+halas-george,George Halas,,CHI,1946,1955,1955,75,42,2,1,1,1946,FALSE,counted,hand-entered (Wikipedia table not parsed)
+driscoll-paddy,Paddy Driscoll,,CHI,1956,1957,1957,14,9,1,0,1,,FALSE,counted,hand-entered (Wikipedia table not parsed)
+halas-george,George Halas,,CHI,1958,1967,1967,75,53,6,1,0,1963,FALSE,counted,hand-entered (Wikipedia table not parsed)
+dooley-jim,Jim Dooley,,CHI,1968,1971,1971,20,36,0,0,0,,FALSE,counted,hand-entered (Wikipedia table not parsed)
+gibron-abe,Abe Gibron,,CHI,1972,1974,1974,11,30,1,0,0,,FALSE,counted,hand-entered (Wikipedia table not parsed)
+pardee-jack,Jack Pardee,,CHI,1975,1977,1977,20,22,0,0,1,,FALSE,counted,hand-entered (Wikipedia table not parsed)
+armstrong-neill,Neill Armstrong,,CHI,1978,1981,1981,30,34,0,0,1,,FALSE,counted,hand-entered (Wikipedia table not parsed)
+ditka-mike,Mike Ditka,,CHI,1982,1992,1992,106,62,0,6,6,1985,FALSE,counted,hand-entered (Wikipedia table not parsed)
+wannstedt-dave,Dave Wannstedt,,CHI,1993,1998,1998,40,56,0,1,1,,FALSE,counted,hand-entered (Wikipedia table not parsed)
+brown-paul,Paul Brown,,CIN,1968,1975,1975,55,56,1,0,3,,FALSE,transcribed,List of Cincinnati Bengals head coaches
+johnson-bill,Bill Johnson,,CIN,1976,1978,1978,18,15,0,0,0,,FALSE,transcribed,List of Cincinnati Bengals head coaches
+rice-homer,Homer Rice,,CIN,1978,1979,1979,8,19,0,0,0,,FALSE,transcribed,List of Cincinnati Bengals head coaches
+gregg-forrest,Forrest Gregg,,CIN,1980,1983,1983,32,25,0,2,2,,FALSE,transcribed,List of Cincinnati Bengals head coaches
+wyche-sam,Sam Wyche,,CIN,1984,1991,1991,61,66,0,3,2,,FALSE,transcribed,List of Cincinnati Bengals head coaches
+shula-dave,Dave Shula,,CIN,1992,1996,1996,19,52,0,0,0,,FALSE,transcribed,List of Cincinnati Bengals head coaches
+coslet-bruce,Bruce Coslet,,CIN,1996,2000,1998,17,24,0,0,0,,FALSE,transcribed,List of Cincinnati Bengals head coaches
+brown-paul,Paul Brown,,CLE,1946,1962,1962,158,48,8,9,5,1946 1947 1948 1949 1950 1954 1955,FALSE,transcribed,List of Cleveland Browns head coaches
+collier-blanton,Blanton Collier,,CLE,1963,1970,1970,76,34,2,3,4,1964,FALSE,transcribed,List of Cleveland Browns head coaches
+skorich-nick,Nick Skorich,,CLE,1971,1974,1974,30,24,2,0,2,,FALSE,transcribed,List of Cleveland Browns head coaches
+gregg-forrest,Forrest Gregg,,CLE,1975,1977,1977,18,23,0,0,0,,FALSE,transcribed,List of Cleveland Browns head coaches
+modzelewski-dick,Dick Modzelewski,,CLE,1977,1977,1977,0,1,0,,,,FALSE,transcribed,List of Cleveland Browns head coaches
+rutigliano-sam,Sam Rutigliano,,CLE,1978,1984,1984,47,50,0,0,2,,FALSE,transcribed,List of Cleveland Browns head coaches
+schottenheimer-marty,Marty Schottenheimer,,CLE,1984,1988,1988,44,27,0,2,4,,FALSE,transcribed,List of Cleveland Browns head coaches
+carson-bud,Bud Carson,,CLE,1989,1990,1990,11,13,1,1,1,,FALSE,transcribed,List of Cleveland Browns head coaches
+shofner-jim,Jim Shofner,,CLE,1990,1990,1990,1,6,0,,,,FALSE,transcribed,List of Cleveland Browns head coaches
+belichick-bill,Bill Belichick,,CLE,1991,1995,1995,36,44,0,1,1,,FALSE,transcribed,List of Cleveland Browns head coaches
+landry-tom,Tom Landry,,DAL,1960,1988,1988,250,162,6,20,16,1971 1977,FALSE,transcribed,List of Dallas Cowboys head coaches
+johnson-jimmy,Jimmy Johnson,,DAL,1989,1993,1993,44,36,0,7,1,1992 1993,FALSE,transcribed,List of Dallas Cowboys head coaches
+switzer-barry,Barry Switzer,,DAL,1994,1997,1997,40,24,0,5,2,1995,FALSE,transcribed,List of Dallas Cowboys head coaches
+gailey-chan,Chan Gailey,,DAL,1998,1999,1998,10,6,0,0,1,,FALSE,transcribed,List of Dallas Cowboys head coaches
+filchock-frank,Frank Filchock,,DEN,1960,1961,1961,7,20,1,0,0,,FALSE,transcribed,List of Denver Broncos head coaches
+faulkner-jack,Jack Faulkner,,DEN,1962,1964,1964,9,22,1,0,0,,FALSE,transcribed,List of Denver Broncos head coaches
+speedie-mac,Mac Speedie,,DEN,1964,1966,1966,6,19,1,0,0,,FALSE,transcribed,List of Denver Broncos head coaches
+malavasi-ray,Ray Malavasi,,DEN,1966,1966,1966,4,8,0,,,,FALSE,transcribed,List of Denver Broncos head coaches
+saban-lou,Lou Saban,,DEN,1967,1971,1971,20,42,3,0,0,,FALSE,transcribed,List of Denver Broncos head coaches
+smith-jerry,Jerry Smith,,DEN,1971,1971,1971,2,3,0,,,,FALSE,transcribed,List of Denver Broncos head coaches
+ralston-john,John Ralston,,DEN,1972,1976,1976,34,33,3,0,0,,FALSE,transcribed,List of Denver Broncos head coaches
+miller-red,Red Miller,,DEN,1977,1980,1980,40,22,0,2,3,,FALSE,transcribed,List of Denver Broncos head coaches
+reeves-dan,Dan Reeves,,DEN,1981,1992,1992,110,73,1,7,6,,FALSE,transcribed,List of Denver Broncos head coaches
+phillips-wade,Wade Phillips,,DEN,1993,1994,1994,16,16,0,0,1,,FALSE,transcribed,List of Denver Broncos head coaches
+shanahan-mike,Mike Shanahan,,DEN,1995,2008,1998,47,17,0,7,1,1997 1998,FALSE,transcribed,List of Denver Broncos head coaches
+griffen-hal,Hal Griffen,,DET,1930,1930,1930,5,6,3,0,0,,FALSE,transcribed,List of Detroit Lions head coaches
+clark-george-potsy,"George ""Potsy"" Clark",,DET,1931,1936,1936,48,20,6,1,0,1935,FALSE,transcribed,List of Detroit Lions head coaches
+clark-earl-dutch,"Earl ""Dutch"" Clark",,DET,1937,1938,1938,14,8,0,0,0,,FALSE,transcribed,List of Detroit Lions head coaches
+henderson-gus,Gus Henderson,,DET,1939,1939,1939,6,5,0,0,0,,FALSE,transcribed,List of Detroit Lions head coaches
+clark-george-potsy,"George ""Potsy"" Clark",,DET,1940,1940,1940,5,5,1,0,0,,FALSE,transcribed,List of Detroit Lions head coaches
+edwards-bill,Bill Edwards,,DET,1941,1942,1942,4,9,1,0,0,,FALSE,transcribed,List of Detroit Lions head coaches
+karcis-john,John Karcis,,DET,1942,1942,1942,0,8,0,,,,FALSE,transcribed,List of Detroit Lions head coaches
+dorais-gus,Gus Dorais,,DET,1943,1947,1947,20,31,2,0,0,,FALSE,transcribed,List of Detroit Lions head coaches
+mcmillin-bo,Bo McMillin,,DET,1948,1950,1950,12,24,0,0,0,,FALSE,transcribed,List of Detroit Lions head coaches
+parker-buddy,Buddy Parker,,DET,1951,1956,1956,47,23,2,3,1,1952 1953,FALSE,transcribed,List of Detroit Lions head coaches
+wilson-george,George Wilson,,DET,1957,1964,1964,53,45,6,2,0,1957,FALSE,transcribed,List of Detroit Lions head coaches
+gilmer-harry,Harry Gilmer,,DET,1965,1966,1966,10,16,2,0,0,,FALSE,transcribed,List of Detroit Lions head coaches
+schmidt-joe,Joe Schmidt,,DET,1967,1972,1972,43,34,7,0,1,,FALSE,transcribed,List of Detroit Lions head coaches
+mccafferty-don,Don McCafferty,,DET,1973,1973,1973,6,7,1,0,0,,FALSE,transcribed,List of Detroit Lions head coaches
+forzano-rick,Rick Forzano,,DET,1974,1976,1976,15,17,0,0,0,,FALSE,transcribed,List of Detroit Lions head coaches
+hudspeth-tommy,Tommy Hudspeth,,DET,1976,1977,1977,11,13,0,0,0,,FALSE,transcribed,List of Detroit Lions head coaches
+clark-monte,Monte Clark,,DET,1978,1984,1984,43,61,1,0,2,,FALSE,transcribed,List of Detroit Lions head coaches
+rogers-darryl,Darryl Rogers,,DET,1985,1988,1988,18,40,0,0,0,,FALSE,transcribed,List of Detroit Lions head coaches
+fontes-wayne,Wayne Fontes,,DET,1988,1996,1996,66,67,0,1,4,,FALSE,transcribed,List of Detroit Lions head coaches
+ross-bobby,Bobby Ross,,DET,1997,2000,1998,14,20,0,0,1,,FALSE,transcribed,List of Detroit Lions head coaches
+lambeau-curly,Curly Lambeau,,GB,1921,1949,1949,209,104,21,3,2,1936 1939 1944,FALSE,transcribed,List of Green Bay Packers head coaches
+ronzani-gene,Gene Ronzani,,GB,1950,1953,1953,14,31,1,0,0,,FALSE,transcribed,List of Green Bay Packers head coaches
+devore-hugh,Hugh Devore,,GB,1953,1953,1953,0,2,0,,,,FALSE,transcribed,List of Green Bay Packers head coaches
+mclean-ray,Ray McLean,,GB,1953,1953,1953,0,2,0,,,,FALSE,transcribed,List of Green Bay Packers head coaches
+blackbourn-lisle,Lisle Blackbourn,,GB,1954,1957,1957,17,31,0,0,0,,FALSE,transcribed,List of Green Bay Packers head coaches
+mclean-ray,Ray McLean,,GB,1958,1958,1958,1,10,1,0,0,,FALSE,transcribed,List of Green Bay Packers head coaches
+lombardi-vince,Vince Lombardi,,GB,1959,1967,1967,89,29,4,9,1,1961 1962 1965 1966 1967,FALSE,transcribed,List of Green Bay Packers head coaches
+bengtson-phil,Phil Bengtson,,GB,1968,1970,1970,20,21,1,0,0,,FALSE,transcribed,List of Green Bay Packers head coaches
+devine-dan,Dan Devine,,GB,1971,1974,1974,25,27,4,0,1,,FALSE,transcribed,List of Green Bay Packers head coaches
+starr-bart,Bart Starr,,GB,1975,1983,1983,52,76,3,1,1,,FALSE,transcribed,List of Green Bay Packers head coaches
+gregg-forrest,Forrest Gregg,,GB,1984,1987,1987,25,37,1,0,0,,FALSE,transcribed,List of Green Bay Packers head coaches
+infante-lindy,Lindy Infante,,GB,1988,1991,1991,24,40,0,0,0,,FALSE,transcribed,List of Green Bay Packers head coaches
+holmgren-mike,Mike Holmgren,,GB,1992,1998,1998,75,37,0,9,5,1996,FALSE,transcribed,List of Green Bay Packers head coaches
+molesworth-keith,Keith Molesworth,,IND,1953,1953,1953,3,9,0,0,0,,FALSE,transcribed,List of Indianapolis Colts head coaches
+ewbank-weeb,Weeb Ewbank,,IND,1954,1962,1962,59,52,1,2,0,1958 1959,FALSE,transcribed,List of Indianapolis Colts head coaches
+shula-don,Don Shula,,IND,1963,1969,1969,71,23,4,2,3,,FALSE,transcribed,List of Indianapolis Colts head coaches
+mccafferty-don,Don McCafferty,,IND,1970,1972,1972,22,10,1,4,1,1970,FALSE,transcribed,List of Indianapolis Colts head coaches
+sandusky-john,John Sandusky,,IND,1972,1972,1972,4,5,0,,,,FALSE,transcribed,List of Indianapolis Colts head coaches
+schnellenberger-howard,Howard Schnellenberger,,IND,1973,1974,1974,4,13,0,0,0,,FALSE,transcribed,List of Indianapolis Colts head coaches
+thomas-joe,Joe Thomas,,IND,1974,1974,1974,2,9,0,,,,FALSE,transcribed,List of Indianapolis Colts head coaches
+marchibroda-ted,Ted Marchibroda,,IND,1975,1979,1979,41,33,0,0,3,,FALSE,transcribed,List of Indianapolis Colts head coaches
+mccormack-mike,Mike McCormack,,IND,1980,1981,1981,9,23,0,0,0,,FALSE,transcribed,List of Indianapolis Colts head coaches
+kush-frank,Frank Kush,,IND,1982,1983,1983,7,17,1,0,0,,FALSE,transcribed,List of Indianapolis Colts head coaches
+kush-frank,Frank Kush,,IND,1984,1984,1984,4,11,0,,,,FALSE,transcribed,List of Indianapolis Colts head coaches
+hunter-hal,Hal Hunter,,IND,1984,1984,1984,0,1,0,,,,FALSE,transcribed,List of Indianapolis Colts head coaches
+dowhower-rod,Rod Dowhower,,IND,1985,1986,1986,5,24,0,0,0,,FALSE,transcribed,List of Indianapolis Colts head coaches
+meyer-ron,Ron Meyer,,IND,1986,1991,1991,36,35,0,0,1,,FALSE,transcribed,List of Indianapolis Colts head coaches
+venturi-rick,Rick Venturi,,IND,1991,1991,1991,1,10,0,,,,FALSE,transcribed,List of Indianapolis Colts head coaches
+marchibroda-ted,Ted Marchibroda,,IND,1992,1995,1995,30,34,0,2,1,,FALSE,transcribed,List of Indianapolis Colts head coaches
+infante-lindy,Lindy Infante,,IND,1996,1997,1997,12,20,0,0,1,,FALSE,transcribed,List of Indianapolis Colts head coaches
+mora-jim-e,Jim E. Mora,Jim Mora,IND,1998,2001,1998,3,13,0,0,0,,FALSE,transcribed,List of Indianapolis Colts head coaches
+coughlin-tom,Tom Coughlin,,JAX,1995,2002,1998,35,29,0,3,3,,FALSE,transcribed,List of Jacksonville Jaguars head coaches
+stram-hank,Hank Stram,,KC,1960,1962,1962,27,17,0,1,0,1962,FALSE,transcribed,List of Kansas City Chiefs head coaches
+stram-hank,Hank Stram,,KC,1963,1974,1974,97,59,10,4,3,1969,FALSE,transcribed,List of Kansas City Chiefs head coaches
+wiggin-paul,Paul Wiggin,,KC,1975,1977,1977,11,24,0,0,0,,FALSE,transcribed,List of Kansas City Chiefs head coaches
+bettis-tom,Tom Bettis,,KC,1977,1977,1977,1,6,0,,,,FALSE,transcribed,List of Kansas City Chiefs head coaches
+levy-marv,Marv Levy,,KC,1978,1982,1982,31,42,0,0,0,,FALSE,transcribed,List of Kansas City Chiefs head coaches
+mackovic-john,John Mackovic,,KC,1983,1986,1986,30,34,0,0,1,,FALSE,transcribed,List of Kansas City Chiefs head coaches
+gansz-frank,Frank Gansz,,KC,1987,1988,1988,8,22,1,0,0,,FALSE,transcribed,List of Kansas City Chiefs head coaches
+schottenheimer-marty,Marty Schottenheimer,,KC,1989,1998,1998,101,58,1,3,7,,FALSE,transcribed,List of Kansas City Chiefs head coaches
+gillman-sid,Sid Gillman,,LAC,1960,1960,1960,10,4,0,0,1,,FALSE,transcribed,List of Los Angeles Chargers head coaches
+gillman-sid,Sid Gillman,,LAC,1961,1971,1971,76,49,6,1,3,1963,FALSE,transcribed,List of Los Angeles Chargers head coaches
+waller-charlie,Charlie Waller,,LAC,1969,1970,1970,9,7,3,,,,FALSE,transcribed,List of Los Angeles Chargers head coaches
+svare-harland,Harland Svare,,LAC,1971,1973,1973,7,17,2,0,0,,FALSE,transcribed,List of Los Angeles Chargers head coaches
+waller-ron,Ron Waller,,LAC,1973,1973,1973,1,5,0,,,,FALSE,transcribed,List of Los Angeles Chargers head coaches
+prothro-tommy,Tommy Prothro,,LAC,1974,1978,1978,21,39,0,0,0,,FALSE,transcribed,List of Los Angeles Chargers head coaches
+coryell-don,Don Coryell,,LAC,1978,1986,1986,69,56,0,3,4,,FALSE,transcribed,List of Los Angeles Chargers head coaches
+saunders-al,Al Saunders,,LAC,1986,1988,1988,17,22,0,0,0,,FALSE,transcribed,List of Los Angeles Chargers head coaches
+henning-dan,Dan Henning,,LAC,1989,1991,1991,16,32,0,0,0,,FALSE,transcribed,List of Los Angeles Chargers head coaches
+ross-bobby,Bobby Ross,,LAC,1992,1996,1996,47,33,0,3,3,,FALSE,transcribed,List of Los Angeles Chargers head coaches
+gilbride-kevin,Kevin Gilbride,,LAC,1997,1998,1998,6,16,0,0,0,,FALSE,transcribed,List of Los Angeles Chargers head coaches
+jones-june,June Jones,,LAC,1998,1998,1998,3,7,0,,,,FALSE,transcribed,List of Los Angeles Chargers head coaches
+wetzel-damon,Damon Wetzel,,LAR,1936,1936,1936,5,2,2,,,,FALSE,transcribed,List of Los Angeles Rams head coaches
+bezdek-hugo,Hugo Bezdek,,LAR,1937,1938,1938,1,13,0,0,0,,FALSE,transcribed,List of Los Angeles Rams head coaches
+lewis-art,Art Lewis,,LAR,1938,1938,1938,4,4,0,,,,FALSE,transcribed,List of Los Angeles Rams head coaches
+clark-dutch,Dutch Clark,,LAR,1939,1942,1942,16,26,2,0,0,,FALSE,transcribed,List of Los Angeles Rams head coaches
+donelli-aldo,Aldo Donelli,,LAR,1944,1944,1944,4,6,0,0,0,,FALSE,transcribed,List of Los Angeles Rams head coaches
+walsh-adam,Adam Walsh,,LAR,1945,1946,1946,15,5,1,1,0,1945,FALSE,transcribed,List of Los Angeles Rams head coaches
+snyder-bob,Bob Snyder,,LAR,1947,1947,1947,6,6,0,0,0,,FALSE,transcribed,List of Los Angeles Rams head coaches
+shaughnessy-clark,Clark Shaughnessy,,LAR,1948,1949,1949,14,7,3,0,1,,FALSE,transcribed,List of Los Angeles Rams head coaches
+stydahar-joe,Joe Stydahar,,LAR,1950,1952,1952,17,8,0,2,1,1951,FALSE,transcribed,List of Los Angeles Rams head coaches
+pool-hamp,Hamp Pool,,LAR,1952,1954,1954,23,10,2,0,0,,FALSE,transcribed,List of Los Angeles Rams head coaches
+gillman-sid,Sid Gillman,,LAR,1955,1959,1959,28,31,1,0,1,,FALSE,transcribed,List of Los Angeles Rams head coaches
+waterfield-bob,Bob Waterfield,,LAR,1960,1962,1962,9,24,1,0,0,,FALSE,transcribed,List of Los Angeles Rams head coaches
+svare-harland,Harland Svare,,LAR,1962,1965,1965,14,31,8,0,0,,FALSE,transcribed,List of Los Angeles Rams head coaches
+allen-george,George Allen,,LAR,1966,1970,1970,49,17,4,0,2,,FALSE,transcribed,List of Los Angeles Rams head coaches
+prothro-tommy,Tommy Prothro,,LAR,1971,1972,1972,14,12,2,0,0,,FALSE,transcribed,List of Los Angeles Rams head coaches
+knox-chuck,Chuck Knox,,LAR,1973,1977,1977,54,15,1,3,5,,FALSE,transcribed,List of Los Angeles Rams head coaches
+malavasi-ray,Ray Malavasi,,LAR,1978,1982,1982,40,33,0,3,3,,FALSE,transcribed,List of Los Angeles Rams head coaches
+robinson-john,John Robinson,,LAR,1983,1991,1991,75,68,0,4,6,,FALSE,transcribed,List of Los Angeles Rams head coaches
+knox-chuck,Chuck Knox,,LAR,1992,1994,1994,15,33,0,0,0,,FALSE,transcribed,List of Los Angeles Rams head coaches
+brooks-rich,Rich Brooks,,LAR,1995,1996,1996,13,19,0,0,0,,FALSE,transcribed,List of Los Angeles Rams head coaches
+vermeil-dick,Dick Vermeil,,LAR,1997,1999,1998,9,23,0,0,0,,FALSE,transcribed,List of Los Angeles Rams head coaches
+wilson-george,George Wilson,,MIA,1966,1969,1969,15,39,2,0,0,,FALSE,transcribed,List of Miami Dolphins head coaches
+shula-don,Don Shula,,MIA,1970,1995,1995,257,133,2,17,14,1972 1973,FALSE,transcribed,List of Miami Dolphins head coaches
+johnson-jimmy,Jimmy Johnson,,MIA,1996,1999,1998,27,21,0,1,2,,FALSE,transcribed,List of Miami Dolphins head coaches
+brocklin-norm-van,Norm Van Brocklin,,MIN,1961,1966,1966,29,51,4,0,0,,FALSE,transcribed,List of Minnesota Vikings head coaches
+grant-bud,Bud Grant,,MIN,1967,1983,1983,151,87,5,10,12,,FALSE,transcribed,List of Minnesota Vikings head coaches
+steckel-les,Les Steckel,,MIN,1984,1984,1984,3,13,0,0,0,,FALSE,transcribed,List of Minnesota Vikings head coaches
+grant-bud,Bud Grant,,MIN,1985,1985,1985,7,9,0,0,0,,FALSE,transcribed,List of Minnesota Vikings head coaches
+burns-jerry,Jerry Burns,,MIN,1986,1991,1991,52,43,0,3,3,,FALSE,transcribed,List of Minnesota Vikings head coaches
+green-dennis,Dennis Green,,MIN,1992,2001,1998,71,41,0,2,6,,FALSE,transcribed,List of Minnesota Vikings head coaches
+saban-lou,Lou Saban,,NE,1960,1961,1961,,,,,,,FALSE,unresolved,List of New England Patriots head coaches
+holovak-mike,Mike Holovak,,NE,1961,1968,1968,,,,,,,FALSE,unresolved,List of New England Patriots head coaches
+rush-clive,Clive Rush,,NE,1969,1970,1970,,,,,,,FALSE,unresolved,List of New England Patriots head coaches
+mazur-john,John Mazur,,NE,1970,1970,1970,,,,,,,FALSE,unresolved,List of New England Patriots head coaches
+mazur-john,John Mazur,,NE,1971,1972,1972,,,,,,,FALSE,unresolved,List of New England Patriots head coaches
+bengtson-phil,Phil Bengtson,,NE,1972,1972,1972,,,,,,,FALSE,unresolved,List of New England Patriots head coaches
+fairbanks-chuck,Chuck Fairbanks,,NE,1973,1978,1978,46,40,0,0,2,,FALSE,counted,List of New England Patriots head coaches
+erhardt-ron,Ron Erhardt,,NE,1979,1981,1981,21,27,0,0,0,,FALSE,counted,List of New England Patriots head coaches
+meyer-ron,Ron Meyer,,NE,1982,1984,1984,,,,,,,FALSE,unresolved,List of New England Patriots head coaches
+berry-raymond,Raymond Berry,,NE,1984,1989,1989,,,,,,,FALSE,unresolved,List of New England Patriots head coaches
+rust-rod,Rod Rust,,NE,1990,1990,1990,1,15,0,0,0,,FALSE,counted,List of New England Patriots head coaches
+macpherson-dick,Dick MacPherson,,NE,1991,1992,1992,8,24,0,0,0,,FALSE,counted,List of New England Patriots head coaches
+parcells-bill,Bill Parcells,,NE,1993,1996,1996,32,32,0,2,2,,FALSE,counted,List of New England Patriots head coaches
+carroll-pete,Pete Carroll,,NE,1997,1999,1998,19,13,0,1,2,,FALSE,counted,List of New England Patriots head coaches
+fears-tom,Tom Fears,,NO,1967,1970,1970,13,34,2,0,0,,FALSE,transcribed,List of New Orleans Saints head coaches
+roberts-j-d,J. D. Roberts,,NO,1970,1972,1972,7,25,3,0,0,,FALSE,transcribed,List of New Orleans Saints head coaches
+north-john,John North,,NO,1973,1975,1975,11,23,0,0,0,,FALSE,transcribed,List of New Orleans Saints head coaches
+hefferle-ernie,Ernie Hefferle,,NO,1975,1975,1975,1,7,0,,,,FALSE,transcribed,List of New Orleans Saints head coaches
+stram-hank,Hank Stram,,NO,1976,1977,1977,7,21,0,0,0,,FALSE,transcribed,List of New Orleans Saints head coaches
+nolan-dick,Dick Nolan,,NO,1978,1980,1980,15,29,0,0,0,,FALSE,transcribed,List of New Orleans Saints head coaches
+stanfel-dick,Dick Stanfel,,NO,1980,1980,1980,1,3,0,,,,FALSE,transcribed,List of New Orleans Saints head coaches
+phillips-bum,Bum Phillips,,NO,1981,1985,1985,27,42,0,0,0,,FALSE,transcribed,List of New Orleans Saints head coaches
+phillips-wade,Wade Phillips,,NO,1985,1985,1985,1,3,0,,,,FALSE,transcribed,List of New Orleans Saints head coaches
+mora-jim-e,Jim E. Mora,Jim Mora,NO,1986,1996,1996,93,74,0,0,4,,FALSE,transcribed,List of New Orleans Saints head coaches
+venturi-rick,Rick Venturi,,NO,1996,1996,1996,1,7,0,,,,FALSE,transcribed,List of New Orleans Saints head coaches
+ditka-mike,Mike Ditka,,NO,1997,1999,1998,12,20,0,0,0,,FALSE,transcribed,List of New Orleans Saints head coaches
+folwell-bob,Bob Folwell,,NYG,1925,1925,1925,8,4,0,0,0,,FALSE,transcribed,List of New York Giants head coaches
+alexander-doc,Doc Alexander,,NYG,1926,1926,1926,8,4,1,0,0,,FALSE,transcribed,List of New York Giants head coaches
+potteiger-earl,Earl Potteiger,,NYG,1927,1928,1928,15,8,3,0,0,,FALSE,transcribed,List of New York Giants head coaches
+andrews-leroy,LeRoy Andrews,,NYG,1929,1930,1930,24,5,1,0,0,,FALSE,transcribed,List of New York Giants head coaches
+friedman-benny,Benny Friedman,,NYG,1930,1930,1930,2,0,0,,,,FALSE,transcribed,List of New York Giants head coaches
+owen-steve,Steve Owen,,NYG,1931,1953,1953,153,100,17,2,8,1934 1938,FALSE,transcribed,List of New York Giants head coaches
+howell-jim-lee,Jim Lee Howell,,NYG,1954,1960,1960,53,27,4,2,2,1956,FALSE,transcribed,List of New York Giants head coaches
+sherman-allie,Allie Sherman,,NYG,1961,1968,1968,57,51,4,0,3,,FALSE,transcribed,List of New York Giants head coaches
+webster-alex,Alex Webster,,NYG,1969,1973,1973,29,40,1,0,0,,FALSE,transcribed,List of New York Giants head coaches
+arnsparger-bill,Bill Arnsparger,,NYG,1974,1976,1976,7,28,0,0,0,,FALSE,transcribed,List of New York Giants head coaches
+mcvay-john,John McVay,,NYG,1976,1978,1978,14,23,0,0,0,,FALSE,transcribed,List of New York Giants head coaches
+perkins-ray,Ray Perkins,,NYG,1979,1982,1982,23,34,0,1,1,,FALSE,transcribed,List of New York Giants head coaches
+parcells-bill,Bill Parcells,,NYG,1983,1990,1990,77,49,1,8,3,1986 1990,FALSE,transcribed,List of New York Giants head coaches
+handley-ray,Ray Handley,,NYG,1991,1992,1992,14,18,0,0,0,,FALSE,transcribed,List of New York Giants head coaches
+reeves-dan,Dan Reeves,,NYG,1993,1996,1996,31,33,0,1,1,,FALSE,transcribed,List of New York Giants head coaches
+fassel-jim,Jim Fassel,,NYG,1997,2003,1998,18,13,1,0,1,,FALSE,transcribed,List of New York Giants head coaches
+baugh-sammy,Sammy Baugh,,NYJ,1960,1961,1961,14,14,0,0,0,,FALSE,counted,List of New York Jets head coaches
+turner-bulldog,Bulldog Turner,,NYJ,1962,1962,1962,5,9,0,0,0,,FALSE,counted,List of New York Jets head coaches
+ewbank-weeb,Weeb Ewbank,,NYJ,1963,1973,1973,71,77,6,2,1,1968,FALSE,counted,List of New York Jets head coaches
+winner-charley,Charley Winner,,NYJ,1974,1975,1975,,,,,,,FALSE,unresolved,List of New York Jets head coaches
+shipp-ken,Ken Shipp,,NYJ,1975,1975,1975,,,,,,,FALSE,unresolved,List of New York Jets head coaches
+holtz-lou,Lou Holtz,,NYJ,1976,1976,1976,,,,,,,FALSE,unresolved,List of New York Jets head coaches
+holovak-mike,Mike Holovak,,NYJ,1976,1976,1976,,,,,,,FALSE,unresolved,List of New York Jets head coaches
+michaels-walt,Walt Michaels,,NYJ,1977,1982,1982,39,47,1,2,2,,FALSE,counted,List of New York Jets head coaches
+walton-joe,Joe Walton,,NYJ,1983,1989,1989,53,57,1,1,2,,FALSE,counted,List of New York Jets head coaches
+coslet-bruce,Bruce Coslet,,NYJ,1990,1993,1993,26,38,0,0,1,,FALSE,counted,List of New York Jets head coaches
+carroll-pete,Pete Carroll,,NYJ,1994,1994,1994,6,10,0,0,0,,FALSE,counted,List of New York Jets head coaches
+kotite-rich,Rich Kotite,,NYJ,1995,1996,1996,4,28,0,0,0,,FALSE,counted,List of New York Jets head coaches
+parcells-bill,Bill Parcells,,NYJ,1997,1999,1998,21,11,0,1,1,,FALSE,counted,List of New York Jets head coaches
+erdelatz-eddie,Eddie Erdelatz,,OAK,1960,1961,1961,6,10,0,0,0,,FALSE,transcribed,List of Las Vegas Raiders head coaches
+feldman-marty,Marty Feldman,,OAK,1961,1962,1962,2,15,0,,,,FALSE,transcribed,List of Las Vegas Raiders head coaches
+conkright-red,Red Conkright,,OAK,1962,1962,1962,1,8,0,,,,FALSE,transcribed,List of Las Vegas Raiders head coaches
+davis-al,Al Davis,,OAK,1963,1965,1965,23,16,3,0,0,,FALSE,transcribed,List of Las Vegas Raiders head coaches
+rauch-john,John Rauch,,OAK,1966,1968,1968,33,8,1,2,2,,FALSE,transcribed,List of Las Vegas Raiders head coaches
+madden-john,John Madden,,OAK,1969,1978,1978,103,32,7,9,7,1976,FALSE,transcribed,List of Las Vegas Raiders head coaches
+flores-tom,Tom Flores,,OAK,1979,1981,1981,27,21,0,4,0,1980,FALSE,transcribed,List of Las Vegas Raiders head coaches
+flores-tom,Tom Flores,,OAK,1982,1987,1987,56,32,0,4,3,1983,FALSE,transcribed,List of Las Vegas Raiders head coaches
+shanahan-mike,Mike Shanahan,,OAK,1988,1989,1989,8,12,0,0,0,,FALSE,transcribed,List of Las Vegas Raiders head coaches
+shell-art,Art Shell,,OAK,1989,1994,1994,54,38,0,2,3,,FALSE,transcribed,List of Las Vegas Raiders head coaches
+white-mike,Mike White,,OAK,1995,1996,1996,15,17,0,0,0,,FALSE,transcribed,List of Las Vegas Raiders head coaches
+bugel-joe,Joe Bugel,,OAK,1997,1997,1997,4,12,0,0,0,,FALSE,transcribed,List of Las Vegas Raiders head coaches
+gruden-jon,Jon Gruden,,OAK,1998,2001,1998,8,8,0,0,0,,FALSE,transcribed,List of Las Vegas Raiders head coaches
+wray-lud,Lud Wray,,PHI,1933,1935,1935,9,21,1,0,0,,FALSE,transcribed,List of Philadelphia Eagles head coaches
+bell-bert,Bert Bell,,PHI,1936,1940,1940,10,44,2,0,0,,FALSE,transcribed,List of Philadelphia Eagles head coaches
+neale-greasy,Greasy Neale,,PHI,1941,1950,1950,63,43,5,3,1,1948 1949,FALSE,transcribed,List of Philadelphia Eagles head coaches
+mcmillin-bo,Bo McMillin,,PHI,1951,1951,1951,2,0,0,,,,FALSE,transcribed,List of Philadelphia Eagles head coaches
+millner-wayne,Wayne Millner,,PHI,1951,1951,1951,2,8,0,,,,FALSE,transcribed,List of Philadelphia Eagles head coaches
+trimble-jim,Jim Trimble,,PHI,1952,1955,1955,25,20,3,0,0,,FALSE,transcribed,List of Philadelphia Eagles head coaches
+devore-hugh,Hugh Devore,,PHI,1956,1957,1957,7,16,1,0,0,,FALSE,transcribed,List of Philadelphia Eagles head coaches
+shaw-buck,Buck Shaw,,PHI,1958,1960,1960,19,16,1,1,0,1960,FALSE,transcribed,List of Philadelphia Eagles head coaches
+skorich-nick,Nick Skorich,,PHI,1961,1963,1963,15,24,3,0,0,,FALSE,transcribed,List of Philadelphia Eagles head coaches
+kuharich-joe,Joe Kuharich,,PHI,1964,1968,1968,28,41,1,0,0,,FALSE,transcribed,List of Philadelphia Eagles head coaches
+williams-jerry,Jerry Williams,,PHI,1969,1971,1971,7,22,2,0,0,,FALSE,transcribed,List of Philadelphia Eagles head coaches
+khayat-ed,Ed Khayat,,PHI,1971,1972,1972,8,15,2,0,0,,FALSE,transcribed,List of Philadelphia Eagles head coaches
+mccormack-mike,Mike McCormack,,PHI,1973,1975,1975,16,25,1,0,0,,FALSE,transcribed,List of Philadelphia Eagles head coaches
+vermeil-dick,Dick Vermeil,,PHI,1976,1982,1982,54,47,0,3,4,,FALSE,transcribed,List of Philadelphia Eagles head coaches
+campbell-marion,Marion Campbell,,PHI,1983,1985,1985,17,29,1,0,0,,FALSE,transcribed,List of Philadelphia Eagles head coaches
+bruney-fred,Fred Bruney,,PHI,1985,1985,1985,1,0,0,,,,FALSE,transcribed,List of Philadelphia Eagles head coaches
+ryan-buddy,Buddy Ryan,,PHI,1986,1990,1990,43,35,1,0,3,,FALSE,transcribed,List of Philadelphia Eagles head coaches
+kotite-rich,Rich Kotite,,PHI,1991,1994,1994,36,28,0,1,1,,FALSE,transcribed,List of Philadelphia Eagles head coaches
+rhodes-ray,Ray Rhodes,,PHI,1995,1998,1998,29,34,1,1,2,,FALSE,transcribed,List of Philadelphia Eagles head coaches
+douds-forrest,Forrest Douds,,PIT,1933,1933,1933,3,6,2,0,0,,FALSE,transcribed,List of Pittsburgh Steelers head coaches
+dimeolo-luby,Luby DiMeolo,,PIT,1934,1934,1934,2,10,0,0,0,,FALSE,transcribed,List of Pittsburgh Steelers head coaches
+bach-joe,Joe Bach,,PIT,1935,1936,1936,10,14,0,0,0,,FALSE,transcribed,List of Pittsburgh Steelers head coaches
+blood-johnny,Johnny Blood,,PIT,1937,1939,1939,6,19,0,0,0,,FALSE,transcribed,List of Pittsburgh Steelers head coaches
+kiesling-walt,Walt Kiesling,,PIT,1939,1940,1940,3,13,3,0,0,,FALSE,transcribed,List of Pittsburgh Steelers head coaches
+donelli-aldo,Aldo Donelli,,PIT,1941,1941,1941,0,5,0,,,,FALSE,transcribed,List of Pittsburgh Steelers head coaches
+bell-bert,Bert Bell,,PIT,1941,1941,1941,0,2,0,,,,FALSE,transcribed,List of Pittsburgh Steelers head coaches
+kiesling-walt,Walt Kiesling,,PIT,1941,1944,1944,13,20,2,0,0,,FALSE,transcribed,List of Pittsburgh Steelers head coaches
+leonard-jim,Jim Leonard,,PIT,1945,1945,1945,2,8,0,0,0,,FALSE,transcribed,List of Pittsburgh Steelers head coaches
+sutherland-jock,Jock Sutherland,,PIT,1946,1947,1947,13,9,1,0,1,,FALSE,transcribed,List of Pittsburgh Steelers head coaches
+michelosen-john,John Michelosen,,PIT,1948,1951,1951,20,26,2,0,0,,FALSE,transcribed,List of Pittsburgh Steelers head coaches
+bach-joe,Joe Bach,,PIT,1952,1953,1953,11,13,0,0,0,,FALSE,transcribed,List of Pittsburgh Steelers head coaches
+kiesling-walt,Walt Kiesling,,PIT,1954,1956,1956,14,22,0,0,0,,FALSE,transcribed,List of Pittsburgh Steelers head coaches
+parker-buddy,Buddy Parker,,PIT,1957,1964,1964,51,47,6,0,0,,FALSE,transcribed,List of Pittsburgh Steelers head coaches
+nixon-mike,Mike Nixon,,PIT,1965,1965,1965,2,12,0,0,0,,FALSE,transcribed,List of Pittsburgh Steelers head coaches
+austin-bill,Bill Austin,,PIT,1966,1968,1968,11,28,3,0,0,,FALSE,transcribed,List of Pittsburgh Steelers head coaches
+noll-chuck,Chuck Noll,,PIT,1969,1991,1991,193,148,1,16,8,1974 1975 1978 1979,FALSE,transcribed,List of Pittsburgh Steelers head coaches
+cowher-bill,Bill Cowher,,PIT,1992,2006,1998,71,41,0,5,6,,FALSE,transcribed,List of Pittsburgh Steelers head coaches
+patera-jack,Jack Patera,,SEA,1976,1982,1982,35,59,0,0,0,,FALSE,transcribed,List of Seattle Seahawks head coaches
+mccormack-mike,Mike McCormack,,SEA,1982,1982,1982,4,3,0,,,,FALSE,transcribed,List of Seattle Seahawks head coaches
+knox-chuck,Chuck Knox,,SEA,1983,1991,1991,80,63,0,3,4,,FALSE,transcribed,List of Seattle Seahawks head coaches
+flores-tom,Tom Flores,,SEA,1992,1994,1994,14,34,0,0,0,,FALSE,transcribed,List of Seattle Seahawks head coaches
+erickson-dennis,Dennis Erickson,,SEA,1995,1998,1998,31,33,0,0,0,,FALSE,transcribed,List of Seattle Seahawks head coaches
+shaw-buck,Buck Shaw,,SF,1946,1954,1954,71,39,4,1,1,,FALSE,transcribed,List of San Francisco 49ers head coaches
+strader-red,Red Strader,,SF,1955,1955,1955,4,8,0,0,0,,FALSE,transcribed,List of San Francisco 49ers head coaches
+albert-frankie,Frankie Albert,,SF,1956,1958,1958,19,16,1,0,1,,FALSE,transcribed,List of San Francisco 49ers head coaches
+hickey-red,Red Hickey,,SF,1959,1963,1963,27,27,1,0,0,,FALSE,transcribed,List of San Francisco 49ers head coaches
+christiansen-jack,Jack Christiansen,,SF,1963,1967,1967,26,38,3,0,0,,FALSE,transcribed,List of San Francisco 49ers head coaches
+nolan-dick,Dick Nolan,,SF,1968,1975,1975,54,53,5,2,3,,FALSE,transcribed,List of San Francisco 49ers head coaches
+clark-monte,Monte Clark,,SF,1976,1976,1976,8,6,0,0,0,,FALSE,transcribed,List of San Francisco 49ers head coaches
+meyer-ken,Ken Meyer,,SF,1977,1977,1977,5,9,0,0,0,,FALSE,transcribed,List of San Francisco 49ers head coaches
+oconnor-fred,Fred O'Connor,,SF,1978,1978,1978,1,6,0,,,,FALSE,transcribed,List of San Francisco 49ers head coaches
+mcculley-pete,Pete McCulley,,SF,1978,1978,1978,1,8,0,,,,FALSE,transcribed,List of San Francisco 49ers head coaches
+walsh-bill,Bill Walsh,,SF,1979,1988,1988,92,59,1,10,4,1981 1984 1988,FALSE,transcribed,List of San Francisco 49ers head coaches
+seifert-george,George Seifert,,SF,1989,1996,1996,98,30,0,10,5,1989 1994,FALSE,transcribed,List of San Francisco 49ers head coaches
+mariucci-steve,Steve Mariucci,,SF,1997,2002,1998,25,7,0,2,2,,FALSE,transcribed,List of San Francisco 49ers head coaches
+mckay-john,John McKay,,TB,1976,1984,1984,44,88,1,1,3,,FALSE,transcribed,List of Tampa Bay Buccaneers head coaches
+bennett-leeman,Leeman Bennett,,TB,1985,1986,1986,4,28,0,0,0,,FALSE,transcribed,List of Tampa Bay Buccaneers head coaches
+perkins-ray,Ray Perkins,,TB,1987,1990,1990,19,41,0,0,0,,FALSE,transcribed,List of Tampa Bay Buccaneers head coaches
+williamson-richard,Richard Williamson,,TB,1990,1991,1991,4,15,0,0,0,,FALSE,transcribed,List of Tampa Bay Buccaneers head coaches
+wyche-sam,Sam Wyche,,TB,1992,1995,1995,23,41,0,0,0,,FALSE,transcribed,List of Tampa Bay Buccaneers head coaches
+dungy-tony,Tony Dungy,,TB,1996,2001,1998,24,24,0,1,1,,FALSE,transcribed,List of Tampa Bay Buccaneers head coaches
+rymkus-lou,Lou Rymkus,,TEN,1960,1961,1961,11,7,1,1,0,1960,FALSE,transcribed,List of Tennessee Titans head coaches
+lemm-wally,Wally Lemm,,TEN,1961,1961,1961,9,0,0,,,,FALSE,transcribed,List of Tennessee Titans head coaches
+ivy-pop,Pop Ivy,,TEN,1962,1963,1963,17,11,0,0,1,,FALSE,transcribed,List of Tennessee Titans head coaches
+baugh-sammy,Sammy Baugh,,TEN,1964,1964,1964,4,10,0,0,0,,FALSE,transcribed,List of Tennessee Titans head coaches
+taylor-hugh,Hugh Taylor,,TEN,1965,1965,1965,4,10,0,0,0,,FALSE,transcribed,List of Tennessee Titans head coaches
+lemm-wally,Wally Lemm,,TEN,1966,1970,1970,28,38,4,0,2,,FALSE,transcribed,List of Tennessee Titans head coaches
+hughes-ed,Ed Hughes,,TEN,1971,1971,1971,4,9,1,0,0,,FALSE,transcribed,List of Tennessee Titans head coaches
+peterson-bill,Bill Peterson,,TEN,1972,1973,1973,1,18,0,0,0,,FALSE,transcribed,List of Tennessee Titans head coaches
+gillman-sid,Sid Gillman,,TEN,1973,1974,1974,8,15,0,0,0,,FALSE,transcribed,List of Tennessee Titans head coaches
+phillips-bum,Bum Phillips,,TEN,1975,1980,1980,55,35,0,4,3,,FALSE,transcribed,List of Tennessee Titans head coaches
+biles-ed,Ed Biles,,TEN,1981,1983,1983,8,23,0,0,0,,FALSE,transcribed,List of Tennessee Titans head coaches
+studley-chuck,Chuck Studley,,TEN,1983,1983,1983,2,8,0,,,,FALSE,transcribed,List of Tennessee Titans head coaches
+campbell-hugh,Hugh Campbell,,TEN,1984,1985,1985,8,22,0,0,0,,FALSE,transcribed,List of Tennessee Titans head coaches
+glanville-jerry,Jerry Glanville,,TEN,1985,1989,1989,33,32,0,2,3,,FALSE,transcribed,List of Tennessee Titans head coaches
+pardee-jack,Jack Pardee,,TEN,1990,1994,1994,43,31,0,1,4,,FALSE,transcribed,List of Tennessee Titans head coaches
+fisher-jeff,Jeff Fisher,,TEN,1994,1996,1996,16,22,0,0,0,,FALSE,transcribed,List of Tennessee Titans head coaches
+fisher-jeff,Jeff Fisher,,TEN,1997,1998,1998,16,16,0,0,0,,FALSE,transcribed,List of Tennessee Titans head coaches
+wray-lud,Lud Wray,,WSH,1932,1932,1932,4,4,2,0,0,,FALSE,transcribed,List of Washington Commanders head coaches
+dietz-lone-star,Lone Star Dietz,,WSH,1933,1934,1934,11,11,2,0,0,,FALSE,transcribed,List of Washington Commanders head coaches
+casey-eddie,Eddie Casey,,WSH,1935,1935,1935,2,8,1,0,0,,FALSE,transcribed,List of Washington Commanders head coaches
+flaherty-ray,Ray Flaherty,,WSH,1936,1942,1942,54,21,3,2,2,1937 1942,FALSE,transcribed,List of Washington Commanders head coaches
+bergman-dutch,Dutch Bergman,,WSH,1943,1943,1943,6,3,1,1,1,,FALSE,transcribed,List of Washington Commanders head coaches
+degroot-dudley,Dudley DeGroot,,WSH,1944,1945,1945,14,5,1,0,1,,FALSE,transcribed,List of Washington Commanders head coaches
+edwards-turk,Turk Edwards,,WSH,1946,1948,1948,16,18,1,0,0,,FALSE,transcribed,List of Washington Commanders head coaches
+ball-herman,Herman Ball,,WSH,1949,1951,1951,4,16,0,0,0,,FALSE,transcribed,List of Washington Commanders head coaches
+whelchel-john,John Whelchel,,WSH,1949,1949,1949,3,3,1,,,,FALSE,transcribed,List of Washington Commanders head coaches
+todd-dick,Dick Todd,,WSH,1951,1951,1951,5,4,0,,,,FALSE,transcribed,List of Washington Commanders head coaches
+lambeau-curly,Curly Lambeau,,WSH,1952,1953,1953,10,13,1,0,0,,FALSE,transcribed,List of Washington Commanders head coaches
+kuharich-joe,Joe Kuharich,,WSH,1954,1958,1958,26,32,2,0,0,,FALSE,transcribed,List of Washington Commanders head coaches
+nixon-mike,Mike Nixon,,WSH,1959,1960,1960,4,18,2,0,0,,FALSE,transcribed,List of Washington Commanders head coaches
+mcpeak-bill,Bill McPeak,,WSH,1961,1965,1965,21,46,3,0,0,,FALSE,transcribed,List of Washington Commanders head coaches
+graham-otto,Otto Graham,,WSH,1966,1968,1968,17,22,3,0,0,,FALSE,transcribed,List of Washington Commanders head coaches
+lombardi-vince,Vince Lombardi,,WSH,1969,1969,1969,7,5,2,0,0,,FALSE,transcribed,List of Washington Commanders head coaches
+austin-bill,Bill Austin,,WSH,1970,1970,1970,6,8,0,0,0,,FALSE,transcribed,List of Washington Commanders head coaches
+allen-george,George Allen,,WSH,1971,1977,1977,67,30,1,2,5,,FALSE,transcribed,List of Washington Commanders head coaches
+pardee-jack,Jack Pardee,,WSH,1978,1980,1980,24,24,0,0,0,,FALSE,transcribed,List of Washington Commanders head coaches
+gibbs-joe,Joe Gibbs,,WSH,1981,1992,1992,124,60,0,16,5,1982 1987 1991,FALSE,transcribed,List of Washington Commanders head coaches
+petitbon-richie,Richie Petitbon,,WSH,1993,1993,1993,4,12,0,0,0,,FALSE,transcribed,List of Washington Commanders head coaches
+turner-norv,Norv Turner,,WSH,1994,2000,1998,38,51,1,0,0,,FALSE,transcribed,List of Washington Commanders head coaches

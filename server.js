@@ -38,19 +38,20 @@ import { computeStandings, divisionPeers, playedSeasons } from './lib/standings.
 import { Lru, memo, mergeGames, versionOf } from './lib/derived.js';
 import { historyPoints } from './lib/history.js';
 import { codeTables, franchisesForClub, staleFranchises } from './lib/codes.js';
-import { availability, close, connect, franchisesWithGames, gamesFor, gamesSince, health, lastUpdated, lastUpdatedAll, readSummary, withClient, writeSummary } from './lib/store.js';
+import { availability, close, connect, franchisesWithGames, gamesFor, gamesSince, health, lastUpdated, lastUpdatedAll, leaderGames, leaderTenures, readSummary, withClient, writeSummary } from './lib/store.js';
 import { lockKeyFor, nextDelay, refreshLive, withLock } from './lib/live.js';
 import {
 	daysToNextGame, lastLosslessSeason, latestSeason, recordText, seasons, seasonTally, seasonVerdict,
 	seasonWinPct, seriesRecords, streakBanner, verdictText,
 } from './lib/core.js';
 import {
-	NEUTRAL, clubPage, clubSwitcher, noticePage, standingsModal, headToHeadPage, historyPage, leagueNav, leagueRecordsPage, leagueSchedulePage, sportTabs, missingSeasonPage, opponentPage, recordsPage, standingsPage,
+	NEUTRAL, clubPage, clubSwitcher, noticePage, standingsModal, headToHeadPage, historyPage, leadersPage, leagueNav, leagueRecordsPage, leagueSchedulePage, sportTabs, missingSeasonPage, opponentPage, recordsPage, standingsPage,
 	scheduleHtml, seasonNav, selectorPage, siteNav, sparklineHtml,
 } from './lib/render.js';
 import { colorsFor, resolver } from './lib/names.js';
 import { SPORTS, loadSports, loadTeams } from './lib/teams.js';
 import { matchRoute, parseView, routeTable } from './lib/routes.js';
+import { mergeLeaders, rankLeaders, tallyLeaders, tallyTenures } from './lib/leaders.js';
 import { loadDivisions, needsSelector, parseScope, resolveScope } from './lib/scope.js';
 
 const PORT = Number(process.env.PORT ?? 3000);
@@ -1021,7 +1022,10 @@ function main() {
 				});
 			}
 
-			const view = parseView(rest);
+			// The leaders route is named by the sport — `/coaches` or
+			// `/managers` — so the club has to be resolved before the path can be
+			// parsed. Every other view has a fixed name and does not care.
+			const view = parseView(rest, { leaderPlural: clubFor(entry)?.nouns?.leaderPlural });
 			if (!view) return json(res, 404, { error: 'no such view', path: url.pathname });
 
 			// What the switcher appends to another club's base, so switching
@@ -1165,6 +1169,41 @@ function main() {
 						siteNavHtml: siteNav(entry.base, team, { league: needsSelector(table) }),
 						switcher: clubSwitcher(clubList(), entry.teamId, here),
 						updatedAt: await lastUpdated(entry.sport, entry.franchise),
+					}));
+				}
+				if (view.view === 'leaders') {
+					const team = clubFor(entry);
+					const all = await games(entry);
+					// One club, so the franchise list is one long — and it still
+					// goes in as a list, because the same query serves a league
+					// scope where a leader who led two clubs is one person.
+					const [gameRows, tenures] = await Promise.all([
+						leaderGames(entry.sport, [entry.franchise]),
+						leaderTenures(entry.sport, [entry.franchise]),
+					]);
+					const ranked = rankLeaders(mergeLeaders(tallyLeaders(gameRows), tallyTenures(tenures)));
+					if (wantsJson(url)) {
+						return json(res, 200, {
+							leaders: ranked.map((r) => ({ ...r, seasons: undefined, champ: undefined })),
+						});
+					}
+					const latest = latestSeason(all);
+					// The gap, said on the page. A club whose games start well
+					// before its leaders do is not showing its whole history, and
+					// a table that quietly begins in 1999 looks complete.
+					const firstGame = seasons(all)[0];
+					const firstLeader = ranked.length ? Math.min(...ranked.map((r) => r.firstSeason)) : null;
+					const note = firstLeader != null && firstGame != null && firstLeader > firstGame
+						? `Games are on record from ${firstGame}, but ${team.nouns.leaderPlural} only from ${firstLeader}.`
+						: null;
+					return html(res, 200, leadersPage({
+						team,
+						colors: team.colors ?? colorsFor(namers[entry.sport], entry.code, { season: latest?.season, date: all.at(-1)?.date }, NEUTRAL),
+						leaders: ranked,
+						base: entry.base,
+						note,
+						siteNavHtml: siteNav(entry.base, team, { league: needsSelector(table) }),
+						switcher: clubSwitcher(clubList(), entry.teamId, here),
 					}));
 				}
 				if (view.view === 'records') {

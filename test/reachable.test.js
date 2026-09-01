@@ -312,8 +312,13 @@ test('the standings page links back to the clubs and the other league pages', ()
 
 // The tests above ask whether every route is linked. Nothing asked the reverse,
 // and `/managers` was in every club page's site nav, answering 404, for as long
-// as the nav existed. The leaders page needs a curated coaches/managers table
-// nobody publishes; the link went in ahead of the page.
+// as the nav existed, because the link went in ahead of the page.
+//
+// The page exists now, and these tests are what caught the other half of
+// building it: `resolves` parsed the path without telling it which sport it was
+// looking at, so `/coaches` was still unroutable here while the server served
+// it. The leaders route is the only one whose NAME comes from the sport, and
+// anything checking routes has to carry the club the way the server does.
 
 const LEAGUE_ROUTES = new Set(['/records', '/schedule', '/standings'])
 
@@ -329,7 +334,9 @@ const resolves = (href, sport) => {
 	const id = sport === 'mlb' ? 'brewers' : 'packers'
 	const table = routeTable(parseScope(`team:${sport}/${id}`), [{ sport, teamId: id, code: 'X', available: true }])
 	const m = matchRoute(href, table)
-	return Boolean(m && parseView(m.rest))
+	// The club's own noun, exactly as server.js passes it. Without this the
+	// leaders page is unroutable here and routable in production.
+	return Boolean(m && parseView(m.rest, { leaderPlural: teamFor(sport).nouns.leaderPlural }))
 }
 
 for (const sport of ['nfl', 'mlb']) {
@@ -346,9 +353,24 @@ for (const sport of ['nfl', 'mlb']) {
 test('the nav test can fail — an unbuilt page is caught', () => {
 	// Guards the guard. `resolves` returning true for everything would make the
 	// two tests above pass on the nav that shipped the 404.
-	assert.equal(resolves('/managers', 'mlb'), false)
-	assert.equal(resolves('/coaches', 'nfl'), false)
+	//
+	// It used to assert that `/managers` and `/coaches` do not resolve, which was
+	// the honest statement of a missing page and is now false: both are built.
+	// The guard needs a route that genuinely does not exist, so it uses one of
+	// the social-card paths, which are still on the parity list and still
+	// unbuilt.
+	assert.equal(resolves('/og/default.png', 'nfl'), false)
+	assert.equal(resolves('/coaches', 'mlb'), false, 'a baseball club answered the football noun')
+	assert.equal(resolves('/managers', 'nfl'), false, 'a football club answered the baseball noun')
 	assert.equal(resolves('/records', 'nfl'), true)
+})
+
+test('each sport answers its own leaders noun and not the other', () => {
+	// `/coaches` for football and `/managers` for baseball. Serving both from
+	// one club would be the leaders page quietly existing at two URLs, and is
+	// what a `leaderPlural` default of "coaches" would have produced.
+	assert.equal(resolves('/coaches', 'nfl'), true)
+	assert.equal(resolves('/managers', 'mlb'), true)
 })
 
 test('a club under a multi-club scope can reach the standings', () => {

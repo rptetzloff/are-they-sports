@@ -153,6 +153,36 @@ export function gameRow(r, teamId) {
 	};
 }
 
+/** Both coaches of one nflverse schedules row, in the neutral leader shape.
+ *
+ *  `home_coach` and `away_coach` are columns 42 and 43 of the file
+ *  scripts/fetch.mjs has been pulling all along, populated on 7,548 of 7,548
+ *  rows with no blanks — so football's modern era needed no curation and no new
+ *  source, only for someone to read the header.
+ *
+ *  THE NAME IS NOT THE IDENTITY. nflverse writes `Jim Mora` for Indianapolis in
+ *  1999 and for Atlanta in 2004, and those are a father and a son. Keyed on the
+ *  string, the leaders page serves one coach with three clubs and an eleven-year
+ *  career, and nothing errors. So this emits the name and the resolver in
+ *  lib/leaders.js turns (name, franchise, season) into an id using
+ *  data/reference/nfl-coaches.csv — which is the file that does for football
+ *  what Retrosheet's manager ids do for baseball for free.
+ *
+ *  The row is emitted for scheduled games too. nflverse names the 2026 Giants'
+ *  head coach on sixteen games nobody has played, which is how a club page can
+ *  say who is in charge now; the record counts final games only, and that filter
+ *  belongs where the counting happens rather than here.
+ */
+export function leaderRows(r) {
+	const out = [];
+	for (const [code, name] of [[r.away_team, r.away_coach], [r.home_team, r.home_coach]]) {
+		const leaderName = name?.trim();
+		if (!leaderName) continue;
+		out.push({ gameId: r.game_id, code, leaderName, season: Number(r.season) });
+	}
+	return out;
+}
+
 /** A FiveThirtyEight row, from `teamId`'s point of view, or null.
  *
  *  A different shape from nflverse: team1 is the home side, `playoff` carries
@@ -274,6 +304,23 @@ export const defaults = {
 		 *  ending it at the boundary would erase the record the list exists to
 		 *  show. Baseball does the opposite, on purpose. */
 		streaksSpanSeasons: true,
+		/** How long a stint can be and still be somebody covering an absence.
+		 *
+		 *  Five games, and it is inert: nflverse names the head coach of record
+		 *  for every game and never the assistant who stood in for one. Measured
+		 *  rather than assumed — of 246 runs of consecutive games under one
+		 *  coach, none is bracketed by a coach who managed more of that season.
+		 *
+		 *  Five because it is baseball's 45 as a share of a season, 28%, and not
+		 *  because anything here was tuned: there is nothing to tune against. A
+		 *  number carried over from baseball unscaled would be most of a football
+		 *  season and would be waiting to swallow a real interim the day a source
+		 *  starts recording stand-ins.
+		 *
+		 *  Declared even though it folds nothing, because the rule belongs to the
+		 *  sport and a constant that exists for one league only is how these
+		 *  repos became two codebases. */
+		fillInMaxGames: 5,
 		/** A season with no losses is a plausible thing to look for in a
 		 *  17-game sport. */
 		losslessSeasonIsPlausible: true,
@@ -308,6 +355,7 @@ export const sport = {
 	isScoringPlay,
 	scoringRow,
 	seedRound,
+	leaderRows,
 	/** The column identifying a game across sources, so the builder can key an
 	 *  index without knowing the sport. */
 	gameKey: 'game_id',
