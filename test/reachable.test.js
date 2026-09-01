@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { clubPage, leagueNav, leagueRecordsPage, leagueSchedulePage, selectorPage, siteNav, sportTabs, standingsModal, standingsPage } from '../lib/render.js'
+import { clubPage, clubSwitcher, leagueNav, leagueRecordsPage, leagueSchedulePage, selectorPage, siteNav, sportTabs, standingsModal, standingsPage } from '../lib/render.js'
 import { matchRoute, parseView, routeTable } from '../lib/routes.js'
 import { parseScope } from '../lib/scope.js'
 import mlb from '../sports/mlb.js'
@@ -363,6 +363,44 @@ test('the nav test can fail — an unbuilt page is caught', () => {
 	assert.equal(resolves('/coaches', 'mlb'), false, 'a baseball club answered the football noun')
 	assert.equal(resolves('/managers', 'nfl'), false, 'a football club answered the baseball noun')
 	assert.equal(resolves('/records', 'nfl'), true)
+})
+
+test('the club switcher never sends you to the other sport’s leaders noun', () => {
+	// A REAL 404, shipped. The switcher appends ONE path to every club's base so
+	// that switching keeps you on the page you were on, and every route below a
+	// club is spelled the same for every club — except the leaders page, which is
+	// `/coaches` for football and `/managers` for baseball. So the Packers'
+	// coaches page linked to `/mlb/brewers/coaches`, and the Brewers' managers
+	// page linked to `/nfl/packers/managers`. Both directions, both 404.
+	//
+	// Nothing caught it because every reachability test here builds a
+	// single-sport scope, where the two nouns never meet.
+	const clubs = [
+		{ teamId: 'packers', sport: 'nfl', code: 'GB', name: 'Packers', available: true, url: '/nfl/packers', leaderPlural: 'coaches' },
+		{ teamId: 'brewers', sport: 'mlb', code: 'MIL', name: 'Brewers', available: true, url: '/mlb/brewers', leaderPlural: 'managers' },
+	]
+	const perClub = (c) => (c.leaderPlural ? `/${c.leaderPlural}` : '')
+
+	for (const from of clubs) {
+		const links = hrefs(clubSwitcher(clubs, from.teamId, perClub))
+		for (const href of links) {
+			const target = clubs.find((c) => href.startsWith(c.url))
+			assert.ok(target, `${href} belongs to no club`)
+			assert.ok(href.endsWith(`/${target.leaderPlural}`),
+				`${href} uses the wrong sport's noun`)
+		}
+	}
+})
+
+test('a club with no manifest is switched to its front page, not a bad route', () => {
+	// The fallback matters: a club whose manifest is missing has no leaders noun,
+	// and appending nothing sends the reader somewhere that exists.
+	const clubs = [
+		{ teamId: 'packers', sport: 'nfl', code: 'GB', name: 'Packers', available: true, url: '/nfl/packers', leaderPlural: 'coaches' },
+		{ teamId: 'x', sport: 'nfl', code: 'X', name: 'X', available: true, url: '/nfl/x', leaderPlural: null },
+	]
+	const links = hrefs(clubSwitcher(clubs, 'packers', (c) => (c.leaderPlural ? `/${c.leaderPlural}` : '')))
+	assert.deepEqual(links, ['/nfl/x'])
 })
 
 test('each sport answers its own leaders noun and not the other', () => {

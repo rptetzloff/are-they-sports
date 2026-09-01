@@ -773,6 +773,13 @@ Three rules the tests pin, because each was wrong once:
 Missing values sort last in both directions: a club with no value has not got a
 very small one.
 
+Switching clubs on the leaders page translates the noun. `/nfl/packers/coaches`
+links to `/mlb/brewers/managers`, not to `/mlb/brewers/coaches` — which is what
+it did at first, in both directions, because the switcher appends one path to
+every club's base and every route below a club is spelled the same for every
+club **except this one**. No reachability test caught it: they all build a
+single-sport scope, where the two nouns never meet.
+
 The **leaders page defaults to chronological, earliest first**, so it reads as
 the club's history from the top. It was most wins first, which is what both live
 sites do — and is the wrong default for a page that lists everyone who held the
