@@ -38,14 +38,14 @@ import { computeStandings, divisionPeers, playedSeasons } from './lib/standings.
 import { Lru, memo, mergeGames, versionOf } from './lib/derived.js';
 import { historyPoints } from './lib/history.js';
 import { codeTables, franchisesForClub, staleFranchises } from './lib/codes.js';
-import { availability, close, connect, franchisesWithGames, gamesFor, gamesSince, health, lastUpdated, lastUpdatedAll, leaderGames, leaderTenures, readSummary, withClient, writeSummary } from './lib/store.js';
+import { availability, championships, close, connect, franchisesWithGames, gamesFor, gamesSince, health, lastUpdated, lastUpdatedAll, leaderGames, leaderTenures, readSummary, withClient, writeSummary } from './lib/store.js';
 import { lockKeyFor, nextDelay, refreshLive, withLock } from './lib/live.js';
 import {
 	daysToNextGame, lastLosslessSeason, latestSeason, recordText, seasons, seasonTally, seasonVerdict,
 	seasonWinPct, seriesRecords, streakBanner, verdictText,
 } from './lib/core.js';
 import {
-	ALL_TIME_COLUMNS, historyColumns, standingsColumns,
+	ALL_TIME_COLUMNS, CHAMPION_COLUMNS, championsPage, historyColumns, standingsColumns,
 	NEUTRAL, clubPage, clubSwitcher, noticePage, standingsModal, headToHeadPage, historyPage, leadersPage, leagueNav, leagueRecordsPage, leagueSchedulePage, sportTabs, missingSeasonPage, opponentPage, recordsPage, standingsPage,
 	scheduleHtml, seasonNav, selectorPage, siteNav, sparklineHtml,
 } from './lib/render.js';
@@ -765,14 +765,52 @@ function main() {
 				// The fourth segment is the schedule's period — `w3`, `d2026-08-29`,
 				// the period's own key. Only the schedule takes one; /records/2011
 				// and /standings/2011 are whole seasons by definition.
-				const m = url.pathname.match(/^(?:\/([a-z0-9]+))?\/(records|schedule|standings)(?:\/(\d{4})(?:\/([wd][\w-]+))?)?$/);
+				const m = url.pathname.match(/^(?:\/([a-z0-9]+))?\/(records|schedule|standings|champions)(?:\/(\d{4})(?:\/([wd][\w-]+))?)?$/);
 				if (!m) return null;
 				const [, sport, view, season, period] = m;
 				if (period && view !== 'schedule') return null;
 				if (sport && !inScopeSports.includes(sport)) return null;
-				if (view === 'records' && season) return null;
+				// Neither of these is about one season: a record book and a list
+				// of champions are both the whole history by definition.
+				if ((view === 'records' || view === 'champions') && season) return null;
 				return { sport: sport ?? null, view, season: season ?? null, period: period ?? null };
 			})();
+
+			// Every champion the league has had. The only page that reads the
+			// championship table directly — the club record book and the history
+			// chart read it through computeRecords.
+			if (leagueRoute?.view === 'champions' && needsSelector(table)) {
+				const withGames = table.filter((e2) => e2.available && e2.teamId);
+				if (!withGames.length) return noClubsLoaded(res, url, 'champions');
+				const wanted = leagueRoute.sport
+					? [leagueRoute.sport]
+					: [...new Set(withGames.map((e2) => e2.sport))];
+				const all = [];
+				for (const sport of wanted) {
+					const resolve = namers[sport];
+					// Names are resolved per sport AND per season, because a 1969
+					// champion is not called what that franchise is called now.
+					for (const c of await championships(sport)) {
+						all.push({
+							...c, sport,
+							championName: resolve(c.champion, { season: String(c.season) }).name,
+							runnerUpName: c.runnerUp
+								? resolve(c.runnerUp, { season: String(c.season) }).name : null,
+						});
+					}
+				}
+				if (wantsJson(url)) return json(res, 200, { champions: all });
+				return html(res, 200, championsPage({
+					champions: all,
+					heading: wanted.length === 1 ? `${wanted[0].toUpperCase()} champions` : 'Champions',
+					colors: NEUTRAL,
+					clubs: clubList(),
+					tabs: sportTabs(inScopeSports, leagueRoute.sport, 'champions'),
+					sort: parseSort(url.searchParams, CHAMPION_COLUMNS, null),
+					path: url.pathname,
+					params: url.searchParams,
+				}));
+			}
 
 			// Where every club finished, for one season. Computed from games rather
 			// than fetched: the baseball site pulls ESPN's standings endpoint into
@@ -1170,7 +1208,14 @@ function main() {
 				if (view.view === 'history') {
 					const team = clubFor(entry);
 					const all = await games(entry);
-					const records = computeRecords(all, { streaksSpanSeasons: team.rules.streaksSpanSeasons });
+					// The club's own titles, including the ones no game can show.
+					// Without them the history chart marks three Packers
+					// championships where there are six.
+					const clubTitles = await championships(entry.sport, [entry.franchise]);
+					const records = computeRecords(all, {
+						streaksSpanSeasons: team.rules.streaksSpanSeasons,
+						titles: clubTitles.filter((t) => t.champion === entry.franchise),
+					});
 					const points = historyPoints(records.everySeason);
 					if (wantsJson(url)) return json(res, 200, { seasons: points });
 					const latest = latestSeason(all);
@@ -1258,12 +1303,14 @@ function main() {
 				if (view.view === 'records') {
 					const team = clubFor(entry);
 					const all = await games(entry);
+					const won = await championships(entry.sport, [entry.franchise]);
 					const records = computeRecords(all, {
 						// Declared per sport: football's longest streak is 15
 						// games across the 2010 and 2011 seasons, and ending runs
 						// at the boundary would erase it. Baseball says the
 						// opposite, on purpose.
 						streaksSpanSeasons: team.rules.streaksSpanSeasons,
+						titles: won.filter((t) => t.champion === entry.franchise),
 					});
 					if (wantsJson(url)) return json(res, 200, records);
 					const latest = latestSeason(all);

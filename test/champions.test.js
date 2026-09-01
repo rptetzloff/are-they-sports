@@ -243,6 +243,41 @@ test('championships in the database', { skip: !DATABASE_URL && 'no DATABASE_URL 
 		assert.ok(gb[0].rows > gb[0].seasons, 'expected a club with two titles in one season')
 		assert.equal(gb[0].seasons, 13, 'Green Bay has thirteen championship seasons')
 	})
+
+	await t.test('baseball champions derive, including the season with a tie game', {
+		skip: !loaded && 'championship table is empty',
+	}, async () => {
+		// A DRAW IS NOT A WIN. The win expression
+		// `(home = club) = (home_score > away_score)` is false=false for the away
+		// side of a tied game, which is TRUE — so a draw counted as an away win.
+		// The 1912 World Series ran to eight games because game two was called
+		// 6-6 for darkness; Boston won it 4-3, the tie made it 4-4, and the
+		// season came out with NO CHAMPION at all while 120 others looked fine.
+		const mlb = await q(`
+			SELECT count(*)::int n,
+			       count(*) FILTER (WHERE method <> 'championship series')::int wrong
+			  FROM championship WHERE sport = 'mlb'`)
+		if (!mlb[0].n) return
+		assert.equal(mlb[0].wrong, 0, 'a baseball title is not a series')
+		const seasons = await q(`
+			SELECT DISTINCT season FROM game
+			 WHERE sport = 'mlb' AND round = 'championship' AND status = 'final'
+			 EXCEPT SELECT season FROM championship WHERE sport = 'mlb'`)
+		assert.deepEqual(seasons, [], 'a season had a championship round and no champion')
+	})
+
+	await t.test('a champion actually won the game it is linked to, in both sports', {
+		skip: !loaded && 'championship table is empty',
+	}, async () => {
+		// For a series this is the clinching game, which the winner won by
+		// definition. For a single final it is the final.
+		const bad = await q(`
+			SELECT c.sport, c.season, c.champion FROM championship c
+			  JOIN game g ON g.sport = c.sport AND g.id = c.game_id
+			 WHERE g.home_score <> g.away_score
+			   AND c.champion <> CASE WHEN g.home_score > g.away_score THEN g.home ELSE g.away END`)
+		assert.deepEqual(bad, [])
+	})
 })
 
 // ---------------------------------------------------------------------------
