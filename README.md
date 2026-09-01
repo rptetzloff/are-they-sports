@@ -780,6 +780,40 @@ inside W/L and Wikipedia does not: of 175 NFL tenures the two describe in common
 2213–1774 in Retrosheet and 2149–1709 on Wikipedia, and the difference is exactly
 his postseason.
 
+### Getting the game logs to the database
+
+Managers come from Retrosheet's `gl*.txt`, and there is a deadlock worth naming:
+the container cannot reach a local directory, and on a deployment whose database
+is not reachable from outside, a load run from the machine that *has* the files
+cannot reach the database. Neither side can do the job alone.
+
+So the logs are fetchable. Point `MLB_GAMELOGS_URL` at a base URL — one object
+per file, which is how they already sit in a bucket — and the load pulls the
+seasons the database actually holds, plus the four postseason files. It costs
+160 requests and 228MB a load.
+
+Two smaller shapes were measured and rejected: a concatenated `gl*.txt.gz` at
+33MB, and a derived managers extract at **1.6MB** (471,214 rows, a 142:1
+reduction — the same size as the eight-column `gameinfo.csv` slice, by
+coincidence). Both were rejected because they add a step to repeat each year
+when Retrosheet publishes, and a derived file that can silently fall behind its
+source.
+
+`MLB_GAMELOGS_DIR` still takes a local directory, and **either variable accepts
+either form** — pointing `_DIR` at a URL is what a person tries first, and it
+used to fail an `existsSync` check and report "no game logs at http://...",
+which is true, useless, and indistinguishable from the variable being unset.
+
+Fetching by name is the one thing a local directory does better. A glob cannot
+miss a file; a list of names can, and did — `gldv.txt` was left out, the load
+reported 132 files and no error, and 1,026 division-series attributions were
+simply absent. 0.2%, invisible in any total, found by loading the same data
+twice and comparing. `gameLogNames` is a pure function now, with a test that
+pins all four rounds.
+
+Missing logs are never fatal. The load reports the gap, loads every game, and
+the leaders page says "No one on record."
+
 ### Who held the job, not who ran the game
 
 Retrosheet names the manager of record for each game, which means it names the
@@ -1019,7 +1053,9 @@ docker run -p 3000:3000 -e SCOPE=division:nfl/nfc-north are-they-sports
 | `STRICT_SCOPE` | `1` makes any unbuilt club in scope unhealthy. Unset, serving at least one club is healthy, because building clubs one at a time is how this repo works today. |
 | `PORT` | defaults to 3000. |
 | `BUILD_SHA` | stamped into `/healthz` as `build`. Coolify's `SOURCE_COMMIT` is read too. Unset reports `"unknown"` rather than guessing. |
-| `MLB_GAMELOGS_DIR` | where Retrosheet's `gl*.txt` game logs are, for `npm run load mlb`. Optional: without it the load skips managers, says so, and every other page is unaffected. |
+| `MLB_GAMELOGS_URL` | base URL for Retrosheet's `gl*.txt` game logs, one object per file, for `npm run load mlb`. Signed automatically when `S3_ACCESS_KEY_ID` and `S3_SECRET_ACCESS_KEY` are set. |
+| `MLB_GAMELOGS_DIR` | the same thing as a local directory, for a load running where the files are. Either variable accepts either form. |
+| `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`, `S3_REGION` | credentials for a private bucket. Any host that is not GitHub is signed when these are set; an unsigned GET against a private bucket returns 403. |
 
 The healthcheck is `/healthz`, and it reports the gap between what the scope
 promised and what is built.
