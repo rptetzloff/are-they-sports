@@ -739,6 +739,47 @@ rule a second time in a second language, and this file's own example of the cost
 is that merging those two implementations "would silently rewrite one record
 book". They are computed in JavaScript, once, and the *result* is stored.
 
+## Sortable tables, without any JavaScript
+
+Every `.league-table` — leaders, the all-time league record book, standings and a
+club's season history — sorts by clicking a column header. The header is a link
+and the order is a `?sort=` query parameter the server reads, which is the same
+shape as the `?format=json` already on every route.
+
+**There is no client-side JavaScript in this repo and this did not add any.** The
+standings modal is a CSS `:target` on an anchor; sorting is links. A few lines of
+browser JavaScript would have been shorter and was rejected for the reason
+CLAUDE.md states at length: rendering that happens in the browser is not
+reachable from `node --test`, which is exactly how 118 tests passed on the
+football site while every past season rendered a 0-0 record. Sorting on the
+server makes the order a pure function of the request, so a test can assert it
+and a reader without JavaScript still gets it. The cost is a round trip per
+click.
+
+Three rules the tests pin, because each was wrong once:
+
+- **A column decides its own first direction.** Nobody clicking "W" wants fewest
+  wins and nobody clicking a name wants Z first, so `defaultDir` is per column.
+  Clicking the column you are already sorted by reverses it.
+- **The order is total.** Rows equal on the sorted column are broken apart by a
+  stable key, because otherwise they fall back to whatever order the query
+  returned — and a table that reshuffles two equal rows between requests looks
+  broken in a way nobody can reproduce.
+- **No sort parameter means no sorting.** Falling back to the first column
+  re-sorted the all-time table and the standings alphabetically by club, taking
+  away the win-percentage and standing orders those pages arrive in. A feature
+  that adds an option must not remove the existing one.
+
+Missing values sort last in both directions: a club with no value has not got a
+very small one.
+
+The **leaders page defaults to chronological, earliest first**, so it reads as
+the club's history from the top. It was most wins first, which is what both live
+sites do — and is the wrong default for a page that lists everyone who held the
+job rather than ranking them. Wins are one click away. The standings **modal** is
+deliberately not sortable: it lives inside a CSS `:target`, and a link in it
+would navigate away and close it.
+
 ## The leaders page, and a claim that was two-thirds wrong
 
 `/coaches` for football and `/managers` for baseball — one page, and the noun

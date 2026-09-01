@@ -4,7 +4,8 @@ import { existsSync, readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import {
-	creditFillIns, mergeLeaders, nflLeaderResolver, rankLeaders, slugFor, tallyLeaders, tallyTenures,
+	creditFillIns, leaderColumns, mergeLeaders, nflLeaderResolver, rankLeaders, slugFor,
+	tallyLeaders, tallyTenures,
 } from '../lib/leaders.js'
 import { leaderRows as nflLeaderRows } from '../sports/nfl.js'
 import { leaderRows as mlbLeaderRows, gameLogId, gameLogNames } from '../sports/mlb.js'
@@ -449,9 +450,28 @@ test('the titles column is not named after the current championship', () => {
 	// `Super Bowl` over Curly Lambeau's 1936, 1939 and 1944 is wrong by thirty
 	// years — they were NFL Championships. The records page already learned this
 	// and this table made the same mistake on its first render.
-	const html = leadersPage({ team: TEAM, colors: {}, leaders: [finished()], base: '' })
-	assert.ok(html.includes('<th>Titles</th>'))
-	assert.ok(!html.includes('<th>Super Bowl</th>'))
+	const columns = leaderColumns({ titles: true, leaderNoun: 'Coach' })
+	const html = leadersPage({ team: TEAM, colors: {}, leaders: [finished()], base: '', columns })
+	// Scoped to the header. "Super Bowl" legitimately appears elsewhere on the
+	// page — it is the club's championship noun — so asserting against the whole
+	// document tests the wrong thing and fails for the right reason.
+	const thead = html.slice(html.indexOf('<thead>'), html.indexOf('</thead>'))
+	assert.ok(thead.includes('>Titles<'), 'no Titles header')
+	assert.ok(!thead.includes('Super Bowl'), 'headed with the current championship')
+})
+
+test('the body draws exactly the columns the header does', () => {
+	// The body used to recompute which optional columns exist from the rows,
+	// agreeing with the header only because both looked at the same array. A
+	// header and a body that disagree about how many cells a row has is a table
+	// that slides every column one to the left.
+	const columns = leaderColumns({ ties: false, post: false, titles: false, leaderNoun: 'Coach' })
+	const html = leadersPage({ team: TEAM, colors: {}, leaders: [finished()], base: '', columns })
+	const headCells = (html.match(/<th[ >]/g) ?? []).length
+	const bodyRow = html.slice(html.indexOf('<tbody>'))
+	const bodyCells = (bodyRow.match(/<td[ >]/g) ?? []).length
+	assert.equal(headCells, columns.length)
+	assert.equal(bodyCells, columns.length)
 })
 
 test('a stated row says so on the page', () => {

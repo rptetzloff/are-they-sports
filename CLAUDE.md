@@ -419,6 +419,15 @@ block**, which is the check that would have caught the sites.
 Both sites run on Node's standard library and `node --test`. A new runtime
 dependency needs a reason in the PR.
 
+**Client-side JavaScript is a dependency of a different kind, and this repo has
+none.** Zero script tags, zero handlers: the standings modal is a CSS `:target`
+on an anchor, and sortable tables are header LINKS with a `?sort=` parameter the
+server reads. The reason is the one this file already gives — rendering that
+happens in the browser is not reachable from `node --test`, which is how 118
+tests passed while every past season rendered a 0-0 record. Sorting on the
+server costs a round trip per click and buys an order that is a pure function of
+the request, assertable by a test, and working for a reader with scripts off.
+
 This repo now has exactly one, `pg`, because reads happen against Postgres at
 request time and Node ships no Postgres client. `node:sqlite` *is* built in and
 was measured as the alternative — every NFL game ever is 18,506 rows and 2.91MB
