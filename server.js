@@ -718,6 +718,9 @@ function main() {
 				name: clubFor(e)?.nouns.fullName ?? namers[e.sport](e.code).name,
 				available: e.available,
 				url: e.available ? `${origin}${e.base}` : null,
+				// What this club calls its leaders page. The switcher needs it
+				// because that route, alone, is named by the sport.
+				leaderPlural: clubFor(e)?.nouns.leaderPlural ?? null,
 			}));
 
 			if (url.pathname === '/' && needsSelector(table)) {
@@ -1243,7 +1246,13 @@ function main() {
 						path: url.pathname,
 						params: url.searchParams,
 						siteNavHtml: siteNav(entry.base, team, { league: needsSelector(table) }),
-						switcher: clubSwitcher(clubList(), entry.teamId, here),
+						// Per club, not one path for all of them: switching from
+						// the Packers' coaches to the Brewers must land on
+						// `/managers`, which is what that club calls the same
+						// page. A club whose manifest is missing goes to its
+						// front page rather than to a route that does not exist.
+						switcher: clubSwitcher(clubList(), entry.teamId,
+							(c) => (c.leaderPlural ? `/${c.leaderPlural}` : '')),
 					}));
 				}
 				if (view.view === 'records') {
