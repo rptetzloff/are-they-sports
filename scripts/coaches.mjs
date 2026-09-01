@@ -171,7 +171,42 @@ async function main() {
 		 WHERE g.sport = 'nfl' AND g.status = 'final' AND g.season < $1
 		 GROUP BY s.fr, g.season`, [COUNTED_FROM]);
 	const bySeason = new Map(tally.map((r) => [`${r.franchise}|${r.season}`,
-		{ w: +r.w, l: +r.l, t: +r.t, pw: +r.pw, pl: +r.pl, won: +r.cw > +r.cl }]));
+		{ w: +r.w, l: +r.l, t: +r.t, pw: +r.pw, pl: +r.pl }]));
+
+	// Titles come from the `championship` table, not from counting championship
+	// games, and that is the whole reason this pass changed.
+	//
+	// Counting games cannot see the twelve seasons decided on the final
+	// standings: there was no championship game before 1933, so Curly Lambeau's
+	// 1929, 1930 and 1931 were invisible and he showed three titles where he won
+	// six. The table has a row for them and no game to point at.
+	//
+	// THE TOP TITLE OF A SEASON, not every title awarded in it.
+	//
+	// A club can hold two for one season and the two are not equal. Green Bay
+	// won the 1966 NFL Championship and then Super Bowl I: one championship
+	// season, two rows, and counting rows gives Lombardi seven where he won
+	// five. Worse, Kansas City won the 1966 AFL Championship and then LOST
+	// Super Bowl I, and Baltimore won the 1968 NFL Championship and then lost
+	// Super Bowl III — so counting league titles credited Hank Stram and Don
+	// Shula with championships their clubs are not given and did not win.
+	//
+	// So: where a season has a Super Bowl, only its winner is champion of that
+	// season. Where it does not, every league champion is — 1946 through 1949
+	// had an NFL and an AAFC champion and no game between them, and 1960 through
+	// 1965 an NFL and an AFL champion, and in those years both are true.
+	const { rows: titles } = await client.query(
+		'SELECT season, champion, title FROM championship WHERE sport = $1', ['nfl']);
+	const bySeasonTitles = new Map();
+	for (const t of titles) {
+		if (!bySeasonTitles.has(t.season)) bySeasonTitles.set(t.season, []);
+		bySeasonTitles.get(t.season).push(t);
+	}
+	const wonIn = new Set();
+	for (const [season, list] of bySeasonTitles) {
+		const superBowl = list.filter((t) => t.title === 'Super Bowl');
+		for (const t of (superBowl.length ? superBowl : list)) wonIn.add(`${t.champion}|${season}`);
+	}
 
 	// What the games say a straddler did FROM 1999, so it can be subtracted from
 	// the Wikipedia total that covers both eras.
@@ -274,7 +309,7 @@ async function main() {
 					const g = bySeason.get(`${club}|${s}`);
 					if (!g) continue;
 					sum.w += g.w; sum.l += g.l; sum.t += g.t; sum.pw += g.pw; sum.pl += g.pl;
-					if (g.won) titleSeasons.push(s);
+					if (wonIn.has(`${club}|${s}`)) titleSeasons.push(s);
 				}
 				w = sum.w; l = sum.l; t = sum.t; pw = sum.pw; pl = sum.pl;
 				basis = 'counted';
@@ -295,7 +330,7 @@ async function main() {
 				const g = bySeason.get(`${club}|${s}`);
 				if (!g) continue;
 				sw += g.pw; sl += g.pl; any = true;
-				if (g.won) titleSeasons.push(s);
+				if (wonIn.has(`${club}|${s}`)) titleSeasons.push(s);
 			}
 			if (any) { pw = sw; pl = sl; }
 		}

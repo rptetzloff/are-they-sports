@@ -739,6 +739,76 @@ rule a second time in a second language, and this file's own example of the cost
 is that merging those two implementations "would silently rewrite one record
 book". They are computed in JavaScript, once, and the *result* is stored.
 
+## Champions before there was a championship game
+
+The database answered "who won this season" by finding championship **games**:
+the load marks the last playoff game of a league and calls its winner champion.
+That works from 1933 and cannot work before it. Twelve NFL seasons were decided
+on the final standings and one by a tie-breaking playoff, so there was no game to
+win — and Curly Lambeau's leaders row showed three titles where he won six, with
+nothing in the data wrong.
+
+`data/reference/nfl-champions.csv` is the third curated file, for the same reason
+as the first two: nobody publishes this. 64 rows, 1920–1969, loaded into a
+`championship` table alongside rows derived from games for 1970 onward.
+
+| method | rows | |
+|---|---|---|
+| `championship game` | 51 | a scheduled final |
+| `standings` | 12 | awarded on the final standings, or by vote |
+| `playoff game` | 1 | 1932, a game played only to break a tie |
+
+**The 51 derivable rows are kept deliberately.** The load's "last playoff game of
+a league" rule had never been checked against anything, and these are an
+independent source to check it with. 52 agree. The check earned its keep before
+it was committed: three codes in the supplied file were wrong and **every one of
+them resolved** — `CRA` is the Chicago Rockets, `NYY` the NFL New York Bulldogs,
+`BDA` the Brooklyn Dodgers — so the AAFC champion and two runners-up were real
+clubs and the wrong ones. Corrected to `CLE`, `NAA`, `BBA` against the games
+themselves.
+
+### Three things that are subtler than they look
+
+**1932's game is linked but its round is not rewritten.** The Bears and the
+Spartans finished level and played indoors at Chicago Stadium; the game is in the
+data as `regular`, because at the time it *counted in the standings*. Marking it
+a championship to make a join work would be editing history to suit the schema,
+so it is linked on the pair of clubs the curated file names and `method` records
+what it was.
+
+**Super Bowls I–IV nearly went missing.** Keyed by season alone, the derived pass
+skipped every season the curated file mentions — and 1966–69 each have a curated
+NFL *and* AFL champion, so the four games that era is remembered for were
+dropped. Green Bay's 1966 read "NFL Championship" with no Super Bowl beside it.
+Keyed by season **and league**, with the pre-merger Super Bowl under `AFL-NFL`
+because it belonged to neither.
+
+**A club counts a season once.** Green Bay won the 1966 NFL Championship and then
+Super Bowl I: two rows, one championship season. Counting rows gives Lombardi
+seven where he won five. And the reverse trap — Kansas City won the 1966 AFL
+Championship and *lost* Super Bowl I, Baltimore won the 1968 NFL Championship and
+lost Super Bowl III — so where a season has a Super Bowl, only its winner is
+champion of that season. Otherwise every league champion is, because 1946–49 and
+1960–65 had two leagues and no game between them.
+
+### Checking the era that has no games
+
+Those twelve standings rows are the only ones nothing could check, and a mutation
+run proved it: changing the 1929 champion from Green Bay to the Bears changed no
+test result. But the title was awarded *on the standings*, so the champion should
+top its own league — and nine of twelve do. The three that do not are each
+documented in the row's own note, and the test **requires the note**:
+
+| | |
+|---|---|
+| 1920 | Akron tied Buffalo on percentage; the title was voted on |
+| 1925 | Pottsville finished ahead and was suspended |
+| 1930 | the league excluded ties from percentage and this repo does not — Green Bay .769 to the Giants .765 |
+
+The test counts clubs finishing *strictly* ahead rather than reading a sort
+position, because 1924 is an exact tie between Cleveland and Duluth at .8333 and
+whichever the sort happened to place first decided whether it passed.
+
 ## Sortable tables, without any JavaScript
 
 Every `.league-table` — leaders, the all-time league record book, standings and a
@@ -918,9 +988,8 @@ in, which is measured rather than assumed.
   season span. Their counts are blank *on purpose* and the page shows the coach
   with no numbers, which is the honest version of a table that would otherwise
   invent them.
-- **Pre-1933 NFL titles.** The league awarded them on standings before there was
-  a championship game, so Curly Lambeau's 1929, 1930 and 1931 do not appear —
-  a title here is winning the championship *round*, and there was no round.
+- ~~**Pre-1933 NFL titles.**~~ **Closed** — see *Champions before there was a
+  championship game* below. Lambeau's 1929, 1930 and 1931 now appear.
 - **Connie Mack's first three seasons.** He managed Pittsburgh in 1894–96 and
   `gameinfo.csv` begins in 1897, so he is about 130 wins short of his published
   total. A coverage gap, not an attribution one.

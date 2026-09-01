@@ -332,6 +332,24 @@ publishes it. `data/reference/nfl-franchise-history.csv` is the worked example:
 264 hand-curated rows giving every franchise, code, era, name and colour, which
 is what Retrosheet gives baseball for free.
 
+`data/reference/nfl-champions.csv` is the third, and it exists because a
+derivation ran out of era. The database found champions by finding championship
+GAMES, which works from 1933 and cannot work before it: twelve NFL seasons were
+decided on the final standings and one by a tie-breaking playoff, so there was no
+game whose winner is the champion. Curly Lambeau showed three titles where he won
+six and nothing in the data was wrong — the question simply had no answer where
+the answer was not a game.
+
+51 of its 64 rows COULD be derived and are kept anyway, which is the interesting
+half. The load marks a champion by taking the last playoff game of a league in a
+season, and that rule had never been checked against anything at all. These check
+it, 52 agree, and the check paid for itself before it was committed: three codes
+in the supplied file were wrong and **every one of them resolved**. CRA is the
+Chicago Rockets, NYY the NFL New York Bulldogs, BDA the Brooklyn Dodgers — real
+clubs, wrong ones, which is the failure mode the rule below is named after. A
+curated row that merely confirms a derivation is not a duplicate; it is the only
+reason to believe the derivation.
+
 `data/reference/nfl-coaches.csv` is the second, and the same sentence describes
 it: 382 rows of head coaches from 1920 to 1998, which is what Retrosheet's game
 logs give baseball back to 1871. Curate only the era that has no source — the
@@ -498,6 +516,15 @@ either club ever played, so the same table falls out of a query and works for
 1962 as well as today. The live source it does need is the one already
 built — the server's own refresh timer — which is what keeps the season being
 played current.
+
+A curated file needs a check that can fail, and the standings era nearly did not
+get one. Those twelve rows are the only ones no game can confirm, and a mutation
+run proved nothing was looking: changing the 1929 champion from Green Bay to the
+Bears changed no test result. The check that works is the definition itself —
+the title was awarded ON the standings, so the champion should top its league —
+and nine of twelve do, with the other three documented in their own notes and the
+test requiring the note. An exception with a reason attached is a record; an
+exception with nothing attached is a hole.
 
 *What this repo has today*, checked by rendering `/2011` under
 `SCOPE=team:nfl/packers` rather than remembered: the answer, the record, a club

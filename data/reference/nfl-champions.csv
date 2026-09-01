@@ -1,0 +1,92 @@
+# NFL, APFA, AAFC and AFL champions, 1920-1969.
+#
+# CURATED AND COMMITTED, because for the standings era nobody publishes a game
+# to derive it from. Twelve of these seasons were decided by league standings or
+# a vote and one by a tie-breaking playoff, so no amount of reading the schedule
+# finds them: before 1933 there was no championship game to win.
+#
+# The other 51 rows CAN be derived, and are kept anyway as a check. The loader
+# marks a champion by finding the last playoff game of a league in a season,
+# which had never been verified against anything; 47 of these agree with it, and
+# test/champions.test.js asserts they still do. A curated row that merely
+# confirms a derivation is not a duplicate -- it is the only reason to believe
+# the derivation.
+#
+# THE CODE IS AUTHORITATIVE AND THE NAME IS FOR READING. Three codes were wrong
+# in the supplied version and every one of them resolved: CRA is the Chicago
+# Rockets, NYY the NFL New York Bulldogs, BDA the Brooklyn Dodgers. They are
+# corrected to CLE, NAA and BBA, confirmed against the games themselves, and a
+# test asserts each code still names a franchise the database holds.
+#
+# method:
+#   standings          league title awarded on the final standings, or by vote
+#   playoff game       a game played only to break a standings tie (1932)
+#   championship game  a scheduled final
+#
+# A blank runnerUp is a standings-era season with no opponent to name.
+#
+season,league,champion,championName,runnerUp,runnerUpName,method,notes
+1920,APFA,AKR,Akron Pros,,,standings,Title awarded by vote at April 1921 league meeting; Buffalo and Decatur also claimed it
+1921,APFA,CHI,Chicago Staleys,,,standings,Buffalo All-Americans disputed the title
+1922,NFL,CBD,Canton Bulldogs,,,standings,
+1923,NFL,CBD,Canton Bulldogs,,,standings,
+1924,NFL,CIB,Cleveland Bulldogs,,,standings,
+1925,NFL,ARI,Chicago Cardinals,,,standings,"Pottsville Maroons dispute - Pottsville suspended, title awarded to Cardinals"
+1926,NFL,FYJ,Frankford Yellow Jackets,,,standings,
+1927,NFL,NYG,New York Giants,,,standings,
+1928,NFL,PRV,Providence Steam Roller,,,standings,
+1929,NFL,GB,Green Bay Packers,,,standings,
+1930,NFL,GB,Green Bay Packers,,,standings,"Decided on win percentage EXCLUDING ties, which is how the league counted then: Green Bay 10-3-1 (.769) over the Giants 13-4 (.765). Counting a tie as half a win, as this repo does everywhere else, puts the Giants top."
+1931,NFL,GB,Green Bay Packers,,,standings,
+1932,NFL,CHI,Chicago Bears,DET,Portsmouth Spartans,playoff game,Indoor game at Chicago Stadium to break a standings tie; led to the championship-game format
+1933,NFL,CHI,Chicago Bears,NYG,New York Giants,championship game,First scheduled NFL Championship Game
+1934,NFL,NYG,New York Giants,CHI,Chicago Bears,championship game,Sneakers Game
+1935,NFL,DET,Detroit Lions,NYG,New York Giants,championship game,
+1936,NFL,GB,Green Bay Packers,WSH,Boston Redskins,championship game,"Played at Polo Grounds, NY"
+1937,NFL,WSH,Washington Redskins,CHI,Chicago Bears,championship game,
+1938,NFL,NYG,New York Giants,GB,Green Bay Packers,championship game,
+1939,NFL,GB,Green Bay Packers,NYG,New York Giants,championship game,
+1940,NFL,CHI,Chicago Bears,WSH,Washington Redskins,championship game,73-0
+1941,NFL,CHI,Chicago Bears,NYG,New York Giants,championship game,
+1942,NFL,WSH,Washington Redskins,CHI,Chicago Bears,championship game,
+1943,NFL,CHI,Chicago Bears,WSH,Washington Redskins,championship game,
+1944,NFL,GB,Green Bay Packers,NYG,New York Giants,championship game,
+1945,NFL,LAR,Cleveland Rams,WSH,Washington Redskins,championship game,
+1946,AAFC,CLE,Cleveland Browns,NAA,New York Yankees,championship game,champion CRA->CLE and runnerUp NYY->NAA; CRA is the Chicago Rockets and NYY the NFL Yanks
+1946,NFL,CHI,Chicago Bears,NYG,New York Giants,championship game,
+1947,AAFC,CLE,Cleveland Browns,NAA,New York Yankees,championship game,champion CRA->CLE and runnerUp NYY->NAA
+1947,NFL,ARI,Chicago Cardinals,PHI,Philadelphia Eagles,championship game,
+1948,AAFC,CLE,Cleveland Browns,BBA,Buffalo Bills,championship game,champion CRA->CLE and runnerUp BDA->BBA; BDA is the Brooklyn Dodgers
+1948,NFL,PHI,Philadelphia Eagles,ARI,Chicago Cardinals,championship game,
+1949,AAFC,CLE,Cleveland Browns,SF,San Francisco 49ers,championship game,champion CRA->CLE; last AAFC season
+1949,NFL,PHI,Philadelphia Eagles,LAR,Los Angeles Rams,championship game,
+1950,NFL,CLE,Cleveland Browns,LAR,Los Angeles Rams,championship game,Browns first NFL season
+1951,NFL,LAR,Los Angeles Rams,CLE,Cleveland Browns,championship game,
+1952,NFL,DET,Detroit Lions,CLE,Cleveland Browns,championship game,
+1953,NFL,DET,Detroit Lions,CLE,Cleveland Browns,championship game,
+1954,NFL,CLE,Cleveland Browns,DET,Detroit Lions,championship game,
+1955,NFL,CLE,Cleveland Browns,LAR,Los Angeles Rams,championship game,
+1956,NFL,NYG,New York Giants,CHI,Chicago Bears,championship game,
+1957,NFL,DET,Detroit Lions,CLE,Cleveland Browns,championship game,
+1958,NFL,IND,Baltimore Colts,NYG,New York Giants,championship game,The Greatest Game Ever Played
+1959,NFL,IND,Baltimore Colts,NYG,New York Giants,championship game,
+1960,AFL,TEN,Houston Oilers,LAC,Los Angeles Chargers,championship game,
+1960,NFL,PHI,Philadelphia Eagles,GB,Green Bay Packers,championship game,
+1961,AFL,TEN,Houston Oilers,LAC,San Diego Chargers,championship game,
+1961,NFL,GB,Green Bay Packers,NYG,New York Giants,championship game,
+1962,AFL,KC,Dallas Texans,TEN,Houston Oilers,championship game,Double overtime
+1962,NFL,GB,Green Bay Packers,NYG,New York Giants,championship game,
+1963,AFL,LAC,San Diego Chargers,NE,Boston Patriots,championship game,
+1963,NFL,CHI,Chicago Bears,NYG,New York Giants,championship game,
+1964,AFL,BUF,Buffalo Bills,LAC,San Diego Chargers,championship game,
+1964,NFL,CLE,Cleveland Browns,IND,Baltimore Colts,championship game,
+1965,AFL,BUF,Buffalo Bills,LAC,San Diego Chargers,championship game,
+1965,NFL,GB,Green Bay Packers,CLE,Cleveland Browns,championship game,
+1966,AFL,KC,Kansas City Chiefs,BUF,Buffalo Bills,championship game,Then lost Super Bowl I
+1966,NFL,GB,Green Bay Packers,DAL,Dallas Cowboys,championship game,Then won Super Bowl I
+1967,AFL,OAK,Oakland Raiders,TEN,Houston Oilers,championship game,Then lost Super Bowl II
+1967,NFL,GB,Green Bay Packers,DAL,Dallas Cowboys,championship game,Ice Bowl; then won Super Bowl II
+1968,AFL,NYJ,New York Jets,OAK,Oakland Raiders,championship game,Then won Super Bowl III
+1968,NFL,IND,Baltimore Colts,CLE,Cleveland Browns,championship game,Then lost Super Bowl III to Jets
+1969,AFL,KC,Kansas City Chiefs,OAK,Oakland Raiders,championship game,Then won Super Bowl IV; last AFL season
+1969,NFL,MIN,Minnesota Vikings,CLE,Cleveland Browns,championship game,Then lost Super Bowl IV to Chiefs
