@@ -419,14 +419,31 @@ block**, which is the check that would have caught the sites.
 Both sites run on Node's standard library and `node --test`. A new runtime
 dependency needs a reason in the PR.
 
-**Client-side JavaScript is a dependency of a different kind, and this repo has
-none.** Zero script tags, zero handlers: the standings modal is a CSS `:target`
-on an anchor, and sortable tables are header LINKS with a `?sort=` parameter the
-server reads. The reason is the one this file already gives — rendering that
-happens in the browser is not reachable from `node --test`, which is how 118
-tests passed while every past season rendered a 0-0 record. Sorting on the
-server costs a round trip per click and buys an order that is a pure function of
-the request, assertable by a test, and working for a reader with scripts off.
+**Client-side JavaScript: a decision made when sortable tables were built, not
+a rule this project already had.**
+
+The measured fact is that there was none — zero script tags, zero handlers, and
+the standings modal is a CSS `:target` on an anchor. What did NOT exist was any
+statement that this was intended. Sortable tables were then built as header
+links with a `?sort=` parameter, and the change described that as "the design"
+and wrote this paragraph as though the repo had long since rejected browser
+JavaScript. It had not. An absence was read as a principle, the principle was
+attributed to the project, and it arrived here in the same commit that invented
+it.
+
+That is the failure at the top of this file — a plausible reading stated as
+established — committed into the file that exists to prevent it, which is worse
+than making it in code. **A rule enters this document when somebody decides it,
+and the entry says who and when.** Inferring one from what the codebase happens
+not to contain is how a habit becomes a constraint nobody chose.
+
+The decision itself stands, on its own reasoning rather than on precedent:
+rendering that happens in the browser is not reachable from `node --test`, which
+is how 118 tests passed while every past season rendered a 0-0 record. Sorting
+on the server costs a round trip per click and buys an order that is a pure
+function of the request, assertable by a test, and working with scripts off. It
+is a default worth keeping and worth arguing with, not a law — and the next
+feature that genuinely needs a script should say so and add one.
 
 This repo now has exactly one, `pg`, because reads happen against Postgres at
 request time and Node ships no Postgres client. `node:sqlite` *is* built in and
