@@ -51,6 +51,7 @@ import {
 } from './lib/render.js';
 import { colorsFor, resolver } from './lib/names.js';
 import { SPORTS, loadSports, loadTeams } from './lib/teams.js';
+import { creditsFor } from './lib/credits.js';
 import { matchRoute, parseView, routeTable } from './lib/routes.js';
 import { LEADERS_DEFAULT_SORT, leaderColumns, mergeLeaders, rankLeaders, tallyLeaders, tallyTenures } from './lib/leaders.js';
 import { parseSort, sortRows } from './lib/sort.js';
@@ -713,6 +714,13 @@ function main() {
 
 			// The selector. Only exists when the scope holds more than one club;
 			// a single-club scope serves that club at the root instead.
+			// The credits this deployment owes, from the sports in its scope. A
+			// football-only site must not name Retrosheet: crediting a source you
+			// do not use reads as carelessness, and a reader cannot tell it from
+			// a false claim.
+			const scopeCredits = creditsFor(
+				[...new Set(table.map((e) => e.sport))].map((id) => adapters[id]).filter(Boolean));
+
 			const clubList = () => table.map((e) => ({
 				teamId: e.teamId, sport: e.sport, code: e.code,
 				name: clubFor(e)?.nouns.fullName ?? namers[e.sport](e.code).name,
@@ -736,6 +744,7 @@ function main() {
 				}));
 				if (wantsJson(url)) return json(res, 200, { scope: process.env.SCOPE, clubs });
 				return html(res, 200, selectorPage({
+					credits: scopeCredits,
 					scope: process.env.SCOPE,
 					clubs,
 					colors: NEUTRAL,
@@ -1130,6 +1139,7 @@ function main() {
 
 				const allPlayed = all.filter((g) => g.result);
 				return clubPage({
+					credits: scopeCredits,
 					team,
 					season,
 					tally,

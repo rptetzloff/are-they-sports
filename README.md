@@ -739,6 +739,43 @@ rule a second time in a second language, and this file's own example of the cost
 is that merging those two implementations "would silently rewrite one record
 book". They are computed in JavaScript, once, and the *result* is stored.
 
+## The data credit
+
+Every page a reader lands on names where the data came from — the club front page
+and the selector. This repo rendered no credit at all until now, and that was not
+a missing nicety: most of these sources ask for attribution and **Retrosheet
+requires it**, so the absence was a licence term going unmet for as long as
+baseball had been loaded.
+
+Credits are declared in `sports/<id>.js`, beside the sources they describe,
+because that file already says where data comes from and a second list elsewhere
+is the drift this repo keeps warning about. `lib/credits.js` merges them for the
+sports **in scope** and adds the repo-wide ones.
+
+**A deployment credits only what it uses.** A football-only site does not name
+Retrosheet; a baseball-only one does not name FiveThirtyEight. Crediting a source
+you do not use reads as carelessness at best, and a reader cannot tell it from a
+false claim. Sources both sports use — ESPN's scoreboard — appear once.
+
+The third tier is credited by everyone, because it is the easiest to forget:
+nothing fetches it and no adapter declares it. Wikipedia for the coaches and
+champions files, teamcolorcodes.com for the colours in the franchise histories.
+
+### A notice is not a courtesy
+
+Retrosheet's terms ask that their statement be reproduced, so `notice` is
+rendered **in full and on its own**, below the list rather than folded into it.
+Shortening it to fit a footer would be crediting them without meeting the
+condition — the version of this that looks done and is not. A test asserts the
+whole sentence appears, not a prefix of it, because `includes` on the first
+clause passes on a truncated notice.
+
+One caveat, stated because it is the only claim here not checked against
+anything in the repository: **the wording of that notice is reproduced from
+knowledge of Retrosheet's terms, not from a licence file** — none came with the
+supplied data. Verify it against retrosheet.org and correct `sports/mlb.js` if it
+has changed.
+
 ## Champions before there was a championship game
 
 The database answered "who won this season" by finding championship **games**:
