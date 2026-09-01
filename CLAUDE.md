@@ -108,13 +108,18 @@ because its `main.js` fetches its own CSV in the browser and `lib/seasons.js`
 reads the file at import and calls ESPN. Neither is reachable from `node --test`.
 Know which files your suite cannot see, and say so out loud.
 
-This repo now has 73, over the pure parts — `splitCsvLine`, `renderNdjson`, both
+This repo now has 656, over the pure parts — `splitCsvLine`, `renderNdjson`, both
 `gameRow`s, `seedGameRow`, `isoDate`, `isScoringPlay`, `scoringRow`, `collapse`,
-`seasonRange`, `coveredSeasons` — plus the seam itself and the two manifests.
-They need no sources and run in about 140ms. The comparison against the two live
-sites still stands behind them and is still the stronger check, but it needs
-490MB of fetched sources and two sibling checkouts, so it cannot run in CI and
-will not survive those repos being retired.
+`seasonRange`, `coveredSeasons`, both `leaderRows` — plus the seam itself and the
+two manifests. They need no sources and run in about 140ms. The comparison
+against the two live sites still stands behind them and is still the stronger
+check, but it needs 490MB of fetched sources and two sibling checkouts, so it
+cannot run in CI and will not survive those repos being retired.
+
+(It said 73, which was true when it was written and had been wrong for months.
+A count in prose is a claim like any other and goes stale in exactly the way the
+top of this file describes: nothing failed and nobody was told. Counted with
+`npm test`, not remembered — and it will be wrong again, so count it.)
 
 **Every one of them was mutation-tested: 25 deliberate breaks, 25 caught.** That
 is the only reason to believe any of it, and the run paid for itself twice over.
@@ -127,6 +132,23 @@ That one produced correct output, which is why nothing had caught it; what it
 cost was that `grep` and `git diff` both treat a file containing a NUL as binary
 and refuse to show it. The mutation run surfaced it by failing to find a line it
 had just been shown.
+
+The leaders page added 12 more breaks, 12 caught — and three of those "survived"
+on the first run because the HARNESS was wrong, not the tests. One mutated a
+manager's id offset while leaving the name offset alone, so the right name still
+came back. One patched `class="record-card league-wide"`, which appears four
+times in `lib/render.js`, and `String.replace` took the first — mutating a
+different page than the test was watching. **A surviving mutant is a claim about
+the test that needs checking too**, and two of these three were the harness
+lying in the opposite direction from the usual one.
+
+The third was real and stayed: breaking the `(none)` check in `sports/mlb.js`
+changed no test result, because every `(none)` in Retrosheet also has an empty
+id and the empty-id guard fires first. That is the unreachable-defence problem
+this file already records from the route tie-break. It is kept rather than
+deleted, with a test that reaches it directly, because the two guards say
+different things — one that a field is missing, one that it was filled in with a
+word meaning nobody.
 
 And the first mutation run was itself worthless: it invoked `node --test test/`,
 which this Node resolves as a module path and refuses, so all 23 mutants were
@@ -310,6 +332,21 @@ publishes it. `data/reference/nfl-franchise-history.csv` is the worked example:
 264 hand-curated rows giving every franchise, code, era, name and colour, which
 is what Retrosheet gives baseball for free.
 
+`data/reference/nfl-coaches.csv` is the second, and the same sentence describes
+it: 382 rows of head coaches from 1920 to 1998, which is what Retrosheet's game
+logs give baseball back to 1871. Curate only the era that has no source — the
+first draft of this one nearly transcribed all 177 modern coaches too, to say
+what `schedules.csv` already says.
+
+It carries its own confidence, per row, because it was built three ways. 341
+tenures are **transcribed** from Wikipedia and cannot be rechecked here. 27 are
+**counted** from games, over seasons no other tenure at that club claims —
+strictly better than the transcribed ones, and used where Wikipedia's table did
+not parse. 15 are **unresolved**: co-head coaches and mid-season changes a
+season span cannot split, left blank on purpose so the page shows a coach with
+no record instead of a plausible wrong one. A curated file that could not say
+which of its numbers were which would be a worse artifact than any of the three.
+
 **A row is an era; a column is a spelling.** `franchiseAbbrv` joins a club's
 eras together, `teamAbbrv` names one era, and any further `<provider>Abbrv` —
 `nflverseAbbrv` is WAS where ours is WSH — is what some other source calls that
@@ -439,16 +476,70 @@ played current.
 *What this repo has today*, checked by rendering `/2011` under
 `SCOPE=team:nfl/packers` rather than remembered: the answer, the record, a club
 selector, a season selector, the schedule grid, the streak banner, the history
-sparkline and last-updated; `/records`, `/history`, `/vs`, `/schedule` and
-`/standings`, each also per sport and as JSON. What is left is the leaders page
-(which needs a curated coaches/managers table nobody publishes), the six social
-cards, the on-this-day panel, share buttons, the data credit, the photo gallery,
-box scores and TV listings.
+sparkline and last-updated; `/records`, `/history`, `/vs`, `/schedule`,
+`/standings` and the leaders page, each also per sport and as JSON. What is left
+is the six social cards, the on-this-day panel, share buttons, the data credit,
+the photo gallery, box scores and TV listings.
 
 The leaders page was *linked* the whole time, from every club page, answering
 404 — the reverse of the reachability failure this file already records, and
 invisible for the same reason: the test asks whether every route is linked, never
 whether every link is a route. It asks both now.
+
+**And the reason it was missing was two-thirds wrong.** This file said it "needs
+a curated coaches/managers table nobody publishes" for as long as the page
+404'd. Measured, that claim survives for exactly one era of one sport:
+
+- Retrosheet's game logs name both managers of every baseball game back to 1871.
+  217,906 of 225,713 final games, 96.5%. Nothing to curate.
+- nflverse's `schedules.csv` — the file `scripts/fetch.mjs` has been pulling all
+  along — has `home_coach` and `away_coach`, populated on 7,548 of 7,548 rows.
+- Football before 1999 has no per-game source anywhere, and FiveThirtyEight's
+  file is two clubs, two Elo ratings and two scores. That one needed the curated
+  tier, and got `data/reference/nfl-coaches.csv`.
+
+Two of the three were sitting in files this repo already had. The claim was
+never checked because nothing depended on it being true, which is the failure
+mode the top of this file describes, arriving as a reason not to build something.
+
+The identity rule below arrived again with it. nflverse writes `Jim Mora` for
+Indianapolis in 1999 and Atlanta in 2004, and those are a father and a son —
+so a leader is an id, never a name, and the curated file exists as much for that
+as for the records. Retrosheet gives baseball a manager id for free, unique
+across all 1,490 (id, name) pairs; football has no such column anywhere.
+
+Reversed once during the build, and worth keeping because the wrong version
+passed every check: the manager fields were read at Retrosheet offsets 78-81,
+the load ran clean, and 427,433 attributions went in naming **umpires**. Fields
+78-89 are six umpire slots. What made it convincing is that it was verified
+against one row from 1871, which had a single umpire and five empty slots — the
+one era where the wrong offsets and the right ones coincide.
+
+Reversed a second time over what a leaders page is even asking. Retrosheet names
+who RAN each game, so an ejection puts the bench coach in the record and Bobby
+Cox came out 2493-1998 against a published 2504-2001. A coaching record is a
+tenure, so `game_leader` now carries `leader` (who held the job) and `ran` (who
+managed it, when that was somebody else).
+
+The rule for folding one into the other is the interesting part, because the
+obvious version is wrong in a way that gets WORSE as you loosen it. Comparing
+adjacent runs of games — a run bracketed by two runs of the same other person is
+a fill-in — is true of a fill-in and equally true of the manager, because every
+ejection chops his season into runs. Phil Garner's 2006 Astros read
+`Cooper(1) Garner(37) Cooper(1)`, so adjacency alone calls Garner the stand-in
+and hands his season to his own bench coach. It only stays safe while the
+threshold is small enough to hide the problem.
+
+Adding "and the person on both sides managed MORE of that season" fixes it, and
+that is the whole rule. A firing fails it at any length.
+
+**The threshold was swept, not chosen**, against twelve managers' published
+career records — 648 games of drift at 15, 435 at 36, 350 at 45, 385 at 50. It
+sits at 45 because 15 misses Don Zimmer's 36 games covering Joe Torre's cancer
+treatment in 1999, and 50 swallows Bob Coleman's 46 games covering Casey Stengel
+after a taxi hit him in 1943, which every published record credits to Coleman.
+The window between a 36-game absence and a 46-game one is the entire margin, and
+recording the sweep is worth more than recording the number.
 
 The credit line is in that list because writing this paragraph from memory put it
 in the other one, and grepping the rendered page is what found it. Both sites
@@ -464,6 +555,16 @@ describe does not obviously apply to them.
 Parity also has to survive the seam: the leaders page is `/coaches` or
 `/managers` depending on the sport, and TV listings exist for one club and not
 the other. Those are manifest and adapter questions, not `if` statements.
+
+The leaders page is the worked example now. `nouns.leaderPlural` names the route
+and every heading, `lib/leaders.js` counts without knowing which league it is
+looking at, and each adapter turns its own source shape — Retrosheet's
+positional game logs, nflverse's two columns — into one neutral row. It is also
+the first route whose NAME comes from the sport, which broke something
+immediately: `test/reachable.test.js` parsed paths without saying which club it
+held, so the page was routable in the server and a 404 in the test. Anything
+that resolves a route now has to carry the club, which is the rule below
+arriving through a test helper.
 
 ## Commits and branches
 
