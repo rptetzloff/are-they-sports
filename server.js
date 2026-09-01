@@ -45,13 +45,15 @@ import {
 	seasonWinPct, seriesRecords, streakBanner, verdictText,
 } from './lib/core.js';
 import {
+	ALL_TIME_COLUMNS, historyColumns, standingsColumns,
 	NEUTRAL, clubPage, clubSwitcher, noticePage, standingsModal, headToHeadPage, historyPage, leadersPage, leagueNav, leagueRecordsPage, leagueSchedulePage, sportTabs, missingSeasonPage, opponentPage, recordsPage, standingsPage,
 	scheduleHtml, seasonNav, selectorPage, siteNav, sparklineHtml,
 } from './lib/render.js';
 import { colorsFor, resolver } from './lib/names.js';
 import { SPORTS, loadSports, loadTeams } from './lib/teams.js';
 import { matchRoute, parseView, routeTable } from './lib/routes.js';
-import { mergeLeaders, rankLeaders, tallyLeaders, tallyTenures } from './lib/leaders.js';
+import { LEADERS_DEFAULT_SORT, leaderColumns, mergeLeaders, rankLeaders, tallyLeaders, tallyTenures } from './lib/leaders.js';
+import { parseSort, sortRows } from './lib/sort.js';
 import { loadDivisions, needsSelector, parseScope, resolveScope } from './lib/scope.js';
 
 const PORT = Number(process.env.PORT ?? 3000);
@@ -812,6 +814,10 @@ function main() {
 						: firstSport.standings);
 				}
 				return html(res, 200, standingsPage({
+					// Sorting is a query parameter, read here and drawn there.
+					sort: parseSort(url.searchParams, standingsColumns(true), null),
+					path: url.pathname,
+					params: url.searchParams,
 					standings: firstSport.standings,
 					// Every season either sport played, so the nav still steps
 					// through years the other one has and this one does not.
@@ -993,6 +999,10 @@ function main() {
 				const label = first.label;
 				if (wantsJson(url)) return json(res, 200, league);
 				return html(res, 200, leagueRecordsPage({
+					// Sorting is a query parameter, read here and drawn there.
+					sort: parseSort(url.searchParams, ALL_TIME_COLUMNS, null),
+					path: url.pathname,
+					params: url.searchParams,
 					league,
 					resolve: first.resolve,
 					heading: scopeHeading(scope, table),
@@ -1162,6 +1172,10 @@ function main() {
 					if (wantsJson(url)) return json(res, 200, { seasons: points });
 					const latest = latestSeason(all);
 					return html(res, 200, historyPage({
+					// Sorting is a query parameter, read here and drawn there.
+					sort: parseSort(url.searchParams, historyColumns(clubFor(entry)), null),
+					path: url.pathname,
+					params: url.searchParams,
 						team,
 						colors: team.colors ?? colorsFor(namers[entry.sport], entry.code, { season: latest?.season, date: all.at(-1)?.date }, NEUTRAL),
 						points,
@@ -1181,9 +1195,31 @@ function main() {
 						leaderGames(entry.sport, [entry.franchise]),
 						leaderTenures(entry.sport, [entry.franchise]),
 					]);
-					const ranked = rankLeaders(mergeLeaders(tallyLeaders(gameRows), tallyTenures(tenures)));
+					const merged = mergeLeaders(tallyLeaders(gameRows), tallyTenures(tenures));
+					// Which optional columns exist depends on the rows: a club with no
+					// ties, no postseason and no titles should not be handed three empty
+					// columns to sort by. The renderer reads the same list for its body
+					// cells, so the header and the rows cannot disagree.
+					const columns = leaderColumns({
+						ties: merged.some((r) => r.t > 0),
+						post: merged.some((r) => r.playoffW || r.playoffL),
+						titles: merged.some((r) => r.titles.length),
+						leaderNoun: team.nouns.leaderPlural.replace(/e?s$/, '')
+							.replace(/^./, (c) => c.toUpperCase()),
+					});
+					const sort = parseSort(url.searchParams, columns, LEADERS_DEFAULT_SORT);
+					// Chronological by default, earliest first, because this page is a
+					// list of everyone who held the job rather than a ranking. It was
+					// most wins first. `rankLeaders` still exists and still means that,
+					// and is now one click away rather than the only order there is.
+					//
+					// Tie-broken on the leader id so the order is total: two rows equal
+					// on the sorted column would otherwise fall back to whatever order
+					// the query returned, and reshuffle between requests.
+					const ranked = sortRows(merged, columns, sort, (r) => r.leader);
 					if (wantsJson(url)) {
 						return json(res, 200, {
+							sort,
 							leaders: ranked.map((r) => ({ ...r, seasons: undefined, champ: undefined })),
 						});
 					}
@@ -1202,6 +1238,10 @@ function main() {
 						leaders: ranked,
 						base: entry.base,
 						note,
+						columns,
+						sort,
+						path: url.pathname,
+						params: url.searchParams,
 						siteNavHtml: siteNav(entry.base, team, { league: needsSelector(table) }),
 						switcher: clubSwitcher(clubList(), entry.teamId, here),
 					}));
