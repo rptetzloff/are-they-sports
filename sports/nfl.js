@@ -107,6 +107,37 @@ export const sources = {
 	},
 };
 
+/** Who this sport's data came from, said on the page.
+ *
+ *  Declared here rather than in the renderer because this file already says
+ *  where the data comes from, and a second list elsewhere would drift from it.
+ *  A deployment credits only the sports in its scope.
+ *
+ *  nflverse asks to be cited and FiveThirtyEight's data is published under a
+ *  Creative Commons licence that requires attribution; neither is optional, and
+ *  neither was rendered anywhere until this existed.
+ */
+export const credits = [
+	{
+		name: 'nflverse',
+		url: 'https://github.com/nflverse/nflverse-data',
+		note: 'schedules, results and play-by-play from 1999',
+	},
+	{
+		name: 'FiveThirtyEight',
+		url: 'https://github.com/fivethirtyeight/nfl-elo-game',
+		// Their own endpoints 404 behind an ABC News redirect, so the GitHub
+		// copy is the surviving one. Credited by the name it was published
+		// under rather than by whoever hosts it now.
+		note: 'game results from 1920 to 1998',
+	},
+	{
+		name: 'ESPN',
+		url: 'https://www.espn.com',
+		note: 'scores for the season being played',
+	},
+];
+
 /** Turn one league-wide schedules row into a neutral game row, from the point
  *  of view of `teamId`, or null if the team was not playing.
  *
@@ -346,6 +377,7 @@ export const sport = {
 	id: 'nfl',
 	name: 'football',
 	sources,
+	credits,
 	defaults,
 	gameRow,
 	seedGameRow,

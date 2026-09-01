@@ -319,6 +319,35 @@ export function scoringRow(r) {
 	};
 }
 
+/** Who this sport's data came from, said on the page.
+ *
+ *  RETROSHEET REQUIRES A NOTICE, and it is not a courtesy credit. Their terms
+ *  ask that the statement below be reproduced, so `notice` is rendered in full
+ *  rather than shortened into a list of names — a footer that trims it to fit
+ *  has not met the condition.
+ *
+ *  The wording is Retrosheet's standard notice. It is reproduced here from
+ *  knowledge of their terms and NOT from anything in this repository: no licence
+ *  file came with the supplied data, so this is the one claim in this file that
+ *  was not checked against a source. Verify it against retrosheet.org before
+ *  relying on it, and correct it here if it has changed.
+ */
+export const credits = [
+	{
+		name: 'Retrosheet',
+		url: 'https://www.retrosheet.org',
+		note: 'games, scoring plays and managers from 1871',
+		notice: 'The information used here was obtained free of charge from and is '
+			+ 'copyrighted by Retrosheet. Interested parties may contact Retrosheet at '
+			+ '20 Sunset Rd., Newark, DE 19711.',
+	},
+	{
+		name: 'ESPN',
+		url: 'https://www.espn.com',
+		note: 'scores for the season being played',
+	},
+];
+
 /** Every game log file needed to cover a span of seasons.
  *
  *  Pure, and separate from the fetching, because this is where the only bug in
@@ -480,6 +509,7 @@ export const sport = {
 	id: 'mlb',
 	name: 'baseball',
 	sources,
+	credits,
 	defaults,
 	gameRow,
 	isScoringPlay,

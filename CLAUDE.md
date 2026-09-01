@@ -530,9 +530,9 @@ exception with nothing attached is a hole.
 `SCOPE=team:nfl/packers` rather than remembered: the answer, the record, a club
 selector, a season selector, the schedule grid, the streak banner, the history
 sparkline and last-updated; `/records`, `/history`, `/vs`, `/schedule`,
-`/standings` and the leaders page, each also per sport and as JSON. What is left
-is the six social cards, the on-this-day panel, share buttons, the data credit,
-the photo gallery, box scores and TV listings.
+`/standings`, the leaders page and `/champions`, each also per sport and as JSON,
+with sortable tables and a data credit. What is left is the six social cards, the
+on-this-day panel, share buttons, the photo gallery, box scores and TV listings.
 
 The leaders page was *linked* the whole time, from every club page, answering
 404 — the reverse of the reachability failure this file already records, and
@@ -594,10 +594,21 @@ after a taxi hit him in 1943, which every published record credits to Coleman.
 The window between a 36-game absence and a 46-game one is the entire margin, and
 recording the sweep is worth more than recording the number.
 
-The credit line is in that list because writing this paragraph from memory put it
-in the other one, and grepping the rendered page is what found it. Both sites
-carry one; this repo has never rendered any, and the sources it would credit —
-nflverse, Retrosheet, FiveThirtyEight, teamcolorcodes.com — mostly ask for it.
+The credit line WAS in that list, and is done. It got there because writing this
+paragraph from memory put it in the other one, and grepping the rendered page is
+what found it.
+
+It turned out not to be a nicety. Most of those sources ask for attribution and
+**Retrosheet requires it**, so rendering none was a licence term going unmet for
+as long as baseball had been loaded — not a missing panel. Credits are declared
+in `sports/<id>.js` beside the sources they describe, merged for the sports in
+scope, and a required notice is reproduced in full rather than folded into a row
+of links: shortening it would be crediting the source without meeting the
+condition, which is the version of this that looks done and is not.
+
+A deployment credits only what it uses. A football-only site naming Retrosheet
+would be asserting a relationship it does not have, and a reader cannot tell that
+from carelessness.
 
 Two of these are genuinely hard rather than merely long. The social cards need
 `@resvg/resvg-js`, which is the one native dependency either site carries and the
