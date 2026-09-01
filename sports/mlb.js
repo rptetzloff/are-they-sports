@@ -85,10 +85,15 @@ export const sources = {
 	 *  404'd: the game logs carry a manager ID and name for BOTH sides of every
 	 *  game, at fields 78-81, back to 1871.
 	 *
-	 *  One file per season — `gl1871.txt` through `gl2025.txt` — plus `glws.txt`,
-	 *  `gllc.txt` and `glwc.txt` for the World Series, league championships and
-	 *  wild cards, which is why the glob is `gl*.txt` and not a year range. Drop
-	 *  the three postseason files and every October game loses its manager.
+	 *  One file per season — `gl1871.txt` through `gl2025.txt` — plus four for the
+	 *  postseason: `glws.txt`, `gllc.txt`, `glwc.txt` and `gldv.txt`, the World
+	 *  Series, league championships, wild cards and division series. That is why
+	 *  the glob is `gl*.txt` and not a year range, and why `extraFiles` names all
+	 *  four: drop one and that round loses its managers.
+	 *
+	 *  `glas.txt` exists too and is deliberately not read. It is the All-Star
+	 *  games, whose sides are NLS and ALS rather than clubs, and the load already
+	 *  skips those 2,566 games.
 	 *
 	 *  Headerless and positional, and the fields are mixed quoted and bare
 	 *  — `"18710504","0","Thu","CL1","NA",1,"FW1"` — so a split on `","` returns
@@ -104,11 +109,51 @@ export const sources = {
 	gameLogs: {
 		glob: 'gl*.txt',
 		perSeason: false,
-		/** Supplied, not fetched, for the same reason `schedules` is: Retrosheet
-		 *  publishes downloads rather than stable release URLs. A deployment
-		 *  that cannot supply these gets no leaders page and says so, rather
-		 *  than getting an empty one. */
+		/** A local directory of `gl*.txt`, for a load running where the files are. */
 		env: 'MLB_GAMELOGS_DIR',
+		/** Or a base URL to fetch them from, one object per file.
+		 *
+		 *  The container cannot reach a local directory and, on a deployment
+		 *  whose database is not reachable from outside, a load run from the
+		 *  machine that HAS the files cannot reach the database either. That is
+		 *  a deadlock with no workaround, so the logs have to be fetchable.
+		 *
+		 *  One object per file rather than an archive, because that is how they
+		 *  already sit in a bucket and nothing has to be generated or kept in
+		 *  step. It costs 160 requests and 228MB a load, against 33MB for a
+		 *  concatenated `gl*.txt.gz` or 1.6MB for a derived managers extract —
+		 *  both measured, and both rejected because they add a step that has to
+		 *  be repeated every year when Retrosheet publishes, and a file that can
+		 *  silently fall behind the source it came from.
+		 *
+		 *  Signed automatically when S3 credentials are in the environment; see
+		 *  `shouldSign` in scripts/fetch.mjs, which signs any host that is not
+		 *  GitHub. A public MinIO on an internal network needs no credentials.
+		 */
+		urlEnv: 'MLB_GAMELOGS_URL',
+		/** What a season's file is called. */
+		fileFor: (season) => `gl${season}.txt`,
+		/** The postseason lives in its own files, not in the season ones. Drop
+		 *  one and that round loses its managers.
+		 *
+		 *  FOUR, and the first version listed three. Retrosheet splits the
+		 *  postseason by round — World Series, league championship, wild card and
+		 *  DIVISION SERIES — and `gldv.txt` was the one left out. Fetching by
+		 *  name means a file nobody names is simply absent, and the load reported
+		 *  132 files fetched and no error at all: 1,026 division-series
+		 *  attributions short, which is 0.2% and invisible in any total.
+		 *
+		 *  It was caught by loading the same data twice, once from a local
+		 *  directory read with a glob and once over HTTP, and comparing the
+		 *  counts. A glob cannot miss a file; a list of names can, and that is
+		 *  the cost of not being able to list a bucket.
+		 *
+		 *  `glas.txt` is deliberately NOT here. It is the All-Star games, whose
+		 *  sides are NLS and ALS rather than clubs, and the load already skips
+		 *  those 2,566 games — fetching it would add managers for games no page
+		 *  can show.
+		 */
+		extraFiles: ['glws.txt', 'gllc.txt', 'glwc.txt', 'gldv.txt'],
 	},
 	/** ESPN's public scoreboard, for the season currently being played.
 	 *
@@ -274,6 +319,22 @@ export function scoringRow(r) {
 	};
 }
 
+/** Every game log file needed to cover a span of seasons.
+ *
+ *  Pure, and separate from the fetching, because this is where the only bug in
+ *  the fetch path lived and a list of names is exactly the kind of thing a test
+ *  can pin. Reading a local directory uses a glob and cannot miss a file;
+ *  fetching by name over HTTP can, and did — `gldv.txt` was left out and the
+ *  load reported 132 files, no error, and 1,026 missing division-series
+ *  attributions. That is 0.2%, invisible in any total, and was found only by
+ *  loading the same data twice and comparing.
+ */
+export function gameLogNames(firstSeason, lastSeason) {
+	const names = [];
+	for (let s = firstSeason; s <= lastSeason; s++) names.push(sources.gameLogs.fileFor(s));
+	return [...names, ...sources.gameLogs.extraFiles];
+}
+
 /** Retrosheet game log fields, 0-based, of the 161 on a row.
  *
  *  Retrosheet documents them 1-based, so every number here is its number minus
@@ -425,6 +486,7 @@ export const sport = {
 	scoringRow,
 	leaderRows,
 	gameLogId,
+	gameLogNames,
 	// The live feed's mappers belong here too. `loadSports` hands the server
 	// each adapter's DEFAULT export, and these were only named exports — the
 	// command-line loader imported the whole module namespace, so nothing showed

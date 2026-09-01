@@ -264,6 +264,82 @@ async function loadLive(client, sportId, cfg, season, put) {
 	return seen;
 }
 
+/** A directory holding Retrosheet game logs, fetching them first if needed.
+ *
+ *  Returns null when there are none to be had, because a missing optional
+ *  source is a gap the load reports rather than a reason to fail: every other
+ *  MLB page depends on this load succeeding and none of them needs a manager.
+ *
+ *  THE URL FORM IS NOT A CONVENIENCE. A container cannot reach a local
+ *  directory, and on a deployment whose database is not reachable from outside,
+ *  a load run from the machine that HAS the files cannot reach the database.
+ *  Neither side can do the job alone, which is a deadlock rather than an
+ *  inconvenience -- so the logs have to be fetchable to be usable at all.
+ *
+ *  Either variable may hold either thing. `MLB_GAMELOGS_DIR` pointed at a URL
+ *  is what a person naturally tries first, and it used to fail `existsSync` and
+ *  report "no game logs at http://..." -- technically true, unhelpful, and
+ *  indistinguishable from the variable being unset. A value that parses as
+ *  http(s) is a base URL wherever it was written.
+ */
+async function gameLogDir(client, sportId, sport) {
+	const cfg = sport.sources.gameLogs;
+	const isUrl = (v) => Boolean(v) && /^https?:\/\//i.test(v);
+	const configured = process.env[cfg.urlEnv] ?? process.env[cfg.env];
+	const base = isUrl(configured) ? configured.replace(/\/+$/, '') : null;
+
+	if (!base) {
+		const local = configured ?? join(SOURCE_DIR, 'sportsdata', 'mlb', 'alldata', 'gamelogs');
+		return existsSync(local) ? local : null;
+	}
+
+	// Only the seasons this database actually holds. Retrosheet publishes logs
+	// from 1871 and `gameinfo.csv` starts in 1897, so asking for the whole range
+	// would be 26 requests for games that cannot be attributed to anything -- and
+	// the season being played has no log published yet, which is a 404 meaning
+	// "not yet" rather than "misconfigured".
+	const { rows } = await client.query(
+		'SELECT min(season)::int lo, max(season)::int hi FROM game WHERE sport = $1', [sportId]);
+	const { lo, hi } = rows[0] ?? {};
+	if (lo == null) return null;
+
+	const names = sport.gameLogNames(lo, hi);
+
+	const dest = join(SOURCE_DIR, 'mlb', 'gamelogs');
+	mkdirSync(dest, { recursive: true });
+
+	let fetched = 0, cached = 0, missing = 0;
+	let firstError = null;
+	for (const name of names) {
+		const path = join(dest, name);
+		// Already here from a previous run. Deleting data/sources costs a
+		// download and never correctness, which is the rule fetch.mjs states.
+		if (existsSync(path)) { cached++; continue; }
+		try {
+			await download(`${base}/${name}`, path);
+			fetched++;
+		} catch (e) {
+			// A 404 is ordinary: not every season in the database has a log, and
+			// the current one never does until Retrosheet publishes. Anything else
+			// is worth naming once -- a bad host, or a 403 from an unsigned request
+			// against a private bucket, would otherwise read as 160 seasons that
+			// happen not to exist.
+			missing++;
+			if (!firstError) firstError = `${name}: ${e.message}`;
+			rmSync(path, { force: true });
+		}
+	}
+	console.log(`  game logs    ${fetched} fetched, ${cached} already present, ${missing} unavailable`);
+	if (missing && !fetched && !cached) {
+		console.log(`  FETCH FAILED every request failed. First: ${firstError}`);
+		console.log('               If the bucket is private, set S3_ACCESS_KEY_ID and');
+		console.log('               S3_SECRET_ACCESS_KEY -- an unsigned GET returns 403.');
+		return null;
+	}
+	if (firstError) console.log(`  note         first unavailable was ${firstError}`);
+	return dest;
+}
+
 /** Load who led each side of each game, and the tenures no source counts.
  *
  *  Runs AFTER games are flushed, and that ordering is load-bearing rather than
@@ -307,14 +383,14 @@ async function loadLeaders(client, sportId, sport, { byCode }) {
 			}
 		}
 	} else {
-		const dir = process.env[sport.sources.gameLogs.env]
-			?? join(SOURCE_DIR, 'sportsdata', 'mlb', 'alldata', 'gamelogs');
-		if (!existsSync(dir)) {
+		const cfg = sport.sources.gameLogs;
+		const dir = await gameLogDir(client, sportId, sport);
+		if (!dir) {
 			// A gap, not a configuration error: the rest of the load is valid and
 			// the leaders page reports itself unavailable. Exiting here would
-			// make a missing optional file fatal to every other page.
-			console.log(`  leaders      SKIPPED, no game logs at ${dir}`);
-			console.log(`               set ${sport.sources.gameLogs.env} to load managers`);
+			// make a missing optional source fatal to every other page.
+			console.log(`  leaders      SKIPPED, no game logs`);
+			console.log(`               set ${cfg.env} to a directory, or ${cfg.urlEnv} to a base URL`);
 			return;
 		}
 		const files = readdirSync(dir).filter((f) => /^gl.*\.txt$/i.test(f)).sort();
@@ -434,6 +510,28 @@ async function loadLeaders(client, sportId, sport, { byCode }) {
 	}
 
 	if (sportId === 'nfl') await loadNflTenures(client, known);
+
+	// People nothing points at any more.
+	//
+	// `game_leader` is rewritten by every load and `leader` was not, so the
+	// identity table only ever grew. That is not hypothetical tidiness: reading
+	// Retrosheet's manager fields at the wrong offsets once put 1,488 UMPIRES in
+	// here, and correcting the offsets left every one of them behind. They were
+	// invisible — the leaders page joins through `game_leader`, so an unreferenced
+	// person renders nowhere — which is exactly why they would have stayed.
+	//
+	// Deleting them is what makes this table reproducible: drop the database,
+	// reload, and get the same rows. A table that only accumulates cannot make
+	// that claim, and CLAUDE.md's whole provenance argument rests on it.
+	const { rowCount: orphans } = await client.query(
+		`DELETE FROM leader l
+		  WHERE l.sport = $1
+		    AND NOT EXISTS (SELECT 1 FROM game_leader gl
+		                     WHERE gl.sport = l.sport AND (gl.leader = l.id OR gl.ran = l.id))
+		    AND NOT EXISTS (SELECT 1 FROM leader_tenure t
+		                     WHERE t.sport = l.sport AND t.leader = l.id)`, [sportId]);
+
+	if (orphans) console.log(`  pruned       ${orphans} people no game or tenure refers to`);
 }
 
 /** The curated football coaches table, or [] when it does not exist yet.

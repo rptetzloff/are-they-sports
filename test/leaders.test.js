@@ -7,7 +7,7 @@ import {
 	creditFillIns, mergeLeaders, nflLeaderResolver, rankLeaders, slugFor, tallyLeaders, tallyTenures,
 } from '../lib/leaders.js'
 import { leaderRows as nflLeaderRows } from '../sports/nfl.js'
-import { leaderRows as mlbLeaderRows, gameLogId } from '../sports/mlb.js'
+import { leaderRows as mlbLeaderRows, gameLogId, gameLogNames } from '../sports/mlb.js'
 import { parseView } from '../lib/routes.js'
 import { leadersPage, siteNav } from '../lib/render.js'
 import { parseCsv, splitCsvLine } from '../lib/csv.js'
@@ -362,6 +362,27 @@ test('Retrosheet’s (none) placeholder is not a manager', () => {
 	named[89] = 'nonex001'; named[90] = '(none)'
 	named[91] = 'mackc101'; named[92] = 'Connie Mack'
 	assert.deepEqual(mlbLeaderRows(named).map((r) => r.leaderName), ['Connie Mack'])
+})
+
+test('the fetched file list covers every postseason round', () => {
+	// THE BUG THIS EXISTS FOR. Reading a local directory uses a glob and cannot
+	// miss a file. Fetching by name over HTTP can, and did: `gldv.txt` was left
+	// out, the load reported 132 files fetched and no error, and 1,026
+	// division-series attributions were simply absent — 0.2%, invisible in any
+	// total. It was found by loading the same data twice and comparing.
+	const names = gameLogNames(1897, 2025)
+	for (const round of ['glws.txt', 'gllc.txt', 'glwc.txt', 'gldv.txt']) {
+		assert.ok(names.includes(round), `${round} is not fetched, so that round has no managers`)
+	}
+	// The All-Star file is excluded on purpose: its sides are NLS and ALS rather
+	// than clubs, and the load skips those games anyway.
+	assert.ok(!names.includes('glas.txt'))
+})
+
+test('the fetched file list covers exactly the seasons asked for', () => {
+	const names = gameLogNames(1999, 2001)
+	assert.deepEqual(names.filter((n) => /^gl\d{4}\.txt$/.test(n)),
+		['gl1999.txt', 'gl2000.txt', 'gl2001.txt'])
 })
 
 test('an nflverse schedules row yields both coaches with the season', () => {
