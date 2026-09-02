@@ -556,8 +556,9 @@ exception with nothing attached is a hole.
 selector, a season selector, the schedule grid, the streak banner, the history
 sparkline and last-updated; `/records`, `/history`, `/vs`, `/schedule`,
 `/standings`, the leaders page and `/champions`, each also per sport and as JSON,
-with sortable tables and a data credit. What is left is the six social cards, the
-on-this-day panel, share buttons, the photo gallery, box scores and TV listings.
+with sortable tables, a data credit and the on-this-day panel. What is left is
+the six social cards, share buttons, the photo gallery, box scores and TV
+listings.
 
 Two of those are much bigger than the list makes them look, and the list is what
 somebody will plan from.
@@ -570,11 +571,14 @@ only then render. The fetch has the same reachability problem baseball's game
 logs had — a container can pull nflverse, and the Retrosheet play-by-play is a
 file one person has.
 
-**The on-this-day panel is the cheap one**, and it is cheap for the reason box
-scores are not: it needs only games, which are loaded, and
-`rules.onThisDayWindowDays` is already declared per sport — exact for baseball,
+**The on-this-day panel was the cheap one, and is done.** It was cheap for the
+reason box scores are not: it needed only games, which are loaded, and
+`rules.onThisDayWindowDays` was already declared per sport — exact for baseball,
 three days either side for football, because a seventeen-game season has empty
-calendar dates by the hundred.
+calendar dates by the hundred. Declared with the other rules and read by nothing
+until now, which is what a seam is for: the panel never learns which sport it is
+drawing, and the heading changes from "On this date" to "Around this date"
+because the window did, not because anything branched.
 
 The leaders page was *linked* the whole time, from every club page, answering
 404 — the reverse of the reachability failure this file already records, and
