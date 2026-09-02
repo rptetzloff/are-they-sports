@@ -749,12 +749,31 @@ baseball one, against 296 in `lib/records.js`.
 
 ### Records
 
-Twelve categories, and they match. What does not:
+**"Twelve categories, and they match" was wrong, and wrong in the way this
+document keeps describing.** It was measured against the football site, which
+publishes twelve; the baseball site's `SITE.records` publishes **twenty**. The
+audit that exists to stop a route being mistaken for a feature counted one
+site's cards and reported a match.
+
+The nine baseball-only ones are named rather than left as a shorter list:
+no-hitters, perfect games, most home runs in a game by the team and by a player,
+most RBIs in a game, cycles, player and team error games, and triple plays.
+**Every one of them needs play-by-play**, which means `scoring_play` — the table
+that holds zero rows because nothing writes it. They are the same blocker as box
+scores, and none of them is a rendering job.
+
+Eleven of the twelve remaining are published for baseball. `lossless-seasons` is
+absent for a different reason: no club has one, and `rules.losslessSeasonIsPlausible`
+already says so.
 
 | | |
 |---|---|
-| per-record permalink `/records/{slug}` | **broken, not merely absent** — the slug is parsed into `view.record` and never read, so all twelve URLs render the identical page. Since the meta work each also declares itself canonical, which is worse than ignoring the slug: twelve URLs claiming to be the canonical copy of one page. |
-| per-record share copy | the site hand-writes a title and description per slug (`recordsCopy`). Here every slug gets the same derived one. |
+| twelve football cards | done |
+| eleven of them for baseball, selected in `sports/mlb.js` | done |
+| nine baseball-only cards | **gap, blocked on `scoring_play`** |
+| per-record permalink `/records/{slug}` | done — the slug picks the title, the description and which card is marked, and a slug the club does not publish is a 404 rather than the whole book under a wrong title |
+| per-record share copy | done — `recordCopy` in `lib/render.js`, mirroring the site's `recordsCopy` |
+| scroll to the linked card | **recorded deviation** — the sites call `scrollIntoView`; the focused card is drawn first instead, which needs no script |
 | share on the page | **gap** — share exists only on the club front page |
 
 ### Head-to-head
@@ -809,6 +828,9 @@ rule.** Settled so far:
 - **sortable columns** — done server-side. Same outcome, no script.
 - **share targets** — done as links. Copy-link and the native sheet cannot be
   links and remain gaps.
+- **scrolling a permalink to its card** — done without one, by drawing that card
+  first. The sites keep the order and call `scrollIntoView`; a reader opening a
+  shared link sees the record they were sent either way.
 - **lightbox, chart tooltip** — undecided. Both are hard without a script.
 
 ## Commits and branches

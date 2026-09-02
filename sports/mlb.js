@@ -471,6 +471,28 @@ export const defaults = {
 		meetingPlural: 'clashes',
 		losslessSeasonNoun: 'undefeated',
 	},
+	/** Which record cards this sport publishes, and in what order.
+	 *
+	 *  ELEVEN OF THE TWENTY the baseball site publishes, and the nine missing
+	 *  are named rather than left as a shorter list: no-hitters, perfect games,
+	 *  most home runs in a game by the team and by a player, most RBIs in a
+	 *  game, cycles, player and team error games, and triple plays.
+	 *
+	 *  Every one of them needs play-by-play, which means `scoring_play` -- a
+	 *  table that holds zero rows because nothing writes it. They are the same
+	 *  blocker as box scores and are not a rendering job.
+	 *
+	 *  `lossless-seasons` is absent for a different reason: no modern club has
+	 *  one, and `rules.losslessSeasonIsPlausible` is already false here.
+	 *
+	 *  The parity audit in CLAUDE.md said the twelve categories "match", which
+	 *  was measured against football alone. Baseball publishes twenty. */
+	records: [
+		'best-seasons', 'worst-seasons', 'best-starts', 'worst-starts',
+		'win-streaks', 'losing-streaks', 'lopsided-wins', 'worst-losses',
+		'playoff-appearances', 'championship-appearances', 'ties',
+	],
+
 	rules: {
 		/** Streaks end at the season boundary here and span them in football.
 		 *  Across 162 games the within-season run is the record anyone quotes;

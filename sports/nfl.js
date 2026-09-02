@@ -343,6 +343,21 @@ export const defaults = {
 		 *  club for which it would be right. */
 		losslessSeasonNoun: 'undefeated',
 	},
+	/** Which record cards this sport publishes, and in what order.
+	 *
+	 *  The catalogue of what CAN be drawn is in lib/render.js; this is the
+	 *  selection, which is the same split the football site makes between its
+	 *  CARDS list and `SITE.records`. A sport omits a slug rather than the
+	 *  renderer knowing which sports have lossless seasons.
+	 *
+	 *  Twelve, matching arethepackersundefeated.com exactly. */
+	records: [
+		'best-seasons', 'worst-seasons', 'best-starts', 'worst-starts',
+		'lossless-seasons', 'win-streaks', 'losing-streaks',
+		'lopsided-wins', 'worst-losses', 'playoff-appearances',
+		'championship-appearances', 'ties',
+	],
+
 	rules: {
 		/** Streaks run across season boundaries here. The longest Green Bay
 		 *  streak, 15 games, ran from December 2010 into December 2011, and
