@@ -746,6 +746,26 @@ test('loaded data', { skip: !isLoaded && 'database has no loaded games — run s
 		assert.equal(r.seasons, 13)
 	})
 
+	await t.test('the leader query returns what the interim rule needs', async () => {
+		// `markInterim` asks which leader was in charge for a club's FIRST game
+		// of each season, which the season alone cannot answer. The date is what
+		// answers it, and nothing else in the suite can see the SQL — every other
+		// test builds leader rows by hand, so dropping the column from the query
+		// changed no result while making every coach look like an opener.
+		const { leaderGames } = await import('../lib/store.js')
+		const { markInterim } = await import('../lib/leaders.js')
+		const pool = { query: (text, params) => client.query(text, params) }
+		const rows = await leaderGames('nfl', ['GB'], pool)
+		if (!rows.length) return   // an empty database has nothing to say here
+		assert.ok(rows.every((r) => r.date), 'a leader row came back with no date')
+		assert.ok(rows.every((r) => r.leader && r.franchise && r.season),
+			'a leader row is missing an identity')
+		// Joe Philbin took Green Bay's last four games of 2018 after Mike
+		// McCarthy was sacked. Against real rows, not fixtures.
+		const names = new Map(rows.map((r) => [r.leader, r.name]))
+		assert.deepEqual([...markInterim(rows)].map((id) => names.get(id)), ['Joe Philbin'])
+	})
+
 	await t.test('the aliases collapsed', async () => {
 		const r = await one(`SELECT count(DISTINCT franchise)::int f, count(DISTINCT code)::int c
 			FROM franchise_code WHERE sport='nfl'`)
