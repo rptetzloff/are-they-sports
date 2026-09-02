@@ -761,20 +761,43 @@ The third tier is credited by everyone, because it is the easiest to forget:
 nothing fetches it and no adapter declares it. Wikipedia for the coaches and
 champions files, teamcolorcodes.com for the colours in the franchise histories.
 
-### A notice is not a courtesy
+### What each source actually requires
 
-Retrosheet's terms ask that their statement be reproduced, so `notice` is
-rendered **in full and on its own**, below the list rather than folded into it.
-Shortening it to fit a footer would be crediting them without meeting the
-condition — the version of this that looks done and is not. A test asserts the
-whole sentence appears, not a prefix of it, because `includes` on the first
-clause passes on a truncated notice.
+| source | licence | what it asks for |
+|---|---|---|
+| Retrosheet | — | a specific statement, appearing **prominently** |
+| nflverse | CC BY 4.0 | attribution, a link to the licence, and an indication that the data was modified |
+| FiveThirtyEight | MIT | the copyright notice retained |
+| Wikipedia | CC BY-SA 4.0 | attribution and a licence mention |
 
-One caveat, stated because it is the only claim here not checked against
-anything in the repository: **the wording of that notice is reproduced from
-knowledge of Retrosheet's terms, not from a licence file** — none came with the
-supplied data. Verify it against retrosheet.org and correct `sports/mlb.js` if it
-has changed.
+Retrosheet's statement renders **in full, on its own, and undimmed** — their terms
+say "prominently", and styling it to match the quiet credits above it would be
+the design overruling a licence term without anyone deciding to. A test asserts
+the whole sentence appears, not a prefix, because `includes` on the first clause
+passes on a truncated notice; another asserts the CSS rule carries no `opacity`
+and no `--muted`.
+
+CC BY asks that modification be indicated, and everything here is modified —
+games become a neutral row, plays are dropped unless they scored, records are
+recomputed. Said once for the whole footer rather than per source, because
+repeating it five times reads as boilerplate.
+
+### Three of these were wrong, written from memory
+
+Every licence claim in the first version of this was guessed and every guess was
+committed:
+
+- **Retrosheet's notice** ended with a postal address — `20 Sunset Rd., Newark,
+  DE 19711` — that is not in their current terms, which give the website.
+- **nflverse** was described as vaguely "asking to be cited". It is CC BY 4.0,
+  with specific requirements.
+- **FiveThirtyEight** was called Creative Commons. It is **MIT**, and requires a
+  copyright notice for ABC News Internet Ventures.
+
+Each was committed with a comment admitting it had not been checked, which is
+not the same as checking it. Reading the two `LICENSE` files and asking about
+the third took one round trip and produced the real text. The licences are pinned
+by name in tests now, so a future guess cannot quietly replace them.
 
 ## Champions before there was a championship game
 

@@ -2,7 +2,13 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { REFERENCE_CREDITS, creditsFor, requiredNotices } from '../lib/credits.js'
 import { creditLine, clubPage, selectorPage } from '../lib/render.js'
+import { escapeHtml } from '../lib/html.js'
 import { SPORTS, loadSports } from '../lib/teams.js'
+import { readFileSync } from 'node:fs'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 
 const adapters = await loadSports()
 const nfl = adapters.nfl
@@ -67,13 +73,71 @@ test('Retrosheet carries a notice and it is reproduced in full', () => {
 	// looks done and is not.
 	const [retrosheet] = requiredNotices(creditsFor([mlb]))
 	assert.ok(retrosheet, 'no required notice found for a baseball deployment')
-	assert.match(retrosheet.notice, /obtained free of charge/)
-	assert.match(retrosheet.notice, /copyrighted by Retrosheet/)
+
+	// PINNED VERBATIM, because this sentence is the requirement rather than a
+	// description of it. The first version was reproduced from memory and ended
+	// with a postal address that is not in Retrosheet's current terms; a test
+	// matching only /copyrighted by Retrosheet/ passed on it happily.
+	assert.equal(retrosheet.notice,
+		'The information used here was obtained free of charge from and is '
+		+ 'copyrighted by Retrosheet. Interested parties may contact Retrosheet at '
+		+ '"www.retrosheet.org".')
+	assert.ok(!/Newark|Sunset/.test(retrosheet.notice), 'the old postal address is back')
 
 	const html = creditLine(creditsFor([mlb]))
-	// The whole sentence, not a prefix of it. An `includes` on the first clause
-	// would pass on a truncated notice, which is exactly the failure.
-	assert.ok(html.includes(retrosheet.notice), 'the notice is not reproduced verbatim')
+	// Compared against the ESCAPED form, because the notice contains the quotation
+	// marks Retrosheet puts around their address and those render as `&quot;`.
+	// The page shows the sentence exactly; the source does not contain it
+	// literally, and a test comparing the raw string fails on correct output.
+	//
+	// The whole sentence, not a prefix of it: an `includes` on the first clause
+	// passes on a truncated notice, which is the failure worth catching.
+	assert.ok(html.includes(escapeHtml(retrosheet.notice)), 'the notice is not reproduced verbatim')
+})
+
+test('every licence is named and linked, and named correctly', () => {
+	// BOTH OF THESE WERE WRONG when written from memory. nflverse was described
+	// as vaguely "asking to be cited" when it is CC BY 4.0 with specific terms,
+	// and FiveThirtyEight was called Creative Commons when it is MIT. Reading the
+	// two LICENSE files is what fixed it, and pinning them here is what stops a
+	// future guess replacing them.
+	const by = Object.fromEntries(creditsFor([nfl, mlb]).map((c) => [c.name, c]))
+	assert.equal(by.nflverse.licence.name, 'CC BY 4.0')
+	assert.equal(by.FiveThirtyEight.licence.name, 'MIT')
+	assert.equal(by.Wikipedia.licence.name, 'CC BY-SA 4.0')
+	for (const c of Object.values(by)) {
+		if (!c.licence) continue
+		assert.match(c.licence.url, /^https:\/\//, `${c.name}: licence is named without a link`)
+	}
+	// MIT requires the copyright notice be retained, so it is data rather than
+	// something the renderer invents.
+	assert.match(by.FiveThirtyEight.copyright, /ABC News Internet Ventures/)
+
+	// AND THAT IT REACHES THE PAGE. Asserting it on the credit object only says
+	// the string exists somewhere; MIT asks that it be included in copies, and a
+	// mutation that stopped rendering it changed no test result.
+	assert.ok(creditLine(creditsFor([nfl])).includes(by.FiveThirtyEight.copyright),
+		'the MIT copyright notice is not rendered')
+})
+
+test('the footer says the data was modified, which CC BY asks for', () => {
+	// Everything here is reshaped: games become a neutral row, plays are dropped
+	// unless they scored, records are recomputed. Said once rather than per
+	// source, because repeating it five times reads as boilerplate.
+	const html = creditLine(creditsFor([nfl]))
+	assert.match(html, /reshaped, combined and recomputed/)
+	// And not said at all when nothing carries a licence that asks for it.
+	assert.ok(!creditLine([{ name: 'X' }]).includes('reshaped'))
+})
+
+test('the required notice is not dimmed the way the credits are', () => {
+	// Retrosheet's terms ask that the statement appear "prominently". The rest
+	// of the footer is deliberately quiet, and styling the notice to match it
+	// would be the design overruling a licence term without anyone deciding to.
+	const css = readFileSync(join(ROOT, 'lib/style.js'), 'utf8')
+	const rule = css.slice(css.indexOf('.notice {'), css.indexOf('}', css.indexOf('.notice {')))
+	assert.ok(!/opacity/.test(rule), 'the required notice is faded')
+	assert.ok(!/var\(--muted\)/.test(rule), 'the required notice is muted')
 })
 
 test('a football-only deployment renders no notice, because it owes none', () => {
