@@ -33,6 +33,15 @@ That is cheap enough to be the default now: start the server on a spare port,
 `chrome --headless --screenshot --window-size=1400,1600`, and look at the image.
 Do it before and after, so the pair is evidence rather than hope.
 
+**That command lies below about 500px.** The window has a minimum width on
+Windows, so `--window-size=390,900` lays the page out wider than 390 and crops
+the image to 390 — which draws a clipped heading and a cut-off column on a page
+that is fine. A narrow-viewport check has to go through the DevTools protocol
+and `Emulation.setDeviceMetricsOverride` instead, which also lets the page be
+asked `document.documentElement.scrollWidth` and, better, which element is over.
+Node ships a WebSocket client, so that costs no dependency. A phone-width list
+of four broken pages produced this way was wrong about two of them.
+
 Corollary: a test that reads the source proves the source, not the behaviour.
 Keep both, and know which one you just wrote.
 
@@ -841,20 +850,57 @@ it now.
 started, and not a rendering job: `scoring_play` holds zero rows and nothing
 writes it. See the note above.
 
-### Every table page overflows a phone, and always has
+### Tables on a phone, and a screenshot that was lying
 
-Not a head-to-head gap and not new: rendered at 420px, `/history`, `/records`,
-`/vs` and the schedule all scroll sideways, with the `<h1>` and the last column
-running off the right edge. Found while checking the filter form at that width,
-which is the only reason it is written down — nothing fails, nothing renders
-wrong on a desktop, and both sites this came from are read mostly on phones.
+**Done, and the first version of this entry was wrong about half of it.** It
+said `/history`, `/records`, `/vs` and the schedule all scrolled sideways at
+420px. Measured properly, at 390px, the set was `/history` (59px over), `/vs`
+(41), `/coaches` (174) and `/managers` (76). `/records` and `/schedule` were
+never in it, and `/coaches` — the worst of the four — was not named.
 
-It is one or two rules (`overflow-x: auto` on the panels, a wrapping heading)
-and it is deliberately NOT fixed in the head-to-head change: it touches every
-page, so it needs its own before-and-after at that width for each of them, and
-folding it in would hide a site-wide defect inside a feature commit.
+The reason the first list was wrong is worth more than the list.
+**`chrome --headless --screenshot --window-size=390,900` does not give you a
+390px viewport on Windows.** The window has a minimum width, the page lays out
+wider than asked, and the image is cropped to the requested size. So the
+screenshot shows a clipped heading and a cut-off column on pages that are
+perfectly fine, and the technique this file prescribes in its opening rule
+quietly stops working below about 500px. At 1400px it is fine, which is why it
+has held up until now.
 
-### The JavaScript question, per feature
+What works is driving the same browser over the DevTools protocol and setting
+`Emulation.setDeviceMetricsOverride`, then asking the page itself for
+`document.documentElement.scrollWidth`. Node ships a WebSocket client, so this
+needs no dependency. It also answers a question a screenshot cannot: WHICH
+element is too wide. Every offender was a `<table>`; nothing else on the site
+was ever over.
+
+The fix is `overflow-x: auto` on `.panel` and `.record-card` — on the
+CONTAINERS, so a table added later inherits it. Both sites use a wrapper
+element (`.h2h-table-wrap`) and have exactly that to remember. Plus, under
+600px, tighter cell padding and `white-space: nowrap`: Lombardi's Titles cell
+is "1961, 1962, 1965, 1966, 1967" and broke onto five lines, making his row five
+rows tall while the column itself was scrolled out of sight — a reader saw an
+unexplained gap next to two coaches and nothing to explain it.
+
+**0 of 16 pages overflow at 390px, 360px and 320px**, and 0 at 1400px, which is
+the check that the fix changed nothing on a desktop.
+
+Columns are kept rather than dropped. The baseball site hides the coach photo
+below 600px, which costs nothing because a photo is decoration; every column
+here is a number somebody came for. What the scroll does not have is an
+affordance — nothing on the page says the table scrolls. Neither site has one
+either. The pure-CSS scroll shadow was considered and rejected: it needs an
+opaque cover colour matching the container, and `--panel` is translucent black
+over the club's ground, so there is no colour to use.
+
+`test/mobile.test.js` holds the part a test can hold, in two halves that only
+mean something together — the stylesheet gives those containers a horizontal
+scroll, and every table this repo renders is inside one of them. Neither half
+alone stops the page overflowing. It cannot prove the rule WORKS; the browser
+measurement is the stronger check and it needs a database, so it lives in the
+commit rather than in CI.
+
+### The JavaScript question, per feature### The JavaScript question, per feature
 
 The sites use client-side JavaScript — `sortable.js`, a lightbox, share widgets,
 a chart tooltip. This repo has none, which was a decision taken when sortable
