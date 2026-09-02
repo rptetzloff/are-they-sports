@@ -1276,6 +1276,68 @@ job rather than ranking them. Wins are one click away. The standings **modal** i
 deliberately not sortable: it lives inside a CSS `:target`, and a link in it
 would navigate away and close it.
 
+## Numbering the coaches, and two features neither site had
+
+The leaders table opens with the club's own count: **1..N for the people who
+held the job, and a fraction for somebody who only ever stood in.** Mike
+McCarthy is Green Bay's fifteenth here and Joe Philbin is 15.1, so the official
+count survives and the column still sorts as a number.
+
+**Per person, where both sites number per stint.** That is a deliberate
+difference. Ray McLean stood in for Green Bay in 1953 and was the head coach in
+1958, and the club counts him once. The football site's `computeCoaches` numbers
+each span and then keys it back to `byCoach.get(s.name)` — the coach's whole
+career — so a man with two spans gets two rows carrying identical totals.
+
+Three rules, each with a test:
+
+- **Numbered by arrival, not by the order the rows are in.** This page is
+  sortable; numbering the array as handed over renumbers everyone the moment
+  somebody clicks "W".
+- **Numbered before anything is filtered.** Hiding the stand-ins and finding
+  McCarthy renumbered from 15 to 14 would be the page contradicting the club.
+- **The input order is returned unchanged.** The caller sorts. Returning arrival
+  order would silently undo the reader's chosen column.
+
+The count is what this repo knows, which for football before 1999 is not the
+whole story: Green Bay comes out with sixteen regulars where the club says
+fifteen, because Hugh Devore's 1953 spell is an interim the curated file does
+not mark. The page already says interims are only marked from 1999.
+
+### Hiding the stand-ins is a link
+
+`?interim=hide` leaves the people who held the job, which is the list a club
+publishes. Both sites use a checkbox remembered in `localStorage`; a link needs
+no script and makes the filtered view a URL somebody can send. What it costs is
+that the choice does not follow the reader to the next club, which the sites'
+version does.
+
+Two details that were wrong first and are pinned by tests: the count comes from
+the **unfiltered** set, or the link vanishes the moment it is used and there is
+no way back; and every other query parameter survives, or hiding a stand-in
+throws away the column somebody sorted by.
+
+Drawn only where there is a stand-in to hide — the same call the head-to-head
+"current franchises" control makes.
+
+### Two audit rows were things neither site does
+
+The parity list carried "points for / against" and "per-coach slug and detail
+view" as gaps on this page. Both were written from memory, and reading the sites
+is what settled them:
+
+- `computeCoaches` totals `pf` and `pa` and **the table never renders them**.
+  Neither site shows the columns.
+- **There is no per-coach route on either site.** `/coaches` and `/managers` are
+  the only ones; the slug exists to key a lightbox.
+
+Removed rather than built. Building them would be inventing a difference, which
+is the rule the audit is supposed to enforce.
+
+What is genuinely still missing from this page is **photos** — and that is a
+data gap before it is a rendering one, since nothing in this repo holds a photo
+URL for a coach.
+
 ## Coach eras on the history chart
 
 Alternating translucent bands behind the line, each labelled with a surname and

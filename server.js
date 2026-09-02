@@ -58,7 +58,7 @@ import { cardSvg, fontsPresent, renderCard } from './lib/card.js';
 import { shareLinks } from './lib/share.js';
 import { onThisDay as onThisDayGames, summarise } from './lib/onthisday.js';
 import { matchRoute, parseView, routeTable } from './lib/routes.js';
-import { LEADERS_DEFAULT_SORT, leaderColumns, leaderStints, mergeLeaders, rankLeaders, tallyLeaders, tallyTenures } from './lib/leaders.js';
+import { LEADERS_DEFAULT_SORT, leaderColumns, leaderStints, mergeLeaders, numberLeaders, rankLeaders, tallyLeaders, tallyTenures } from './lib/leaders.js';
 import { parseSort, sortRows } from './lib/sort.js';
 import { loadDivisions, needsSelector, parseScope, resolveScope } from './lib/scope.js';
 
@@ -1453,7 +1453,13 @@ function main() {
 						leaderGames(entry.sport, [entry.franchise]),
 						leaderTenures(entry.sport, [entry.franchise]),
 					]);
-					const merged = mergeLeaders(tallyLeaders(gameRows), tallyTenures(tenures));
+					// Numbered BEFORE anything is filtered or sorted, because the
+					// number is the club's own count of who has held the job and
+					// must not change when a reader hides the stand-ins or sorts
+					// by wins. Hiding interims and finding McCarthy renumbered
+					// from 14 to 13 would be the page contradicting the club.
+					const merged = numberLeaders(
+						mergeLeaders(tallyLeaders(gameRows), tallyTenures(tenures)));
 					// Which optional columns exist depends on the rows: a club with no
 					// ties, no postseason and no titles should not be handed three empty
 					// columns to sort by. The renderer reads the same list for its body
@@ -1474,7 +1480,13 @@ function main() {
 					// Tie-broken on the leader id so the order is total: two rows equal
 					// on the sorted column would otherwise fall back to whatever order
 					// the query returned, and reshuffle between requests.
-					const ranked = sortRows(merged, columns, sort, (r) => r.leader);
+					// `?interim=hide` leaves the fifteen people who held the job,
+					// which is the list a club publishes. Applied after numbering
+					// and before sorting.
+					const shown = url.searchParams.get('interim') === 'hide'
+						? merged.filter((r) => !r.interim)
+						: merged;
+					const ranked = sortRows(shown, columns, sort, (r) => r.leader);
 					if (wantsJson(url)) {
 						return json(res, 200, {
 							sort,
@@ -1501,11 +1513,33 @@ function main() {
 					const interimNote = perGame != null && firstLeader != null && perGame > firstLeader
 						? `Interim ${team.nouns.leaderPlural} are marked from ${perGame}, where the per-game record starts. Before that the curated file does not say.`
 						: null;
+					// The same sentence the page's own meta description carries, so
+					// a shared link cannot say something the page does not.
+					const leadersUrl = `${origin}${url.pathname}`;
+					const most = [...ranked].sort((a, b) => b.w - a.w)[0];
+					const leadersText = ranked.length
+						? `${team.nouns.fullName}: every ${team.nouns.leaderPlural.replace(/e?s$/, '')} since ${
+							Math.min(...ranked.map((r) => r.firstSeason))}.${
+							most ? ` Most wins: ${most.name} (${most.w}\u2013${most.l}${most.t ? `\u2013${most.t}` : ''}).` : ''}`
+						: null;
 					return html(res, 200, leadersPage({
 						team,
+						share: leadersText
+							? sharePanel({
+								url: leadersUrl,
+								links: shareLinks({
+									url: leadersUrl,
+									title: `${team.nouns.fullName} ${team.nouns.leaderPlural}`,
+									text: leadersText,
+								}),
+							})
+							: '',
 						colors: team.colors ?? colorsFor(namers[entry.sport], entry.code, { season: latest?.season, date: all.at(-1)?.date }, NEUTRAL),
 						leaders: ranked,
 						base: entry.base,
+						// From the UNFILTERED set, so the link back exists on the
+						// filtered page.
+						standIns: merged.filter((r) => r.interim).length,
 						notes: [note, interimNote],
 						columns,
 						sort,
