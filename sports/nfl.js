@@ -113,23 +113,37 @@ export const sources = {
  *  where the data comes from, and a second list elsewhere would drift from it.
  *  A deployment credits only the sports in its scope.
  *
- *  nflverse asks to be cited and FiveThirtyEight's data is published under a
- *  Creative Commons licence that requires attribution; neither is optional, and
- *  neither was rendered anywhere until this existed.
+ *  CORRECTED, and both halves were wrong. This said "nflverse asks to be cited
+ *  and FiveThirtyEight's data is published under a Creative Commons licence" --
+ *  written from memory, checked against nothing, and shipped in a comment
+ *  explaining a footer whose job is to satisfy those licences. Reading them:
+ *
+ *    nflverse         CC BY 4.0. Requires attribution, a link to the licence,
+ *                     and an indication that the material was modified.
+ *    FiveThirtyEight  MIT, not Creative Commons at all. Requires the copyright
+ *                     notice and permission notice be retained.
+ *
+ *  So one was the wrong family of licence and the other was vaguer than the
+ *  terms it stood for. Both are named and linked now, and the modification
+ *  notice CC BY asks for is rendered once for the whole footer -- everything
+ *  here is reshaped, so it is true of every source rather than of one.
  */
 export const credits = [
 	{
 		name: 'nflverse',
 		url: 'https://github.com/nflverse/nflverse-data',
 		note: 'schedules, results and play-by-play from 1999',
+		licence: { name: 'CC BY 4.0', url: 'https://creativecommons.org/licenses/by/4.0/' },
 	},
 	{
 		name: 'FiveThirtyEight',
 		url: 'https://github.com/fivethirtyeight/nfl-elo-game',
 		// Their own endpoints 404 behind an ABC News redirect, so the GitHub
 		// copy is the surviving one. Credited by the name it was published
-		// under rather than by whoever hosts it now.
+		// under; the copyright notice names who holds it now.
 		note: 'game results from 1920 to 1998',
+		licence: { name: 'MIT', url: 'https://github.com/fivethirtyeight/nfl-elo-game/blob/master/LICENSE' },
+		copyright: 'Copyright (c) 2021 ABC News Internet Ventures.',
 	},
 	{
 		name: 'ESPN',

@@ -322,15 +322,20 @@ export function scoringRow(r) {
 /** Who this sport's data came from, said on the page.
  *
  *  RETROSHEET REQUIRES A NOTICE, and it is not a courtesy credit. Their terms
- *  ask that the statement below be reproduced, so `notice` is rendered in full
- *  rather than shortened into a list of names — a footer that trims it to fit
- *  has not met the condition.
+ *  state one requirement for any use of the data: that the statement below
+ *  "must appear prominently". So `notice` is rendered in full, on its own, and
+ *  NOT dimmed the way the rest of the credit line is -- a footer that greys it
+ *  to fit the design has met the letter and not the word.
  *
- *  The wording is Retrosheet's standard notice. It is reproduced here from
- *  knowledge of their terms and NOT from anything in this repository: no licence
- *  file came with the supplied data, so this is the one claim in this file that
- *  was not checked against a source. Verify it against retrosheet.org before
- *  relying on it, and correct it here if it has changed.
+ *  CORRECTED. The first version of this was reproduced from memory and ended
+ *  "...may contact Retrosheet at 20 Sunset Rd., Newark, DE 19711." That address
+ *  is not in their current terms, which give the website instead. It was
+ *  committed with a comment admitting it had not been checked against anything,
+ *  which is not the same as checking it: the right move was to ask, and asking
+ *  took one message and produced the real text.
+ *
+ *  The wording below is Retrosheet's, quoted from their terms. The quotation
+ *  marks around the address are theirs too.
  */
 export const credits = [
 	{
@@ -339,7 +344,17 @@ export const credits = [
 		note: 'games, scoring plays and managers from 1871',
 		notice: 'The information used here was obtained free of charge from and is '
 			+ 'copyrighted by Retrosheet. Interested parties may contact Retrosheet at '
-			+ '20 Sunset Rd., Newark, DE 19711.',
+			+ '"www.retrosheet.org".',
+		// NOT required, and included anyway: Retrosheet asks to hear about
+		// discrepancies, and a site serving 223,655 of their games is exactly
+		// where somebody would notice one.
+		//
+		// Their words rather than a paraphrase of them, and the shorter half of
+		// what they publish -- the liability paragraph is left out because it is
+		// theirs to state on their own site, not ours to restate on a footer.
+		corrections: 'All information is subject to corrections as additional data are received. '
+			+ 'We are grateful to anyone who discovers discrepancies and we appreciate learning '
+			+ 'of the details.',
 	},
 	{
 		name: 'ESPN',

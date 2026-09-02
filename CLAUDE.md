@@ -55,6 +55,20 @@ cadence, which is refreshed by hand and whose workflow only validates.
 So: **if a claim is checkable in one command, run the command before saying the
 thing.** When it is not checkable, say which kind of claim it is.
 
+**And when it is not checkable from here, ASK — do not caveat and ship.** Added
+after the data credit, at the reviewer's request: "I mean, you can ask
+questions." Retrosheet's required attribution notice was reproduced from memory,
+marked in a comment as not checked against anything in the repository, and
+committed into a footer whose only job is to satisfy that requirement. It was
+wrong — it gave a postal address their current terms no longer carry. Two more
+licence claims in the same change were wrong the same way: nflverse is CC BY 4.0
+rather than vaguely "asking to be cited", and FiveThirtyEight is MIT rather than
+Creative Commons.
+
+A disclaimer moves the work to the reader without giving anyone the chance to
+answer cheaply. Asking took one message. Reading the two LICENSE files took two
+fetches. Both were available the entire time the caveat was being written.
+
 Never pipe a command whose exit code matters. `set -o pipefail`, or do not pipe.
 That rule was already written down in a sibling repo and then broken here in the
 same week, by piping a test run through `tail` and reading the pipe's status.
