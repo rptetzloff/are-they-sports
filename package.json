@@ -14,7 +14,8 @@
     "start": "node server.js",
     "dev": "node server.js",
     "migrate": "node scripts/migrate.mjs",
-    "load": "node scripts/load.mjs"
+    "load": "node scripts/load.mjs",
+    "viewport": "node scripts/viewport.mjs"
   },
   "dependencies": {
     "@resvg/resvg-js": "^2.6.2",

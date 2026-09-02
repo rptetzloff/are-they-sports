@@ -1079,6 +1079,75 @@ The test counts clubs finishing *strictly* ahead rather than reading a sort
 position, because 1924 is an exact tie between Cleveland and Duluth at .8333 and
 whichever the sort happened to place first decided whether it passed.
 
+## Tables on a phone, and a screenshot that was lying
+
+`npm run viewport 390 http://localhost:3000` opens every page at a phone width
+and reports which ones scroll sideways, and which element is too wide.
+
+It exists because the obvious way to check that is wrong.
+**`chrome --headless --screenshot --window-size=390,900` does not give you a
+390px viewport on Windows.** The window has a minimum width, so the page lays
+out wider than asked and the image is cropped to the size requested — which
+draws a clipped heading and a cut-off column on a page that is perfectly fine.
+A list of four overflowing pages produced that way was wrong about two of them
+and missed the worst one. Above roughly 500px the command is honest, which is
+why the 1400px checks throughout this repo have held up.
+
+`scripts/viewport.mjs` drives the same browser over the DevTools protocol and
+sets `Emulation.setDeviceMetricsOverride`, then asks the page for
+`document.documentElement.scrollWidth`. Node ships a WebSocket client, so it
+adds no dependency. It answers the question a screenshot cannot: **which
+element**. Every offender on every page turned out to be a `<table>`.
+
+Measured at 390px before the fix:
+
+| | |
+|---|---|
+| `/coaches` | 174px over |
+| `/managers` | 76px |
+| `/history` | 59px |
+| `/vs` | 41px |
+
+`/records`, `/schedule`, `/standings`, `/champions`, the club page and the
+season page were all already fine — which is why this went unnoticed: the site
+mostly fits, and a page that scrolls sideways moves its centred heading off
+centre, so the visible symptom is a clipped title and the cause is three
+elements down.
+
+The fix is `overflow-x: auto` on `.panel` and `.record-card`. **On the
+containers, not on a wrapper element**, so a table added later inherits it —
+both sites use a `.h2h-table-wrap` and have exactly that to remember. Under
+600px the cell padding tightens and cells stop wrapping: Lombardi's Titles cell
+is "1961, 1962, 1965, 1966, 1967" and broke onto five lines, making his row five
+rows tall while the column itself was scrolled out of sight, so a reader saw an
+unexplained gap next to two coaches and nothing to explain it. Making the table
+wider costs nothing once it is a scroll container.
+
+Overflow clips positioned descendants, and the one thing that could have hit is
+the standings modal — which is `position: fixed` and a **sibling** of these, not
+a child. The focus ring on a record card is that element's own `box-shadow`, and
+overflow does not clip an element's own shadow.
+
+**Columns are kept rather than dropped.** The baseball site hides the coach
+photo below 600px, which costs nothing because a photo is decoration; every
+column here is a number somebody came for.
+
+What the scroll does not have is an affordance — nothing says the table scrolls,
+and neither site has one either. The pure-CSS scroll shadow was considered and
+rejected: it needs an opaque cover colour matching the container, and `--panel`
+is translucent black over the club's ground, so there is no colour to use.
+
+After: **0 of 16 pages overflow at 320px, 360px, 390px and 1400px.** The last
+number is the check that the fix changed nothing on a desktop.
+
+`test/mobile.test.js` holds the part a test can hold, deliberately as two halves
+that only mean something together — the stylesheet gives those containers a
+horizontal scroll, and every table this repo renders is inside one of them.
+Neither half alone stops a page overflowing. It cannot prove the rule *works*:
+`overflow-x` could be misspelled into a property no browser has and both halves
+would still pass. The browser measurement is the stronger check, it needs a
+running server and a loaded database, so it is a script rather than a test.
+
 ## Sortable tables, without any JavaScript
 
 Every `.league-table` — leaders, the all-time league record book, standings, a
