@@ -46,13 +46,14 @@ import {
 } from './lib/core.js';
 import {
 	ALL_TIME_COLUMNS, CHAMPION_COLUMNS, championsPage, historyColumns, standingsColumns,
-	NEUTRAL, clubPage, clubSwitcher, noticePage, onThisDayPanel, standingsModal, headToHeadPage, historyPage, leadersPage, leagueNav, leagueRecordsPage, leagueSchedulePage, sportTabs, missingSeasonPage, opponentPage, recordsPage, standingsPage,
+	NEUTRAL, clubPage, clubSwitcher, noticePage, onThisDayPanel, questionFor, standingsModal, headToHeadPage, historyPage, leadersPage, leagueNav, leagueRecordsPage, leagueSchedulePage, sportTabs, missingSeasonPage, opponentPage, recordsPage, standingsPage,
 	scheduleHtml, seasonNav, selectorPage, siteNav, sparklineHtml,
 } from './lib/render.js';
 import { colorsFor, resolver } from './lib/names.js';
 import { SPORTS, loadSports, loadTeams } from './lib/teams.js';
 import { creditsFor } from './lib/credits.js';
 import { describe, titleOf, withMeta } from './lib/meta.js';
+import { cardSvg, fontsPresent, renderCard } from './lib/card.js';
 import { onThisDay as onThisDayGames, summarise } from './lib/onthisday.js';
 import { matchRoute, parseView, routeTable } from './lib/routes.js';
 import { LEADERS_DEFAULT_SORT, leaderColumns, mergeLeaders, rankLeaders, tallyLeaders, tallyTenures } from './lib/leaders.js';
@@ -106,6 +107,22 @@ const json = (res, code, body) => {
  *  route that says nothing still previews as something. A route that knows
  *  better passes its own.
  */
+/** Send a PNG.
+ *
+ *  Cached hard, because a social card for a finished season never changes and
+ *  every reader who sees a shared link fetches it. The season being played is
+ *  the exception and gets a short cache, so a card does not go on claiming a
+ *  record that has moved.
+ */
+const sendPng = (res, png, { immutable = false } = {}) => {
+	res.writeHead(200, {
+		'content-type': 'image/png',
+		'content-length': png.length,
+		'cache-control': immutable ? 'public, max-age=31536000, immutable' : 'public, max-age=300',
+	});
+	res.end(png);
+};
+
 const sendHtml = (res, code, body, meta = {}) => {
 	const withTags = withMeta(body, { description: describe(titleOf(body)), ...meta });
 	const buf = Buffer.from(withTags);
@@ -1248,7 +1265,12 @@ function main() {
 					if (wantsJson(url)) return json(res, 200, await summary(entry, origin, entry.base));
 					const latest = latestSeason(await games(entry));
 					const page = await renderSeason(latest.season);
-					return html(res, 200, page.body, { description: page.description });
+					return html(res, 200, page.body, {
+						description: page.description,
+						// The card for THIS page, so a shared link shows the answer
+						// it is about rather than a house image.
+						image: `${origin}${entry.base}/og/default.png`,
+					});
 				}
 				if (view.view === 'season') {
 					if (wantsJson(url)) {
@@ -1257,7 +1279,12 @@ function main() {
 						return json(res, 200, { team: entry.teamId, season: view.season, games: rows });
 					}
 					const page = await renderSeason(view.season);
-					if (page) return html(res, 200, page.body, { description: page.description });
+					if (page) {
+						return html(res, 200, page.body, {
+							description: page.description,
+							image: `${origin}${entry.base}/og/${view.season}.png`,
+						});
+					}
 					// Reachable by switching clubs from a season page — the
 					// Vikings have no 1929 — so it explains itself and offers the
 					// seasons this club does have.
@@ -1301,6 +1328,60 @@ function main() {
 						switcher: clubSwitcher(clubList(), entry.teamId, here),
 						updatedAt: await lastUpdated(entry.sport, entry.franchise),
 					}));
+				}
+				if (view.view === 'card') {
+					// A card says what its page says. The words come from the same
+					// values the page renders, so the two cannot drift into
+					// describing different things.
+					const team = clubFor(entry);
+					const all = await games(entry);
+					const latest = latestSeason(all);
+					const colors = team.colors
+						?? colorsFor(namers[entry.sport], entry.code, { season: latest?.season, date: all.at(-1)?.date }, NEUTRAL);
+
+					const season = view.card === 'default'
+						? latest?.season
+						: (/^\d{4}$/.test(view.card) ? view.card : null);
+
+					let question = questionFor(team);
+					let answer = '';
+					let record = '';
+					let sub = null;
+
+					if (season) {
+						const rows = all.filter((g) => g.season === season);
+						// A season this club never played has no card. Better a 404
+						// than a picture of an empty record.
+						if (!rows.length) return json(res, 404, { error: 'no such season', season });
+						const tally = seasonTally(rows, team);
+						const verdict = seasonVerdict({
+							...tally,
+							isPastSeason: rows.every((g) => g.result !== ''),
+							daysToNextGame: daysToNextGame(all, new Date()),
+						});
+						answer = verdictText(verdict, team);
+						record = `${season} Record: ${recordText(tally)}`;
+						if (tally.postseason) sub = `Postseason ${tally.postseason.w}-${tally.postseason.l}`;
+					} else {
+						// The fixed pages. The card names the page rather than
+						// answering the club's question, because "NO" over a record
+						// book is an answer to something nobody asked.
+						const LABEL = {
+							records: 'Records', history: 'History', vs: 'Head-to-Head',
+							[team.nouns.leaderPlural]: team.nouns.leaderPlural.replace(/^./, (c) => c.toUpperCase()),
+						};
+						question = team.nouns.fullName;
+						answer = LABEL[view.card] ?? view.card;
+						record = `${seasons(all)[0]}–${seasons(all).at(-1)}`;
+					}
+
+					const svg = cardSvg({
+						question, answer, record, sub, colors,
+						footer: new URL(origin).host,
+					});
+					// A finished season never changes; the one being played does.
+					const settled = season && season !== latest?.season;
+					return sendPng(res, await renderCard(svg), { immutable: Boolean(settled) });
 				}
 				if (view.view === 'leaders') {
 					const team = clubFor(entry);
