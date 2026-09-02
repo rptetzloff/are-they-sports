@@ -1276,6 +1276,77 @@ job rather than ranking them. Wins are one click away. The standings **modal** i
 deliberately not sortable: it lives inside a CSS `:target`, and a link in it
 would navigate away and close it.
 
+## Coach eras on the history chart
+
+Alternating translucent bands behind the line, each labelled with a surname and
+each naming itself in full on hover. Two things a reader gets from them that the
+table cannot give: which stretch of the chart belongs to whom, and how long each
+man lasted, read as width.
+
+**Bands are STINTS, not careers.** The leaders table is one row per person and
+that is right for a record book — Harvey Kuenn's 1975 and his 1982–83 are one
+career. A band is a period of time, and one band spanning 1975 to 1983 draws
+straight over Alex Grammas, George Bamberger, Buck Rodgers and Rene Lachemann,
+who held the job for seven of those nine years between them. `leaderStints`
+cuts the game rows into unbroken spells per club.
+
+Those rows arrive already folded: `game_leader.leader` is who HELD the job and
+`ran` is who managed the game when that was somebody else, so an ejection does
+not chop a season into stints. Without that fold this would be unusable — Phil
+Garner's 2006 Astros are `Cooper(1) Garner(37) Cooper(1)` in the raw data.
+
+### Three placement rules, each of which was wrong once
+
+**Positioned by index, not by season.** `chartGeometry` spaces points evenly
+however far apart their seasons are, so a club with a gap has a chart where 1942
+and 1946 are neighbours. Bands computed from season numbers drift off the line
+they sit under.
+
+**A band ends where the next one starts.** A stint's last season is one the next
+man also worked, so drawing each to its own bounds overlaps every boundary by a
+year.
+
+**Half a slot either side**, because a point is the middle of its season and a
+band covers the whole of it. Without that the final band is zero wide whenever
+the last coach has a single season — the boundary and the chart's right edge are
+the same x — which is how Pat Murphy disappeared off the first version.
+
+A season with more than one man in it is **split evenly between them**. That is
+an approximation and a deliberate one: the exact answer is available for the
+counted era, where stints carry first and last game dates, and is not available
+at all for football before 1999, where the curated file knows only seasons.
+Splitting by count is one rule for both, never produces a zero-width band, and
+puts the boundary in the middle of a season that was genuinely divided. The
+baseball site positions by exact date and the football site by whole season, so
+this sits between them.
+
+### The tooltip is a `<title>`, and needs no script
+
+Both sites wire a `mousemove` handler and an absolutely positioned div to say
+"Vince Lombardi, 1959–1967". SVG has had a native `<title>` element for that the
+whole time. What theirs buys is styling and placement; what it costs is a
+tooltip that does not exist with scripts off.
+
+The per-season hover on the line itself is a different thing, is still a gap,
+and does still need a script.
+
+### Labels fit their own band or are not drawn
+
+Only the surname — "Vince Lombardi" does not fit a nine-season band — and
+co-coaches keep both, because the 1953 Packers were Devore and McLean and
+dropping either names the wrong man.
+
+A fixed pixel threshold does not work. At 34px both "Gregg" and "Infante"
+cleared it in adjacent four-season bands and rendered touching, so the chart
+read **"Gregg Infante"** as one man. The test is now the label's own estimated
+width against its own band, using the social card's `textWidth` — measured
+against Liberation Sans rather than guessed, and wrong in the safe direction, so
+it drops a label that would just have fitted rather than drawing one that just
+does not.
+
+Two names run together is worse than one name missing: the band is still there
+and still names itself on hover.
+
 ## Interim coaches, and a flag that meant something else
 
 The leaders table marks a stand-in with an asterisk, and the headline count
