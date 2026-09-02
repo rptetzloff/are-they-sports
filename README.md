@@ -1081,8 +1081,9 @@ whichever the sort happened to place first decided whether it passed.
 
 ## Sortable tables, without any JavaScript
 
-Every `.league-table` — leaders, the all-time league record book, standings and a
-club's season history — sorts by clicking a column header. The header is a link
+Every `.league-table` — leaders, the all-time league record book, standings, a
+club's season history and the head-to-head index — sorts by clicking a column
+header. The header is a link
 and the order is a `?sort=` query parameter the server reads, which is the same
 shape as the `?format=json` already on every route.
 
@@ -1130,6 +1131,73 @@ sites do — and is the wrong default for a page that lists everyone who held th
 job rather than ranking them. Wins are one click away. The standings **modal** is
 deliberately not sortable: it lives inside a CSS `:target`, and a link in it
 would navigate away and close it.
+
+## Head-to-head, and filters without a script
+
+`/vs` lists every opponent a club has played; `/vs/{slug}` is one of them in
+full. Both sites carry three controls the index here did not have — a name
+filter, a venue, and a game type — plus a fourth on football, "current
+franchises only".
+
+They are query parameters and a GET form: `?q=bear&venue=home&type=regular`.
+The sites wire an `input` event and two `change` handlers and re-render in the
+browser; here the filtered view is a URL, which makes it a link somebody can
+send, a bookmark that still works, and a thing `node --test` can assert. **The
+price is an Apply button**, because a `<select>` cannot submit its own form
+without a script. That is the honest trade and it is one click.
+
+Two directions of the same bug are pinned by tests: the sort travels through the
+form as hidden fields, and `sortHref` already carried the filters the other way.
+Without either, applying a filter throws away the column the reader chose, or
+sorting throws away the filter.
+
+**Venue and type filter the GAMES; name and current-only filter the OPPONENTS.**
+Not a detail — a home-only record cannot be recovered from an all-venues one, so
+the first pair re-runs `computeHeadToHead` over the subset the way the sites do,
+while the second pair leaves every number alone. The unfiltered totals are
+computed either way, because two things need them: the "23 of 61" count, and the
+opponent lookup — a filtered index must still resolve `/vs/{slug}` for an
+opponent its own filter hides, or the link a reader just followed 404s.
+
+### "Current franchises" is derived, and neither site's rule ported
+
+The football site hardcodes thirty-one names, which goes stale the next time a
+club moves. The baseball site derives it from the games — current if the
+opponent appears in the latest season present — which is only safe where
+everybody plays everybody. A football club meets fourteen of the other
+thirty-one in a season, so that rule would call twenty-eight franchises defunct.
+
+`currentFranchises()` reads the franchise history table instead: **a franchise is
+current if its latest era is the latest era anyone has.** Football writes an end
+season on every row and the live ones read 2026; baseball leaves the end blank on
+an open era; both fall out of one comparison with a blank sorting last.
+
+Measured: **32 of 119 football franchises, 30 of 30 baseball ones.** That second
+number is why the baseball site has no such checkbox, and this page draws the
+control only where it would narrow something — a control that can never change
+the table is worse than no control.
+
+### The opponent page was the bigger half
+
+`h2h-core.js` is 118 lines on the football site and 206 on the baseball one, and
+`computeOpponentDetail` is most of the difference. `/vs/{slug}` here was a game
+list; it now carries the splits (overall, last ten, home, away, regular,
+postseason), the longest run either way, shutouts in both directions, the score
+differential, and a by-era table — "Chicago Staleys 0–1, Chicago Bears 109–97–6".
+
+Nothing in it is baseball, so football gets it too, which is the point of the
+adapter seam. Three things it says are worth stating because the obvious version
+of each is wrong:
+
+- **A 0–0 tie is not a shutout.** Checking only the score counts a drawn game as
+  both a shutout win and a shutout loss, and football has real ones.
+- **"Last 10" is dropped when there have been ten or fewer**, where it would
+  repeat the overall row under a different heading.
+- **A single-era opponent gets no era table**, for the same reason.
+
+The site renders all of this as a focus card injected above the table, closable,
+pushed into browser history. That is how a single-page app gets a shareable
+address. This repo already has the address, so it is simply the page.
 
 ## The leaders page, and a claim that was two-thirds wrong
 

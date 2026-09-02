@@ -40,6 +40,11 @@ const ROUTES = [
 	'/nfl/schedule/2011', '/nfl/schedule/2011/w3',
 	'/nfl/packers', '/nfl/packers/2011', '/nfl/packers/records', '/nfl/packers/records/win-streaks',
 	'/nfl/packers/vs', '/nfl/packers/history',
+	'/nfl/packers/vs?venue=home&type=playoffs&current=1&q=bear',
+	'/nfl/packers/vs?sort=record&dir=asc', '/nfl/packers/vs/chi',
+	// A filter that matches nothing must render the page, not 500 on an
+	// empty list — and a nonsense value must fall back rather than error.
+	'/nfl/packers/vs?q=zzzzzz', '/nfl/packers/vs?venue=stadium&sort=nope',
 	'/records?format=json', '/standings?format=json', '/schedule?format=json',
 ]
 
