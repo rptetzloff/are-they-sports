@@ -745,6 +745,47 @@ rule a second time in a second language, and this file's own example of the cost
 is that merging those two implementations "would silently rewrite one record
 book". They are computed in JavaScript, once, and the *result* is stored.
 
+## What a shared link looks like
+
+Every page here previewed as **nothing**: no `og:` tags, no `twitter:` tags, no
+description, no canonical. A club URL pasted into Slack or iMessage was a bare
+link — whether or not a share button ever existed, which is why this comes before
+the buttons rather than with them. People share these by copy-paste already.
+
+The club page describes itself with the thing it exists to say:
+
+```
+og:title        Are the Brewers Undefeated?
+og:description  NO. 2026 record 85-53.
+og:url          https://.../mlb/brewers
+```
+
+No derivation produces that — the page knows the question and the answer, so it
+passes its own description. Every other route gets one derived from the title it
+already computes, because a preview with a title and no description is worse than
+one with a plain sentence.
+
+**Injected centrally, not threaded.** `page()` is called from thirteen places,
+and this repo has twice shipped a page missing something wired per call site: the
+leaders nav link answered 404 from every club page, and the data credit had to be
+added to two pages by hand. A fourteenth page added later would silently have no
+tags. So the tags go in where the response is sent, and every route gets them by
+construction.
+
+The title is read back out of the rendered HTML rather than passed a second time
+— every page already computes a good one, and asking twice is how the tab and the
+shared link come to disagree.
+
+`og:url` is absolute and comes from `PUBLIC_ORIGIN` where it is set. That
+machinery existed before anything emitted a tag, with a warning attached: without
+it any `Host` header becomes canonical, which for a share card means a staging
+deploy telling every reader that it **is** the site.
+
+`summary_large_image` is claimed only when there is an image. There is not one
+yet — the social cards need `@resvg/resvg-js` — so the card falls back to
+`summary`, which is what it should do rather than promise a picture it has not
+got.
+
 ## On this day
 
 What the club did on today's date in other years, on the front page. It needs

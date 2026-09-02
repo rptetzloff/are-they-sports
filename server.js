@@ -52,6 +52,7 @@ import {
 import { colorsFor, resolver } from './lib/names.js';
 import { SPORTS, loadSports, loadTeams } from './lib/teams.js';
 import { creditsFor } from './lib/credits.js';
+import { describe, titleOf, withMeta } from './lib/meta.js';
 import { onThisDay as onThisDayGames, summarise } from './lib/onthisday.js';
 import { matchRoute, parseView, routeTable } from './lib/routes.js';
 import { LEADERS_DEFAULT_SORT, leaderColumns, mergeLeaders, rankLeaders, tallyLeaders, tallyTenures } from './lib/leaders.js';
@@ -93,8 +94,21 @@ const json = (res, code, body) => {
 	res.end(buf);
 };
 
-const html = (res, code, body) => {
-	const buf = Buffer.from(body);
+/** Send a page, with its social metadata put in on the way out.
+ *
+ *  Injected here rather than threaded through the thirteen page functions,
+ *  because a fourteenth page added later would silently have no tags -- and this
+ *  repo has twice shipped a page missing something wired per call site: the
+ *  leaders nav link answered 404 from every club page, and the data credit had
+ *  to be added to two pages by hand.
+ *
+ *  The description defaults from the title the page already gave itself, so a
+ *  route that says nothing still previews as something. A route that knows
+ *  better passes its own.
+ */
+const sendHtml = (res, code, body, meta = {}) => {
+	const withTags = withMeta(body, { description: describe(titleOf(body)), ...meta });
+	const buf = Buffer.from(withTags);
 	res.writeHead(code, { 'content-type': 'text/html; charset=utf-8', 'content-length': buf.length });
 	res.end(buf);
 };
@@ -300,7 +314,7 @@ async function summarised(key, { scope, sport, view, season = 0 }, version, comp
  */
 const noClubsLoaded = (res, url, view) => (wantsJson(url)
 	? json(res, 503, { error: 'no games loaded', view, run: 'npm run load <sport>' })
-	: html(res, 503, noticePage({
+	: sendHtml(res, 503, noticePage({
 		heading: 'No games loaded',
 		message: 'No club in scope has any games in the database yet. Run npm run load <sport> to load them.',
 		colors: NEUTRAL,
@@ -687,6 +701,13 @@ function main() {
 			if (dbHealth.ok) await refresh(Date.now());
 			const url = new URL(req.url, 'http://placeholder');
 			const origin = originOf(req);
+			// Every page below sends through this, so every page gets a canonical
+			// URL and og:url without asking. Absolute, and from PUBLIC_ORIGIN
+			// where it is set: server.js already warns that without it any Host
+			// header becomes canonical, which for a share card means a staging
+			// deploy telling every reader that it IS the site.
+			const html = (res2, code, body, meta = {}) =>
+				sendHtml(res2, code, body, { url: `${origin}${url.pathname}`, ...meta });
 
 			if (url.pathname === '/healthz') {
 				// Queried live, every time. It used to report the value captured
@@ -1164,7 +1185,17 @@ function main() {
 					windowDays: team.rules.onThisDayWindowDays ?? 0,
 				});
 
-				return clubPage({
+				// The one page that can describe itself better than a derivation
+				// can: it knows the question and the answer. "Are the Packers
+				// Undefeated? NO. 2011 Record: 15-1" is what a reader in a group
+				// chat needs to see, and no title-derived sentence produces it.
+				const answerText = verdictText(verdict, team);
+				const record = recordText(tally);
+				const shareDescription =
+					`${answerText}. ${season} record ${record}.`
+					+ (tally.postseason ? ` Postseason ${tally.postseason.w}-${tally.postseason.l}.` : '');
+
+				return { description: shareDescription, body: clubPage({
 					credits: scopeCredits,
 					onThisDay: otd,
 					team,
@@ -1172,7 +1203,7 @@ function main() {
 					tally,
 					verdict,
 					answer: verdictText(verdict, team),
-					recordLabel: recordText(tally),
+					recordLabel: record,
 					// The division table behind the record. Absent for a club with
 					// no division on record or a season it did not play, which is
 					// what keeps the record from linking to an empty box.
@@ -1209,14 +1240,15 @@ function main() {
 						first: allSeasons[0],
 						last: allSeasons.at(-1),
 					},
-				});
+				}) };
 			};
 
 			try {
 				if (view.view === 'summary') {
 					if (wantsJson(url)) return json(res, 200, await summary(entry, origin, entry.base));
 					const latest = latestSeason(await games(entry));
-					return html(res, 200, await renderSeason(latest.season));
+					const page = await renderSeason(latest.season);
+					return html(res, 200, page.body, { description: page.description });
 				}
 				if (view.view === 'season') {
 					if (wantsJson(url)) {
@@ -1224,8 +1256,8 @@ function main() {
 						if (!rows.length) return json(res, 404, { error: 'no such season', season: view.season });
 						return json(res, 200, { team: entry.teamId, season: view.season, games: rows });
 					}
-					const body = await renderSeason(view.season);
-					if (body) return html(res, 200, body);
+					const page = await renderSeason(view.season);
+					if (page) return html(res, 200, page.body, { description: page.description });
 					// Reachable by switching clubs from a season page — the
 					// Vikings have no 1929 — so it explains itself and offers the
 					// seasons this club does have.
