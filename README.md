@@ -1276,6 +1276,58 @@ job rather than ranking them. Wins are one click away. The standings **modal** i
 deliberately not sortable: it lives inside a CSS `:target`, and a link in it
 would navigate away and close it.
 
+## Photographs are sidelined, by decision
+
+Not a gap: a choice, taken on 2 September 2026 by the reviewer, in those words —
+*"it's a lot of complexity for very little reward"*. It covers both places they
+appear, the front-page gallery with its lightbox and the coach photos on the
+leaders page.
+
+The reason is worth recording because it is the shape of the cost. A photo is
+not something this repo can derive: the sites read `image` and `imagePage` out of
+their own coaches CSV, pointing at Wikimedia Commons. So it needs a fourth
+reference file nobody publishes; per-image licence and attribution carried
+alongside every URL, since Commons images are not uniformly licensed and several
+require the photographer's name in the caption; a lightbox, which is the one
+item on the parity list that genuinely cannot be done without a script; and
+either a cache or a hot link to somebody else's server on every page view.
+
+Against that: a picture of a coach, beside a table that already names him.
+
+**This is "we decided not", not "we could not".** If it comes back, what it needs
+first is the data — a licence-bearing column, curated the way the champions and
+coaches files were — and not the rendering.
+
+## Share, on every page that has something to say
+
+Six links in a `<details>`, because sharing to a platform genuinely is a link.
+The mechanism was built and tested long before this and wired into one page, so
+the parity list carried "share on the page — gap" four separate times for four
+pages using the same six lines.
+
+It is now on the club page, the record book and each record's permalink,
+head-to-head and each opponent, the history and the leaders. Each carries its
+own sentence, and that sentence is the one its own meta description carries:
+one source, so a shared link cannot say something the page does not.
+
+**The shared URL drops the query string.** `?sort=w&dir=desc` is something
+somebody did to the page rather than the page itself, and a link that arrives
+with a stranger's sort applied reads as broken. That is the opposite call to the
+head-to-head filters, where the query string IS the view and sharing it is the
+whole point — the difference is whether the parameter changes what the page is
+about or only how it is arranged.
+
+Two things this cost, found by writing the copy rather than by any test:
+
+- The history sentence said **"13 super bowls"** for a club with four, and
+  **"0 world seriess"** for the Brewers. The era-noun mistake and the
+  pluralisation bug, both fixed a fortnight earlier elsewhere, arrived together
+  in new copy the moment somebody wrote a new sentence. It says "13
+  championships" now and omits the clause at zero.
+- The leaders page put its share row between the switcher and the site nav,
+  where every other page puts it last. One page out of five in a different place
+  is what nobody notices and everybody copies.
+
 ## Numbering the coaches, and two features neither site had
 
 The leaders table opens with the club's own count: **1..N for the people who

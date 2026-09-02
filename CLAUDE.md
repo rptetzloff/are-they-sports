@@ -661,7 +661,9 @@ selector, a season selector, the schedule grid, the streak banner, the history
 sparkline and last-updated; `/records`, `/history`, `/vs`, `/schedule`,
 `/standings`, the leaders page and `/champions`, each also per sport and as JSON,
 with sortable tables, a data credit, the on-this-day panel, social cards and
-share buttons. What is left is the photo gallery, box scores and TV listings.
+share buttons. What is left is box scores and TV listings — the photo gallery
+was on this list and has been sidelined by decision rather than finished; see
+the parity section below.
 
 **That sentence is the trap this list sets.** Every route exists; several of the
 features behind them are half the size of the site's version. What each one is
@@ -823,11 +825,37 @@ baseball one, against 296 in `lib/records.js`.
 | data credit | ✓ | ✓ | done |
 | share: bsky, X, facebook, reddit | ✓ | ✓ | done |
 | share: **copy link**, **native sheet** | ✓ | ✓ | **gap — needs a script** |
-| photo gallery + lightbox | ✓ | ✓ | **gap** |
+| photo gallery + lightbox | ✓ | ✓ | **recorded deviation — sidelined**, see below |
 | emoji toggle | ✓ | — | **gap** |
 | standings modal | — | ✓ | done |
 | linescore modal | — | ✓ | **gap** |
 | watch modal, channels, provider picker | — | ✓ | **gap (TV listings)** |
+
+**Photographs are sidelined — a decision taken on 2 September 2026, by the
+reviewer, in those words: "it's a lot of complexity for very little reward".**
+
+It covers both places they appear: the front-page gallery with its lightbox, and
+the coach photos on the leaders page. Neither is a gap any more; both are a
+choice, and this entry is what makes the difference visible.
+
+What it saves is worth writing down, because it is the reason. A photo is not a
+number this repo can derive: the sites read `image` and `imagePage` out of their
+own coaches CSV, pointing at Wikimedia Commons. So it needs a fourth reference
+file nobody publishes, per-image licence and attribution carried alongside every
+URL — Commons images are not uniformly licensed and several require the
+photographer's name in the caption — a lightbox, which is the one thing on the
+parity list that genuinely cannot be done without a script, and a cache or a hot
+link to somebody else's server on every page view.
+
+Against that: a picture of a coach, beside a table that already names him.
+
+**This is not "we could not". It is "we decided not".** If it comes back, what it
+needs first is the data — a licence-bearing column, curated the way the champions
+and coaches files were — and not the rendering.
+
+The rest of the parity list is unaffected. `main` still means feature parity, and
+this is now one of the things parity means: everything the sites do, minus the
+photographs, with the reason stated.
 
 ### Records
 
@@ -856,7 +884,7 @@ already says so.
 | per-record permalink `/records/{slug}` | done — the slug picks the title, the description and which card is marked, and a slug the club does not publish is a 404 rather than the whole book under a wrong title |
 | per-record share copy | done — `recordCopy` in `lib/render.js`, mirroring the site's `recordsCopy` |
 | scroll to the linked card | **recorded deviation** — the sites call `scrollIntoView`; the focused card is drawn first instead, which needs no script |
-| share on the page | **gap** — share exists only on the club front page |
+| share on the page | done |
 
 ### Head-to-head
 
@@ -874,7 +902,7 @@ without a script.
 | the "23 of 61" count | done |
 | sortable columns | done — `?sort=`, which the site has and this audit had not listed |
 | per-opponent splits, eras, streaks, shutouts, differential | done — `opponentDetail`, ported from baseball's `computeOpponentDetail` |
-| share on the page | **gap** |
+| share on the page | done |
 | the focus card | **recorded deviation** — the site injects a closable card above the table and pushes it into history, because it is a single-page app that needs a shareable address. This repo already has the address: `/vs/{slug}` is a page. |
 
 **"Current franchises" is derived here rather than listed, and neither site's
@@ -904,7 +932,7 @@ it now.
 | playoffs toggle | **gap** |
 | hover tooltip | **gap — needs a script** |
 | coach-era bands | done — from STINTS, not careers, and hoverable with no script: a native `<title>`, where both sites wire a mousemove handler and a positioned div |
-| share on the page | **gap** |
+| share on the page | done |
 
 ### Leaders
 
@@ -928,7 +956,7 @@ audit exists to prevent, made by the audit. Both were checked by reading
 | interim marked in the table | done — derived from the games, because the source flag calls 24 permanent head coaches interim. Not answerable for football before 1999, and the page says so. |
 | show/hide the stand-ins | done — `?interim=hide`, a link where both sites use a checkbox in localStorage |
 | share on the page | done |
-| coach photos in a lightbox with licence | **gap**, and a data gap first: nothing in this repo holds a photo URL |
+| coach photos in a lightbox with licence | **recorded deviation — sidelined**, see the front-page section |
 
 **Numbering is per person, and that is a recorded deviation.** Ray McLean stood
 in for Green Bay in 1953 and was the head coach in 1958; the club counts him
@@ -997,6 +1025,34 @@ alone stops the page overflowing. It cannot prove the rule WORKS; the browser
 measurement is the stronger check and it needs a database, so it lives in the
 commit rather than in CI.
 
+### Share, and why it was four rows on this list
+
+The mechanism was built once, tested and mutation-tested, and wired into exactly
+ONE page. This audit then carried "share on the page -- **gap**" four separate
+times, for four pages using the same six lines. The gap was never the feature; it
+was that nobody had called it.
+
+Now on every page with something to say: the club page, the record book and each
+record's permalink, head-to-head and each opponent, the history and the leaders.
+Each carries its own sentence, which is the sentence its own meta description
+carries -- one source, so a shared link cannot say something the page does not.
+
+**The shared URL drops the query string.** `?sort=w&dir=desc` is a thing somebody
+did to the page, not the page, and a link that arrives with a stranger's sort
+applied reads as broken. That is a judgement rather than an oversight, and the
+opposite call to head-to-head's filters, where the query string IS the view and
+sharing it is the point.
+
+Two things this cost, found by writing it:
+
+- The history sentence said **"13 super bowls"** for a club with four, and
+  **"0 world seriess"** for the Brewers -- the era-noun mistake and the
+  pluralisation bug, both fixed a fortnight earlier, arriving together in new
+  copy. It says "13 championships" and omits the clause at zero.
+- The leaders page put its share row between the switcher and the site nav where
+  every other page puts it last. One page out of five in a different place is
+  what nobody notices and everybody copies.
+
 ### The JavaScript question, per feature
 
 The sites use client-side JavaScript — `sortable.js`, a lightbox, share widgets,
@@ -1017,8 +1073,11 @@ rule.** Settled so far:
   positioned div. What that buys them is styling and placement; what it costs is
   a tooltip that does not exist with scripts off. The per-season hover they also
   wire is still a gap and still needs a script.
-- **lightbox, chart tooltip on the line** — undecided. Both are hard without a
-  script.
+- **the lightbox** — moot. It existed only to show photographs, and photographs
+  are sidelined. It was the one item on this list that genuinely could not be
+  done without a script, so the question goes with it.
+- **the chart tooltip on the line** — undecided, and still hard without a script.
+  The per-BAND tooltip is done and needed none.
 
 ## Commits and branches
 
