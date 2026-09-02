@@ -480,6 +480,13 @@ than making it in code. **A rule enters this document when somebody decides it,
 and the entry says who and when.** Inferring one from what the codebase happens
 not to contain is how a habit becomes a constraint nobody chose.
 
+It has since been tested twice and held both times. Sortable tables are header
+links; share buttons are six plain links in a `<details>`, because sharing to a
+platform genuinely IS a link. The two things a script would have bought —
+copy-to-clipboard and the native share sheet — are named in lib/share.js as what
+the no-script version gives up, which is the shape this rule should take: not
+"never a script", but "say what it costs when there is not one".
+
 The decision itself stands, on its own reasoning rather than on precedent:
 rendering that happens in the browser is not reachable from `node --test`, which
 is how 118 tests passed while every past season rendered a 0-0 record. Sorting
@@ -571,8 +578,8 @@ exception with nothing attached is a hole.
 selector, a season selector, the schedule grid, the streak banner, the history
 sparkline and last-updated; `/records`, `/history`, `/vs`, `/schedule`,
 `/standings`, the leaders page and `/champions`, each also per sport and as JSON,
-with sortable tables, a data credit, the on-this-day panel and social cards.
-What is left is share buttons, the photo gallery, box scores and TV listings.
+with sortable tables, a data credit, the on-this-day panel, social cards and
+share buttons. What is left is the photo gallery, box scores and TV listings.
 
 Two of those are much bigger than the list makes them look, and the list is what
 somebody will plan from.

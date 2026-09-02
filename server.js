@@ -46,7 +46,7 @@ import {
 } from './lib/core.js';
 import {
 	ALL_TIME_COLUMNS, CHAMPION_COLUMNS, championsPage, historyColumns, standingsColumns,
-	NEUTRAL, clubPage, clubSwitcher, noticePage, onThisDayPanel, questionFor, standingsModal, headToHeadPage, historyPage, leadersPage, leagueNav, leagueRecordsPage, leagueSchedulePage, sportTabs, missingSeasonPage, opponentPage, recordsPage, standingsPage,
+	NEUTRAL, clubPage, clubSwitcher, noticePage, onThisDayPanel, questionFor, sharePanel, standingsModal, headToHeadPage, historyPage, leadersPage, leagueNav, leagueRecordsPage, leagueSchedulePage, sportTabs, missingSeasonPage, opponentPage, recordsPage, standingsPage,
 	scheduleHtml, seasonNav, selectorPage, siteNav, sparklineHtml,
 } from './lib/render.js';
 import { colorsFor, resolver } from './lib/names.js';
@@ -54,6 +54,7 @@ import { SPORTS, loadSports, loadTeams } from './lib/teams.js';
 import { creditsFor } from './lib/credits.js';
 import { describe, titleOf, withMeta } from './lib/meta.js';
 import { cardSvg, fontsPresent, renderCard } from './lib/card.js';
+import { shareLinks } from './lib/share.js';
 import { onThisDay as onThisDayGames, summarise } from './lib/onthisday.js';
 import { matchRoute, parseView, routeTable } from './lib/routes.js';
 import { LEADERS_DEFAULT_SORT, leaderColumns, mergeLeaders, rankLeaders, tallyLeaders, tallyTenures } from './lib/leaders.js';
@@ -1212,9 +1213,24 @@ function main() {
 					`${answerText}. ${season} record ${record}.`
 					+ (tally.postseason ? ` Postseason ${tally.postseason.w}-${tally.postseason.l}.` : '');
 
+				// Sharing this page shares what it says: the question is the title
+				// and the answer is the text, which is the same pair the og tags
+				// and the card carry. Three places, one source, so a shared link
+				// cannot say something the page does not.
+				const pageUrl = `${origin}${entry.base}`;
+				const share = sharePanel({
+					url: pageUrl,
+					links: shareLinks({
+						url: pageUrl,
+						title: questionFor(team),
+						text: shareDescription,
+					}),
+				});
+
 				return { description: shareDescription, body: clubPage({
 					credits: scopeCredits,
 					onThisDay: otd,
+					share,
 					team,
 					season,
 					tally,

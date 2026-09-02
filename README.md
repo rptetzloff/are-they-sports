@@ -745,6 +745,41 @@ rule a second time in a second language, and this file's own example of the cost
 is that merging those two implementations "would silently rewrite one record
 book". They are computed in JavaScript, once, and the *result* is stored.
 
+## Share buttons
+
+A `<details>` on the club page, like the club switcher, holding six links:
+message, email, Bluesky, X, Facebook, Reddit. Messaging first and not
+alphabetical — these sites are read on phones, where a text is how a game gets
+shared with the person watching it too.
+
+**No JavaScript, because sharing to a platform genuinely is a link.** Every
+target is a URL with query parameters, so the whole feature is markup. What a
+script would buy is copy-to-clipboard and the phone's native share sheet, and
+neither can be a link — the URL is offered in a `readonly` field a reader can
+select instead. Worse than a copy button, and it works with scripts off.
+`readonly` rather than `disabled`, because a disabled input cannot be selected,
+which would leave the fallback unable to do the one thing it exists for.
+
+The text shared is the same pair the og tags and the card carry: the question as
+the title, the answer as the text. Three places, one source, so a shared link
+cannot say something the page does not.
+
+Two details that are easy to get wrong and hard to notice:
+
+- **`sms:?&body=`**, not `sms:?body=`. The stray ampersand after the empty
+  recipient is what makes one link work on both iOS and Android, which otherwise
+  disagree about the separator.
+- **`&` in an href is `&amp;`.** The X and Reddit links join two parameters, and
+  a bare ampersand in an attribute is an entity start. A mutation run caught
+  this: the escape test only looked at the link field, so dropping `escapeHtml`
+  from the href changed no result.
+
+The icon names are checked against the pinned `@mdi/font` rather than
+remembered — a name that does not exist renders as a blank box, which no test
+here can see and no error reports. That check needs the network, so it is a
+documented command in `lib/share.js` rather than part of the suite: a suite that
+fails when a CDN is slow is one people learn to ignore.
+
 ## Social cards
 
 `{club}/og/default.png`, `/og/{season}.png`, and one for each of records,
