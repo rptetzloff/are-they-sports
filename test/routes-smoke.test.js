@@ -38,7 +38,7 @@ const ROUTES = [
 	'/mlb/records', '/mlb/standings', '/mlb/schedule',
 	'/standings/2011', '/schedule/2011',
 	'/nfl/schedule/2011', '/nfl/schedule/2011/w3',
-	'/nfl/packers', '/nfl/packers/2011', '/nfl/packers/records',
+	'/nfl/packers', '/nfl/packers/2011', '/nfl/packers/records', '/nfl/packers/records/win-streaks',
 	'/nfl/packers/vs', '/nfl/packers/history',
 	'/records?format=json', '/standings?format=json', '/schedule?format=json',
 ]
@@ -101,6 +101,34 @@ test('every league and club route answers, and none of them is a 500', async (t)
 		// And it is still up. A route that crashes the process takes every later
 		// request with it, which is how the schedule failure presented.
 		assert.equal((await fetch(`${BASE}/healthz`)).status < 500, true, 'the server did not survive the sweep')
+	} finally {
+		server.child.kill()
+	}
+})
+
+test('a record permalink answers, and one for a record the club does not publish does not', async (t) => {
+	// The route pattern accepts any lowercase word, so an unchecked slug renders
+	// the full record book under a title naming a record that is not there — a
+	// soft 404 that returns 200 and gets indexed. Baseball is the live case:
+	// `lossless-seasons` is a football card, and `/mlb/brewers/records/lossless-seasons`
+	// has to be a 404 rather than the Brewers' whole record book.
+	if (!process.env.DATABASE_URL) {
+		return t.skip('no DATABASE_URL — the server reads games from Postgres at request time')
+	}
+	const server = await start()
+	server.child.removeAllListeners('exit')
+	try {
+		const status = async (route) => (await fetch(BASE + route)).status
+		const ok = await status('/nfl/packers/records/win-streaks')
+		// 503 means this deployment has no games loaded for the club, which is
+		// upstream of anything this test is about. Asserting the pair only when
+		// the club is actually servable keeps it from passing vacuously.
+		if (ok === 503) return t.skip('packers not loaded in this database')
+		assert.equal(ok, 200)
+		assert.equal(await status('/nfl/packers/records/no-hitters'), 404)
+		if (await status('/mlb/brewers/records') === 200) {
+			assert.equal(await status('/mlb/brewers/records/lossless-seasons'), 404)
+		}
 	} finally {
 		server.child.kill()
 	}

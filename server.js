@@ -47,6 +47,7 @@ import {
 import {
 	ALL_TIME_COLUMNS, CHAMPION_COLUMNS, championsPage, historyColumns, standingsColumns,
 	NEUTRAL, clubPage, clubSwitcher, noticePage, onThisDayPanel, questionFor, sharePanel, standingsModal, headToHeadPage, historyPage, leadersPage, leagueNav, leagueRecordsPage, leagueSchedulePage, sportTabs, missingSeasonPage, opponentPage, recordsPage, standingsPage,
+	RECORD_SLUGS, recordCopy,
 	scheduleHtml, seasonNav, selectorPage, siteNav, sparklineHtml,
 } from './lib/render.js';
 import { colorsFor, resolver } from './lib/names.js';
@@ -1480,6 +1481,23 @@ function main() {
 					});
 					if (wantsJson(url)) return json(res, 200, records);
 					const latest = latestSeason(all);
+					// `/records/{slug}` is one card's permalink, and the slug has to
+					// be CHECKED here rather than passed through. The route pattern
+					// accepts any lowercase word, so an unchecked slug renders the
+					// full record book under a title naming a record the club does
+					// not publish -- a soft 404 that returns 200 and gets indexed.
+					const slugs = team.records ?? RECORD_SLUGS;
+					if (view.record && !slugs.includes(view.record)) {
+						return json(res, 404, {
+							error: 'no such record',
+							record: view.record,
+							// Same shape as an unknown opponent below: the answer to
+							// "which are there" is short, and printing it beats a bare
+							// 404 for a URL somebody has plainly hand-edited.
+							records: slugs,
+						});
+					}
+					const focused = view.record ? recordCopy(team, records.championshipAppearances)[view.record] : null;
 					return html(res, 200, recordsPage({
 						team,
 						colors: team.colors ?? colorsFor(namers[entry.sport], entry.code, { season: latest?.season, date: all.at(-1)?.date }, NEUTRAL),
@@ -1488,7 +1506,15 @@ function main() {
 						base: entry.base,
 						siteNavHtml: siteNav(entry.base, team, { league: needsSelector(table) }),
 						switcher: clubSwitcher(clubList(), entry.teamId, here),
-					}));
+						slugs,
+						focus: view.record,
+					}), focused
+						// The card's own note, so a shared permalink previews as the
+						// record it points at. Without this every one of the twelve
+						// shared the page's derived sentence, which is the same
+						// defect as the shared title wearing different clothes.
+						? { description: `${team.nouns.fullName}: ${focused.note.toLowerCase()}.` }
+						: {});
 				}
 				if (view.view === 'vs') {
 					const team = clubFor(entry);
