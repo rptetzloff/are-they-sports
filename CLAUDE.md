@@ -581,6 +581,11 @@ sparkline and last-updated; `/records`, `/history`, `/vs`, `/schedule`,
 with sortable tables, a data credit, the on-this-day panel, social cards and
 share buttons. What is left is the photo gallery, box scores and TV listings.
 
+**That sentence is the trap this list sets.** Every route exists; several of the
+features behind them are half the size of the site's version. What each one is
+actually missing is itemised below under "Parity is per feature, not per route",
+and that is the bar — not this paragraph.
+
 Two of those are much bigger than the list makes them look, and the list is what
 somebody will plan from.
 
@@ -696,6 +701,115 @@ immediately: `test/reachable.test.js` parsed paths without saying which club it
 held, so the page was routable in the server and a 404 in the test. Anything
 that resolves a route now has to carry the club, which is the rule below
 arriving through a test helper.
+
+## Parity is per feature, not per route
+
+**The list above counts routes and panels, and a route is not a feature.** Every
+item on it can be satisfied by a page that exists and returns correct numbers
+while being half of what the site does — and nothing in a checklist of names says
+so. The leaders page was reported done without coach numbering, photos, a
+per-coach view or points for and against. The bar could not fail.
+
+Worse, the working implementations are checked out beside this one —
+`../AreThePackersUndefeated` and `../AreTheBrewersOnTV` — and several features
+here were designed from the checklist rather than from the file that already
+solved them. That is this file's own rule, broken while being quoted: **do not
+invent a difference, go and read the working implementation.**
+
+So the bar is itemised below, from the two sites' own markup and modules rather
+than from memory. An item is either done, a named gap, or a **recorded
+deviation** — a decision to do it differently, with the reason. Nothing is
+allowed to be silently absent.
+
+For scale: `records-core.js` is 651 lines on the football site and 1,183 on the
+baseball one, against 296 in `lib/records.js`.
+
+### Front page
+
+| | football | baseball | here |
+|---|---|---|---|
+| answer, record, title | ✓ | ✓ | done |
+| history sparkline | ✓ | ✓ | done |
+| schedule grid | ✓ | ✓ | done |
+| season selector | first/prev/next/last **and ±10** | same | **gap: ±10 jump** |
+| streak banner | ✓ | ✓ | done |
+| streak **details** | ✓ | ✓ | **gap** |
+| on-this-day | ✓ | ✓ | done |
+| on-this-day **details** | ✓ | ✓ | **gap** |
+| last lossless season | ✓ | ✓ | done |
+| last updated | ✓ | ✓ | done |
+| data credit | ✓ | ✓ | done |
+| share: bsky, X, facebook, reddit | ✓ | ✓ | done |
+| share: **copy link**, **native sheet** | ✓ | ✓ | **gap — needs a script** |
+| photo gallery + lightbox | ✓ | ✓ | **gap** |
+| emoji toggle | ✓ | — | **gap** |
+| standings modal | — | ✓ | done |
+| linescore modal | — | ✓ | **gap** |
+| watch modal, channels, provider picker | — | ✓ | **gap (TV listings)** |
+
+### Records
+
+Twelve categories, and they match. What does not:
+
+| | |
+|---|---|
+| per-record permalink `/records/{slug}` | **broken, not merely absent** — the slug is parsed into `view.record` and never read, so all twelve URLs render the identical page. Since the meta work each also declares itself canonical, which is worse than ignoring the slug: twelve URLs claiming to be the canonical copy of one page. |
+| per-record share copy | the site hand-writes a title and description per slug (`recordsCopy`). Here every slug gets the same derived one. |
+| share on the page | **gap** — share exists only on the club front page |
+
+### Head-to-head
+
+The largest single-page gap. The site's `vs.html` carries four controls this repo
+has none of:
+
+| | |
+|---|---|
+| opponent focus | **gap** |
+| filter | **gap** |
+| venue (home/away) | **gap** |
+| type (regular/playoff) | **gap** |
+| current-opponents-only | **gap** (football) |
+
+### History
+
+| | |
+|---|---|
+| chart, season table | done |
+| metric toggles | **recorded deviation** — one plotted line instead, because points-for and a percentage on one axis reads worst in the original. Stated in `lib/history.js`. |
+| playoffs toggle | **gap** |
+| hover tooltip | **gap — needs a script** |
+| coach-era bands | **gap**, and now possible: `game_leader` has the data |
+| share on the page | **gap** |
+
+### Leaders
+
+| | |
+|---|---|
+| table, records, titles, sorting | done |
+| coach **numbering** — 1..N, interims as 14.1 under the coach they stood in for | **gap** |
+| interim marked in the table | **gap** — loaded into `leader_tenure`, never rendered |
+| points for / against | **gap** |
+| per-coach slug and detail view | **gap** |
+| coach photos in a lightbox with licence | **gap** |
+| share on the page | **gap** |
+
+### Box scores
+
+`/game/{id}`, `boxscore-core.js` at 692 lines, plus a linescore modal. Not
+started, and not a rendering job: `scoring_play` holds zero rows and nothing
+writes it. See the note above.
+
+### The JavaScript question, per feature
+
+The sites use client-side JavaScript — `sortable.js`, a lightbox, share widgets,
+a chart tooltip. This repo has none, which was a decision taken when sortable
+tables were built. **It is decided per feature and recorded, not by blanket
+rule.** Settled so far:
+
+- **sortable columns** — done server-side. Same outcome, no script.
+- **share targets** — done as links. Copy-link and the native sheet cannot be
+  links and remain gaps.
+- **lightbox, chart tooltip** — undecided. Both are hard without a script.
 
 ## Commits and branches
 
