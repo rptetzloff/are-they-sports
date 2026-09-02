@@ -733,6 +733,25 @@ function main() {
 			const html = (res2, code, body, meta = {}) =>
 				sendHtml(res2, code, body, { url: `${origin}${url.pathname}`, ...meta });
 
+			/** The share row for the page being served.
+			 *
+			 *  The URL is the request's own, WITHOUT the query string, so a
+			 *  reader who sorted a table or filtered it shares the page rather
+			 *  than their view of it. That is a judgement rather than an
+			 *  oversight: `?sort=w&dir=desc` is a thing somebody did to the page,
+			 *  and a link that arrives with somebody else's sort applied reads as
+			 *  broken.
+			 *
+			 *  `text` is the sentence the page's own meta description carries, so
+			 *  a shared link cannot say something the page does not.
+			 */
+			const shareFor = (title, text) => (text
+				? sharePanel({
+					url: `${origin}${url.pathname}`,
+					links: shareLinks({ url: `${origin}${url.pathname}`, title, text }),
+				})
+				: '');
+
 			if (url.pathname === '/healthz') {
 				// Queried live, every time. It used to report the value captured
 				// at boot, which meant a database that died afterwards was
@@ -1357,6 +1376,7 @@ function main() {
 						titles: clubTitles.filter((t) => t.champion === entry.franchise),
 					});
 					const points = historyPoints(records.everySeason);
+					const titleCount = points.filter((p) => p.champion).length;
 					if (wantsJson(url)) return json(res, 200, { seasons: points });
 					const latest = latestSeason(all);
 					// Coach eras, as STINTS rather than careers. Two sources, the
@@ -1381,6 +1401,19 @@ function main() {
 					params: url.searchParams,
 						team,
 						eras,
+						// "championships", not the club's own championship noun. The
+						// first draft said "13 super bowls" for a club with four,
+						// which is the era mistake the record book and the history
+						// table were just fixed for, arriving in the share text --
+						// and "0 world seriess" for the Brewers, which is the
+						// pluralisation bug arriving with it. A generic word is true
+						// for every era and pluralises.
+						share: shareFor(
+							`${team.nouns.fullName} history`,
+							points.length
+								? `${team.nouns.fullName} season by season, ${points[0].season}\u2013${points.at(-1).season}.${
+									titleCount ? ` ${titleCount} championship${titleCount === 1 ? '' : 's'}.` : ''}`
+								: null),
 						colors: team.colors ?? colorsFor(namers[entry.sport], entry.code, { season: latest?.season, date: all.at(-1)?.date }, NEUTRAL),
 						points,
 						base: entry.base,
@@ -1596,6 +1629,13 @@ function main() {
 						switcher: clubSwitcher(clubList(), entry.teamId, here),
 						slugs,
 						focus: view.record,
+						share: shareFor(
+							focused
+								? `${team.nouns.fullName} ${focused.heading.toLowerCase()}`
+								: `${team.nouns.fullName} records`,
+							focused
+								? `${team.nouns.fullName}: ${focused.note.toLowerCase()}.`
+								: `${team.nouns.fullName} record book, ${records.seasonRange.first}\u2013${records.seasonRange.last}.`),
 					}), focused
 						// The card's own note, so a shared permalink previews as the
 						// record it points at. Without this every one of the twelve
@@ -1650,6 +1690,9 @@ function main() {
 						if (wantsJson(url)) return json(res, 200, opponents);
 						return html(res, 200, headToHeadPage({
 							...common,
+							share: shareFor(
+								`${team.nouns.fullName} head-to-head`,
+								`${team.nouns.fullName} against all ${h2h.opponents.length} clubs they have ever played.`),
 							opponents,
 							total: h2h.opponents.length,
 							// The control is drawn only where it can narrow
@@ -1676,8 +1719,13 @@ function main() {
 						});
 					}
 					if (wantsJson(url)) return json(res, 200, opponent);
+					const oppName = resolve(opponent.code).name;
 					return html(res, 200, opponentPage({
 						...common,
+						share: shareFor(
+							`${team.nouns.team} vs ${oppName}`,
+							`${team.nouns.team} are ${opponent.record} against the ${oppName} in ${opponent.games} `
+							+ `${opponent.games === 1 ? team.nouns.meetingNoun : team.nouns.meetingPlural} since ${opponent.first.season}.`),
 						opponent,
 						detail: opponentDetail(opponent.meetings, {
 							// The opponent's name AT THE TIME of each meeting, which
@@ -1686,7 +1734,7 @@ function main() {
 							// identical rows.
 							eraOf: (g) => resolve(opponent.code, { season: String(g.season), date: g.date }).name,
 						}),
-						name: resolve(opponent.code).name,
+						name: oppName,
 					}));
 				}
 				// history still needs porting. Saying so beats an empty 200 that
