@@ -30,7 +30,7 @@ import { createServer } from 'node:http';
 import { readdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { computeHeadToHead } from './lib/headtohead.js';
+import { filterGames, opponentDetail, computeHeadToHead } from './lib/headtohead.js';
 import { computeRecords } from './lib/records.js';
 import { computeLeague } from './lib/league.js';
 import { computeSchedule, selectPeriod } from './lib/schedule.js';
@@ -47,10 +47,10 @@ import {
 import {
 	ALL_TIME_COLUMNS, CHAMPION_COLUMNS, championsPage, historyColumns, standingsColumns,
 	NEUTRAL, clubPage, clubSwitcher, noticePage, onThisDayPanel, questionFor, sharePanel, standingsModal, headToHeadPage, historyPage, leadersPage, leagueNav, leagueRecordsPage, leagueSchedulePage, sportTabs, missingSeasonPage, opponentPage, recordsPage, standingsPage,
-	RECORD_SLUGS, recordCopy,
+	RECORD_SLUGS, recordCopy, h2hColumns,
 	scheduleHtml, seasonNav, selectorPage, siteNav, sparklineHtml,
 } from './lib/render.js';
-import { colorsFor, resolver } from './lib/names.js';
+import { colorsFor, currentFranchises, resolver } from './lib/names.js';
 import { SPORTS, loadSports, loadTeams } from './lib/teams.js';
 import { creditsFor } from './lib/credits.js';
 import { describe, titleOf, withMeta } from './lib/meta.js';
@@ -532,6 +532,11 @@ function main() {
 		// still has a name — that is the whole point, since 60 of the 62 clubs an
 		// `all` scope covers are unbuilt and would otherwise be bare codes.
 		const namers = Object.fromEntries(SPORTS.map((s) => [s, resolver(s)]));
+		// The franchises still playing, per sport, built once for the same reason
+		// the resolvers are: it reads and indexes the whole history file, and the
+		// head-to-head page would otherwise do that on every request.
+		const currents = Object.fromEntries(SPORTS.map((s) => [s, currentFranchises(s)]));
+		const currentOf = (sport) => currents[sport] ?? new Set();
 
 		/** The division table behind a club's record, for one season.
 		 *
@@ -1519,8 +1524,18 @@ function main() {
 				if (view.view === 'vs') {
 					const team = clubFor(entry);
 					const all = await games(entry);
-					const h2h = computeHeadToHead(all);
 					const resolve = namers[entry.sport];
+					// Current franchises, from the reference table rather than a
+					// list. Cached per sport at boot with the resolvers, because
+					// this reads and indexes the whole history file.
+					const active = currentOf(entry.sport);
+					const isCurrent = (code) => active.has(resolve(code).franchise ?? code);
+					// The UNFILTERED set, always. Two things need it: the "23 of
+					// 61" count, and the opponent lookup — a filtered page must
+					// still resolve /vs/{slug} for an opponent the filter hides,
+					// or the link a reader just followed 404s because they had a
+					// venue selected.
+					const h2h = computeHeadToHead(all, { isCurrent });
 					const colors = team.colors
 						?? colorsFor(resolve, entry.code, { season: seasons(all).at(-1), date: all.at(-1)?.date }, NEUTRAL);
 					const common = {
@@ -1530,8 +1545,40 @@ function main() {
 					};
 
 					if (!view.opponent) {
-						if (wantsJson(url)) return json(res, 200, h2h.opponents);
-						return html(res, 200, headToHeadPage({ ...common, opponents: h2h.opponents }));
+						const venue = url.searchParams.get('venue') ?? 'all';
+						const type = url.searchParams.get('type') ?? 'all';
+						const q = (url.searchParams.get('q') ?? '').trim().toLowerCase();
+						const onlyCurrent = url.searchParams.get('current') === '1';
+						// Venue and type filter the GAMES and are recomputed,
+						// because a home-only record cannot be recovered from an
+						// all-venues one. Name and current-only filter the
+						// OPPONENTS, so they leave the numbers alone.
+						const filtered = venue === 'all' && type === 'all'
+							? h2h
+							: computeHeadToHead(filterGames(all, { venue, type }), { isCurrent });
+						const opponents = filtered.opponents.filter((o) => {
+							if (onlyCurrent && !o.current) return false;
+							if (!q) return true;
+							// The name the table shows, which is the current-era one.
+							// Filtering on the last-meeting name would hide a row
+							// whose visible text matches what was typed.
+							return resolve(o.code).name.toLowerCase().includes(q);
+						});
+						if (wantsJson(url)) return json(res, 200, opponents);
+						return html(res, 200, headToHeadPage({
+							...common,
+							opponents,
+							total: h2h.opponents.length,
+							// The control is drawn only where it can narrow
+							// something. Every baseball franchise on record is
+							// current, so offering the filter there would be a
+							// checkbox that never changes the table — which is
+							// why the baseball site does not have one either.
+							hasHistorical: h2h.opponents.some((o) => o.current === false),
+							sort: parseSort(url.searchParams, h2hColumns(team), null),
+							path: url.pathname,
+							params: url.searchParams,
+						}));
 					}
 
 					const opponent = h2h.bySlug.get(view.opponent);
@@ -1549,7 +1596,14 @@ function main() {
 					return html(res, 200, opponentPage({
 						...common,
 						opponent,
-						name: resolve(opponent.code, { season: String(opponent.last.season), date: opponent.last.date }).name,
+						detail: opponentDetail(opponent.meetings, {
+							// The opponent's name AT THE TIME of each meeting, which
+							// is what turns one franchise into "Boston Braves,
+							// Milwaukee Braves, Atlanta Braves" instead of three
+							// identical rows.
+							eraOf: (g) => resolve(opponent.code, { season: String(g.season), date: g.date }).name,
+						}),
+						name: resolve(opponent.code).name,
 					}));
 				}
 				// history still needs porting. Saying so beats an empty 200 that

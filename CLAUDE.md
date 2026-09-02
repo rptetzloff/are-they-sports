@@ -778,16 +778,39 @@ already says so.
 
 ### Head-to-head
 
-The largest single-page gap. The site's `vs.html` carries four controls this repo
-has none of:
+Was the largest single-page gap. The four controls are done, as a GET form
+rather than the sites' three change handlers — so a filtered table is a link
+somebody can send, a bookmark that still works, and a thing a test can assert.
+The price is an Apply button, because a `<select>` cannot submit its own form
+without a script.
 
 | | |
 |---|---|
-| opponent focus | **gap** |
-| filter | **gap** |
-| venue (home/away) | **gap** |
-| type (regular/playoff) | **gap** |
-| current-opponents-only | **gap** (football) |
+| opponent filter, venue, type | done — `?q=`, `?venue=`, `?type=` |
+| current-opponents-only | done — `?current=1`, and drawn only where it can narrow something |
+| the "23 of 61" count | done |
+| sortable columns | done — `?sort=`, which the site has and this audit had not listed |
+| per-opponent splits, eras, streaks, shutouts, differential | done — `opponentDetail`, ported from baseball's `computeOpponentDetail` |
+| share on the page | **gap** |
+| the focus card | **recorded deviation** — the site injects a closable card above the table and pushes it into history, because it is a single-page app that needs a shareable address. This repo already has the address: `/vs/{slug}` is a page. |
+
+**"Current franchises" is derived here rather than listed, and neither site's
+rule ported.** Football hardcodes thirty-one names in `h2h-core.js`, which goes
+stale the next time a club moves. Baseball derives it from the games — current
+if the opponent appears in the latest season present — which is only safe in a
+sport where everybody plays everybody: a football club meets fourteen of the
+other thirty-one in a season, so that rule would call twenty-eight franchises
+defunct. `currentFranchises()` reads the franchise history table instead: a
+franchise is current if its latest era is the latest era anyone has. Measured at
+**32 of 119 football franchises and 30 of 30 baseball ones** — and that second
+number is why the baseball site has no such checkbox, and why this one draws the
+control only when the club has a defunct opponent.
+
+**The opponent page was the bigger half and was not on this list at all.**
+`h2h-core.js` is 118 lines on the football site and 206 on the baseball one;
+`computeOpponentDetail` is most of the difference, and this audit had itemised
+four controls while missing it. Nothing in it is baseball, so both sports have
+it now.
 
 ### History
 
@@ -818,6 +841,19 @@ has none of:
 started, and not a rendering job: `scoring_play` holds zero rows and nothing
 writes it. See the note above.
 
+### Every table page overflows a phone, and always has
+
+Not a head-to-head gap and not new: rendered at 420px, `/history`, `/records`,
+`/vs` and the schedule all scroll sideways, with the `<h1>` and the last column
+running off the right edge. Found while checking the filter form at that width,
+which is the only reason it is written down — nothing fails, nothing renders
+wrong on a desktop, and both sites this came from are read mostly on phones.
+
+It is one or two rules (`overflow-x: auto` on the panels, a wrapping heading)
+and it is deliberately NOT fixed in the head-to-head change: it touches every
+page, so it needs its own before-and-after at that width for each of them, and
+folding it in would hide a site-wide defect inside a feature commit.
+
 ### The JavaScript question, per feature
 
 The sites use client-side JavaScript — `sortable.js`, a lightbox, share widgets,
@@ -831,6 +867,8 @@ rule.** Settled so far:
 - **scrolling a permalink to its card** — done without one, by drawing that card
   first. The sites keep the order and call `scrollIntoView`; a reader opening a
   shared link sees the record they were sent either way.
+- **head-to-head filters** — done as a GET form. Costs an Apply click, buys a
+  filtered view that is a URL: shareable, bookmarkable, and assertable.
 - **lightbox, chart tooltip** — undecided. Both are hard without a script.
 
 ## Commits and branches
