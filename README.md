@@ -745,6 +745,43 @@ rule a second time in a second language, and this file's own example of the cost
 is that merging those two implementations "would silently rewrite one record
 book". They are computed in JavaScript, once, and the *result* is stored.
 
+## On this day
+
+What the club did on today's date in other years, on the front page. It needs
+nothing but games, which is why it was the cheap item on the parity list: no new
+source, no migration, no fetch.
+
+**The window is a sport rule that was declared long before anything read it.**
+`rules.onThisDayWindowDays` is 0 for baseball and 3 for football, and the
+difference is not a preference — a club playing 162 games has a game on almost
+every calendar date, so an exact match fills the panel; a club playing 17 has
+empty dates by the hundred, and an exact match shows nothing for most of the
+year. The Brewers get 55 games on an exact date; the Packers get 14 across a
+seven-day window.
+
+So the heading changes with it. "On this date" where the match is exact,
+"Around this date" where it is not — with a window, six of every seven games
+shown are not on this date at all, and calling them an anniversary would be
+wrong about most of the panel.
+
+Three things it deliberately does not do:
+
+- **The current season is excluded.** A game played an hour ago is already the
+  answer at the top of the page; repeating it under a heading about other years
+  reads as a mistake.
+- **Unplayed fixtures are excluded.** A future season's game on today's date has
+  no result, and a panel about what happened must not list what has not.
+- **An empty panel says it is empty** rather than disappearing. An absent panel
+  and a panel with no matches look identical, and only one of them means this
+  club has never played on this date.
+
+Dates are compared as `MM-DD` strings in UTC and the clock is read in the server
+and passed in, never inside the compute function. A game's date is a plain
+`YYYY-MM-DD`; parsing it makes it midnight UTC, and formatting that west of
+Greenwich moves every game a day earlier — the same trap `lib/render.js` already
+carries a warning about. Passing the date in is also what lets the year boundary
+be tested without waiting for December 31.
+
 ## The data credit
 
 Every page a reader lands on names where the data came from — the club front page

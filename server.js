@@ -46,12 +46,13 @@ import {
 } from './lib/core.js';
 import {
 	ALL_TIME_COLUMNS, CHAMPION_COLUMNS, championsPage, historyColumns, standingsColumns,
-	NEUTRAL, clubPage, clubSwitcher, noticePage, standingsModal, headToHeadPage, historyPage, leadersPage, leagueNav, leagueRecordsPage, leagueSchedulePage, sportTabs, missingSeasonPage, opponentPage, recordsPage, standingsPage,
+	NEUTRAL, clubPage, clubSwitcher, noticePage, onThisDayPanel, standingsModal, headToHeadPage, historyPage, leadersPage, leagueNav, leagueRecordsPage, leagueSchedulePage, sportTabs, missingSeasonPage, opponentPage, recordsPage, standingsPage,
 	scheduleHtml, seasonNav, selectorPage, siteNav, sparklineHtml,
 } from './lib/render.js';
 import { colorsFor, resolver } from './lib/names.js';
 import { SPORTS, loadSports, loadTeams } from './lib/teams.js';
 import { creditsFor } from './lib/credits.js';
+import { onThisDay as onThisDayGames, summarise } from './lib/onthisday.js';
 import { matchRoute, parseView, routeTable } from './lib/routes.js';
 import { LEADERS_DEFAULT_SORT, leaderColumns, mergeLeaders, rankLeaders, tallyLeaders, tallyTenures } from './lib/leaders.js';
 import { parseSort, sortRows } from './lib/sort.js';
@@ -1138,8 +1139,34 @@ function main() {
 				}));
 
 				const allPlayed = all.filter((g) => g.result);
+				// What this club did on today's date in other years. Needs only
+				// games, and the window is the sport's own rule: exact for
+				// baseball, three days either side for football, because a
+				// seventeen-game season has empty calendar dates by the hundred.
+				//
+				// The clock is read HERE and passed in, so the compute function
+				// can be tested on a year boundary without waiting for December.
+				// UTC, because a game's date is a plain YYYY-MM-DD and reading it
+				// in a timezone behind Greenwich moves every game a day earlier.
+				const todayIso = new Date().toISOString().slice(0, 10);
+				const otdGames = onThisDayGames(all, {
+					today: todayIso,
+					windowDays: team.rules.onThisDayWindowDays ?? 0,
+					currentSeason: season,
+				});
+				const otd = onThisDayPanel({
+					games: otdGames,
+					summary: summarise(otdGames),
+					today: todayIso,
+					team,
+					base: entry.base,
+					resolve: namers[entry.sport],
+					windowDays: team.rules.onThisDayWindowDays ?? 0,
+				});
+
 				return clubPage({
 					credits: scopeCredits,
+					onThisDay: otd,
 					team,
 					season,
 					tally,
