@@ -341,6 +341,17 @@ sources become 801KB, because rows nobody displays are dropped first — 728,867
 baseball plays to 64,051 that scored, 49,492 league football plays to 238 for
 one team — and only then is anything compressed.
 
+**Those scoring plays go into the artifacts and NOWHERE ELSE.** `scoring_play`
+has existed since the first migration and holds zero rows in both sports;
+`scripts/load.mjs` does not mention the table. The only thing that calls
+`scoringRow` is `build.mjs`, writing NDJSON the server no longer reads.
+
+That is the drift this section warns about, arriving as an absence rather than a
+disagreement: a table nothing writes reads as data waiting to be displayed, and
+this file said box scores were "left" as though the work were a page. Counted
+rather than remembered — `SELECT count(*) FROM scoring_play` is zero against
+225,725 final baseball games and 18,234 football ones.
+
 **Reference data is curated and committed**, because for football nobody
 publishes it. `data/reference/nfl-franchise-history.csv` is the worked example:
 264 hand-curated rows giving every franchise, code, era, name and colour, which
@@ -547,6 +558,23 @@ sparkline and last-updated; `/records`, `/history`, `/vs`, `/schedule`,
 `/standings`, the leaders page and `/champions`, each also per sport and as JSON,
 with sortable tables and a data credit. What is left is the six social cards, the
 on-this-day panel, share buttons, the photo gallery, box scores and TV listings.
+
+Two of those are much bigger than the list makes them look, and the list is what
+somebody will plan from.
+
+**Box scores are not a page over data that is already here.** `scoring_play` is
+empty and unwired, so it is three jobs: fetch the play-by-play again (95MB per
+football season, 388MB for the Retrosheet slice, both discarded after every
+build), add a loader path that writes the table the way games are written, and
+only then render. The fetch has the same reachability problem baseball's game
+logs had — a container can pull nflverse, and the Retrosheet play-by-play is a
+file one person has.
+
+**The on-this-day panel is the cheap one**, and it is cheap for the reason box
+scores are not: it needs only games, which are loaded, and
+`rules.onThisDayWindowDays` is already declared per sport — exact for baseball,
+three days either side for football, because a seventeen-game season has empty
+calendar dates by the hundred.
 
 The leaders page was *linked* the whole time, from every club page, answering
 404 — the reverse of the reachability failure this file already records, and

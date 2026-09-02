@@ -114,3 +114,37 @@ test('every lib module actually parses', () => {
 		assert.fail(`lib/${f} does not parse: ${e.message}`)
 	})))
 })
+
+/** A table the schema declares and the load never fills.
+ *
+ *  `scoring_play` has existed since the first migration and holds zero rows in
+ *  both sports, because nothing writes it: the only caller of `scoringRow` is
+ *  `build.mjs`, producing NDJSON artifacts the server stopped reading when games
+ *  moved to Postgres.
+ *
+ *  That is not a bug — it is a decision nobody has taken yet. What WAS a bug is
+ *  that the documents described box scores as remaining work in the same breath
+ *  as a data reduction, so the table read as data waiting to be displayed and
+ *  the estimate came out three jobs short.
+ *
+ *  So this pins the two together. Wire the loader and this test fails, pointing
+ *  at the sentences that stop being true the moment it does. It is CLAUDE.md's
+ *  own rule — if a property is worth asserting in prose, write the test that
+ *  fails when it stops being true — applied to a claim about an absence, which
+ *  is the kind nothing else notices.
+ */
+test('the docs agree with whether the load fills scoring_play', () => {
+	const loader = readFileSync(join(ROOT, 'scripts/load.mjs'), 'utf8')
+	const writes = /INSERT INTO scoring_play/i.test(loader)
+	const claims = [
+		['CLAUDE.md', readFileSync(join(ROOT, 'CLAUDE.md'), 'utf8')],
+		['README.md', readFileSync(join(ROOT, 'README.md'), 'utf8')],
+	]
+	for (const [name, text] of claims) {
+		const saysEmpty = /holds zero rows|zero rows in both sports/.test(text)
+		assert.equal(saysEmpty, !writes,
+			writes
+				? `${name} still says scoring_play is never written, and the loader now writes it`
+				: `${name} should record that scoring_play is declared and never filled`)
+	}
+})
