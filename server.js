@@ -36,7 +36,7 @@ import { computeLeague } from './lib/league.js';
 import { computeSchedule, selectPeriod } from './lib/schedule.js';
 import { computeStandings, divisionPeers, playedSeasons } from './lib/standings.js';
 import { Lru, memo, mergeGames, versionOf } from './lib/derived.js';
-import { historyPoints } from './lib/history.js';
+import { chartGeometry, coachEras, historyPoints } from './lib/history.js';
 import { codeTables, franchisesForClub, staleFranchises } from './lib/codes.js';
 import { availability, championships, close, connect, franchisesWithGames, gamesFor, gamesSince, health, lastUpdated, lastUpdatedAll, leaderGames, leaderTenures, readSummary, withClient, writeSummary } from './lib/store.js';
 import { lockKeyFor, nextDelay, refreshLive, withLock } from './lib/live.js';
@@ -58,7 +58,7 @@ import { cardSvg, fontsPresent, renderCard } from './lib/card.js';
 import { shareLinks } from './lib/share.js';
 import { onThisDay as onThisDayGames, summarise } from './lib/onthisday.js';
 import { matchRoute, parseView, routeTable } from './lib/routes.js';
-import { LEADERS_DEFAULT_SORT, leaderColumns, mergeLeaders, rankLeaders, tallyLeaders, tallyTenures } from './lib/leaders.js';
+import { LEADERS_DEFAULT_SORT, leaderColumns, leaderStints, mergeLeaders, rankLeaders, tallyLeaders, tallyTenures } from './lib/leaders.js';
 import { parseSort, sortRows } from './lib/sort.js';
 import { loadDivisions, needsSelector, parseScope, resolveScope } from './lib/scope.js';
 
@@ -1359,12 +1359,28 @@ function main() {
 					const points = historyPoints(records.everySeason);
 					if (wantsJson(url)) return json(res, 200, { seasons: points });
 					const latest = latestSeason(all);
+					// Coach eras, as STINTS rather than careers. Two sources, the
+					// same split the leaders page has: runs of games where there
+					// are per-game records, and the curated tenures for football
+					// before 1999, each row of which is already one stint.
+					const [leaderRows, tenureRows] = await Promise.all([
+						leaderGames(entry.sport, [entry.franchise]),
+						leaderTenures(entry.sport, [entry.franchise]),
+					]);
+					const eras = coachEras([
+						...leaderStints(leaderRows),
+						...tenureRows.map((t) => ({
+							leader: t.leader, name: t.name, franchise: t.franchise,
+							from: t.firstSeason, to: t.lastSeason,
+						})),
+					], chartGeometry(points).points);
 					return html(res, 200, historyPage({
 					// Sorting is a query parameter, read here and drawn there.
 					sort: parseSort(url.searchParams, historyColumns(clubFor(entry)), null),
 					path: url.pathname,
 					params: url.searchParams,
 						team,
+						eras,
 						colors: team.colors ?? colorsFor(namers[entry.sport], entry.code, { season: latest?.season, date: all.at(-1)?.date }, NEUTRAL),
 						points,
 						base: entry.base,

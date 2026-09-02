@@ -903,7 +903,7 @@ it now.
 | metric toggles | **recorded deviation** — one plotted line instead, because points-for and a percentage on one axis reads worst in the original. Stated in `lib/history.js`. |
 | playoffs toggle | **gap** |
 | hover tooltip | **gap — needs a script** |
-| coach-era bands | **gap**, and now possible: `game_leader` has the data |
+| coach-era bands | done — from STINTS, not careers, and hoverable with no script: a native `<title>`, where both sites wire a mousemove handler and a positioned div |
 | share on the page | **gap** |
 
 ### Leaders
@@ -974,7 +974,7 @@ alone stops the page overflowing. It cannot prove the rule WORKS; the browser
 measurement is the stronger check and it needs a database, so it lives in the
 commit rather than in CI.
 
-### The JavaScript question, per feature### The JavaScript question, per feature
+### The JavaScript question, per feature
 
 The sites use client-side JavaScript — `sortable.js`, a lightbox, share widgets,
 a chart tooltip. This repo has none, which was a decision taken when sortable
@@ -989,7 +989,13 @@ rule.** Settled so far:
   shared link sees the record they were sent either way.
 - **head-to-head filters** — done as a GET form. Costs an Apply click, buys a
   filtered view that is a URL: shareable, bookmarkable, and assertable.
-- **lightbox, chart tooltip** — undecided. Both are hard without a script.
+- **the coach-era tooltip** — done without one. SVG has a native `<title>`, and
+  both sites reimplemented it with a mousemove handler and an absolutely
+  positioned div. What that buys them is styling and placement; what it costs is
+  a tooltip that does not exist with scripts off. The per-season hover they also
+  wire is still a gap and still needs a script.
+- **lightbox, chart tooltip on the line** — undecided. Both are hard without a
+  script.
 
 ## Commits and branches
 
