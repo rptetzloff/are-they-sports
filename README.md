@@ -28,6 +28,12 @@ The reduction is large enough to change what is possible:
 | 95MB of 2024 league play-by-play | → 4.7KB of Packers scoring plays |
 | 388MB of Retrosheet play-by-play | → 0.84MB of Brewers scoring plays |
 
+Those scoring plays land in the **artifacts** and nowhere else. The `scoring_play`
+table has existed since the first migration, holds zero rows, and `load.mjs` never
+writes to it — so box scores are not a rendering job over data already present.
+They need the play-by-play fetched again, a loader path that does not exist, and
+then a page.
+
 Three things happen in that: rows nobody displays are dropped (a site shows
 plays that *scored*, not every snap), what remains is reindexed for lookup
 rather than scanning, and brotli pays back the JSON verbosity. The first is the
