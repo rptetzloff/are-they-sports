@@ -908,15 +908,38 @@ it now.
 
 ### Leaders
 
+**Two rows of this table were things neither site does.** They were written
+from memory in the change that created this audit, which is the failure the
+audit exists to prevent, made by the audit. Both were checked by reading
+`coaches-core.js`, `coaches.js` and both `server.js` files:
+
+- **"points for / against"** — `computeCoaches` totals `pf` and `pa` and the
+  table never renders them. Neither site shows the columns. Removed rather than
+  built: adding them would be inventing a difference, which is the rule directly
+  above this section.
+- **"per-coach slug and detail view"** — there is no such route on either site.
+  `/coaches` and `/managers` are the only ones; the slug exists to key a
+  lightbox. Removed.
+
 | | |
 |---|---|
 | table, records, titles, sorting | done |
-| coach **numbering** — 1..N, interims as 14.1 under the coach they stood in for | **gap**, and it needs a row per STINT where this table is a row per person |
+| coach **numbering** — 1..N, interims as 14.1 | done, and per PERSON where the sites number per stint — see below |
 | interim marked in the table | done — derived from the games, because the source flag calls 24 permanent head coaches interim. Not answerable for football before 1999, and the page says so. |
-| points for / against | **gap** |
-| per-coach slug and detail view | **gap** |
-| coach photos in a lightbox with licence | **gap** |
-| share on the page | **gap** |
+| show/hide the stand-ins | done — `?interim=hide`, a link where both sites use a checkbox in localStorage |
+| share on the page | done |
+| coach photos in a lightbox with licence | **gap**, and a data gap first: nothing in this repo holds a photo URL |
+
+**Numbering is per person, and that is a recorded deviation.** Ray McLean stood
+in for Green Bay in 1953 and was the head coach in 1958; the club counts him
+once, as its fourth. The football site numbers per SPAN and then keys the span
+back to the coach's whole career, so a man with two spans gets two rows carrying
+identical totals — McLean appears twice, both times with his combined record.
+One row per person avoids that and matches how a club counts.
+
+It counts what this repo KNOWS. Green Bay comes out with sixteen regulars where
+the club says fifteen, because Hugh Devore's 1953 spell is an interim the
+curated file does not mark — the same pre-1999 gap the page already states.
 
 ### Box scores
 
