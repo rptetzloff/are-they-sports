@@ -488,8 +488,23 @@ function of the request, assertable by a test, and working with scripts off. It
 is a default worth keeping and worth arguing with, not a law — and the next
 feature that genuinely needs a script should say so and add one.
 
-This repo now has exactly one, `pg`, because reads happen against Postgres at
-request time and Node ships no Postgres client. `node:sqlite` *is* built in and
+This repo now has exactly two. `pg`, because reads happen against Postgres at
+request time and Node ships no Postgres client; and `@resvg/resvg-js`, because
+the social cards are pictures and nothing in the standard library draws one.
+
+The second was measured before it was taken, and cost less than this file
+feared: the Dockerfile had already moved to `node:24-slim` in anticipation, so
+the Alpine/musl problem was paid for months ago. What is left is 5MB of
+node_modules, a 4.2MB native binary and 810KB of committed fonts — 354MB to
+366MB on the image.
+
+The fonts are the part worth remembering. `loadSystemFonts` finds nothing on
+that image and reports success: the same SVG renders 492 bytes without fonts and
+3,968 with, and the 492 is the background with the text silently dropped.
+Installing a font package does not fix it, because discovery is what is broken.
+So fonts are passed explicitly, committed, and the test asserts the DIFFERENCE
+between the two renders rather than that a PNG came back — which is the
+assertion a naive test makes and the one that passes on a blank card. `node:sqlite` *is* built in and
 was measured as the alternative — every NFL game ever is 18,506 rows and 2.91MB
 — but a file-per-container means a poller per container, all fetching the same
 live data, which defeats one codebase serving many deployments.
@@ -556,9 +571,8 @@ exception with nothing attached is a hole.
 selector, a season selector, the schedule grid, the streak banner, the history
 sparkline and last-updated; `/records`, `/history`, `/vs`, `/schedule`,
 `/standings`, the leaders page and `/champions`, each also per sport and as JSON,
-with sortable tables, a data credit and the on-this-day panel. What is left is
-the six social cards, share buttons, the photo gallery, box scores and TV
-listings.
+with sortable tables, a data credit, the on-this-day panel and social cards.
+What is left is share buttons, the photo gallery, box scores and TV listings.
 
 Two of those are much bigger than the list makes them look, and the list is what
 somebody will plan from.

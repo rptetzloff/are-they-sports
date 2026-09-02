@@ -354,12 +354,14 @@ test('the nav test can fail — an unbuilt page is caught', () => {
 	// Guards the guard. `resolves` returning true for everything would make the
 	// two tests above pass on the nav that shipped the 404.
 	//
-	// It used to assert that `/managers` and `/coaches` do not resolve, which was
-	// the honest statement of a missing page and is now false: both are built.
-	// The guard needs a route that genuinely does not exist, so it uses one of
-	// the social-card paths, which are still on the parity list and still
-	// unbuilt.
-	assert.equal(resolves('/og/default.png', 'nfl'), false)
+	// It has now needed updating twice, which is the point rather than a
+	// nuisance: it names something unbuilt, and things stop being unbuilt. First
+	// it asserted `/managers` and `/coaches` do not resolve, then `/og/default.png`
+	// -- and the cards are built too.
+	//
+	// Box scores are the honest example now. `/game/{id}` is on the parity list,
+	// `scoring_play` holds zero rows, and nothing writes it.
+	assert.equal(resolves('/game/2011_01_NO_GB', 'nfl'), false)
 	assert.equal(resolves('/coaches', 'mlb'), false, 'a baseball club answered the football noun')
 	assert.equal(resolves('/managers', 'nfl'), false, 'a football club answered the baseball noun')
 	assert.equal(resolves('/records', 'nfl'), true)

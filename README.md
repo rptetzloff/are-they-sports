@@ -745,6 +745,65 @@ rule a second time in a second language, and this file's own example of the cost
 is that merging those two implementations "would silently rewrite one record
 book". They are computed in JavaScript, once, and the *result* is stored.
 
+## Social cards
+
+`{club}/og/default.png`, `/og/{season}.png`, and one for each of records,
+history, head-to-head and the leaders page. The club page points `og:image` at
+its own, so a shared link shows the answer it is about rather than a house
+picture.
+
+One route rather than the six the two sites carry, because they are the same
+picture with different words — and six routes would be six places for the words
+to drift from the pages they describe. An invented slug is a 404 rather than a
+card captioned `undefined`, and a club asking for the other sport's noun is
+refused for the same reason the pages refuse it.
+
+### The dependency, measured rather than recalled
+
+| | |
+|---|---|
+| Debian vs Alpine base | **already paid** — the Dockerfile chose `node:24-slim` for exactly this |
+| `@resvg/resvg-js` | 5MB `node_modules`, 4.2MB native binary, ~1s install |
+| fonts | 810KB committed |
+| **image total** | **354MB → 366MB** |
+
+The lockfile carries all twelve platform binaries including `linux-x64-gnu`, so
+`npm ci --omit=dev` works in the image even though the install ran on Windows —
+checked, because a lockfile with only the host's binary is exactly how the
+football site shipped one pinning `vite` and neither native package its cards
+needed.
+
+### The finding that shaped the design
+
+**System font discovery does not work on the deployment image, and it does not
+say so.** Measured on `node:24-slim`, rendering the same SVG:
+
+| | PNG |
+|---|---|
+| no fonts, `loadSystemFonts: true` | 492 bytes |
+| `fonts-dejavu-core` installed, same option | 492 bytes |
+| explicit `fontFiles` | 3,968 bytes |
+
+492 bytes is the background with the text **dropped** — a valid PNG, no error,
+no warning. A renderer written against `loadSystemFonts` ships blank cards and
+passes any test asserting only that a PNG came back. So the test asserts the
+*difference* between rendering with fonts and without, and the fonts are always
+passed explicitly.
+
+That also kills the apt option: `fonts-liberation2` costs 21MB **and does not
+work**, because discovery is what is broken rather than availability.
+
+Fonts are Liberation Sans, metrically compatible with the Arial the stylesheet
+already specifies, under SIL OFL 1.1 — the licence text ships beside them in
+`data/fonts/LICENSE`, as that licence requires. `.gitattributes` marks `*.ttf`
+binary explicitly: git's own detection would probably have been right, and
+probably is not good enough for a file whose corruption shows up as a card with
+no words on it.
+
+`opentype.js` is **not** a dependency. Text is fitted with an average advance
+width, which only has to be right about the long names — the test pins the
+longest club name this repo carries against the card width.
+
 ## What a shared link looks like
 
 Every page here previewed as **nothing**: no `og:` tags, no `twitter:` tags, no

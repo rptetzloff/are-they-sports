@@ -24,5 +24,15 @@ Dockerfile     text eol=lf
 # Derived index artifacts are brotli. Never touch them.
 *.br binary
 
+# Fonts, same rule and a worse failure. `.ttf` was left unspecified and git's own
+# binary detection would probably have got it right -- probably is not good
+# enough for a file whose corruption shows up as a social card with no words on
+# it rather than as an error.
+*.ttf binary
+
+# The font licence has no extension, like the hooks above, so no extension rule
+# reaches it. It is text and should be checked out as text.
+data/fonts/LICENSE text eol=lf
+
 # Fetched sources are whatever upstream sent.
 *.csv -text
