@@ -1018,6 +1018,44 @@ was reported from the running site.
 | club `/records` | the championship card, so the Packers' book lists 1929, 1930, 1931 |
 | club `/history` | title markers on the chart — thirteen for Green Bay, not ten |
 | leaders | the Titles column, as before |
+| league `/records` | the Championships card — **added later, and it was the one this list missed** |
+
+That last row is the point of writing this list down and the proof it was not
+enough. Four consumers were enumerated and wired; the league-wide card was a
+fifth, and it counted only titles decided by a GAME for months afterwards. It
+read **Packers 10** against thirteen, **Bears 7** against nine and **Giants 7**
+against eight, with the finals lost beside them counted across every era — so
+the two numbers were not comparable and the card looked roughly even. Nothing
+failed. `computeLeague` simply never passed `titles` through to `computeRecords`,
+and a default of `[]` is silence.
+
+### A title is a final won, and a final is a round
+
+Three rules, each of which was wrong once and each of which cost real
+championships:
+
+**A title is a final WON, not a championship-round game won.** The Brewers won
+three games of the 1982 World Series and lost it 4–3, and the chart marked 1982
+with a title dot whose tooltip read "1982 — champions".
+
+**A season is judged per ROUND, not across the season.** Eight clubs played two
+finals in a season between 1966 and 1969, and four of them won their league
+championship and then lost the Super Bowl — Kansas City 1966, Oakland 1967,
+Baltimore 1968, Minnesota 1969. Adding a season's championship games together
+makes those 1–1, which counts as neither a title nor a final lost. **Every one of
+those league titles was missing**: the Chiefs showed five championships against
+a published six, the Raiders three against four, the Colts four against five, and
+the Vikings none against one.
+
+**A title is not a winning postseason record.** Every Super Bowl loser wins two
+or three playoff games to get there.
+
+So the season's title is the most significant round it won — Green Bay 1966 is a
+Super Bowl because they won both games, Kansas City 1966 is an AFL Championship
+because they won that one and lost the other — and where it won none, the most
+significant round it reached, which is what "lost Super Bowl" means on the
+history table. One implementation, `finalOf`, shared by the chart, the table and
+the record card, because there were two and they had already diverged.
 
 `computeRecords` takes a `titles` option and **unions** it with what the games
 already say. Passing nothing leaves the function exactly as it was, which is what
@@ -1078,6 +1116,43 @@ documented in the row's own note, and the test **requires the note**:
 The test counts clubs finishing *strictly* ahead rather than reading a sort
 position, because 1924 is an exact tie between Cleveland and Duluth at .8333 and
 whichever the sort happened to place first decided whether it passed.
+
+## The championship noun is the club's word for TODAY
+
+`nouns.championship` is "Super Bowl" and "World Series", and it is what the club
+plays for now. Printed over a list that spans eras it is simply wrong: Green
+Bay's 1936 read "Super Bowl", thirty years before there was one.
+
+The name comes from the DATA — `championshipTitle` on the game, or the curated
+row — and falls back to the manifest only where the data has no name to give.
+That fallback is not a corner case: all 707 baseball championship rows carry a
+null title, because Retrosheet says a game was in the World Series without
+naming it. Football names all four of its rounds (Super Bowl, NFL Championship,
+AFL Championship, AAFC Championship, plus APFA for 1921).
+
+Three places printed the modern noun and now do not: the history table's Final
+column, the record card's note under "Championship games", and the league-wide
+Championships card, which grouped 27 Yankees titles under the literal word
+"Championships".
+
+**Plurals come from the name, not from a manifest noun.** Appending an "s"
+produced "World Seriess" the moment those titles started carrying their name —
+the same shape as the "2 clashs" this repo already records, arriving in a second
+place. A name ending in "s" is already its own plural, which is true of every -s
+proper noun and is not a special case for one league. A `championshipPlural`
+noun would not have reached it either, because these names are data: `title` is
+whatever the load wrote, and the next league brings its own word without editing
+a file here.
+
+### The history table says how the season ended
+
+It used to print a single word for a title season and nothing at all otherwise,
+so a season the club reached the final and lost looked exactly like a season it
+missed the playoffs. The column is headed **Final** now and says three different
+things: the round won (in the club's colour), the round lost (dimmed — reaching
+the final is not a bad season, and `--loss` beside a 13–3 record says the wrong
+thing), and "took NFL Championship" where the title was decided on the standings
+and there was nobody to beat.
 
 ## Tables on a phone, and a screenshot that was lying
 

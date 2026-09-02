@@ -1,12 +1,19 @@
 # House rules
 
-Sixteen rules, so they get applied rather than rediscovered. Short on purpose.
+19 rules, so they get applied rather than rediscovered. Short on purpose.
 
-(It said twelve, which was the count in the two sites this file came from and
-was already wrong here before the scope rule was added. A number in a heading is
-a claim like any other, and this one went stale exactly the way this file says
-claims do: nothing failed, nothing rendered wrong, and it stayed wrong until
-somebody counted.)
+(It said twelve, then sixteen. Twelve was the count in the two sites this file
+came from and was already wrong here before the scope rule was added; sixteen was
+wrong by two the day it was written, because nobody said what a rule WAS. A
+number in a heading is a claim like any other, and this one went stale exactly
+the way this file says claims do: nothing failed, nothing rendered wrong, and it
+stayed wrong until somebody counted.
+
+Third time, so it stops being prose. **A rule is a `##` heading in this file**,
+and `test/source-hygiene.test.js` fails when the number here disagrees with the
+count. That is the rule below about invariants applied to this document: if a
+claim is worth writing down, write the test that fails when it stops being
+true.)
 
 This is that shared repo. `AreThePackersUndefeated` and `AreTheBrewersOnTV`
 each carry a near-identical copy of this file — 208 of 221 lines the same — from
@@ -454,6 +461,45 @@ on its own, because an authoritative source supersedes a live capture as soon as
 it publishes — which is the property that keeps this from drifting into an
 unbackupable pile.
 
+## A noun that is true today is not true of the whole history
+
+`nouns.championship` is the club's word for what it plays for NOW, and printing
+it over a list that spans eras is wrong by thirty years: Green Bay's 1936 read
+"Super Bowl". The rule the seam already states — vocabulary belongs to the sport
+— has a second half, which is that a name the DATA carries beats a name the
+manifest carries. `championshipTitle` is on the game; the manifest is the
+fallback for a sport whose rows have no name, which is every baseball row.
+
+It reached three places and every one of them looked correct in the source.
+
+The counting rules underneath it were wrong three separate ways, and each one
+cost real championships rather than merely mislabelling them:
+
+- **A title is a final WON, not a championship-round game won.** The Brewers won
+  three games of the 1982 World Series and lost it 4-3; the chart marked 1982 as
+  a title, tooltip and all.
+- **A season is judged per ROUND, not across the season.** Four clubs won their
+  league championship and then lost the Super Bowl between 1966 and 1969 —
+  Kansas City, Oakland, Baltimore, Minnesota. Summed across the season each is
+  1-1, which counts as neither a title nor a final lost, and all four titles were
+  missing.
+- **A title is not a winning postseason record.** Every Super Bowl loser wins two
+  or three playoff games to get there.
+
+There were two implementations of "did they win the title that season" — one for
+the chart, one for the record card — and they had already diverged. There is one
+now, and that is the fix that mattered: the rules above were each wrong in one
+copy and right in the other, so no page disagreed with itself loudly enough to
+be noticed.
+
+**And a consumer list is not a consumer count.** When the championship table
+arrived, this file recorded four places a title shows and wired all four. The
+league-wide Championships card was a fifth. It counted only game-decided titles
+for months, reading "Packers 10" against thirteen, with finals lost beside it
+counted across every era — two numbers that are not comparable, which is how it
+was reported: "wins and losses as basically equal, obviously wrong". A default of
+`[]` is silence, and silence is what let it sit.
+
 ## Colour and theme
 
 Colour belongs in CSS custom properties, never a literal in a component. The two
@@ -796,6 +842,7 @@ without a script.
 | | |
 |---|---|
 | opponent filter, venue, type | done — `?q=`, `?venue=`, `?type=` |
+| win percentage column | done — the number the Record column had always sorted by, and which the port had dropped |
 | current-opponents-only | done — `?current=1`, and drawn only where it can narrow something |
 | the "23 of 61" count | done |
 | sortable columns | done — `?sort=`, which the site has and this audit had not listed |
