@@ -148,3 +148,23 @@ test('the docs agree with whether the load fills scoring_play', () => {
 				: `${name} should record that scoring_play is declared and never filled`)
 	}
 })
+
+/** The rule count in CLAUDE.md's own heading.
+ *
+ *  Third time it has gone stale. It said twelve, which was the two sites' count
+ *  and was already wrong here; then sixteen, which was wrong by two the day it
+ *  was written because nobody had said what a rule WAS.
+ *
+ *  So the definition is now stated in the file — a rule is a `##` heading — and
+ *  the claim is checked rather than remembered. That is the file's own rule
+ *  about invariants, applied to the file: a number in prose is a claim like any
+ *  other, and nothing fails when one goes wrong.
+ */
+test('CLAUDE.md counts its own rules correctly', () => {
+	const text = readFileSync(join(ROOT, 'CLAUDE.md'), 'utf8')
+	const rules = text.match(/^## /gm)?.length ?? 0
+	const claimed = /^(\d+) rules,/m.exec(text)
+	assert.ok(claimed, 'the heading no longer states a rule count in the form "N rules,"')
+	assert.equal(Number(claimed[1]), rules,
+		`the heading says ${claimed[1]} rules and there are ${rules} "##" sections`)
+})

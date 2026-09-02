@@ -946,7 +946,10 @@ function main() {
 				// Nothing here touches a game row unless a summary is missing.
 				let loaded = null;
 				const clubRows = async () => (loaded ??= await Promise.all(
-					withGames.map(async (e) => ({ team: clubFor(e), rows: await games(e) }))));
+					// The franchise travels with the club, because the
+					// championship table records a winner as a franchise and the
+					// club id alone is not unique across sports.
+					withGames.map(async (e) => ({ team: clubFor(e), franchise: e.franchise, rows: await games(e) }))));
 				// One schedule per sport, each grouped by its own unit. Football
 				// plays a round a week and baseball plays most days, and a mixed
 				// scope used to take the first club's rule for everything — so an
@@ -1045,7 +1048,10 @@ function main() {
 				// Nothing here touches a game row unless a summary is missing.
 				let loaded = null;
 				const clubRows = async () => (loaded ??= await Promise.all(
-					withGames.map(async (e) => ({ team: clubFor(e), rows: await games(e) }))));
+					// The franchise travels with the club, because the
+					// championship table records a winner as a franchise and the
+					// club id alone is not unique across sports.
+					withGames.map(async (e) => ({ team: clubFor(e), franchise: e.franchise, rows: await games(e) }))));
 				// One league per sport, never merged. A scope spanning both used
 				// to rank football seasons against baseball ones and print a note
 				// admitting the lists compared clubs that never played each
@@ -1076,7 +1082,23 @@ function main() {
 							{ scope: scopeKey, sport, view: 'records' }, version,
 							async () => {
 								const set = await inSport();
+								// The championship table, grouped by franchise.
+								// Without it this card counts only titles decided
+								// by a GAME, which for football means every season
+								// before 1933 is missing: it read "Packers 10"
+								// against thirteen, and "Bears 7" against nine,
+								// with the finals lost beside them counted across
+								// every era. Twelve NFL seasons were decided on the
+								// final standings and one by a tie-breaking
+								// playoff; `data/reference/nfl-champions.csv` is
+								// where they live.
+								const byFranchise = new Map();
+								for (const t of await championships(sport)) {
+									if (!byFranchise.has(t.champion)) byFranchise.set(t.champion, []);
+									byFranchise.get(t.champion).push(t);
+								}
 								return computeLeague(set, {
+									championships: byFranchise,
 									top: 10,
 									// Each sport's own rule now, rather than one
 									// picked for a merged league: streaks span

@@ -289,6 +289,17 @@ test('the clear link appears only when there is something to clear', () => {
 	assert.ok(!render({ params: new URLSearchParams('') }).includes('class="clear"'))
 })
 
+test('the win percentage the table sorts by is on the page', () => {
+	// The Record column has always ordered by win percentage, and the number was
+	// nowhere to be seen — so the table reordered on a value the reader could
+	// not check. Both sites carry the column; the port dropped it.
+	const html = render()
+	assert.match(html, />Win %</)
+	// CHI is 4-0 here, MIN 1-1.
+	assert.match(html, /1\.000/)
+	assert.match(html, />\.500</)
+})
+
 test('the table sorts on the request, and record sorts by percentage', () => {
 	// Sorting "10–5" and "2–1" as strings is alphabetical nonsense, and nobody
 	// clicking Record means it.
