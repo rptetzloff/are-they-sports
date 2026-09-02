@@ -1276,6 +1276,74 @@ job rather than ranking them. Wins are one click away. The standings **modal** i
 deliberately not sortable: it lives inside a CSS `:target`, and a link in it
 would navigate away and close it.
 
+## Interim coaches, and a flag that meant something else
+
+The leaders table marks a stand-in with an asterisk, and the headline count
+excludes them: "16 coaches plus 1 interim". Both sites report it that way, and
+so does a club — Green Bay's fifteenth head coach is Matt LaFleur whether or not
+somebody covered four games along the way.
+
+**The flag is derived from the games, and the source file's own flag is not
+usable.** `data/sources/sportsdata/coaches/nfl_coaches.csv` carries one, produced
+by `build_coach_tenures.py` from the rule "at most 60 games, followed by somebody
+else, in an adjacent season". That describes a coach who was **fired** as
+accurately as one who stood in. Measured over the 1999–2025 tenures it flags 57
+people and **24 of them were permanent head coaches**:
+
+> Al Groh, Marty Schottenheimer, Art Shell, Bobby Petrino, Cam Cameron, Lane
+> Kiffin, Josh McDaniels (twice), Jim Mora, Hue Jackson, Mike Mularkey, Aaron
+> Kromer, Rob Chudzinski, Jim Tomsula, Ben McAdoo, Chip Kelly, Steve Wilks,
+> Freddie Kitchens, David Culley, Urban Meyer, Lovie Smith, Nathaniel Hackett,
+> Frank Reich, Jerod Mayo.
+
+The Wikipedia scrape is no better — `nfl_coaches_wiki.csv` marks 1 of 627 — and
+the curated `data/reference/nfl-coaches.csv` carries the column with `FALSE` on
+all 382 rows, because it was created and never populated.
+
+### The rule
+
+**They never took this club into a season.** Every game they are on record for
+came after somebody else had already opened that year.
+
+It was written as two conditions — "began mid-season AND did not open the
+following season" — and a mutation run showed the second could not fail.
+Deleting it changed no result, because a stand-in who is given the job opens the
+next season and the first condition catches him there. Jason Garrett took over
+Dallas in November 2010 and opened 2011; that is what clears him, and the second
+clause was restating it. Doug Marrone, Mike Tice, Dave McGinnis, Leslie Frazier,
+Dick LeBeau and Tom Cable are the same shape.
+
+It selects **exactly 33 of the source file's 57**, a strict subset, and every one
+of the 24 dropped is a permanent head coach.
+
+**Per club, not per person.** Steve Wilks opened 2018 for Arizona and stood in
+for Carolina in 2022, and both are true; a page about one club says the one that
+is true there. Merged across clubs the conservative answer wins — somebody who
+ever held the job properly is not an interim.
+
+### What it misses, said out loud
+
+- **Football before 1999** has no per-game source, so nothing can be derived and
+  the curated file says nothing. The page says so: *"Interim coaches are marked
+  from 1999, where the per-game record starts."* The year is read from the rows'
+  `basis`, not hardcoded — 1999 is football's boundary and would be a lie in any
+  other sport.
+- **A season-long absence.** Aaron Kromer opened 2012 for New Orleans while Sean
+  Payton served a season-long suspension, so he passes the opener test and is
+  not marked. That case is `creditFillIns`, and this is not it.
+- **The last season on record.** A stand-in there is marked, because there is no
+  following season to clear them — which is what every source says about them at
+  the time, and unmarks itself on the next load if they open the next one.
+
+### Still to do
+
+Retrosheet publishes an authoritative per-club manager list with official
+numbers — `managers.csv`, which the baseball site reads and this repo does not
+fetch. That would replace the derivation for baseball outright, and it also
+carries the numbering the parity list still wants (1..N with a manager's second
+stint as 8.1). The numbering needs a row per stint, and this table is a row per
+person, so it is a bigger change than a column.
+
 ## Head-to-head, and filters without a script
 
 `/vs` lists every opponent a club has played; `/vs/{slug}` is one of them in

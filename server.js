@@ -1474,12 +1474,23 @@ function main() {
 					const note = firstLeader != null && firstGame != null && firstLeader > firstGame
 						? `Games are on record from ${firstGame}, but ${team.nouns.leaderPlural} only from ${firstLeader}.`
 						: null;
+					// The second limit, and a different one: an interim is derived
+					// from the game sequence, so it can only be answered where
+					// there are per-game records. `basis` already says which rows
+					// those are, so this reads it rather than naming a year —
+					// 1999 is football's boundary and would be a lie in any other
+					// sport.
+					const counted = ranked.filter((r) => r.basis === 'counted');
+					const perGame = counted.length ? Math.min(...counted.map((r) => r.firstSeason)) : null;
+					const interimNote = perGame != null && firstLeader != null && perGame > firstLeader
+						? `Interim ${team.nouns.leaderPlural} are marked from ${perGame}, where the per-game record starts. Before that the curated file does not say.`
+						: null;
 					return html(res, 200, leadersPage({
 						team,
 						colors: team.colors ?? colorsFor(namers[entry.sport], entry.code, { season: latest?.season, date: all.at(-1)?.date }, NEUTRAL),
 						leaders: ranked,
 						base: entry.base,
-						note,
+						notes: [note, interimNote],
 						columns,
 						sort,
 						path: url.pathname,

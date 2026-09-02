@@ -1,6 +1,6 @@
 # House rules
 
-19 rules, so they get applied rather than rediscovered. Short on purpose.
+20 rules, so they get applied rather than rediscovered. Short on purpose.
 
 (It said twelve, then sixteen. Twelve was the count in the two sites this file
 came from and was already wrong here before the scope rule was added; sixteen was
@@ -500,6 +500,33 @@ counted across every era — two numbers that are not comparable, which is how i
 was reported: "wins and losses as basically equal, obviously wrong". A default of
 `[]` is silence, and silence is what let it sit.
 
+## A flag in a source file is a claim, not a fact
+
+`data/sources/sportsdata/coaches/nfl_coaches.csv` has an `interim` column, and
+it was reasonable to assume it meant interim. It does not: `build_coach_tenures.py`
+computes it as "at most 60 games, followed by somebody else, in an adjacent
+season", which describes a coach who was FIRED as accurately as one who stood
+in. Of the 57 people it flags, **24 were permanent head coaches** — Marty
+Schottenheimer, Art Shell, Urban Meyer, Jerod Mayo among them.
+
+Reading the script that produced it is what found that, and it took one file.
+The same question asked of the other two candidates: the Wikipedia scrape marks
+1 of 627, and the curated file carries the column with FALSE on all 382 rows
+because it was created and never populated. **Three sources for one fact and
+none of them carried it.**
+
+The rule that works is derived from the games and is one line: they never took
+this club into a season. It selects a strict subset of the flagged 57 — 33 — and
+every one of the 24 it drops is a head coach.
+
+Two things generalise:
+
+- **A column is not its name.** Check what wrote it before believing what it is
+  called, the same way this file already says to check a claim in prose.
+- **Derive where there are games; say nothing where there are not.** Football
+  before 1999 gets no mark and the page says why, with the year read from the
+  rows rather than written into the code.
+
 ## Colour and theme
 
 Colour belongs in CSS custom properties, never a literal in a component. The two
@@ -884,8 +911,8 @@ it now.
 | | |
 |---|---|
 | table, records, titles, sorting | done |
-| coach **numbering** — 1..N, interims as 14.1 under the coach they stood in for | **gap** |
-| interim marked in the table | **gap** — loaded into `leader_tenure`, never rendered |
+| coach **numbering** — 1..N, interims as 14.1 under the coach they stood in for | **gap**, and it needs a row per STINT where this table is a row per person |
+| interim marked in the table | done — derived from the games, because the source flag calls 24 permanent head coaches interim. Not answerable for football before 1999, and the page says so. |
 | points for / against | **gap** |
 | per-coach slug and detail view | **gap** |
 | coach photos in a lightbox with licence | **gap** |
