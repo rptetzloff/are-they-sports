@@ -22,8 +22,8 @@ import { seasonVerdict } from './lib/season-state.js';
 
         class PackersTracker {
         	constructor() {
-        		this.apiUrl = `/api/espn/apis/site/v2/sports/football/nfl/teams/${SITE.espnSlug}/schedule`;
-        		this.scoreboardUrl = '/api/espn/apis/site/v2/sports/football/nfl/scoreboard';
+        		this.apiUrl = `api/espn/apis/site/v2/sports/football/nfl/teams/${SITE.espnSlug}/schedule`;
+        		this.scoreboardUrl = 'api/espn/apis/site/v2/sports/football/nfl/scoreboard';
         		this.countdownInterval = null;
         		this.liveUpdateInterval = null;
         		this.currentSeason = null;
@@ -50,7 +50,7 @@ import { seasonVerdict } from './lib/season-state.js';
 
         			const [loaded, recordsRes, photosRes] = await Promise.all([
         				loadGames().catch(() => null),
-        				fetch('/data/season_records.csv'),
+        				fetch('data/season_records.csv'),
         				fetch('./data/photos.csv'),
         			]);
         			if (loaded) {
@@ -209,8 +209,8 @@ import { seasonVerdict } from './lib/season-state.js';
      document.getElementById('schedule-grid').innerHTML = '<div class="loading">Loading schedule...</div>';
 
      if (pushState) {
-         const url = new URL(window.location.href);
-         url.pathname = `/${year}`;
+         const url = new URL(`${year}${window.location.search}`, document.baseURI);
+         // Relative to <base>, which names the club in a multi-club deployment.
          url.searchParams.delete('season');
          history.pushState({ season: year }, '', url.toString());
      }
@@ -327,7 +327,7 @@ processCsvSeasonData(season) {
 h2hLink(opponentName) {
   const o = this.h2hByName?.get(canonicalOpponent(opponentName));
   if (!o) return null;
-  return { href: `/vs/${o.slug}`, text: o.record, title: `${SITE.team} vs ${o.name} — all-time head-to-head` };
+  return { href: `vs/${o.slug}`, text: o.record, title: `${SITE.team} vs ${o.name} — all-time head-to-head` };
 }
 
 // The same, as the note on the pinned game's card.
@@ -359,7 +359,7 @@ displayCsvSchedule(games, season) {
       clickable: Boolean(id), title: id ? 'Summary' : '',
       links: id ? {
         summary: true,
-        box: `/game/${encodeURIComponent(id)}`,
+        box: `game/${encodeURIComponent(id)}`,
         espn: `https://www.espn.com/nfl/game/_/gameId/${encodeURIComponent(id)}`,
       } : null,
       // HOME, AWAY or NEUTRAL; a neutral site reads "vs", as the card did.
@@ -504,7 +504,7 @@ markActiveMonth() {
         			};
         		}
         		try {
-        			const res = await fetch(`/api/boxscore/${encodeURIComponent(liveGame.id)}`, { cache: 'no-cache' });
+        			const res = await fetch(`api/boxscore/${encodeURIComponent(liveGame.id)}`, { cache: 'no-cache' });
         			if (res.ok) {
         				const box = await res.json();
         				liveGame._box = box;
@@ -780,7 +780,7 @@ markActiveMonth() {
         // anywhere on the row also opens, its box score page, and ESPN's.
         links: upcoming || state === 'postponed' ? null : {
           summary: true,
-          box: `/game/${encodeURIComponent(event.id)}`,
+          box: `game/${encodeURIComponent(event.id)}`,
           espn: `https://www.espn.com/nfl/game/_/gameId/${encodeURIComponent(event.id)}`,
         },
         clickable: !upcoming && state !== 'postponed',
@@ -804,7 +804,7 @@ markActiveMonth() {
       document.body.style.overflow = 'hidden';
       document.getElementById('summary-close').focus();
       try {
-        const res = await fetch(`/api/boxscore/${encodeURIComponent(id)}`, { cache: 'no-cache' });
+        const res = await fetch(`api/boxscore/${encodeURIComponent(id)}`, { cache: 'no-cache' });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const box = await res.json();
         // A slow answer for a game the reader has since closed or replaced.
@@ -813,7 +813,7 @@ markActiveMonth() {
         body.innerHTML = gameSummaryHtml(box);
       } catch (err) {
         if (this._summaryId !== id) return;
-        body.innerHTML = `<p class="record-empty">Could not load this game. <a href="/game/${encodeURIComponent(id)}">Open its box score</a> instead.</p>`;
+        body.innerHTML = `<p class="record-empty">Could not load this game. <a href="game/${encodeURIComponent(id)}">Open its box score</a> instead.</p>`;
         console.error('Summary error:', err);
       }
     }
@@ -1023,7 +1023,7 @@ if (isCompleted) {
 }
 
 const scoreLink = document.createElement('a');
-scoreLink.href = `/game/${encodeURIComponent(event.id)}`;
+scoreLink.href = `game/${encodeURIComponent(event.id)}`;
 scoreLink.textContent = `${resultIndicator}${packersScore}-${opponentScore}`;
 scoreLink.style.color = 'inherit';
 scoreLink.style.textDecoration = 'none';
@@ -1038,7 +1038,7 @@ gameItem.appendChild(scoreDiv);
  scoreDiv.className = 'game-score live';
 
  const scoreLink = document.createElement('a');
- scoreLink.href = `/game/${encodeURIComponent(event.id)}`;
+ scoreLink.href = `game/${encodeURIComponent(event.id)}`;
  scoreLink.textContent = `${packersScore}-${opponentScore}`;
  scoreLink.style.color = 'inherit';
  scoreLink.style.textDecoration = 'none';
@@ -1196,7 +1196,7 @@ buildOnThisDay() {
   if (pick) this._renderOnThisDay(el, pick, pool);
   else el.hidden = true;
   const monthDay = `${String(todayMonth + 1).padStart(2, '0')}-${String(todayDay).padStart(2, '0')}`;
-  fetch(`/api/born/${monthDay}`)
+  fetch(`api/born/${monthDay}`)
     .then((r) => (r.ok ? r.json() : []))
     .then((born) => {
       this._otdBirths = Array.isArray(born) ? born : [];
@@ -1224,7 +1224,7 @@ _otdResetLink() {
 _birthsHtml() {
   const born = this._otdBirths || [];
   if (!born.length) return '';
-  const shown = born.slice(0, 3).map((b) => `<a href="/player/${esc(b.id)}">${esc(b.name)}</a> <span class="otd-born-year">(${esc(b.year)})</span>`);
+  const shown = born.slice(0, 3).map((b) => `<a href="player/${esc(b.id)}">${esc(b.name)}</a> <span class="otd-born-year">(${esc(b.year)})</span>`);
   const more = born.length > 3 ? ` <span class="otd-born-year">+ ${born.length - 3} more</span>` : '';
   return `<div class="otd-born"><i class="mdi mdi-cake-variant"></i> Born on this day: ${shown.join(' · ')}${more}</div>`;
 }
@@ -1263,7 +1263,7 @@ _renderOnThisDay(el, pick, pool) {
     ${photo ? `<a href="${esc(photo.url)}" target="_blank" rel="noopener noreferrer" class="otd-photo-link"><img class="otd-photo" src="${esc(photo.url)}" alt="${esc(photo.caption || '')}" loading="lazy"></a>` : ''}
         				<div class="otd-info">
         					<div class="otd-season-link">
-        						<a href="/${season}" class="otd-year">${season} Season</a>
+        						<a href="${season}" class="otd-year">${season} Season</a>
         						<span class="otd-game-type">${esc(gameTypeLabel)}</span>
         					</div>
         					<div class="otd-game-row">
@@ -1339,7 +1339,7 @@ if (!lastYear) {
 }
 
 const isCurrent = this.currentSeason === lastYear;
-const suffix = isCurrent ? '' : `The ${SITE.team} were last undefeated in <a href="/${lastYear}" class="last-undefeated-link">${lastYear}</a>.`;
+const suffix = isCurrent ? '' : `The ${SITE.team} were last undefeated in <a href="${lastYear}" class="last-undefeated-link">${lastYear}</a>.`;
 
 if (currentIsUndefeated && this.currentSeason === this.latestSeason) {
  el.innerHTML = '';

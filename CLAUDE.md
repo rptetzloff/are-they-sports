@@ -579,8 +579,8 @@ feature that genuinely needs a script should say so and add one.
 
 **Reversed for the front page, 2026-10-19, by Ray.** The bar became "look
 exactly like the two sites", and he chose to get there by serving their own
-front end rather than re-rendering it here. So a single-club deployment's front
-page is now the sites' client-side code, scripts and all. What that costs is
+front end rather than re-rendering it here. So every club's front page is now
+the sites' client-side code, scripts and all. What that costs is
 the argument above, and it is paid knowingly: `node --test` cannot see what
 that page renders, so side-by-side renders against the running sites are its
 evidence, and the tests cover the server half — the files it is fed, the
@@ -818,10 +818,11 @@ baseball one, against 296 in `lib/records.js`.
 
 ### Front page
 
-Superseded for single-club scopes on 2026-10-19: the front page there IS the
-sites' own (see "The front page is the sites' own"), so every row below is the
-site's behaviour by construction, except the gaps that section names. The table
-still describes the server-rendered club page, which multi-club scopes serve.
+Superseded on 2026-10-19: every club's front page IS the sites' own (see "The
+front page is the sites' own"), so every row below is the site's behaviour by
+construction, except the gaps that section names. The table describes the
+server-rendered club page, which a club of a sport with no front end still
+gets.
 
 | | football | baseball | here |
 |---|---|---|---|
@@ -1034,17 +1035,27 @@ rule.** Settled so far:
   wire is still a gap and still needs a script.
 - **lightbox, chart tooltip on the line** — undecided. Both are hard without a
   script.
-- **the front page** — the sites' own, scripts included, for a single-club
-  scope. Decided by Ray on 2026-10-19; see the next section. The list above
+- **the front page** — the sites' own, scripts included, in any scope.
+  Decided by Ray on 2026-10-19; see the next section. The list above
   still governs every page that has not been ported.
 
 ## The front page is the sites' own
 
 `web/mlb` is arethebrewersontv.com's front page and `web/nfl` is
 arethepackersundefeated.com's, copied from each repo's merged `dev` (4441d89 and
-f53c92e) and changed only where a literal named the club. A single-club
-deployment serves the one for its sport at `/` and `/{season}`;
-`lib/web-routes.js` answers everything that page asks its server for.
+f53c92e) and changed only where a literal named the club. Every club with a
+manifest gets the one for its sport at its own root — `/` in a single-club
+scope, `/nfl/packers` under `SCOPE=all` — and `lib/web-routes.js` answers
+everything that page asks its server for.
+
+**Every path in `web/` is relative, and `<base>` says relative to what.** The
+sites fetched `/data/...` and `/api/...` because each owned its domain's root.
+The first version kept that and served the page only to single-club scopes,
+and reported the work done without checking the one deployment that existed:
+testing.arethepackersundefeated.com runs `SCOPE=all`, and kept serving the old
+pages. Now the shell writes `<base href="{club base}/">` and every fetch, link
+and `pushState` resolves against it; a test fails on a root-absolute path in
+`web/`. Check the deployment's `/healthz` scope before calling a page live.
 
 **One front end per sport, on purpose, for now.** The two have drifted: 277 of
 684 and 456 selectors shared, `main.js` 3,100 lines against 1,479. Merging them
@@ -1054,9 +1065,11 @@ CSS first, then the shared modules — each measured against both renders.
 
 **The club is data, again, and arrives as `window.CLUB`.** The server writes it
 into the shell from the manifest before any module runs, and `site.js` reads it.
-On the server the same object is `globalThis.CLUB`, set before anything under
-`web/` is imported, because a single-club deployment is one club per process —
-which is what lets `lib/calendar.js` and the bracket share the page's `SITE`.
+Nothing on the server reads `SITE`. **Reversed:** the first version set
+`globalThis.CLUB` at boot, reasoning that a deployment is one club per
+process; `SCOPE=all` is 62. Club facts the server needs — the calendar's
+club and clock — are arguments now, and a test pins the clock on a Pacific
+club, because a Central one passed on a Central machine by falling back to it.
 `test/web.test.js` fails if a club literal (`'MIL'`, `'GB'`, "Brewers", a
 hashtag) reappears in `web/` outside a comment. Its first run found three the
 substitutions had missed.
@@ -1104,8 +1117,6 @@ which is why none of them is visible as a fault:
   rather than linking to a 404, and links Records, History, Head-to-Head and
   the leaders page to this repo's server-rendered pages, which do not look like
   the sites yet. Each comes back as it is ported.
-- multi-club scopes keep the server-rendered pages. The page fetches absolute
-  paths and assumes it owns the root.
 
 **Licence obligations outrank exactness.** The data credit is always shown,
 where the sites showed it only on past seasons, because the season being played

@@ -79,7 +79,7 @@ export function worldSeriesTitle(events, team = TEAM) {
 export function titleBannerHtml(state) {
 	if (state?.kind !== 'champions' || !state.season) return '';
 	const yr = esc(String(state.season));
-	return `<a class="title-banner" href="/${yr}"><span aria-hidden="true">🏆</span> ${yr} ${esc(SITE.championship)} Champions <span aria-hidden="true">🏆</span></a>`;
+	return `<a class="title-banner" href="${yr}"><span aria-hidden="true">🏆</span> ${yr} ${esc(SITE.championship)} Champions <span aria-hidden="true">🏆</span></a>`;
 }
 
 /** A page with the banner as the first thing in its body. Found by indexOf,

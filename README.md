@@ -1791,7 +1791,8 @@ source code wins and the answer does not depend on scope order.
 
 ## The front page
 
-Under a single-club scope, `/` and `/{season}` are the sites' own front page:
+At each club's root — `/` in a single-club scope, `/nfl/packers` under
+`SCOPE=all` — and at `{root}/{season}`, the page is the sites' own front page:
 `web/mlb` from arethebrewersontv.com for every baseball club and `web/nfl` from
 arethepackersundefeated.com for every football one. They are client-side, as
 the sites are; see "The front page is the sites' own" in CLAUDE.md for why,

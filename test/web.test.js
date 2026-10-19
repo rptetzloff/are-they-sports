@@ -209,9 +209,9 @@ test('a club without channel listings asks whether it is undefeated', () => {
 	assert.equal(brewers.site.tag, ' #ThisIsMyCrew')
 })
 
-test('the shell carries the club, its question and absolute assets', () => {
+test('the shell carries the club, its question and its base', () => {
 	const cfg = clubConfig({ team: team({ nouns: { team: 'Cubs</script>', fullName: 'x' } }), current: { espnAbbr: 'CHC' } })
-	const html = shell(read('web/mlb/index.html'), { config: cfg, creditHtml: '<p class="notice">credit</p>' })
+	const html = shell(read('web/mlb/index.html'), { config: cfg, creditHtml: '<p class="notice">credit</p>', base: '/mlb/cubs' })
 	// Before any module runs, and unable to close its own tag early: the script
 	// as the browser will cut it, at the first </script>, still parses.
 	assert.ok(html.indexOf('window.CLUB') < html.indexOf('main.js'))
@@ -220,7 +220,12 @@ test('the shell carries the club, its question and absolute assets', () => {
 	assert.match(html, /<title>Are the Cubs&lt;\/script&gt; Undefeated\?<\/title>/)
 	assert.ok(!html.includes('Are the Brewers On TV?'), 'the source club\'s question survived')
 	assert.ok(!html.includes('og:image') && !html.includes('twitter:'), 'the source site\'s preview tags survived')
-	assert.ok(html.includes('src="/main.js"') && html.includes('href="/styles.css"'))
+	// The base comes before anything that resolves against it.
+	assert.ok(html.includes('<base href="/mlb/cubs/">'))
+	assert.ok(html.indexOf('<base ') < html.indexOf('styles.css'))
+	assert.ok(html.includes('src="main.js"') && html.includes('href="styles.css"'))
+	// A single-club scope is the root.
+	assert.ok(shell(read('web/mlb/index.html'), { config: cfg }).includes('<base href="/">'))
 	assert.ok(!html.includes('AreTheBrewersOnTV'))
 	assert.ok(html.includes('<div id="data-credit" class="data-credit"><p class="notice">credit</p></div>'))
 	assert.ok(!html.includes('Sunset Rd'), 'the outdated Retrosheet address survived')
@@ -228,13 +233,28 @@ test('the shell carries the club, its question and absolute assets', () => {
 
 test('the nav keeps the pages that exist and drops the ones that do not yet', () => {
 	const html = navFor(read('web/mlb/index.html'), 'mlb')
-	assert.ok(html.includes('href="/records"') && html.includes('href="/managers"'))
+	assert.ok(html.includes('href="records"') && html.includes('href="managers"'))
 	assert.ok(!html.includes('href="/records.html"'))
-	assert.ok(!html.includes('href="/ballparks"') && !html.includes('href="/stats"'))
+	assert.ok(!html.includes('href="ballparks"') && !html.includes('href="stats"'))
 	assert.ok(!html.includes('>Ballparks<') && !html.includes('href="null"'), 'a missing page is still in the nav')
 	assert.ok(html.includes('footer-share-trigger'), 'took more than the link')
 	const nfl = navFor(read('web/nfl/index.html'), 'nfl')
-	assert.ok(nfl.includes('href="/coaches"') && !nfl.includes('href="/splits"'))
+	assert.ok(nfl.includes('href="coaches"') && !nfl.includes('href="splits"'))
+})
+
+test('the front end names no path from the root', () => {
+	// <base> places every path under the club, and a root-absolute one walks
+	// out from under it: /data/games.csv under SCOPE=all is nobody's games.
+	// Protocol-relative and external URLs are fine; so are regexes like "/g".
+	const walk = (d) => readdirSync(join(ROOT, d), { withFileTypes: true }).flatMap((e) =>
+		e.isDirectory() ? walk(`${d}/${e.name}`) : /\.(js|html)$/.test(e.name) ? [`${d}/${e.name}`] : [])
+	const offenders = []
+	for (const f of walk('web')) {
+		const code = read(f).replace(/\/\*[\s\S]*?\*\//g, '').replace(/<!--[\s\S]*?-->/g, '').split('\n')
+			.map((l) => l.replace(/(^|\s)\/\/.*$/, '')).join('\n')
+		for (const m of code.matchAll(/(?:['"`]|(?:href|src)=")\/(?!\/|g[,)]|unknown)[a-z$]/g)) offenders.push(`${f}: ${m[0]}`)
+	}
+	assert.deepEqual(offenders, [])
 })
 
 test('the front end names no club', () => {
@@ -258,6 +278,23 @@ test('the front end names no club', () => {
 		for (const m of code.matchAll(literal(sport))) offenders.push(`${f}: ${m[0]}`)
 	}
 	assert.deepEqual(offenders, [])
+})
+
+test('the calendar finds a simulcast on the club\'s own clock', async () => {
+	// A 10:30pm Pacific game is already the next day in Central time and in UTC,
+	// and simulcasts are filed under the club's date. On any other clock the
+	// game is "not on TV". Pacific on purpose: the machine this was written on
+	// runs Central, and a Central club passed here by falling back to it.
+	const { buildCalendar } = await import('../lib/calendar.js')
+	const { parseTvLookup } = await import('../web/mlb/tv-core.js')
+	const lookup = parseTvLookup(read('data/clubs/mlb/brewers/channel_lookup.csv'), read('data/clubs/mlb/brewers/provider_lookup.csv'))
+	const event = { id: '1', date: '2026-07-04T05:30Z', _t: 'regular', competitions: [{
+		status: { type: { name: 'STATUS_SCHEDULED' } }, broadcasts: [], competitors: [
+			{ homeAway: 'home', team: { abbreviation: 'MIL', shortDisplayName: 'Brewers' } },
+			{ homeAway: 'away', team: { abbreviation: 'CHC', shortDisplayName: 'Cubs' } }] }] }
+	const ics = buildCalendar([event], lookup, new Map([['2026-07-03', ['WMLW']]]),
+		{ origin: 'https://example.test', club: { abbr: 'MIL', team: 'Brewers', timeZone: 'America/Los_Angeles' } })
+	assert.match(ics, /SUMMARY:Brewers vs Cubs · WMLW/)
 })
 
 test('assets and club files cannot be read from outside their directories', () => {

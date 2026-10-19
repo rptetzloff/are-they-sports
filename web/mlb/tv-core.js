@@ -195,13 +195,15 @@ export function parseSimulcasts(csv) {
 }
 
 /** A game's Central-time date, which is how simulcasts and "today" are kept. */
-export const dayCT = (d) => new Date(d).toLocaleDateString('en-CA', { timeZone: SITE.timeZone });
+// The clock is a parameter for the server, which serves many clubs; the page
+// has one, and it is SITE's.
+export const dayCT = (d, timeZone = SITE.timeZone) => new Date(d).toLocaleDateString('en-CA', { timeZone });
 
 /** A game's broadcasts plus a TV entry for each local simulcast that day. */
-export function broadcastsWithSimulcasts(event, simulcasts) {
+export function broadcastsWithSimulcasts(event, simulcasts, timeZone = SITE.timeZone) {
 	const real = event?.competitions?.[0]?.broadcasts || [];
 	if (!simulcasts?.size || !event?.date) return real;
-	const extra = (simulcasts.get(dayCT(event.date)) || []).map((name) => ({
+	const extra = (simulcasts.get(dayCT(event.date, timeZone)) || []).map((name) => ({
 		media: { shortName: name }, type: { shortName: 'TV' }, market: { type: 'Home' }, _simulcast: true,
 	}));
 	return extra.length ? [...real, ...extra] : real;

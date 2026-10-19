@@ -50,7 +50,7 @@ export function scheduleRowHtml(row) {
 
 /** A played game's links: its summary (the line score pop-up), its box
  *  score page, and ESPN's page for it when the game came from ESPN. `links`
- *  is { summary: true, box: '/game/…', espn: 'https://…' }, any of them. */
+ *  is { summary: true, box: 'game/…', espn: 'https://…' }, any of them. */
 function rowLinksHtml(links) {
 	if (!links) return '';
 	const out = [];

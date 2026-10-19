@@ -22,7 +22,7 @@ import { SITE } from './site.js';
 
         class BrewersTracker {
         	constructor() {
-        		this.apiUrl = `/api/espn/apis/site/v2/sports/${SITE.espnLeague}/teams/${SITE.espnSlug}/schedule`;
+        		this.apiUrl = `api/espn/apis/site/v2/sports/${SITE.espnLeague}/teams/${SITE.espnSlug}/schedule`;
         		this.countdownInterval = null;
         		this.liveUpdateInterval = null;
         		this.currentSeason = null;
@@ -109,7 +109,7 @@ import { SITE } from './site.js';
         				fetch('./data/teamstats.csv'),
         				fetch('./data/biofile0.csv'),
         				fetch('./data/simulcasts.csv').catch(() => null),
-        				fetch('/api/current/gameinfo.csv').catch(() => null),
+        				fetch('api/current/gameinfo.csv').catch(() => null),
         			]);
         			// Local over-the-air simulcast games (hand-maintained; these never
         			// appear in the ESPN/MLB broadcast feeds, only in press releases).
@@ -308,8 +308,8 @@ import { SITE } from './site.js';
      document.getElementById('schedule-grid').innerHTML = '<div class="loading">Loading schedule...</div>';
 
      if (pushState) {
-         const url = new URL(window.location.href);
-         url.pathname = `/${year}`;
+         const url = new URL(`${year}${window.location.search}`, document.baseURI);
+         // Relative to <base>, which names the club in a multi-club deployment.
          url.searchParams.delete('season');
          history.pushState({ season: year }, '', url.toString());
      }
@@ -432,7 +432,7 @@ h2hNote(franchiseOrName) {
   if (!o) return null;
   const note = document.createElement('a');
   note.className = 'game-h2h';
-  note.href = `/vs.html?vs=${o.slug}`;
+  note.href = `vs.html?vs=${o.slug}`;
   note.textContent = `All-time: ${o.record}`;
   note.title = `${SITE.team} vs ${o.name} — all-time head-to-head`;
   return note;
@@ -463,7 +463,7 @@ displayCsvSchedule(games, season) {
       tv: [], phase: phaseOf(g), clickable, title: clickable ? 'Line score' : '',
       // Every Retrosheet game has its box score page; there is no ESPN id
       // for a season Retrosheet covers.
-      links: g.gid ? { summary: clickable, box: `/game/${encodeURIComponent(g.gid)}` } : null,
+      links: g.gid ? { summary: clickable, box: `game/${encodeURIComponent(g.gid)}` } : null,
     };
   });
   this.renderScheduleList(rows, {
@@ -616,7 +616,7 @@ markActiveMonth() {
         		// pitchers, the at-bat pitch by pitch and the last plays, a few KB
         		// (live-core.js). The scoreboard below is the fallback.
         		try {
-        			const res = await fetch(`/api/live/${encodeURIComponent(liveGame.id)}`);
+        			const res = await fetch(`api/live/${encodeURIComponent(liveGame.id)}`);
         			const detail = res.ok ? await res.json() : null;
         			if (detail && detail.state === 'in') {
         				for (const t of detail.teams) {
@@ -632,7 +632,7 @@ markActiveMonth() {
         		} catch { /* fall through to the scoreboard */ }
         		try {
         			const gameId = liveGame.id;
-        			const scoreboardUrl = `/api/espn/apis/site/v2/sports/${SITE.espnLeague}/scoreboard`;
+        			const scoreboardUrl = `api/espn/apis/site/v2/sports/${SITE.espnLeague}/scoreboard`;
         			const response = await fetch(scoreboardUrl);
         			const scoreboardData = await response.json();
 
@@ -659,7 +659,7 @@ markActiveMonth() {
         					};
         				}
         			} else {
-        				const boxscoreUrl = `/api/espn/apis/site/v2/sports/${SITE.espnLeague}/summary?event=${gameId}`;
+        				const boxscoreUrl = `api/espn/apis/site/v2/sports/${SITE.espnLeague}/summary?event=${gameId}`;
         				const boxResponse = await fetch(boxscoreUrl);
         				const boxscoreData = await boxResponse.json();
 
@@ -1093,7 +1093,7 @@ markActiveMonth() {
         // score (built from ESPN's, /game/<id>), and ESPN's own page.
         links: upcoming || state === 'postponed' ? null : {
           summary: true,
-          box: `/game/${encodeURIComponent(event.id)}`,
+          box: `game/${encodeURIComponent(event.id)}`,
           espn: `https://www.espn.com/${SITE.espnWeb}/game/_/gameId/${encodeURIComponent(event.id)}`,
         },
         title: state === 'live' || !upcoming ? 'Line score' : canWatch ? 'Where to watch' : '',
@@ -1548,7 +1548,7 @@ buildOnThisDay() {
   };
   render();
   const monthDay = `${String(todayMonth + 1).padStart(2, '0')}-${String(todayDay).padStart(2, '0')}`;
-  fetch(`/api/born/${monthDay}`)
+  fetch(`api/born/${monthDay}`)
     .then((r) => (r.ok ? r.json() : []))
     .then((born) => { this._otdBirths = Array.isArray(born) ? born : []; if (this._otdBirths.length) render(); })
     .catch(() => {});
@@ -1559,7 +1559,7 @@ buildOnThisDay() {
 _birthsHtml() {
   const born = this._otdBirths || [];
   if (!born.length) return '';
-  const shown = born.slice(0, 3).map((b) => `<a href="/player/${esc(b.id)}">${esc(b.name)}</a> <span class="otd-born-year">(${b.year})</span>`);
+  const shown = born.slice(0, 3).map((b) => `<a href="player/${esc(b.id)}">${esc(b.name)}</a> <span class="otd-born-year">(${b.year})</span>`);
   const more = born.length > 3 ? ` <span class="otd-born-year">+ ${born.length - 3} more</span>` : '';
   return `<div class="otd-born"><i class="mdi mdi-cake-variant"></i> Born on this day: ${shown.join(' · ')}${more}</div>`;
 }
@@ -1608,13 +1608,13 @@ _renderOnThisDay(el, pick, pool) {
     ${photo ? `<a href="${esc(photo.url)}" target="_blank" rel="noopener noreferrer" class="otd-photo-link"><img class="otd-photo" src="${esc(photo.url)}" alt="${esc(photo.caption || '')}" loading="lazy"></a>` : ''}
         				<div class="otd-info">
         					<div class="otd-season-link">
-        						<a href="/${season}" class="otd-year">${season} Season</a>
+        						<a href="${season}" class="otd-year">${season} Season</a>
         						<span class="otd-game-type">${gameTypeLabel}</span>
         					</div>
         					<div class="otd-game-row">
         						<span class="otd-result-badge ${resultClass}">${resultLabel}</span>
     ${game.gid
-        ? `<a class="otd-matchup otd-game-link" href="/game/${esc(game.gid)}" title="Full box score">vs. ${esc(opponent)}${scoreText ? ` <span class="otd-score">${scoreText}</span>` : ''}</a>`
+        ? `<a class="otd-matchup otd-game-link" href="game/${esc(game.gid)}" title="Full box score">vs. ${esc(opponent)}${scoreText ? ` <span class="otd-score">${scoreText}</span>` : ''}</a>`
         : `<span class="otd-matchup">vs. ${esc(opponent)}</span>${scoreText ? `<span class="otd-score">${scoreText}</span>` : ''}`}
         					</div>
         					<div class="otd-date">${dateStr}, ${season}</div>
@@ -1676,7 +1676,7 @@ async updatePlayoffPanel(postGames, gamesPlayed, { settled = false } = {}) {
   this.stopBracket();
   if (gamesPlayed == null || 162 - gamesPlayed > RACE_WINDOW_GAMES) return show(null, null);
   try {
-    const nl = await fetch(`/api/espn/apis/v2/sports/${SITE.espnLeague}/standings?group=${SITE.leagueGroup}`).then(r => r.json());
+    const nl = await fetch(`api/espn/apis/v2/sports/${SITE.espnLeague}/standings?group=${SITE.leagueGroup}`).then(r => r.json());
     show('Playoff Race', racePanelHtml(raceNumbers(standingsRows(nl))));
   } catch {
     show(null, null);
@@ -1694,7 +1694,7 @@ async loadBracket() {
   clearTimeout(this._bracketTimer);
   let wait = 5 * 60 * 1000;
   try {
-    const res = await fetch('/api/bracket');
+    const res = await fetch('api/bracket');
     if (!res.ok) throw new Error(`bracket ${res.status}`);
     const { games } = await res.json();
     this._bracket = { at: Date.now(), series: bracketSeries(games) };
@@ -1766,7 +1766,7 @@ _lastTenVsNext(nextGame) {
   const vsGames = lastMeetings(this.h2hRows, fran);
   if (!vsGames.length) return null;
   const short = oppTeam.shortDisplayName || o.name;
-  return `Last ${vsGames.length} vs <a href="/vs/${o.slug}">${short}</a>: <strong>${hyphenRecord(vsGames)}</strong>`;
+  return `Last ${vsGames.length} vs <a href="vs/${o.slug}">${short}</a>: <strong>${hyphenRecord(vsGames)}</strong>`;
 }
 
 updateLastUndefeated(currentSeasonWins, currentSeasonLosses) {
@@ -1794,7 +1794,7 @@ if (!lastYear) {
 }
 
 const isCurrent = this.currentSeason === lastYear;
-const suffix = isCurrent ? '' : `The ${SITE.team} were last undefeated in <a href="/${lastYear}" class="last-undefeated-link">${lastYear}</a>.`;
+const suffix = isCurrent ? '' : `The ${SITE.team} were last undefeated in <a href="${lastYear}" class="last-undefeated-link">${lastYear}</a>.`;
 
 if (currentIsUndefeated && this.currentSeason === this.latestSeason) {
  el.innerHTML = '';
@@ -2276,8 +2276,8 @@ renderScheduleProviderBar() {
 calendarRowEl() {
   const provider = this.selectedProvider && this.providerMeta[this.selectedProvider] ? this.selectedProvider : null;
   const area = provider && this.providerMeta[provider].service_areas.length > 1 ? this.selectedServiceAreaIndex(provider) : 0;
-  const path = provider ? `/calendar/${encodeURIComponent(provider)}.ics${area ? `?area=${area}` : ''}` : '/calendar.ics';
-  const https = `${window.location.origin}${path}`;
+  const path = provider ? `calendar/${encodeURIComponent(provider)}.ics${area ? `?area=${area}` : ''}` : 'calendar.ics';
+  const https = new URL(path, document.baseURI).href;
   const webcal = https.replace(/^https?:/, 'webcal:');
 
   const row = document.createElement('div');
@@ -2573,8 +2573,8 @@ async openStandingsModal() {
 
   try {
     const [alData, nlData] = await Promise.all([
-      fetch(`/api/espn/apis/v2/sports/${SITE.espnLeague}/standings?group=7`).then(r => r.json()),
-      fetch(`/api/espn/apis/v2/sports/${SITE.espnLeague}/standings?group=8`).then(r => r.json()),
+      fetch(`api/espn/apis/v2/sports/${SITE.espnLeague}/standings?group=7`).then(r => r.json()),
+      fetch(`api/espn/apis/v2/sports/${SITE.espnLeague}/standings?group=8`).then(r => r.json()),
     ]);
     this._standingsData = { alData, nlData };
     body.innerHTML = this._buildStandingsShell();
@@ -2774,7 +2774,7 @@ openLinescoreModal(g) {
     lp: playerName(g.lp),
     save: playerName(g.save),
   };
-  const boxScoreUrl = g.gid ? `/game/${g.gid}` : '';
+  const boxScoreUrl = g.gid ? `game/${g.gid}` : '';
   this._renderLinescore(`${visLabel} @ ${homLabel} — ${dateStr}`, visitor, home, visLabel, homLabel, !brewersIsHome, boxScoreUrl, false, pitchers);
 }
 
@@ -2800,13 +2800,13 @@ openLinescoreFromEvent(event) {
   const title = `${visLabel} @ ${homLabel} — ${dateStr}`;
   // The site's own box score page, built from ESPN's summary for a game this
   // season (espn-box-core.js): lineups, batting and pitching lines, notes.
-  const boxScoreUrl = event.id ? `/game/${encodeURIComponent(event.id)}` : '';
+  const boxScoreUrl = event.id ? `game/${encodeURIComponent(event.id)}` : '';
 
   // Show a loading state while we fetch the full linescore from the summary endpoint.
   // The schedule endpoint omits inning-by-inning runs and H/E; the summary endpoint has them.
   this._renderLinescore(title, { inns: [], r: 0, h: 0, e: 0 }, { inns: [], r: 0, h: 0, e: 0 }, visLabel, homLabel, milIsHome, boxScoreUrl, true);
 
-  fetch(`/api/espn/apis/site/v2/sports/${SITE.espnLeague}/summary?event=${event.id}`)
+  fetch(`api/espn/apis/site/v2/sports/${SITE.espnLeague}/summary?event=${event.id}`)
     .then(r => r.json())
     .then(data => {
       const comp = data.header?.competitions?.[0];
@@ -2950,7 +2950,7 @@ _renderLinescore(title, visitor, home, visLabel, homLabel, milIsHome, boxScoreUr
     </div>
     ${pitchers ? this._renderPitchers(pitchers) : ''}
     ${scoringHtml}
-    ${boxScoreUrl ? (boxScoreUrl.startsWith('/game/')
+    ${boxScoreUrl ? (boxScoreUrl.startsWith('game/')
       ? `<a class="linescore-box-link" href="${boxScoreUrl}">Full Box Score <i class="mdi mdi-arrow-right"></i></a>`
       : `<a class="linescore-box-link" href="${boxScoreUrl}" target="_blank" rel="noopener noreferrer">Full Box Score on ESPN <i class="mdi mdi-open-in-new"></i></a>`) : ''}
   `;
