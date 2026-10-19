@@ -285,6 +285,42 @@ on it, because the column names were guessed rather than read. Retrosheet has a
 and the baseball site's own collector had been reading it for years three
 directories away.
 
+### Basketball, the third sport
+
+Added on 2026-10-19 as data first, front page second. What the adapter decides,
+each from how the NBA counts or from a source rather than from memory:
+
+- **Two sources, split at 2002**: FiveThirtyEight's nbaallelo for 1947-2001,
+  sportsdataverse's ESPN schedules after. ABA games are in the first file and
+  are not loaded; the NBA's record books count the four ABA clubs from 1977.
+- **What counts**: regular season and playoffs. Not the play-in (neither, as
+  the league counts it), not the NBA Cup final (outside the standings), not the
+  All-Star weekend, and not ESPN's international exhibitions, which it types
+  as regular season. The first load created EAST, WEST, USA, WORLD and three
+  more as franchises and put a game or two too many in every season from 2014;
+  the load now refuses a club the franchise table does not know.
+- **A season is the year it ends**, as every source writes it. The prepared
+  franchise table counted the year it started, and was shifted when built —
+  which is what made the Seattle SuperSonics' last season fall off its own
+  span until it was.
+- **The Finals**: ESPN names the round from 2004; for every season before, the
+  load takes the last series of the postseason. 80 champions for 80 seasons,
+  checked by hand against eleven of them.
+- **Counted, not asserted**: 1,230 regular-season games in every 30-club
+  season, 1,189 with 29, 990 in the 2012 lockout, 1,229 in 2013 (the Celtics
+  and Pacers game cancelled after the Boston Marathon bombing), 1,059 and
+  1,080 in the two pandemic seasons.
+
+How the history index is chosen changed with it: by the table's shape (a
+`startSeason` column means seasons) rather than `sportId === 'nfl'`, so a
+fourth sport needs no branch there.
+
+**Gaps, named.** No coaches: the leaders page renders "no one on record" for an
+NBA club until a source is chosen. No front page: an NBA club gets the
+server-rendered pages until `web/nba` exists, and the footer's team changer
+lists only clubs that have one. And the season label: 2026-27 reads "2027",
+which every source writes and no fan says.
+
 ## A club is a sport and an id, never an id
 
 Six times now the same bug: something keyed, cached, looked up or chosen without
@@ -311,7 +347,8 @@ and most produced a plausible wrong answer rather than an error.
 
 The rule: **anything that identifies a club carries the sport with it.** A bare
 code, a bare id or a bare franchise is a bug waiting for a second sport, and
-there are four more sports of data sitting in `data/sources/sportsdata`.
+there are three more sports of data sitting in `data/sources/sportsdata`,
+basketball having been the fourth.
 
 Where a function cannot carry it, it refuses: `computeLeague` and
 `computeSchedule` throw on clubs from two sports rather than producing something

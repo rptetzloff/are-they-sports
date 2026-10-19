@@ -2,7 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import nfl from '../sports/nfl.js'
 import mlb from '../sports/mlb.js'
-import { loadTeams } from '../lib/teams.js'
+import { SPORTS as SPORT_IDS, loadTeams } from '../lib/teams.js'
 
 const TEAMS_ALL = await loadTeams()
 const packers = TEAMS_ALL.find((t) => t.id === 'packers')
@@ -14,6 +14,10 @@ const brewers = TEAMS_ALL.find((t) => t.id === 'brewers')
 // is looking at, and adding a club is meant to be a manifest and nothing else.
 // Both of those are claims, and a claim that no test can fail is prose.
 
+// The sports the artifact build covers (scripts/build.mjs): their adapters
+// answer the build's questions — a game row, a scoring play. Basketball is
+// read from the database only and has no play-by-play here, so it is not one
+// of them; the manifest checks below cover every sport.
 const SPORTS = [nfl, mlb]
 // Every club, not a chosen two. The point of the manifest rules is that they
 // hold for whatever gets added, and a list of two is a list that stops finding
@@ -127,6 +131,6 @@ test('a club can predate its own play-by-play source', () => {
 })
 
 test('every manifest names a sport that exists', () => {
-	const ids = new Set(SPORTS.map((s) => s.id))
+	const ids = new Set(SPORT_IDS)
 	for (const t of TEAMS) assert.ok(ids.has(t.sport), `${t.id} names unknown sport ${t.sport}`)
 })

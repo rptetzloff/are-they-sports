@@ -68,6 +68,8 @@ at request time, so `DATABASE_URL` is required wherever the server runs.
 ```
 DATABASE_URL=postgres://user:pass@host:5432/ats npm run migrate
 DATABASE_URL=... npm run load nfl
+DATABASE_URL=... npm run load mlb
+DATABASE_URL=... npm run load nba     # FiveThirtyEight 1947-2001, sportsdataverse 2002-
 ```
 
 Both work **inside the deployed container**, which is usually where the database
