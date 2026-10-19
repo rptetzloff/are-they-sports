@@ -1154,6 +1154,12 @@ which is why none of them is visible as a fault:
 - born-on-this-day answers an empty list. Neither sport's player data is loaded.
 - baseball's line scores and player names (`teamstats.csv`, `biofile0.csv`) are
   headers only, so the line-score button does not appear on a past game.
+- the game page (`/game/{id}`) both sites had. Every Box button, score link
+  and "Full Box Score" link pointed at it and answered 404 — shipped in #84,
+  found only by following every link on the rendered pages, which is the check
+  to run on any page this repo adopts. They are left out now behind
+  `SITE.gamePages` and come back when a game page is ported; the summary
+  pop-up, which needs only ESPN, stays.
 - football's past box scores: the site had ESPN ids from 1999 and play-by-play
   fill-ins; the games table has neither, so a past game is not clickable.
 - the nav drops the pages not ported yet (Ballparks, Stats, Stadiums, Splits)

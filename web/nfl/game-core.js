@@ -5,6 +5,7 @@
 // game.js only fetches and redraws.
 
 import { fieldTrackerHtml } from './field-core.js';
+import { SITE } from './site.js';
 
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
@@ -218,7 +219,7 @@ export function gameSummaryHtml(box) {
 		+ (has(box, 'quarters') ? lineScoreTable(box) : '')
 		+ (leaders ? `<div class="summary-leaders-wrap">${leaders}</div>` : '')
 		+ (scoring ? `<h3 class="game-section-title">Scoring</h3>${scoring}` : '')
-		+ `<div class="summary-links"><a class="summary-box-link" href="game/${esc(box.id)}">Full Box Score <i class="mdi mdi-arrow-right" aria-hidden="true"></i></a>`
+		+ `<div class="summary-links">${SITE.gamePages ? `<a class="summary-box-link" href="game/${esc(box.id)}">Full Box Score <i class="mdi mdi-arrow-right" aria-hidden="true"></i></a>` : ''}`
 		+ `<a class="summary-espn-link" href="https://www.espn.com/nfl/game/_/gameId/${esc(box.id)}" target="_blank" rel="noopener noreferrer">ESPN <i class="mdi mdi-open-in-new" aria-hidden="true"></i></a></div>`;
 }
 

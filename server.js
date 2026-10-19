@@ -50,7 +50,7 @@ import {
 	RECORD_SLUGS, recordCopy, h2hColumns,
 	scheduleHtml, seasonNav, selectorPage, siteNav, sparklineHtml, creditLine,
 } from './lib/render.js';
-import { colorsFor, currentFranchises, loadHistory, resolver } from './lib/names.js';
+import { colorsFor, currentFranchises, displayName, loadHistory, resolver } from './lib/names.js';
 import { hasFrontEnd } from './lib/web.js';
 import { createFront } from './lib/web-routes.js';
 import { SPORTS, loadSports, loadTeams } from './lib/teams.js';
@@ -539,6 +539,17 @@ function main() {
 		// head-to-head page would otherwise do that on every request.
 		const currents = Object.fromEntries(SPORTS.map((s) => [s, currentFranchises(s)]));
 		const currentOf = (sport) => currents[sport] ?? new Set();
+		// Every name a franchise has carried, as a URL slug, to the franchise's
+		// head-to-head slug (its code, lowercased). See the opponent route.
+		const nameSlugs = Object.fromEntries(SPORTS.map((s) => {
+			const out = new Map();
+			const slug = (n) => n.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+			for (const r of loadHistory(s)) {
+				const name = displayName(r) || `${r.city ?? ''} ${r.team ?? ''}`.trim();
+				if (name && r.franchiseAbbrv) out.set(slug(name), r.franchiseAbbrv.toLowerCase());
+			}
+			return [s, out];
+		}));
 
 		/** The division table behind a club's record, for one season.
 		 *
@@ -1727,6 +1738,14 @@ function main() {
 					}
 
 					const opponent = h2h.bySlug.get(view.opponent);
+					// A name in place of a code — /vs/detroit-lions — is the same opponent,
+					// and the football front page links that way (its head-to-head is
+					// keyed by name). Sent to the code's address, so each opponent has one.
+					const byName = !opponent && nameSlugs[entry.sport]?.get(view.opponent);
+					if (byName && h2h.bySlug.has(byName)) {
+						res.writeHead(301, { location: `${entry.base}/vs/${byName}${url.search}` });
+						return res.end();
+					}
 					if (!opponent) {
 						return json(res, 404, {
 							error: 'no such opponent',

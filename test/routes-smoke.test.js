@@ -138,3 +138,27 @@ test('a record permalink answers, and one for a record the club does not publish
 		server.child.kill()
 	}
 })
+
+test('a head-to-head addressed by name goes to the address by code', async (t) => {
+	// The football front page links /vs/detroit-lions (its head-to-head is keyed
+	// by name); the route is keyed by code. Both used to be live and one was a
+	// 404, found by following every link on the rendered page.
+	if (!process.env.DATABASE_URL) {
+		return t.skip('no DATABASE_URL — the server reads games from Postgres at request time')
+	}
+	const server = await start()
+	server.child.removeAllListeners('exit')
+	try {
+		const byCode = await fetch(`${BASE}/nfl/packers/vs/det`, { redirect: 'manual' })
+		// Only meaningful where the club is servable; see the permalink test.
+		if (byCode.status === 503) return t.skip('the Packers have no games loaded here')
+		assert.equal(byCode.status, 200)
+		const byName = await fetch(`${BASE}/nfl/packers/vs/detroit-lions?venue=home`, { redirect: 'manual' })
+		assert.equal(byName.status, 301)
+		assert.equal(byName.headers.get('location'), '/nfl/packers/vs/det?venue=home')
+		// A name nobody carried is still not an opponent.
+		assert.equal((await fetch(`${BASE}/nfl/packers/vs/nobody-at-all`, { redirect: 'manual' })).status, 404)
+	} finally {
+		server.child.kill()
+	}
+})

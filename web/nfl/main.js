@@ -359,7 +359,7 @@ displayCsvSchedule(games, season) {
       clickable: Boolean(id), title: id ? 'Summary' : '',
       links: id ? {
         summary: true,
-        box: `game/${encodeURIComponent(id)}`,
+        box: SITE.gamePages ? `game/${encodeURIComponent(id)}` : null,
         espn: `https://www.espn.com/nfl/game/_/gameId/${encodeURIComponent(id)}`,
       } : null,
       // HOME, AWAY or NEUTRAL; a neutral site reads "vs", as the card did.
@@ -780,7 +780,7 @@ markActiveMonth() {
         // anywhere on the row also opens, its box score page, and ESPN's.
         links: upcoming || state === 'postponed' ? null : {
           summary: true,
-          box: `game/${encodeURIComponent(event.id)}`,
+          box: SITE.gamePages ? `game/${encodeURIComponent(event.id)}` : null,
           espn: `https://www.espn.com/nfl/game/_/gameId/${encodeURIComponent(event.id)}`,
         },
         clickable: !upcoming && state !== 'postponed',
@@ -813,7 +813,9 @@ markActiveMonth() {
         body.innerHTML = gameSummaryHtml(box);
       } catch (err) {
         if (this._summaryId !== id) return;
-        body.innerHTML = `<p class="record-empty">Could not load this game. <a href="game/${encodeURIComponent(id)}">Open its box score</a> instead.</p>`;
+        body.innerHTML = SITE.gamePages
+          ? `<p class="record-empty">Could not load this game. <a href="game/${encodeURIComponent(id)}">Open its box score</a> instead.</p>`
+          : '<p class="record-empty">Could not load this game.</p>';
         console.error('Summary error:', err);
       }
     }
@@ -1023,7 +1025,7 @@ if (isCompleted) {
 }
 
 const scoreLink = document.createElement('a');
-scoreLink.href = `game/${encodeURIComponent(event.id)}`;
+if (SITE.gamePages) scoreLink.href = `game/${encodeURIComponent(event.id)}`;
 scoreLink.textContent = `${resultIndicator}${packersScore}-${opponentScore}`;
 scoreLink.style.color = 'inherit';
 scoreLink.style.textDecoration = 'none';
@@ -1038,7 +1040,7 @@ gameItem.appendChild(scoreDiv);
  scoreDiv.className = 'game-score live';
 
  const scoreLink = document.createElement('a');
- scoreLink.href = `game/${encodeURIComponent(event.id)}`;
+ if (SITE.gamePages) scoreLink.href = `game/${encodeURIComponent(event.id)}`;
  scoreLink.textContent = `${packersScore}-${opponentScore}`;
  scoreLink.style.color = 'inherit';
  scoreLink.style.textDecoration = 'none';

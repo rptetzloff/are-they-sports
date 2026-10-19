@@ -463,7 +463,7 @@ displayCsvSchedule(games, season) {
       tv: [], phase: phaseOf(g), clickable, title: clickable ? 'Line score' : '',
       // Every Retrosheet game has its box score page; there is no ESPN id
       // for a season Retrosheet covers.
-      links: g.gid ? { summary: clickable, box: `game/${encodeURIComponent(g.gid)}` } : null,
+      links: g.gid ? { summary: clickable, box: SITE.gamePages ? `game/${encodeURIComponent(g.gid)}` : null } : null,
     };
   });
   this.renderScheduleList(rows, {
@@ -1093,7 +1093,7 @@ markActiveMonth() {
         // score (built from ESPN's, /game/<id>), and ESPN's own page.
         links: upcoming || state === 'postponed' ? null : {
           summary: true,
-          box: `game/${encodeURIComponent(event.id)}`,
+          box: SITE.gamePages ? `game/${encodeURIComponent(event.id)}` : null,
           espn: `https://www.espn.com/${SITE.espnWeb}/game/_/gameId/${encodeURIComponent(event.id)}`,
         },
         title: state === 'live' || !upcoming ? 'Line score' : canWatch ? 'Where to watch' : '',
@@ -1613,7 +1613,7 @@ _renderOnThisDay(el, pick, pool) {
         					</div>
         					<div class="otd-game-row">
         						<span class="otd-result-badge ${resultClass}">${resultLabel}</span>
-    ${game.gid
+    ${game.gid && SITE.gamePages
         ? `<a class="otd-matchup otd-game-link" href="game/${esc(game.gid)}" title="Full box score">vs. ${esc(opponent)}${scoreText ? ` <span class="otd-score">${scoreText}</span>` : ''}</a>`
         : `<span class="otd-matchup">vs. ${esc(opponent)}</span>${scoreText ? `<span class="otd-score">${scoreText}</span>` : ''}`}
         					</div>
@@ -2774,7 +2774,7 @@ openLinescoreModal(g) {
     lp: playerName(g.lp),
     save: playerName(g.save),
   };
-  const boxScoreUrl = g.gid ? `game/${g.gid}` : '';
+  const boxScoreUrl = g.gid && SITE.gamePages ? `game/${g.gid}` : '';
   this._renderLinescore(`${visLabel} @ ${homLabel} — ${dateStr}`, visitor, home, visLabel, homLabel, !brewersIsHome, boxScoreUrl, false, pitchers);
 }
 
@@ -2800,7 +2800,7 @@ openLinescoreFromEvent(event) {
   const title = `${visLabel} @ ${homLabel} — ${dateStr}`;
   // The site's own box score page, built from ESPN's summary for a game this
   // season (espn-box-core.js): lineups, batting and pitching lines, notes.
-  const boxScoreUrl = event.id ? `game/${encodeURIComponent(event.id)}` : '';
+  const boxScoreUrl = event.id && SITE.gamePages ? `game/${encodeURIComponent(event.id)}` : '';
 
   // Show a loading state while we fetch the full linescore from the summary endpoint.
   // The schedule endpoint omits inning-by-inning runs and H/E; the summary endpoint has them.

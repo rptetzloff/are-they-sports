@@ -265,6 +265,24 @@ test('the team changer lists every club, marks this one, and sits beside Share',
 	assert.ok(!solo.includes('footer-club'))
 })
 
+test('no game link is built while there is no game page', () => {
+	// Both sites had /game/{id}; this repo does not yet, and every Box button
+	// and score link went to a 404 that nobody clicked until a crawl did. Each
+	// place that writes one must be behind SITE.gamePages, on its line or the
+	// one before (a ternary's condition).
+	assert.equal(clubConfig({ team: team(), current: { espnAbbr: 'CHC' } }).site.gamePages, false)
+	const walk = (d) => readdirSync(join(ROOT, d), { withFileTypes: true }).flatMap((e) =>
+		e.isDirectory() ? walk(`${d}/${e.name}`) : e.name.endsWith('.js') ? [`${d}/${e.name}`] : [])
+	const unguarded = []
+	for (const f of walk('web')) {
+		const lines = read(f).split('\n')
+		lines.forEach((l, i) => {
+			if (/(['"`])game\/\$\{/.test(l) && !/^\s*(\/\/|\*)/.test(l) && !`${lines[i - 1] ?? ''}${l}`.includes('SITE.gamePages')) unguarded.push(`${f}:${i + 1}`)
+		})
+	}
+	assert.deepEqual(unguarded, [])
+})
+
 test('the front end names no path from the root', () => {
 	// <base> places every path under the club, and a root-absolute one walks
 	// out from under it: /data/games.csv under SCOPE=all is nobody's games.
