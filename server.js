@@ -721,35 +721,46 @@ function main() {
 			available = table.filter((e) => e.available);
 		}
 
-		// The two sites' own front page, for a single-club scope whose sport has
-		// one (web/<sport>/, lib/web-routes.js). Built once: it reads its page
-		// files and the club's identity at boot, and the club's games per request.
+		// The two sites' own front page, for any club whose sport has one
+		// (web/<sport>/, lib/web-routes.js), at the club's own root: `/` in a
+		// single-club scope, `/nfl/packers` under SCOPE=all. Built on a club's
+		// first request rather than at boot, because an `all` scope is 62 clubs and
+		// a deployment is mostly asked about a few.
 		//
-		// Only for ONE club, because the page fetches absolute paths and assumes
-		// it owns the root. Every other scope keeps the server-rendered pages,
-		// and so does every route this does not answer — /records, /history and
-		// /vs among them — until each is ported.
-		let front = null;
-		const solo = !needsSelector(table) ? table[0] : null;
-		if (solo?.available && clubFor(solo) && hasFrontEnd(solo.sport) && dbHealth.ok) {
-			const today = new Date();
-			front = await createFront({
-				team: clubFor(solo),
-				franchise: solo.franchise,
-				adapter: adapters[solo.sport],
-				namer: namers[solo.sport],
-				history: loadHistory(solo.sport),
-				currentCodes: currentOf(solo.sport),
-				// Today's colours. The sites have one palette, not one per era, and
-				// the template is recoloured once at boot.
-				palette: colorsFor(namers[solo.sport], solo.code,
-					{ season: today.getFullYear(), date: today.toISOString().slice(0, 10) }, NEUTRAL),
-				store: { rawGamesFor, standingsTitles },
-				creditHtml: creditLine(creditsFor([adapters[solo.sport]])),
-				origin: originOf,
-			});
-			console.log(`  front page   web/${solo.sport} for ${solo.sport}/${solo.teamId}`);
-		}
+		// Every route this does not answer — /records, /history, /vs among them —
+		// falls through to the server-rendered pages until each is ported.
+		const fronts = new Map();
+		const frontFor = (entry) => {
+			if (!entry?.available || !clubFor(entry) || !hasFrontEnd(entry.sport) || !dbHealth.ok) return null;
+			const key = `${entry.sport}/${entry.teamId}`;
+			if (!fronts.has(key)) {
+				const today = new Date();
+				fronts.set(key, createFront({
+					team: clubFor(entry),
+					franchise: entry.franchise,
+					base: entry.base,
+					adapter: adapters[entry.sport],
+					namer: namers[entry.sport],
+					history: loadHistory(entry.sport),
+					currentCodes: currentOf(entry.sport),
+					// Today's colours. The sites have one palette, not one per era.
+					palette: colorsFor(namers[entry.sport], entry.code,
+						{ season: today.getFullYear(), date: today.toISOString().slice(0, 10) }, NEUTRAL),
+					store: { rawGamesFor, standingsTitles },
+					creditHtml: creditLine(creditsFor([adapters[entry.sport]])),
+					origin: originOf,
+				}).catch((e) => {
+					// Not cached: the next request tries again, and the club keeps its
+					// server-rendered page in the meantime rather than an error.
+					console.error(`  front page   ${key} failed: ${e.message}`);
+					fronts.delete(key);
+					return null;
+				}));
+			}
+			return fronts.get(key);
+		};
+		const withFront = table.filter((e) => e.available && clubFor(e) && hasFrontEnd(e.sport)).length;
+		if (withFront) console.log(`  front page   ${withFront} of ${table.length} clubs, built on first request`);
 
 		const server = createServer(async (req, res) => {
 			// Before anything reads `available`, including /healthz and the
@@ -790,11 +801,14 @@ function main() {
 				});
 			}
 
+			// A club's front page, and everything it asks for, under the club's base.
+			const claimed = matchRoute(url.pathname, table);
+			const front = claimed && await frontFor(claimed.entry);
 			if (front) {
 				// The page goes out through `html`, so it gets the canonical URL and
 				// the preview tags every other page gets.
-				const handled = await front(req, res, url, (r, body) => html(r, 200, body, {
-					image: `${origin}/og/default.png`,
+				const handled = await front(req, res, claimed.rest, url, (r, body) => html(r, 200, body, {
+					image: `${origin}${claimed.entry.base}/og/default.png`,
 				}));
 				if (handled) return;
 			}

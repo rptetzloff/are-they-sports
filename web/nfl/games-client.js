@@ -9,8 +9,8 @@ import { parseGames, poolCurrentSeason } from './records-core.js';
  *  `fileGames` the CSV's rows as they are. */
 export async function loadGames() {
 	const [fileRes, curRes] = await Promise.all([
-		fetch('/data/games.csv'),
-		fetch('/api/current/games.csv').catch(() => null),
+		fetch('data/games.csv'),
+		fetch('api/current/games.csv').catch(() => null),
 	]);
 	if (!fileRes.ok) throw new Error(`games CSV: HTTP ${fileRes.status}`);
 	const fileGames = parseGames(await fileRes.text());
