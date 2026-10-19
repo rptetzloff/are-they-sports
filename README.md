@@ -9,8 +9,9 @@ other and drifted. Most of what they do is the same computation over different
 vocabularies, so this is the version where a new team is a manifest rather than
 a repository.
 
-**Early. The data pipeline works and a server renders pages; the record and
-box-score views are not ported yet.**
+**Early. The data pipeline works, and a single-club deployment's front page is
+now the two sites' own; the other pages are server-rendered and do not look
+like the sites yet.**
 
 ## The data model
 
@@ -1788,6 +1789,38 @@ neutral-site games are the exception, because a club-perspective row reports
 `location: 'neutral'` and no longer records who was nominally home, so the lower
 source code wins and the answer does not depend on scope order.
 
+## The front page
+
+Under a single-club scope, `/` and `/{season}` are the sites' own front page:
+`web/mlb` from arethebrewersontv.com for every baseball club and `web/nfl` from
+arethepackersundefeated.com for every football one. They are client-side, as
+the sites are; see "The front page is the sites' own" in CLAUDE.md for why,
+and for what it does not do yet.
+
+What the page asks its server for, and where it comes from here:
+
+| request | answered from |
+|---|---|
+| the page, `/main.js`, `/styles.css`, … | `web/<sport>/`, with the club written in as `window.CLUB` and the stylesheet recoloured into the club's palette |
+| `/data/gameinfo.csv`, `/data/CurrentNames.csv` (baseball) | Postgres and the franchise history table, in Retrosheet's shape |
+| `/data/games.csv`, `/data/season_records.csv`, `/api/current/games.csv` (football) | Postgres, in the football site's shape |
+| `/api/espn/*` | ESPN, through a cache, for this club's schedule and the league's scoreboard and summaries only |
+| `/api/live/:id`, `/api/bracket` (baseball) | ESPN, reduced as the baseball site reduced it |
+| `/api/boxscore/:id` (football) | ESPN, reduced as the football site reduced it |
+| `/data/photos.csv`, TV listings, `/logos/*` | `data/clubs/<sport>/<club>/`, if the club has them |
+| `/calendar.ics` | ESPN and the club's TV listings, for a club with listings |
+| `/api/born/:date` | an empty list; no player data is loaded |
+
+A club asks "Are the X on TV?" when `data/clubs/` has its channel and provider
+listings, and "Are the X undefeated?" otherwise. Nothing in the manifest
+declares which, so the two cannot disagree. The manifest's optional `site`
+block carries the rest of what the sites wrote as literals: the emoji, the
+hashtag, the time zone the listings are kept in.
+
+The page needs the round of every playoff game, which the load used to discard;
+`game.stage` keeps the source's word for it. Run `npm run migrate` and reload
+before deploying this.
+
 ## Scope: what one deployment shows
 
 A site is configured by a single `SCOPE`, which resolves to a set of clubs.
@@ -1887,6 +1920,7 @@ turned a half-recorded score into a tie.
 ```
 sports/     adapters: where data comes from, and how it becomes neutral rows
 teams/      manifests: identity and colours; about a dozen lines each
+web/        the two sites' front pages, one per sport (see "The front page")
 scripts/    fetch, build, franchise table
 lib/        csv, scope, routes, index reading, record core, rendering
 server.js   the server; HTML, with ?format=json on every route
@@ -1895,6 +1929,7 @@ data/
   sources/    fetched, gitignored
   indices/    derived, committed
   reference/  curated, committed
+  clubs/      curated per club: photos, TV listings, park names
 ```
 
 A sport adapter has two jobs: say where the data is, and turn it into rows the

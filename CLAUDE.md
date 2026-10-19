@@ -1,6 +1,6 @@
 # House rules
 
-20 rules, so they get applied rather than rediscovered. Short on purpose.
+21 rules, so they get applied rather than rediscovered. Short on purpose.
 
 (It said twelve, then sixteen. Twelve was the count in the two sites this file
 came from and was already wrong here before the scope rule was added; sixteen was
@@ -577,6 +577,16 @@ function of the request, assertable by a test, and working with scripts off. It
 is a default worth keeping and worth arguing with, not a law — and the next
 feature that genuinely needs a script should say so and add one.
 
+**Reversed for the front page, 2026-10-19, by Ray.** The bar became "look
+exactly like the two sites", and he chose to get there by serving their own
+front end rather than re-rendering it here. So a single-club deployment's front
+page is now the sites' client-side code, scripts and all. What that costs is
+the argument above, and it is paid knowingly: `node --test` cannot see what
+that page renders, so side-by-side renders against the running sites are its
+evidence, and the tests cover the server half — the files it is fed, the
+club it is told about, the colours it is given. The rest of this repo's pages
+keep the default until each is ported. See "The front page is the sites' own".
+
 This repo now has exactly two. `pg`, because reads happen against Postgres at
 request time and Node ships no Postgres client; and `@resvg/resvg-js`, because
 the social cards are pictures and nothing in the standard library draws one.
@@ -808,6 +818,11 @@ baseball one, against 296 in `lib/records.js`.
 
 ### Front page
 
+Superseded for single-club scopes on 2026-10-19: the front page there IS the
+sites' own (see "The front page is the sites' own"), so every row below is the
+site's behaviour by construction, except the gaps that section names. The table
+still describes the server-rendered club page, which multi-club scopes serve.
+
 | | football | baseball | here |
 |---|---|---|---|
 | answer, record, title | ✓ | ✓ | done |
@@ -1019,6 +1034,84 @@ rule.** Settled so far:
   wire is still a gap and still needs a script.
 - **lightbox, chart tooltip on the line** — undecided. Both are hard without a
   script.
+- **the front page** — the sites' own, scripts included, for a single-club
+  scope. Decided by Ray on 2026-10-19; see the next section. The list above
+  still governs every page that has not been ported.
+
+## The front page is the sites' own
+
+`web/mlb` is arethebrewersontv.com's front page and `web/nfl` is
+arethepackersundefeated.com's, copied from each repo's merged `dev` (4441d89 and
+f53c92e) and changed only where a literal named the club. A single-club
+deployment serves the one for its sport at `/` and `/{season}`;
+`lib/web-routes.js` answers everything that page asks its server for.
+
+**One front end per sport, on purpose, for now.** The two have drifted: 277 of
+684 and 456 selectors shared, `main.js` 3,100 lines against 1,479. Merging them
+in the same change as copying them would have made "exactly like the site"
+impossible to check, so the copy came first and the merge is its own work —
+CSS first, then the shared modules — each measured against both renders.
+
+**The club is data, again, and arrives as `window.CLUB`.** The server writes it
+into the shell from the manifest before any module runs, and `site.js` reads it.
+On the server the same object is `globalThis.CLUB`, set before anything under
+`web/` is imported, because a single-club deployment is one club per process —
+which is what lets `lib/calendar.js` and the bracket share the page's `SITE`.
+`test/web.test.js` fails if a club literal (`'MIL'`, `'GB'`, "Brewers", a
+hashtag) reappears in `web/` outside a comment. Its first run found three the
+substitutions had missed.
+
+**Colours are the source club's palette, rewritten.** Each stylesheet is
+treated as a template keyed by its club's base and accent, and the colours that
+are that club's brand are LISTED in `lib/web.js`, each read in its rule. Listed
+rather than detected, because "near the accent" catches trophy gold and misses
+the end zone. The remap is the identity for the source club by construction,
+and a test holds both stylesheets byte-identical for it.
+
+**The history is this repo's, in each page's own file shape.** Baseball gets
+Retrosheet's `gameinfo.csv` and `CurrentNames.csv` back out of Postgres and the
+franchise history table; football gets the site's games CSV with its three
+club-named columns renamed. Checked against the sites' committed files, not
+asserted: all 9,067 Brewers games 1969-2025 agree on every column the page
+reads, and all 1,540 Packers games agree on scores, results, rounds and Super
+Bowl numerals. Five Packers games disagree on the neutral-site flag, which is
+the two sources disagreeing, and is left as this repo's data says.
+
+That needed the round, which the load had thrown away — 57 Brewers postseason
+games went in as `playoff`, alike. `game.stage` keeps the source's own word
+(0011). And it found a bug the baseball site still has: ESPN writes this
+year's wild card games as `NLWC`, which its pattern did not match.
+
+**Opponent names are era-correct, and that is a recorded deviation.** The
+football site named every pre-1999 game by the franchise's later name, as
+FiveThirtyEight's file did — the 1950 Chicago Cardinals as the "Arizona
+Cardinals", with a typo for Frankford — and folded only three relocations by
+hand. Copying that would contradict the rule above about nouns true only today.
+So the names stay as this repo has them, and the server sends the page a
+complete fold instead (`franchiseAliases`, from the history table), which is
+what made the all-time records on the schedule agree with the site:
+Cardinals 48-26-4, Lions 108-78-7.
+
+**Gaps, named.** Each renders as the site renders a game with nothing on it,
+which is why none of them is visible as a fault:
+
+- born-on-this-day answers an empty list. Neither sport's player data is loaded.
+- baseball's line scores and player names (`teamstats.csv`, `biofile0.csv`) are
+  headers only, so the line-score button does not appear on a past game.
+- football's past box scores: the site had ESPN ids from 1999 and play-by-play
+  fill-ins; the games table has neither, so a past game is not clickable.
+- the nav drops the pages not ported yet (Ballparks, Stats, Stadiums, Splits)
+  rather than linking to a 404, and links Records, History, Head-to-Head and
+  the leaders page to this repo's server-rendered pages, which do not look like
+  the sites yet. Each comes back as it is ported.
+- multi-club scopes keep the server-rendered pages. The page fetches absolute
+  paths and assumes it owns the root.
+
+**Licence obligations outrank exactness.** The data credit is always shown,
+where the sites showed it only on past seasons, because the season being played
+draws on the same history. The disclaimer gives Retrosheet's current notice, not
+the postal address the baseball site still carried, and does not call this
+repository MIT-licensed, because it has no licence file.
 
 ## Commits and branches
 

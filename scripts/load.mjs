@@ -83,8 +83,8 @@ export function franchiseMap(sportId, dir) {
    publishes the result. Finishing one is worth a write; restating that it has
    not started is not. */
 const SQL_UPSERT_GAME = `
-INSERT INTO game (sport, id, season, date, round, home, away, home_score, away_score, neutral, status, source, week)
-VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
+INSERT INTO game (sport, id, season, date, round, home, away, home_score, away_score, neutral, status, source, week, stage)
+VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
 ON CONFLICT (sport, id) DO UPDATE SET
 	season = EXCLUDED.season, date = EXCLUDED.date, round = EXCLUDED.round,
 	home = EXCLUDED.home, away = EXCLUDED.away,
@@ -94,6 +94,7 @@ ON CONFLICT (sport, id) DO UPDATE SET
 	-- pre-1999 seed and nflverse overlap in 1999-2020, and the seed would
 	-- otherwise null out a real week every time it ran after nflverse.
 	week = COALESCE(EXCLUDED.week, game.week),
+	stage = COALESCE(EXCLUDED.stage, game.stage),
 	source = EXCLUDED.source, observed_at = now()
 WHERE (SELECT authority FROM source WHERE id = EXCLUDED.source)
    >= (SELECT authority FROM source WHERE id = game.source)
@@ -938,7 +939,7 @@ async function main() {
 	// latency, not Postgres — the same rows go in at a fraction of the time when
 	// several hundred travel together.
 	//
-	// 500 at a time: 13 columns means 6,500 parameters, well inside Postgres's
+	// 500 at a time: 14 columns means 7,000 parameters, well inside Postgres's
 	// 65,535 limit, and small enough that a failure names a manageable slice.
 	const BATCH = 500;
 	let pending = [];
@@ -961,11 +962,11 @@ async function main() {
 				row.homeScore, row.awayScore, row.neutral, row.status, row.source,
 				// Undefined and null both mean "this source has no week", and the
 				// upsert coalesces so a source without one never erases one.
-				row.week ?? null);
-			return `(${Array.from({ length: 13 }, (_, i) => `$${at + i + 1}`).join(',')})`;
+				row.week ?? null, row.stage ?? null);
+			return `(${Array.from({ length: 14 }, (_, i) => `$${at + i + 1}`).join(',')})`;
 		});
 		pending = [];
-		const r = await client.query(SQL_UPSERT_GAME.replace('VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)',
+		const r = await client.query(SQL_UPSERT_GAME.replace('VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)',
 			`VALUES ${tuples.join(',')}`), params);
 		loaded += r.rowCount;
 	};
@@ -1037,6 +1038,8 @@ async function main() {
 				neutral: false, status: played ? 'final' : 'scheduled', source: 'nflverse',
 				// The only source in the repo that has one.
 				week: r.week ? +r.week : null,
+				// WC, DIV, CON, SB as nflverse writes them; see 0011_game_stage.sql.
+				stage: r.game_type && r.game_type !== 'REG' ? r.game_type : null,
 			});
 		}
 	}
@@ -1087,6 +1090,7 @@ async function main() {
 				home: r.hometeam, away: r.visteam,
 				homeScore: played ? +r.hruns : null, awayScore: played ? +r.vruns : null,
 				neutral: false, status: played ? 'final' : 'scheduled', source: 'retrosheet',
+				stage: r.gametype === 'regular' ? null : r.gametype,
 			});
 		}
 		if (skippedType) console.log(`  skipped      ${skippedType} all-star and exhibition games`);
