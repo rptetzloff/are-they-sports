@@ -38,7 +38,7 @@ import { computeStandings, divisionPeers, playedSeasons } from './lib/standings.
 import { Lru, memo, mergeGames, versionOf } from './lib/derived.js';
 import { chartGeometry, coachEras, historyPoints } from './lib/history.js';
 import { codeTables, franchisesForClub, staleFranchises } from './lib/codes.js';
-import { availability, championships, close, connect, franchisesWithGames, gamesFor, gamesSince, health, lastUpdated, lastUpdatedAll, leaderGames, leaderTenures, readSummary, withClient, writeSummary } from './lib/store.js';
+import { availability, championships, close, connect, franchisesWithGames, gamesFor, gamesSince, health, lastUpdated, lastUpdatedAll, leaderGames, leaderTenures, rawGamesFor, readSummary, standingsTitles, withClient, writeSummary } from './lib/store.js';
 import { lockKeyFor, nextDelay, refreshLive, withLock } from './lib/live.js';
 import {
 	daysToNextGame, lastLosslessSeason, latestSeason, recordText, seasons, seasonTally, seasonVerdict,
@@ -48,9 +48,11 @@ import {
 	ALL_TIME_COLUMNS, CHAMPION_COLUMNS, championsPage, historyColumns, standingsColumns,
 	NEUTRAL, clubPage, clubSwitcher, noticePage, onThisDayPanel, questionFor, sharePanel, standingsModal, headToHeadPage, historyPage, leadersPage, leagueNav, leagueRecordsPage, leagueSchedulePage, sportTabs, missingSeasonPage, opponentPage, recordsPage, standingsPage,
 	RECORD_SLUGS, recordCopy, h2hColumns,
-	scheduleHtml, seasonNav, selectorPage, siteNav, sparklineHtml,
+	scheduleHtml, seasonNav, selectorPage, siteNav, sparklineHtml, creditLine,
 } from './lib/render.js';
-import { colorsFor, currentFranchises, resolver } from './lib/names.js';
+import { colorsFor, currentFranchises, loadHistory, resolver } from './lib/names.js';
+import { hasFrontEnd } from './lib/web.js';
+import { createFront } from './lib/web-routes.js';
 import { SPORTS, loadSports, loadTeams } from './lib/teams.js';
 import { creditsFor } from './lib/credits.js';
 import { describe, titleOf, withMeta } from './lib/meta.js';
@@ -719,6 +721,36 @@ function main() {
 			available = table.filter((e) => e.available);
 		}
 
+		// The two sites' own front page, for a single-club scope whose sport has
+		// one (web/<sport>/, lib/web-routes.js). Built once: it reads its page
+		// files and the club's identity at boot, and the club's games per request.
+		//
+		// Only for ONE club, because the page fetches absolute paths and assumes
+		// it owns the root. Every other scope keeps the server-rendered pages,
+		// and so does every route this does not answer — /records, /history and
+		// /vs among them — until each is ported.
+		let front = null;
+		const solo = !needsSelector(table) ? table[0] : null;
+		if (solo?.available && clubFor(solo) && hasFrontEnd(solo.sport) && dbHealth.ok) {
+			const today = new Date();
+			front = await createFront({
+				team: clubFor(solo),
+				franchise: solo.franchise,
+				adapter: adapters[solo.sport],
+				namer: namers[solo.sport],
+				history: loadHistory(solo.sport),
+				currentCodes: currentOf(solo.sport),
+				// Today's colours. The sites have one palette, not one per era, and
+				// the template is recoloured once at boot.
+				palette: colorsFor(namers[solo.sport], solo.code,
+					{ season: today.getFullYear(), date: today.toISOString().slice(0, 10) }, NEUTRAL),
+				store: { rawGamesFor, standingsTitles },
+				creditHtml: creditLine(creditsFor([adapters[solo.sport]])),
+				origin: originOf,
+			});
+			console.log(`  front page   web/${solo.sport} for ${solo.sport}/${solo.teamId}`);
+		}
+
 		const server = createServer(async (req, res) => {
 			// Before anything reads `available`, including /healthz and the
 			// selector.
@@ -756,6 +788,15 @@ function main() {
 					available: available.length,
 					missing: table.filter((e) => !e.available).map((e) => `${e.sport}/${e.code}`),
 				});
+			}
+
+			if (front) {
+				// The page goes out through `html`, so it gets the canonical URL and
+				// the preview tags every other page gets.
+				const handled = await front(req, res, url, (r, body) => html(r, 200, body, {
+					image: `${origin}/og/default.png`,
+				}));
+				if (handled) return;
 			}
 
 			// The selector. Only exists when the scope holds more than one club;

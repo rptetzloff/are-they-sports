@@ -1,0 +1,270 @@
+import test from 'node:test'
+import assert from 'node:assert/strict'
+import { readFileSync, readdirSync } from 'node:fs'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
+import {
+	TEMPLATES, recolor, gameinfoRow, gameinfoCsv, GAMEINFO_HEADER, nflGameRow, seasonRecordsCsv,
+	franchiseAliases, shell, clubConfig, assetFor, clubFileFor,
+} from '../lib/web.js'
+import { navFor } from '../lib/web-routes.js'
+import { endpointsFor, espnTarget, ttlFor, FINAL_TTL, IDLE_TTL, TTL } from '../lib/espn.js'
+import { stageFromNotes } from '../sports/mlb.js'
+import { liveGameRow } from '../sports/nfl.js'
+import { displayName, loadHistory } from '../lib/names.js'
+
+const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
+const read = (p) => readFileSync(join(ROOT, p), 'utf8')
+
+// --- colour -----------------------------------------------------------------
+
+test('each stylesheet is unchanged for the club it came from', () => {
+	// The whole claim of "exactly like the site" for the Brewers and the Packers
+	// rests on this: the remap must be the identity for the source palette,
+	// however the palette's hex happens to be cased.
+	for (const [sport, palette] of [['mlb', { base: '#12284B', accent: '#FFC52F' }], ['nfl', { base: '#203731', accent: '#FFB612' }]]) {
+		const css = read(`web/${sport}/styles.css`)
+		assert.equal(recolor(css, sport, palette), css, `${sport} stylesheet changed for its own club`)
+	}
+})
+
+test('every colour a template lists is actually in its stylesheet', () => {
+	// A listed colour the file no longer uses means the list was written
+	// against a different file, and a brand colour added since is being missed.
+	for (const [sport, t] of Object.entries(TEMPLATES)) {
+		const css = read(`web/${sport}/styles.css`).toLowerCase()
+		for (const hex of [...t.dark, ...t.accentFamily, ...t.tint]) {
+			assert.ok(css.includes(hex), `${sport}: ${hex} is listed but not in styles.css`)
+		}
+		for (const triplet of Object.keys(t.rgb)) {
+			assert.ok(css.includes(`: ${triplet};`), `${sport}: rgb ${triplet} is listed but not in styles.css`)
+		}
+	}
+})
+
+const BRAND = {
+	mlb: ['#12284b', '#1a3558', '#1a3a6b', '#1a3660', '#16305a', '#16294a', '#0d1d38', '#ffc52f', '#ffd45e', '#e0a820', '#8a5d00', '#f3f5f9', '#eef2f8', '#e9eef6'],
+	nfl: ['#203731', '#152a1e', '#1a2e28', '#ffb612', '#ffd050', '#8a5d00', '#f4f6f2', '#e8eee9'],
+}
+
+test('another club loses every brand colour and keeps every other one', () => {
+	const cubs = { base: '#0e3386', accent: '#cc3433' }
+	for (const sport of Object.keys(TEMPLATES)) {
+		const css = read(`web/${sport}/styles.css`)
+		const out = recolor(css, sport, cubs).toLowerCase()
+		// Written out here rather than read from TEMPLATES, so that dropping a
+		// colour from the list is caught instead of being agreed with.
+		for (const hex of BRAND[sport]) {
+			assert.ok(!out.includes(hex), `${sport}: ${hex} survived the remap`)
+		}
+		// Trophy gold and the win green are nobody's brand.
+		const count = (s, x) => s.toLowerCase().split(x).length - 1
+		for (const generic of ['#ffd700', '#4caf50']) {
+			assert.equal(count(out, generic), count(css, generic), `${sport}: ${generic} was moved`)
+		}
+		assert.ok(out.includes(cubs.base) && out.includes(cubs.accent))
+	}
+})
+
+// --- history ----------------------------------------------------------------
+
+const mlbGame = (o) => ({ id: 'MIL201810190', season: 2018, date: '2018-10-19', round: 'playoff', stage: 'lcs',
+	home: 'MIL', away: 'LAN', homeScore: 7, awayScore: 2, neutral: false, status: 'final', ...o })
+
+test('a baseball game becomes the gameinfo row the page parses', () => {
+	const r = gameinfoRow(mlbGame())
+	assert.deepEqual(
+		[r.gid, r.visteam, r.hometeam, r.date, r.number, r.gametype, r.vruns, r.hruns, r.wteam, r.lteam, r.season],
+		['MIL201810190', 'LAN', 'MIL', '20181019', '0', 'lcs', 2, 7, 'MIL', 'LAN', 2018])
+	// The second game of a doubleheader is numbered by its id.
+	assert.equal(gameinfoRow(mlbGame({ id: 'CHA196904202' })).number, '2')
+	// No round stored is the regular season, which is what Retrosheet writes.
+	assert.equal(gameinfoRow(mlbGame({ stage: null, round: 'regular' })).gametype, 'regular')
+	// A playoff game loaded before `stage` existed stays a postseason game.
+	assert.equal(gameinfoRow(mlbGame({ stage: null, round: 'playoff' })).gametype, 'postseason')
+	assert.equal(gameinfoRow(mlbGame({ stage: null, round: 'championship' })).gametype, 'worldseries')
+	// An unplayed game has no score and no winner, rather than a 0-0 tie.
+	const pending = gameinfoRow(mlbGame({ status: 'scheduled', homeScore: null, awayScore: null }))
+	assert.deepEqual([pending.vruns, pending.hruns, pending.wteam, pending.lteam], ['', '', '', ''])
+})
+
+test('the gameinfo file has the header the page reads by name', () => {
+	const [head, line] = gameinfoCsv([mlbGame()]).trim().split('\n')
+	assert.deepEqual(head.split(','), GAMEINFO_HEADER)
+	assert.equal(line.split(',').length, GAMEINFO_HEADER.length)
+	// The live season's lines go out without one: the page prepends it.
+	assert.ok(!gameinfoCsv([mlbGame()], { header: false }).startsWith('gid,'))
+})
+
+const nflGame = (o) => ({ id: 'x', season: 2010, date: '2011-02-06', round: 'championship', stage: 'SB', title: 'Super Bowl',
+	home: 'PIT', away: 'GB', homeScore: 25, awayScore: 31, neutral: true, status: 'final', ...o })
+const named = (code, season) => `${code}@${season}`
+
+test('a football game becomes the football site\'s row, from the club\'s side', () => {
+	const r = nflGameRow(nflGame(), 'GB', named)
+	assert.deepEqual([r.result, r.team_score, r.opponent_score, r.location, r.Opponent, r.regular_season, r.playoff],
+		['WIN', 31, 25, 'NEUTRAL', 'PIT@2010', '0', '1'])
+})
+
+test('a Super Bowl carries its numeral, and an NFL Championship does not', () => {
+	// The 1966 season's final was Super Bowl I.
+	assert.equal(nflGameRow(nflGame({ season: 1966, stage: null }), 'GB', named).superbowl, 'i')
+	assert.equal(nflGameRow(nflGame(), 'GB', named).superbowl, 'xlv')
+	assert.equal(nflGameRow(nflGame({ season: 1996 }), 'GB', named).superbowl, 'xxxi')
+	assert.equal(nflGameRow(nflGame({ season: 1965, stage: null, title: 'NFL Championship' }), 'GB', named).superbowl, '')
+})
+
+test('season records split regular season from postseason', () => {
+	const rows = [
+		{ season: 1929, regular_season: '1', result: 'WIN' },
+		{ season: 1929, regular_season: '1', result: 'TIE' },
+		{ season: 1929, regular_season: '0', result: 'LOSS' },
+		{ season: 1929, regular_season: '1', result: '' },
+	]
+	assert.equal(seasonRecordsCsv(rows).trim().split('\n')[1], '1929,1,0,1,0,1,0')
+})
+
+test('every era of a football franchise folds into its latest name', () => {
+	const aliases = franchiseAliases(loadHistory('nfl'), displayName)
+	assert.equal(aliases['Chicago Cardinals'], 'Arizona Cardinals')
+	assert.equal(aliases['Portsmouth Spartans'], 'Detroit Lions')
+	assert.equal(aliases['St. Louis Rams'], 'Los Angeles Rams')
+	// Two different franchises were the New York Yankees; folding the name
+	// into either would merge them.
+	assert.equal(aliases['New York Yankees'], undefined)
+	// A current name is never an alias of itself.
+	assert.equal(aliases['Green Bay Packers'], undefined)
+})
+
+test('a name two franchises carried folds into neither', () => {
+	// The real New York Yankees cannot test this: both are defunct and each one's
+	// latest name is its own, so they never reach the ambiguity check.
+	const rows = [
+		{ franchiseAbbrv: 'A', city: 'Old', teamName: 'Name', startSeason: '1920' },
+		{ franchiseAbbrv: 'A', city: 'New', teamName: 'A', startSeason: '1950' },
+		{ franchiseAbbrv: 'B', city: 'Old', teamName: 'Name', startSeason: '1930' },
+		{ franchiseAbbrv: 'B', city: 'New', teamName: 'B', startSeason: '1960' },
+	]
+	assert.deepEqual(franchiseAliases(rows, displayName), {})
+})
+
+// --- ESPN -------------------------------------------------------------------
+
+test('the proxy allows this club\'s schedule and nobody else\'s', () => {
+	const eps = endpointsFor({ league: 'baseball/mlb', slug: 'chc', standings: true })
+	assert.equal(espnTarget(eps, 'apis/site/v2/sports/baseball/mlb/teams/chc/schedule', 'seasontype=2&season=2026'),
+		'https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/teams/chc/schedule?season=2026&seasontype=2')
+	assert.equal(espnTarget(eps, 'apis/site/v2/sports/baseball/mlb/teams/mil/schedule', ''), null)
+	assert.equal(espnTarget(eps, 'apis/site/v2/sports/baseball/mlb/summary', 'event=401;rm'), null)
+	assert.equal(espnTarget(eps, 'apis/site/v2/sports/baseball/mlb/summary', 'event=1&x=2'), null)
+	// Football's front page never asked for standings, so it cannot.
+	const nfl = endpointsFor({ league: 'football/nfl', slug: 'gb' })
+	assert.equal(espnTarget(nfl, 'apis/v2/sports/football/nfl/standings', 'group=8'), null)
+})
+
+test('a schedule is cached for a day once every game in it is over', () => {
+	const post = JSON.stringify({ events: [{ competitions: [{ status: { type: { state: 'post' } } }] }] })
+	const later = JSON.stringify({ events: [{ date: '2030-01-01T00:00Z', competitions: [{ status: { type: { state: 'pre' } } }] }] })
+	const url = 'https://site.api.espn.com/apis/site/v2/sports/football/nfl/teams/gb/schedule'
+	assert.equal(ttlFor(url, 200, post), FINAL_TTL)
+	assert.equal(ttlFor(url, 200, later, Date.parse('2029-06-01')), IDLE_TTL)
+	assert.equal(ttlFor(url, 500, post), TTL)
+})
+
+// --- rounds -----------------------------------------------------------------
+
+test('a baseball postseason note names its round as Retrosheet would', () => {
+	const of = (h) => stageFromNotes([{ headline: h }])
+	assert.equal(of('NLWC - Game 1'), 'wildcard')
+	assert.equal(of('AL Wild Card Game 2'), 'wildcard')
+	assert.equal(of('ALDS - Game 3'), 'divisionseries')
+	assert.equal(of('NLCS - Game 6'), 'lcs')
+	assert.equal(of('World Series - Game 1'), 'worldseries')
+	// Not `playoff`, which is Retrosheet's word for a tiebreaker.
+	assert.equal(of('Postseason'), 'postseason')
+})
+
+test('a live football playoff game is staged as nflverse stages it', () => {
+	const event = (week) => ({
+		season: { type: 3, year: 2025 }, week: { number: week }, date: '2026-01-11T18:00Z',
+		competitions: [{ status: { type: { completed: false } }, competitors: [
+			{ homeAway: 'home', team: { abbreviation: 'PHI' } }, { homeAway: 'away', team: { abbreviation: 'GB' } }] }],
+	})
+	const ctx = { franchiseOf: (c) => c, knows: () => true, codeIn: (c) => c }
+	assert.deepEqual([1, 2, 3, 5].map((w) => liveGameRow(event(w), ctx).stage), ['WC', 'DIV', 'CON', 'SB'])
+})
+
+// --- the page ---------------------------------------------------------------
+
+const team = (o = {}) => ({ sport: 'mlb', id: 'cubs', sourceIds: ['CHN'], firstSeason: 1876,
+	nouns: { team: 'Cubs', fullName: 'Chicago Cubs' }, copy: { seasonNotStarted: 'GO CUBS' }, ...o })
+
+test('a club without channel listings asks whether it is undefeated', () => {
+	const cfg = clubConfig({ team: team(), current: { espnAbbr: 'CHC', league: 'NL' } })
+	assert.equal(cfg.site.title, 'Are the Cubs Undefeated?')
+	assert.equal(cfg.site.tv, false)
+	assert.deepEqual([cfg.site.espnAbbr, cfg.site.espnSlug, cfg.site.leagueGroup, cfg.site.tag], ['CHC', 'chc', 8, ''])
+	const brewers = clubConfig({ team: team({ id: 'brewers', nouns: { team: 'Brewers', fullName: 'Milwaukee Brewers' }, site: { hashtag: '#ThisIsMyCrew' } }), current: { espnAbbr: 'MIL', league: 'NL' } })
+	assert.equal(brewers.site.title, 'Are the Brewers On TV?')
+	assert.equal(brewers.site.tag, ' #ThisIsMyCrew')
+})
+
+test('the shell carries the club, its question and absolute assets', () => {
+	const cfg = clubConfig({ team: team({ nouns: { team: 'Cubs</script>', fullName: 'x' } }), current: { espnAbbr: 'CHC' } })
+	const html = shell(read('web/mlb/index.html'), { config: cfg, creditHtml: '<p class="notice">credit</p>' })
+	// Before any module runs, and unable to close its own tag early: the script
+	// as the browser will cut it, at the first </script>, still parses.
+	assert.ok(html.indexOf('window.CLUB') < html.indexOf('main.js'))
+	const script = html.slice(html.indexOf('window.CLUB = ') + 'window.CLUB = '.length).split('</script>')[0]
+	assert.deepEqual(JSON.parse(script.replace(/;$/, '')), cfg)
+	assert.match(html, /<title>Are the Cubs&lt;\/script&gt; Undefeated\?<\/title>/)
+	assert.ok(!html.includes('Are the Brewers On TV?'), 'the source club\'s question survived')
+	assert.ok(!html.includes('og:image') && !html.includes('twitter:'), 'the source site\'s preview tags survived')
+	assert.ok(html.includes('src="/main.js"') && html.includes('href="/styles.css"'))
+	assert.ok(!html.includes('AreTheBrewersOnTV'))
+	assert.ok(html.includes('<div id="data-credit" class="data-credit"><p class="notice">credit</p></div>'))
+	assert.ok(!html.includes('Sunset Rd'), 'the outdated Retrosheet address survived')
+})
+
+test('the nav keeps the pages that exist and drops the ones that do not yet', () => {
+	const html = navFor(read('web/mlb/index.html'), 'mlb')
+	assert.ok(html.includes('href="/records"') && html.includes('href="/managers"'))
+	assert.ok(!html.includes('href="/records.html"'))
+	assert.ok(!html.includes('href="/ballparks"') && !html.includes('href="/stats"'))
+	assert.ok(!html.includes('>Ballparks<') && !html.includes('href="null"'), 'a missing page is still in the nav')
+	assert.ok(html.includes('footer-share-trigger'), 'took more than the link')
+	const nfl = navFor(read('web/nfl/index.html'), 'nfl')
+	assert.ok(nfl.includes('href="/coaches"') && !nfl.includes('href="/splits"'))
+})
+
+test('the front end names no club', () => {
+	// The point of the copy: every club fact arrives as window.CLUB. A literal
+	// left behind is a Bears page saying Packers, which nothing would catch.
+	// Comments are allowed to remember where the code came from.
+	const offenders = []
+	const walk = (d) => readdirSync(join(ROOT, d), { withFileTypes: true }).flatMap((e) =>
+		e.isDirectory() ? walk(`${d}/${e.name}`) : e.name.endsWith('.js') ? [`${d}/${e.name}`] : [])
+	// Per sport, because a code is only a club in its own sport: 'GB' in the
+	// baseball standings is Games Behind. And by name rather than city, because
+	// the league-wide name table rightly says Milwaukee Braves.
+	const CODES = { mlb: 'MIL|SE1|mil', nfl: 'GB|gb' }
+	const literal = (sport) => new RegExp(`(['"\`])(?:${CODES[sport]})\\1|teams/(?:mil|gb)/|#ThisIsMyCrew|#GoPackGo|['"\`][^'"\`\\n]*\\b(?:Brewers|Packers|Green Bay)\\b`, 'g')
+	const files = [...walk('web/mlb').map((f) => [f, 'mlb']), ...walk('web/nfl').map((f) => [f, 'nfl']),
+		['lib/calendar.js', 'mlb'], ['lib/espn-box.js', 'nfl']]
+	assert.ok(files.length >= 20, `only scanned ${files.length} files`)
+	for (const [f, sport] of files) {
+		const code = read(f).replace(/\/\*[\s\S]*?\*\//g, '').split('\n')
+			.map((l) => l.replace(/(^|\s)\/\/.*$/, '')).join('\n')
+		for (const m of code.matchAll(literal(sport))) offenders.push(`${f}: ${m[0]}`)
+	}
+	assert.deepEqual(offenders, [])
+})
+
+test('assets and club files cannot be read from outside their directories', () => {
+	assert.ok(assetFor('mlb', '/main.js'))
+	assert.equal(assetFor('mlb', '/index.html'), null, 'the shell is not an asset')
+	assert.equal(assetFor('mlb', '/../../server.js'), null)
+	assert.equal(assetFor('mlb', '/..%2f..%2fserver.js'), null)
+	assert.ok(clubFileFor('nfl', 'packers', 'photos.csv'))
+	assert.equal(clubFileFor('nfl', 'packers', '../../../package.json'), null)
+})

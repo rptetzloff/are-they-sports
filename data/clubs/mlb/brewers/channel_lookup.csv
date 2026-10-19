@@ -1,0 +1,15 @@
+key,alias,display_name,type,description,website_url,directv,comcast,att_uverse,spectrum,amherst,celect,ntec,coon_valley,genuine,grantsburg,lynxx,maqs,mhtc,nsight,amery,norvado,reedsburg,sktv,solarus,tds,tcc,vernon
+FOX,,FOX,broadcast,Free over-the-air broadcast,https://www.fox.com,,,,,11 (WZAW) | 1 (WLUK) | 1 (WMSN),3 (WEUX) | 9 (KMSP),3 (WEUX),325 (WLAX),25 / 325 (WMSN),9 (KMSP) | 8 (WEUX),325 (WLAX) | 347 (WMSN),47 (WMSN),108 (WMSN),11 (WLUK) | 6 (WLUC),8 (WEUX) | 9 (KMSP),11 (KQDS) | 11 (WZAW),6 (WMSN),5 (WEUX),11 (WZAW) | 11 (WLUK),,3 (WLAX/WEUX),25 (WLAX/WEUX)
+ABC,,ABC,broadcast,Free over-the-air broadcast,https://abc.com,,,,,9 (WAOW)|2 (WBAY) | 2 (WKOW),12 (WQOW) | 5 (KSTP),10 (WQOW),319 (WXOW),19 / 319 (WXOW) | 27 / 327 (WKOW),5 (KSTP),319 (WXOW) | 322 (WKOW),27 (WKOW),107 (WKOW),2 (WBAY) | 10 (WBUP),18 (WQOW) | 5 (KSTP),10 (WDIO) | 10 (WAOW),4 (WKOW),9 (WQOW),9 (WAOW) | 2 (WBAY),,8 (WQOW) | 9 (WXOW),19 (WXOW)
+FS1,,FS1,cable,Fox Sports 1,https://www.foxsports.com,219,,652 / 1652,,49,36,32,339,39 / 339,36,334,37,157,46,60,98,29,46,34,,36,39
+ESPN,,ESPN,cable,ESPN cable channel,https://www.espn.com,206,,602 / 1602,,33,29,25,333,33 / 333,29,302,31,146,36,21,23,24,38,29,,32,33
+ESPN2,,ESPN2,cable,ESPN2 cable channel,https://www.espn.com,209,,606 / 1606,,34,30,26,334,34 / 334,30,303,32,147,37,20,24,25,39,30,,33,34
+TBS,,TBS,cable,TBS cable channel,https://www.tbs.com,247,,112 / 1112,,8,38,54,417,117 / 417,38,306,117,188,213,23,30,48,50,43,,66,117
+MLB Network,MLBN,MLB Network,cable,MLB's 24/7 baseball network,https://www.mlb.com/network,213,,634 / 1634,,35,35,45,329,31 / 331,35,344,36,151,35,64,26,33,,,,28,29
+Brewers.TV,,Brewers.TV,regional,Regional broadcast for Brewers home games,https://www.mlb.com/brewers/schedule/watch,670,1263,1743,469 | 319 or 327 | 319 or 327 or 308 / 1308 | 327 | 327 or 308 / 1308 | 327 | 327 | 327 | 327,16,104,44,335,32 / 332,104,345,46,150,51,70,17,30,47,32,243 | 242 | 610 / 1610 | 610 / 1610 | 276 / 1276,24,41
+MLB.TV,,MLB.TV,streaming,,https://www.mlb.com/live-stream-games/subscribe/overlap,,,,,,,,,,,,,,,,,,,,,,
+Apple TV+,,Apple TV+,streaming,Exclusive Friday night games on Apple TV+,https://tv.apple.com,,,,,,,,,,,,,,,,,,,,,,
+Peacock,,Peacock,streaming,NBC streaming — Sunday Leadoff games,https://www.peacocktv.com,,,,,,,,,,,,,,,,,,,,,,
+ESPN+,,ESPN+,streaming,ESPN streaming service,https://plus.espn.com,,,,,,,,,,,,,,,,,,,,,,
+Paramount+,,Paramount+,streaming,Paramount streaming service,https://www.paramountplus.com,,,,,,,,,,,,,,,,,,,,,,
+Simulcast,,Simulcast,broadcast,Free over-the-air simulcast on FOX6 (WITI) and statewide affiliate stations,https://www.mlb.com/press-release/press-release-fox6-milwaukee-to-simulcast-10-milwaukee-brewers-regular-season-games,,,,,7 (WSAW) or 11 (WZAW) | 6 (WGBA) or 65 (WACY) | 4 (WISC) or 75 (TVW),8 (WKBT),8 (WKBT),308 (WKBT),8 / 308 (WKBT) | 3 / 303 (WISC) or 4 (TVW),,308 (WKBT) | 320 (WISC) or 4 (TVW),3 (WISC) or 14 (TVW),109 (WISC) or 104 (TVW),26 (WGBA) or 32 (WACY),,3 (KBJR) or 9 (KDLH) | 3 (WSAW) or 11 (WZAW),3 (CBS) or 131 (TVW),,7 (WSAW) or 11 (WZAW) | 7 (WGBA) or 13 (WACY),,,8 (WKBT)

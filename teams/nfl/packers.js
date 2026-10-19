@@ -37,6 +37,14 @@ export const team = {
 		 *  that had not lost. */
 		seasonNotStarted: 'GO PACK GO',
 	},
+
+	/** What the front page said as literals on arethepackersundefeated.com,
+	 *  and is genuinely this club's (lib/web.js clubConfig). */
+	site: {
+		emoji: '🧀',
+		hashtag: '#GoPackGo',
+		timeZone: 'America/Chicago',
+	},
 };
 
 export default team;

@@ -636,10 +636,17 @@ export function liveGameRow(event, { eraCodeOf, franchiseOf, knows, number = 0, 
 		season: Number(String(event.season?.year ?? date.slice(0, 4))),
 		date,
 		// ESPN's season type: 1 preseason, 2 regular, 3 postseason. Anything
-		// beyond the regular season is a playoff game; which ROUND it was, and
-		// whether it was the World Series, is left to the authoritative source
-		// rather than guessed from a live feed.
+		// beyond the regular season is a playoff game. Whether it was the World
+		// Series is still left to the authoritative source: `round` decides a
+		// title, and a misread note must not award one.
 		round: (event.season?.type ?? 2) > 2 ? 'playoff' : 'regular',
+		// REVERSED, for `stage` only. This used to leave the round itself to
+		// Retrosheet too. The adopted front page labels the postseason being
+		// played, months before Retrosheet publishes it, and the baseball site
+		// has read it from ESPN's notes all along (lib/espn-current.js there).
+		// `stage` is a label, never a count, so a wrong one mislabels a row and
+		// decides nothing; the authoritative load overwrites it.
+		stage: (event.season?.type ?? 2) > 2 ? stageFromNotes(comp.notes) : null,
 		home: franchiseOf(home.team.abbreviation),
 		away: franchiseOf(away.team.abbreviation),
 		homeScore: played ? Number(home.score) : null,
@@ -649,6 +656,22 @@ export function liveGameRow(event, { eraCodeOf, franchiseOf, knows, number = 0, 
 		source: 'espn',
 		week: null,
 	};
+}
+
+/** Retrosheet's gametype word for an ESPN postseason event, from its notes.
+ *  Ported from the baseball site's `gametypeOf`, including its fallback: an
+ *  unreadable note is `postseason`, NOT `playoff`, because `playoff` is
+ *  Retrosheet's word for a tiebreaker and would file the game as a regular
+ *  season one. */
+export function stageFromNotes(notes) {
+	const note = (notes ?? []).map((n) => n?.headline ?? '').join(' ');
+	if (/world series/i.test(note)) return 'worldseries';
+	if (/\b[an]lcs\b|championship series/i.test(note)) return 'lcs';
+	if (/\b[an]lds\b|division series/i.test(note)) return 'divisionseries';
+	// "NLWC - Game 1" is how ESPN writes it in 2026, which the site's pattern
+	// missed: nine of that postseason's first games came out `postseason`.
+	if (/\b[an]lwc\b|wild ?card/i.test(note)) return 'wildcard';
+	return 'postseason';
 }
 
 /** Group events into Retrosheet game numbers: 0 alone, 1 and 2 for a double.

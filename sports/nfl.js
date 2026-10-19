@@ -498,8 +498,14 @@ export function liveGameRow(event, { franchiseOf, knows, codeIn, queryDate = nul
 		status: played ? 'final' : 'scheduled',
 		source: 'espn',
 		week,
+		// nflverse's own word for the round, from the week it already worked
+		// out, so a live row and the authoritative one agree. A label only;
+		// see 0011_game_stage.sql.
+		stage: STAGE_BY_WEEK[week] ?? null,
 	};
 }
+
+const STAGE_BY_WEEK = { 19: 'WC', 20: 'DIV', 21: 'CON', 22: 'SB' };
 
 /** Football has no doubleheaders, so every game is its own.
  *

@@ -17,6 +17,19 @@ export const team = {
 	copy: {
 		seasonNotStarted: 'GO BREW CREW',
 	},
+
+	/** What the front page said as literals on arethebrewersontv.com, and is
+	 *  genuinely this club's (lib/web.js clubConfig). Whether the page asks
+	 *  "On TV?" is not here: it follows from data/clubs/mlb/brewers/ having
+	 *  channel listings, and the park's names over time are curated data in
+	 *  data/clubs/mlb/brewers/park_names.json rather than manifest lines. */
+	site: {
+		emoji: '🍺',
+		hashtag: '#ThisIsMyCrew',
+		/** The clock the TV listings and simulcast dates are kept in. */
+		timeZone: 'America/Chicago',
+		providerExamples: 'Xfinity, Spectrum, TDS',
+	},
 };
 
 export default team;

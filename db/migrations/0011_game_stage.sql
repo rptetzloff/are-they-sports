@@ -1,0 +1,19 @@
+-- Which playoff round a game was, in the source's own word.
+--
+-- `round` answers the two questions every page asks — regular season or not,
+-- championship round or not — and the load threw the rest away. 57 Brewers
+-- postseason games came out of Retrosheet as `divisionseries`, `lcs`,
+-- `wildcard` and went in as `playoff`, all alike.
+--
+-- That stopped being enough when the front page was adopted from the two sites
+-- (2026-10-19, Ray's decision). Their history sparkline marks each season's
+-- deepest round, the on-this-day card names the round, and the schedule labels
+-- it; every one of those reads the word this column keeps.
+--
+-- The source's word, not a vocabulary of ours. Retrosheet writes `wildcard`,
+-- `divisionseries`, `lcs`, `worldseries`; nflverse writes `WC`, `DIV`, `CON`,
+-- `SB`. Each front end already speaks its sport's, and translating both into a
+-- third would be a mapping nothing asked for. NULL where the source has no
+-- round to give — every regular season game, and FiveThirtyEight's football
+-- before 1999, which carries a playoff flag and nothing else.
+ALTER TABLE game ADD COLUMN IF NOT EXISTS stage text;

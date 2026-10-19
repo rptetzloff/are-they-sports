@@ -5,7 +5,9 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
-const DIRS = ['scripts', 'sports', 'teams', 'test']
+// `web/` is the adopted front end, scanned because it is source like any other:
+// a stray control byte there reaches every reader's browser.
+const DIRS = ['scripts', 'sports', 'teams', 'test', 'web']
 
 /** Every source file under a directory, including one level of subdirectory.
  *
@@ -32,7 +34,7 @@ test('the scan is actually looking at the source', () => {
 	for (const d of DIRS) {
 		assert.ok(sources(d).length > 0, `no source files found under ${d}/`)
 	}
-	for (const expected of ['scripts/build.mjs', 'sports/nfl.js', 'teams/nfl/packers.js']) {
+	for (const expected of ['scripts/build.mjs', 'sports/nfl.js', 'teams/nfl/packers.js', 'web/mlb/main.js', 'web/nfl/main.js']) {
 		assert.ok(files.includes(expected), `not scanning ${expected}`)
 	}
 })
