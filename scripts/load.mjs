@@ -19,7 +19,7 @@ import pg from 'pg';
 import { csvRows, parseCsv, splitCsvLine } from '../lib/csv.js';
 import { codeTable } from '../lib/codes.js';
 import { creditFillIns, nflLeaderResolver } from '../lib/leaders.js';
-import { loadHistory, mlbIndex, nflIndex, resolver } from '../lib/names.js';
+import { indexFor, loadHistory, resolver } from '../lib/names.js';
 import { download } from './fetch.mjs';
 import { isoDate } from '../sports/mlb.js';
 import { seedRound } from '../sports/nfl.js';
@@ -38,9 +38,7 @@ const REFERENCE_DIR = join(ROOT, 'data', 'reference');
  *  the Brewers lost 163 games.
  */
 export function franchiseMap(sportId, dir) {
-	const idx = sportId === 'nfl'
-		? nflIndex(loadHistory('nfl', dir))
-		: mlbIndex(loadHistory('mlb', dir));
+	const idx = indexFor(loadHistory(sportId, dir));
 	// Codes come from lib/codes.js, not from the index keys. The index is keyed
 	// by teamAbbrv — our own per-era spelling — and a game arrives labelled with
 	// whatever nflverse called that club, which for five franchises is a
@@ -346,12 +344,12 @@ async function loadChampionships(client, sportId, byCode) {
 				-- The last game of the round by DATE, not by id: a Retrosheet id
 				-- begins with the home club, so ordering by it sorts alphabetically
 				-- and picks whichever club happens to be last in the alphabet.
-				SELECT DISTINCT ON (season) season, id, source
+				SELECT DISTINCT ON (season) season, id, source, title
 				  FROM game
 				 WHERE sport = $1 AND round = 'championship' AND status = 'final'
 				 ORDER BY season, date DESC, id DESC)
 			INSERT INTO championship (sport, season, league, champion, runner_up, method, title, game_id, source)
-			SELECT $1, w.season, upper($1), w.club, l.club, 'championship series', $2, c.id, c.source
+			SELECT $1, w.season, upper($1), w.club, l.club, 'championship series', COALESCE(c.title, $2), c.id, c.source
 			  FROM ranked w
 			  JOIN ranked l ON l.season = w.season AND l.rn = 2
 			  JOIN clincher c ON c.season = w.season
@@ -605,6 +603,10 @@ async function gameLogDir(client, sportId, sport) {
  *  row and no page is wrong because none of those clubs is in any scope.
  */
 async function loadLeaders(client, sportId, sport, { byCode }) {
+	if (!sport.leaderRows) {
+		console.log(`  leaders      none: sports/${sportId}.js has no leaders source yet`);
+		return;
+	}
 	const { rows: existing } = await client.query('SELECT id FROM game WHERE sport = $1', [sportId]);
 	const haveGame = new Set(existing.map((r) => r.id));
 
@@ -889,8 +891,9 @@ async function main() {
 	const { byCode, names } = franchiseMap(sportId);
 
 	await client.query('BEGIN');
+	const adapter = (await import(`../sports/${sportId}.js`)).default;
 	await client.query('INSERT INTO sport VALUES ($1,$2) ON CONFLICT DO NOTHING',
-		[sportId, sportId === 'nfl' ? 'football' : 'baseball']);
+		[sportId, adapter.name]);
 
 	await repairAliasFranchises(client, sportId, codeTable(sportId, loadHistory(sportId)));
 
@@ -1096,6 +1099,58 @@ async function main() {
 		if (skippedType) console.log(`  skipped      ${skippedType} all-star and exhibition games`);
 	}
 
+	if (sportId === 'nba') {
+		// FiveThirtyEight for 1947-2001, then sportsdataverse a season at a time;
+		// see sports/nba.js for the split and for what does not count.
+		//
+		// Both sides must be clubs the franchise table knows. ESPN types the
+		// All-Star weekend's other games and its international exhibitions as
+		// regular season — EAST, WEST, USA, WORLD, a touring club — and the first
+		// load created all seven as franchises and put one or two extra games in
+		// every season from 2014. The live refresh already refuses them the same
+		// way (lib/live.js `knows`).
+		const codes = codeTable('nba', loadHistory('nba'));
+		const notClubs = new Map();
+		const putClub = async (row) => {
+			for (const c of [row.home, row.away]) {
+				if (!codes.knows(c)) { notClubs.set(c, (notClubs.get(c) ?? 0) + 1); return; }
+			}
+			await put(row);
+		};
+		const histPath = join(SOURCE_DIR, 'nba', 'nbaallelo.csv');
+		if (!await ensureSource('nba', histPath, adapter.sources.history, 'FiveThirtyEight nbaallelo')) {
+			await client.query('ROLLBACK');
+			await client.end();
+			return 1;
+		}
+		for await (const r of csvRows(histPath)) {
+			if (Number(r.year_id) >= adapter.sources.history.useBefore) continue;
+			const row = adapter.eloGameRow(r);
+			if (row) await putClub(row);
+		}
+		// Through the season being played. Its file may not be published yet in
+		// October, and that one gap is expected: the live refresh carries it.
+		const last = adapter.sources.live.seasonOf(new Date());
+		for (let season = adapter.sources.schedules.from; season <= last; season++) {
+			const path = join(SOURCE_DIR, 'nba', `nba_schedule_${season}.csv`);
+			const ok = await ensureSource('nba', path, { url: adapter.sources.schedules.url(season) }, `sportsdataverse NBA ${season}`);
+			if (!ok) {
+				if (season === last) { console.log(`  not yet      sportsdataverse NBA ${season}; the live refresh carries it`); continue; }
+				await client.query('ROLLBACK');
+				await client.end();
+				return 1;
+			}
+			for await (const r of csvRows(path)) {
+				const row = adapter.espnGameRow(r);
+				if (row) await putClub(row);
+			}
+		}
+		if (notClubs.size) {
+			const list = [...notClubs].map(([c, n]) => `${c} ${n}`).join(', ');
+			console.log(`  not clubs    ${[...notClubs.values()].reduce((a, b) => a + b, 0)} games skipped: ${list}`);
+		}
+	}
+
 	// Championship games, marked after the fact.
 	//
 	// Neither football source says which playoff game was the title. nflverse
@@ -1164,6 +1219,36 @@ async function main() {
 			marked += r.rowCount;
 		}
 		console.log(`  championships ${marked} title games identified`);
+	}
+
+	if (sportId === 'nba') {
+		await flush();
+		// ESPN names the Finals from 2004 (measured: 2002 and 2003 carry no round);
+		// FiveThirtyEight names no round at all.
+		// So a season with playoff games and no championship round gets one: the
+		// two clubs in its last playoff game, and every playoff game between them
+		// that season. A Finals pair has never met earlier in the same playoffs —
+		// they come from opposite halves of the bracket — which is what makes
+		// "every meeting" the same as "the series".
+		const { rows: seasons } = await client.query(`
+			SELECT DISTINCT ON (season) season, home, away FROM game
+			 WHERE sport = 'nba' AND round = 'playoff'
+			   AND season NOT IN (SELECT season FROM game WHERE sport = 'nba' AND round = 'championship')
+			 ORDER BY season, date DESC, id DESC`);
+		let finals = 0;
+		for (const f of seasons) {
+			const r = await client.query(
+				`UPDATE game SET round = 'championship'
+				  WHERE sport = 'nba' AND season = $1 AND round = 'playoff'
+				    AND ((home = $2 AND away = $3) OR (home = $3 AND away = $2))`,
+				[f.season, f.home, f.away]);
+			finals += r.rowCount;
+		}
+		// Named as each era named it, ESPN's seasons included.
+		await client.query(
+			`UPDATE game SET title = CASE WHEN season <= 1949 THEN 'BAA Finals' ELSE 'NBA Finals' END
+			  WHERE sport = 'nba' AND round = 'championship'`);
+		console.log(`  finals       ${finals} games across ${seasons.length} seasons derived as the last series`);
 	}
 
 	// After the flush above, because game_leader points at game.

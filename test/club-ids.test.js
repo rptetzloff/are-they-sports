@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import * as fs from 'node:fs'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
-import { loadTeams } from '../lib/teams.js'
+import { SPORTS, loadTeams } from '../lib/teams.js'
 import { computeLeague } from '../lib/league.js'
 import { computeSchedule } from '../lib/schedule.js'
 import { loadDivisions, parseScope, resolveScope } from '../lib/scope.js'
@@ -17,7 +17,9 @@ import { codeTables, franchisesForClub } from '../lib/codes.js'
 // another club's name, with no error and every route answering 200.
 
 const TEAMS = await loadTeams()
-const DIVISIONS = { nfl: loadDivisions('nfl'), mlb: loadDivisions('mlb') }
+// Every sport, from the list the server reads. Naming two here is how a third
+// sport's clubs went unresolved in this test and nowhere else.
+const DIVISIONS = Object.fromEntries(SPORTS.map((s) => [s, loadDivisions(s)]))
 
 test('two sports genuinely share club ids', () => {
 	// The premise. If this stops being true the tests below still pass while

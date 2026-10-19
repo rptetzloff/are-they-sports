@@ -1,0 +1,36 @@
+# Current NBA division membership, from ESPN's standings on 2026-10-19 (via
+# data/reference/nba-franchise-history.csv, whose current rows carry it).
+#
+# A SNAPSHOT, NOT A HISTORY, as nfl-divisions.csv explains at length: a division
+# scope means today's clubs, each with its whole history.
+code,conference,division
+BKN,Eastern,Atlantic
+BOS,Eastern,Atlantic
+NYK,Eastern,Atlantic
+PHI,Eastern,Atlantic
+TOR,Eastern,Atlantic
+CHI,Eastern,Central
+CLE,Eastern,Central
+DET,Eastern,Central
+IND,Eastern,Central
+MIL,Eastern,Central
+ATL,Eastern,Southeast
+CHA,Eastern,Southeast
+MIA,Eastern,Southeast
+ORL,Eastern,Southeast
+WAS,Eastern,Southeast
+DEN,Western,Northwest
+MIN,Western,Northwest
+OKC,Western,Northwest
+POR,Western,Northwest
+UTA,Western,Northwest
+GSW,Western,Pacific
+LAC,Western,Pacific
+LAL,Western,Pacific
+PHX,Western,Pacific
+SAC,Western,Pacific
+DAL,Western,Southwest
+HOU,Western,Southwest
+MEM,Western,Southwest
+NOP,Western,Southwest
+SAS,Western,Southwest
