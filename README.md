@@ -1812,6 +1812,9 @@ What the page asks its server for, and where it comes from here:
 | `/calendar.ics` | ESPN and the club's TV listings, for a club with listings |
 | `/api/born/:date` | an empty list; no player data is loaded |
 
+Under a scope with more than one club, the footer gets a Team menu beside
+Share, listing every club with a front page, its own sport first.
+
 A club asks "Are the X on TV?" when `data/clubs/` has its channel and provider
 listings, and "Are the X undefeated?" otherwise. Nothing in the manifest
 declares which, so the two cannot disagree. The manifest's optional `site`

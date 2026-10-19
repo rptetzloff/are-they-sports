@@ -242,6 +242,29 @@ test('the nav keeps the pages that exist and drops the ones that do not yet', ()
 	assert.ok(nfl.includes('href="coaches"') && !nfl.includes('href="splits"'))
 })
 
+test('the team changer lists every club, marks this one, and sits beside Share', () => {
+	const clubs = [
+		{ sport: 'mlb', teamId: 'brewers', name: 'Milwaukee Brewers', href: '/mlb/brewers/' },
+		{ sport: 'nfl', teamId: 'packers', name: 'Green Bay Packers', href: '/nfl/packers/' },
+		{ sport: 'nfl', teamId: 'bears', name: 'Chicago Bears', href: '/nfl/bears/' },
+	]
+	const cfg = clubConfig({ team: team(), current: { espnAbbr: 'GB' } })
+	const html = shell(read('web/nfl/index.html'), { config: cfg, clubs, current: { sport: 'nfl', teamId: 'packers' }, base: '/nfl/packers' })
+	const menu = html.slice(html.indexOf('footer-club-menu'), html.indexOf('</div>', html.indexOf('footer-club-menu')))
+	assert.equal((menu.match(/role="menuitem"/g) ?? []).length, 3)
+	assert.match(menu, /aria-current="page"[^>]*>[^<]*<i[^>]*><\/i> Green Bay Packers/)
+	// This club's sport first, alphabetical within it.
+	assert.ok(menu.indexOf('Football') < menu.indexOf('Baseball'))
+	assert.ok(menu.indexOf('Chicago Bears') < menu.indexOf('Green Bay Packers'))
+	// In the footer, immediately before Share.
+	// (`footer-share-wrap` alone, without `footer-club-wrap`, is the Share menu.)
+	const changer = html.indexOf('footer-club-wrap'), share = html.indexOf('<div class="footer-share-wrap">')
+	assert.ok(html.indexOf('<footer') < changer && changer < share)
+	// One club has nothing to change to.
+	const solo = shell(read('web/nfl/index.html'), { config: cfg, clubs: clubs.slice(1, 2), current: { sport: 'nfl', teamId: 'packers' } })
+	assert.ok(!solo.includes('footer-club'))
+})
+
 test('the front end names no path from the root', () => {
 	// <base> places every path under the club, and a root-absolute one walks
 	// out from under it: /data/games.csv under SCOPE=all is nobody's games.

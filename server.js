@@ -730,6 +730,12 @@ function main() {
 		// Every route this does not answer — /records, /history, /vs among them —
 		// falls through to the server-rendered pages until each is ported.
 		const fronts = new Map();
+		// Every club a front page can change to, for the footer's team changer.
+		// Only clubs that have a front page, so the menu never leads somewhere
+		// that looks different.
+		const frontClubs = table
+			.filter((e) => e.available && clubFor(e) && hasFrontEnd(e.sport))
+			.map((e) => ({ sport: e.sport, teamId: e.teamId, name: clubFor(e).nouns.fullName, href: `${e.base}/` }));
 		const frontFor = (entry) => {
 			if (!entry?.available || !clubFor(entry) || !hasFrontEnd(entry.sport) || !dbHealth.ok) return null;
 			const key = `${entry.sport}/${entry.teamId}`;
@@ -739,6 +745,7 @@ function main() {
 					team: clubFor(entry),
 					franchise: entry.franchise,
 					base: entry.base,
+					clubs: frontClubs,
 					adapter: adapters[entry.sport],
 					namer: namers[entry.sport],
 					history: loadHistory(entry.sport),

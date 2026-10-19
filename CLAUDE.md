@@ -1063,6 +1063,12 @@ in the same change as copying them would have made "exactly like the site"
 impossible to check, so the copy came first and the merge is its own work —
 CSS first, then the shared modules — each measured against both renders.
 
+**A deployment with more than one club gets a team changer in the footer.** It
+is the Share menu's markup and classes beside Share, so it takes each club's
+colours with no rule of its own, and it lists only clubs with a front page,
+so changing never lands on a page that looks different. Ray asked for it to
+match the footer; the sites never needed one, each being one club.
+
 **The club is data, again, and arrives as `window.CLUB`.** The server writes it
 into the shell from the manifest before any module runs, and `site.js` reads it.
 Nothing on the server reads `SITE`. **Reversed:** the first version set
