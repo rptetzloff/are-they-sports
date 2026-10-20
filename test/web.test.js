@@ -268,7 +268,9 @@ test('the team changer lists every club, marks this one, and sits beside Share',
 	assert.equal((menu.match(/role="menuitem"/g) ?? []).length, 3)
 	assert.match(menu, /aria-current="page"[^>]*>[^<]*<i[^>]*><\/i> Green Bay Packers/)
 	// This club's sport first, alphabetical within it.
-	assert.ok(menu.indexOf('Football') < menu.indexOf('Baseball'))
+	// Headed by league (Ray, 2026-10-20), this club's first.
+	assert.ok(menu.indexOf('</i> NFL</summary>') > 0)
+	assert.ok(menu.indexOf('</i> NFL</summary>') < menu.indexOf('</i> MLB</summary>'))
 	assert.ok(menu.indexOf('Chicago Bears') < menu.indexOf('Green Bay Packers'))
 	// In the footer, immediately before Share.
 	// (`footer-share-wrap` alone, without `footer-club-wrap`, is the Share menu.)
