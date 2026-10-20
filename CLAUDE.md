@@ -1123,7 +1123,10 @@ CSS first, then the shared modules — each measured against both renders.
 is the Share menu's markup and classes beside Share, so it takes each club's
 colours with no rule of its own, and it lists only clubs with a front page,
 so changing never lands on a page that looks different. Ray asked for it to
-match the footer; the sites never needed one, each being one club.
+match the footer; the sites never needed one, each being one club. Each sport
+is a `<details>`: on a desktop all are open, their clubs in as many columns as
+fit; on a phone only this club's sport is open and the menu spans the screen,
+because centred on its button, as Share is, it ran off the right edge.
 
 **The club is data, again, and arrives as `window.CLUB`.** The server writes it
 into the shell from the manifest before any module runs, and `site.js` reads it.
@@ -1186,11 +1189,23 @@ which is why none of them is visible as a fault:
   the leaders page to this repo's server-rendered pages, which do not look like
   the sites yet. Each comes back as it is ported.
 
-**Licence obligations outrank exactness.** The data credit is always shown,
-where the sites showed it only on past seasons, because the season being played
-draws on the same history. The disclaimer gives Retrosheet's current notice, not
-the postal address the baseball site still carried, and does not call this
-repository MIT-licensed, because it has no licence file.
+**The data credit lives in the Disclaimer, on every sport's page.** It was first
+made always visible in the main column, on the reasoning that the season being
+played draws on the same history. **Reversed by Ray, 2026-10-19:** out of the
+main column, into the Disclaimer modal — which is where the baseball site had
+already put Retrosheet's notice. The shell carries the credit as a
+`<template id="data-credit">` and `license-modal.js` reads it, so the modal's
+data section is lib/credits.js's and cannot disagree with it. One modal file,
+copied into all three front ends and held identical by a test; football's
+merged site had none, so it gained one. It gives Retrosheet's current notice,
+not the postal address the baseball site still carried, names each sport's own
+league (the first basketball copy said Major League Baseball and credited
+Retrosheet), and does not call this repository MIT-licensed, because it has no
+licence file.
+
+Moving the credit somewhere it is read made a credit bug visible: Wikipedia was
+credited by every deployment, so a baseball page credited it for "NFL head
+coaches before 1999". A curated source now names the sports it serves.
 
 ## Commits and branches
 

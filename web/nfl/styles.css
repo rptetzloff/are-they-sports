@@ -3226,3 +3226,87 @@ th.sorted-desc::after {
 .stats-table tbody th a {
     color: inherit;
 }
+
+/* The disclaimer modal (license-modal.js), from the baseball site's stylesheet:
+   football's merged site had none. --raised-a stands in for baseball's
+   --raised-e, which this stylesheet does not define. */
+.license-link {
+    background: none;
+    border: none;
+    font-family: inherit;
+    cursor: pointer;
+}
+
+.license-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0.75);
+}
+
+.license-overlay[hidden] {
+    display: none;
+}
+
+.license-modal {
+    position: relative;
+    max-width: 34rem;
+    max-height: 85vh;
+    overflow-y: auto;
+    padding: 1.5rem 1.75rem;
+    border-radius: 12px;
+    border: 1px solid rgb(var(--accent-rgb) / 0.35);
+    background: var(--raised-a);
+    text-align: left;
+    font-size: 0.88rem;
+    color: rgb(var(--fg-rgb) / 0.8);
+    line-height: 1.5;
+}
+
+.license-modal h2 {
+    margin: 0 0 0.75rem;
+    font-size: 1.1rem;
+    color: var(--accent-text);
+}
+
+.license-modal h3 {
+    margin: 1rem 0 0.3rem;
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: rgb(var(--accent-text-rgb) / 0.85);
+}
+
+.license-modal p {
+    margin: 0.35rem 0;
+}
+
+.license-modal a {
+    color: var(--accent-text);
+}
+
+.license-close {
+    position: absolute;
+    top: 0.7rem;
+    right: 0.7rem;
+    width: 1.8rem;
+    height: 1.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: 1px solid rgb(var(--fg-rgb) / 0.2);
+    background: none;
+    color: rgb(var(--fg-rgb) / 0.6);
+    cursor: pointer;
+}
+
+.license-close:hover {
+    color: var(--fg);
+    border-color: rgb(var(--fg-rgb) / 0.4);
+}
+
