@@ -1,15 +1,27 @@
-// Adds a "Disclaimer" link to the footer nav on every page and injects the
-// modal it opens: the channel-listings disclaimer, the required Retrosheet
-// notice, and ESPN usage.
+// Adds a "Disclaimer" link to the footer nav and injects the modal it opens:
+// who the site is not affiliated with, where its data comes from — the sources
+// and the notices they require — and how to ask for a correction.
 //
-// In are-they-sports the club comes from window.CLUB (lib/web.js), and three
-// claims changed rather than being copied: Retrosheet's notice is the current
-// one (the site still gave a postal address their terms no longer carry); the
-// channel section appears only for a club with listings; and the code is not
-// called MIT-licensed, because this repo carries no licence file.
+// The baseball site's modal, made one for every sport. The same file is copied
+// into web/mlb, web/nfl and web/nba, and test/web.test.js holds the copies
+// identical, so there is one disclaimer to keep right rather than three.
+//
+// The data section is the server's: lib/credits.js says what each sport's
+// sources ask for (Retrosheet's notice in full, CC BY's licence links and the
+// statement that the data was reshaped), and the shell carries it in a
+// <template id="data-credit">. Ray, 2026-10-19: the credit lives here, not in
+// the page's main column. The baseball site's own modal already carried
+// Retrosheet's notice the same way.
+//
+// Changed from that modal rather than copied: the club and league come from
+// window.CLUB; the channel section appears only for a club with TV listings;
+// Retrosheet's notice is the current one (the site's gave a postal address
+// their terms no longer carry); and the code is not called MIT-licensed,
+// because this repository has no licence file.
 (() => {
 	const CLUB = window.CLUB ?? { fullName: 'this club', site: {} };
 	const REPO = 'https://github.com/rptetzloff/are-they-sports';
+	const league = CLUB.site.leagueName || 'the league';
 	function init() {
 		const nav = document.querySelector('.footer-nav');
 		if (!nav) return;
@@ -20,6 +32,9 @@
 		link.innerHTML = '<i class="mdi mdi-license"></i><span class="footer-nav-label">Disclaimer</span>';
 		nav.insertBefore(link, nav.querySelector('.footer-github'));
 
+		const credit = document.getElementById('data-credit');
+		const data = credit ? credit.innerHTML.trim() : '';
+
 		const overlay = document.createElement('div');
 		overlay.className = 'license-overlay';
 		overlay.hidden = true;
@@ -29,23 +44,18 @@
 				<h2><i class="mdi mdi-license"></i> Data &amp; Licenses</h2>
 				<p>This is an independent fan site. Unless otherwise noted, it is not
 				affiliated with, sponsored by, or endorsed by the ${CLUB.fullName},
-				Major League Baseball, any data provider, or any TV service provider
-				named on this site. All team names, logos, and trademarks belong to
-				their respective owners.</p>
+				${league}, ${CLUB.site.tv ? 'any data provider, or any TV service provider named on this site' : 'or any data provider'}.
+				All team names, logos, and trademarks belong to their respective owners.</p>
 				${CLUB.site.tv ? `<h3>Channel information</h3>
 				<p>Channel information is based on publicly available channel listings.
 				Please check your local channel guide for the most accurate broadcast
 				information.</p>` : ''}
-				<h3>Retrosheet</h3>
-				<p>The information used here was obtained free of charge from and is copyrighted
-				by Retrosheet. Interested parties may contact Retrosheet at
-				"www.retrosheet.org".</p>
-				<p>All historical game data (${CLUB.site.firstSeason}–present) comes from
-				<a href="https://www.retrosheet.org" target="_blank" rel="noopener noreferrer">retrosheet.org</a>.</p>
+				${data ? `<h3>Data</h3>
+				<div class="license-data">${data}</div>` : ''}
 				<h3>ESPN</h3>
 				<p>Live schedule, score, standings, and broadcast information for the current
 				season is retrieved from ESPN's publicly available API. This site is not
-				affiliated with, sponsored by, or endorsed by ESPN or Major League Baseball.</p>
+				affiliated with, sponsored by, or endorsed by ESPN or ${league}.</p>
 				<h3>Site</h3>
 				<p>The site's code is on
 				<a href="${REPO}" target="_blank" rel="noopener noreferrer">GitHub</a>.

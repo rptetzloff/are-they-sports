@@ -229,7 +229,10 @@ test('the shell carries the club, its question and its base', () => {
 	// A single-club scope is the root.
 	assert.ok(shell(read('web/mlb/index.html'), { config: cfg }).includes('<base href="/">'))
 	assert.ok(!html.includes('AreTheBrewersOnTV'))
-	assert.ok(html.includes('<div id="data-credit" class="data-credit"><p class="notice">credit</p></div>'))
+	// The credit goes to the Disclaimer modal (Ray, 2026-10-19): out of the main
+	// column, into a template the modal reads.
+	assert.ok(!html.includes('<div id="data-credit"'), 'the credit is still in the main column')
+	assert.ok(html.includes('<template id="data-credit"><p class="notice">credit</p></template>'))
 	assert.ok(!html.includes('Sunset Rd'), 'the outdated Retrosheet address survived')
 })
 
@@ -252,7 +255,13 @@ test('the team changer lists every club, marks this one, and sits beside Share',
 	]
 	const cfg = clubConfig({ team: team(), current: { espnAbbr: 'GB' } })
 	const html = shell(read('web/nfl/index.html'), { config: cfg, clubs, current: { sport: 'nfl', teamId: 'packers' }, base: '/nfl/packers' })
-	const menu = html.slice(html.indexOf('footer-club-menu'), html.indexOf('</div>', html.indexOf('footer-club-menu')))
+	const menu = html.slice(html.indexOf('footer-club-menu'), html.indexOf('<style>', html.indexOf('footer-club-menu')))
+	// A group per sport, this club's open; a phone opens only that one, and a
+	// desktop all of them (the toggle's script).
+	assert.equal((menu.match(/<details class="footer-club-group"/g) ?? []).length, 2)
+	assert.match(menu, /<details class="footer-club-group" data-sport="nfl" data-current open>/)
+	assert.match(menu, /<details class="footer-club-group" data-sport="mlb">/)
+	assert.match(html, /grid-template-columns: repeat\(auto-fill/)
 	assert.equal((menu.match(/role="menuitem"/g) ?? []).length, 3)
 	assert.match(menu, /aria-current="page"[^>]*>[^<]*<i[^>]*><\/i> Green Bay Packers/)
 	// This club's sport first, alphabetical within it.
@@ -283,6 +292,16 @@ test('no game link is built while there is no game page', () => {
 		})
 	}
 	assert.deepEqual(unguarded, [])
+})
+
+test('one disclaimer for every sport, naming that sport\'s league', () => {
+	const copies = ['mlb', 'nfl', 'nba'].map((s) => read(`web/${s}/license-modal.js`))
+	assert.equal(new Set(copies).size, 1, 'the three disclaimer copies have drifted')
+	for (const s of ['mlb', 'nfl', 'nba']) assert.match(read(`web/${s}/index.html`), /<script src="license-modal\.js" defer><\/script>/, `${s} does not load it`)
+	const league = (sport) => clubConfig({ team: team({ sport }), current: { espnAbbr: 'X' } }).site.leagueName
+	assert.deepEqual(['mlb', 'nfl', 'nba'].map(league), ['Major League Baseball', 'the National Football League', 'the National Basketball Association'])
+	// Nothing sport-specific is written into the modal itself.
+	assert.doesNotMatch(copies[0], /Retrosheet at|Major League Baseball|Brewers/)
 })
 
 test('the front end names no path from the root', () => {

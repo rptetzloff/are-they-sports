@@ -13,6 +13,7 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 const adapters = await loadSports()
 const nfl = adapters.nfl
 const mlb = adapters.mlb
+const nba = adapters.nba
 
 // ---------------------------------------------------------------------------
 // What a deployment owes
@@ -53,12 +54,21 @@ test('a source both sports use is credited once', () => {
 	assert.equal(names.filter((n) => n === 'ESPN').length, 1)
 })
 
-test('the curated files are credited whatever the scope', () => {
+test('a curated file is credited by the sports that use it', () => {
 	// The third tier is the easiest to forget: nothing fetches it and no adapter
-	// declares it, so it is credited by every deployment rather than by a sport.
-	for (const list of [[nfl], [mlb], [nfl, mlb], []]) {
-		const names = creditsFor(list).map((c) => c.name)
-		for (const r of REFERENCE_CREDITS) assert.ok(names.includes(r.name), `${r.name} missing`)
+	// declares it.
+	//
+	// REVERSED. This said every curated credit belongs to every deployment, and
+	// so a baseball page credited Wikipedia for "NFL head coaches before 1999".
+	// A credit with per-sport notes is owed by the sports it names, with their
+	// notes; one without (the colours) by every deployment.
+	const wiki = (list) => creditsFor(list).find((c) => c.name === 'Wikipedia')
+	assert.equal(wiki([mlb]), undefined, 'a baseball-only site credits Wikipedia')
+	assert.match(wiki([nfl]).note, /NFL head coaches/)
+	assert.doesNotMatch(wiki([nfl]).note, /defunct/)
+	assert.match(wiki([nfl, nba]).note, /NFL head coaches.*defunct BAA/)
+	for (const list of [[nfl], [mlb], [nba], [nfl, mlb], []]) {
+		assert.ok(creditsFor(list).some((c) => c.name === 'teamcolorcodes.com'), 'the colours credit is missing')
 	}
 })
 
