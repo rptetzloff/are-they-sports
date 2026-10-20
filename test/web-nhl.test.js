@@ -79,8 +79,11 @@ test('the gameinfo row carries how a game ended, and a sport can name its rounds
 	// An unplayed game has no ending yet.
 	assert.equal(gameinfoRow({ ...g, status: 'scheduled', ending: null }).ending, '')
 	const [header, line] = gameinfoCsv([g]).trim().split('\n')
-	assert.equal(header.split(',').at(-1), 'ending')
-	assert.equal(line.split(',').at(-1), 'OT')
+	// By name: the page reads columns by name, and soccer's shootout columns
+	// came after this one.
+	const at = header.split(',').indexOf('ending')
+	assert.ok(at > 0)
+	assert.equal(line.split(',')[at], 'OT')
 })
 
 test('ESPN\'s round notes and the page\'s own round names land on the same codes', () => {

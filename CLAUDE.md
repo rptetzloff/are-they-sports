@@ -614,9 +614,40 @@ Added on 2026-10-20, data first. What the adapter decides:
 - **Counted, not asserted**: 30 MLS Cups, each right, six of them on penalties;
   every regular season clubs times games, halved.
 
-Gaps: no coaches; no front page until `web/mls` exists. The server's league
-standings rank by winning percentage, which is not how MLS (points) or the NHL
-ranks; that is a server page's, and was already true of hockey.
+**The front page** (`web/mls`) is hockey's, made MLS's. What it took:
+
+- **ESPN's soccer is served differently**, so the server asks for it and
+  answers the page's usual question (`lib/espn-soccer.js`): a club's schedule
+  is its results plus a second request for fixtures (`fixture=true`, with the
+  broadcasts); its playoff games are in no club's schedule, only on the
+  scoreboard, their round in the season's slug; finished games are
+  STATUS_FULL_TIME, not STATUS_FINAL. Read as they came, every game was
+  unfinished and the record 0-0-0. A club's schedule is asked by ESPN's
+  numeric id, which each manifest carries (`site.espnSlug`).
+- **A record is W-L-T** from 2000 and W-L before; seasons rank by points
+  percentage, three a win. A shootout shows as "W 1-1 (4-2 pens)".
+- **Rounds are numbered back from MLS Cup** by the load (`numberSeriesRounds`):
+  every series but the Final has a winner who goes on to exactly one more, so a
+  series is one round further out than that. MLS has named its rounds a dozen
+  ways since 1996, and counting forward by dates split 2023's Round One across
+  two rounds whenever a wild card's winner began after other Round One series.
+  The page names them W MLS Cup, L Conference Final, D Conference Semifinal,
+  F Round One, X Wild Card (`lib/web.js` mlsGametype).
+- **A finished series was won if the club went on**, not by its wins: MLS's
+  two-legged series (2003-2014) were aggregate goals, and the 2005 MetroStars
+  won a leg and went out.
+- **Names**: a club's whole name with no city, and MLS's short name on schedule
+  rows ("Salt Lake"). The baseball parser this came from skipped every row
+  without a city. And a calendar-year league's eras run January to December
+  (`currentNamesCsv`): counted October to September, as basketball's are, the
+  MetroStars' 2005 playoffs were the Red Bulls' and Detroit's 2009 WNBA
+  playoffs were Tulsa's.
+- **The race is for ninth** in the club's conference, in points; the standings
+  lead with the conference, tagged PO (1-7) and WC (8-9).
+
+Gaps: no coaches. The server's league standings rank by winning percentage,
+which is not how MLS (points) or the NHL ranks; that is a server page's, and was
+already true of hockey.
 
 ## A club is a sport and an id, never an id
 

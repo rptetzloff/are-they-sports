@@ -9,6 +9,9 @@ export const team = {
 		team: 'Nashville SC',
 		fullName: 'Nashville SC',
 	},
+
+	/** ESPN's id for the club, which its soccer schedules are asked by. */
+	site: { espnSlug: '18986' },
 };
 
 export default team;

@@ -9,6 +9,9 @@ export const team = {
 		team: 'Union',
 		fullName: 'Philadelphia Union',
 	},
+
+	/** ESPN's id for the club, which its soccer schedules are asked by. */
+	site: { espnSlug: '10739' },
 };
 
 export default team;

@@ -9,6 +9,9 @@ export const team = {
 		team: 'Atlanta United',
 		fullName: 'Atlanta United',
 	},
+
+	/** ESPN's id for the club, which its soccer schedules are asked by. */
+	site: { espnSlug: '18418' },
 };
 
 export default team;

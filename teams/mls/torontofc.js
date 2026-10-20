@@ -9,6 +9,9 @@ export const team = {
 		team: 'Toronto FC',
 		fullName: 'Toronto FC',
 	},
+
+	/** ESPN's id for the club, which its soccer schedules are asked by. */
+	site: { espnSlug: '7318' },
 };
 
 export default team;

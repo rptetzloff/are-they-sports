@@ -9,6 +9,9 @@ export const team = {
 		team: 'Timbers',
 		fullName: 'Portland Timbers',
 	},
+
+	/** ESPN's id for the club, which its soccer schedules are asked by. */
+	site: { espnSlug: '9723' },
 };
 
 export default team;

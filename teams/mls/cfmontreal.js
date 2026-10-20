@@ -9,6 +9,9 @@ export const team = {
 		team: 'CF Montréal',
 		fullName: 'CF Montréal',
 	},
+
+	/** ESPN's id for the club, which its soccer schedules are asked by. */
+	site: { espnSlug: '9720' },
 };
 
 export default team;

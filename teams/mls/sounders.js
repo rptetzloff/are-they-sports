@@ -9,6 +9,9 @@ export const team = {
 		team: 'Sounders',
 		fullName: 'Seattle Sounders FC',
 	},
+
+	/** ESPN's id for the club, which its soccer schedules are asked by. */
+	site: { espnSlug: '9726' },
 };
 
 export default team;
