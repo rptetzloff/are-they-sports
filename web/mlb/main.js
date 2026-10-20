@@ -432,7 +432,10 @@ h2hNote(franchiseOrName) {
   if (!o) return null;
   const note = document.createElement('a');
   note.className = 'game-h2h';
-  note.href = `vs.html?vs=${o.slug}`;
+  // The head-to-head page by name; the server sends a name to its code's
+  // address (server.js, the opponent route). The site's `vs.html?vs=` form
+  // has no route here.
+  note.href = `vs/${o.slug}`;
   note.textContent = `All-time: ${o.record}`;
   note.title = `${SITE.team} vs ${o.name} — all-time head-to-head`;
   return note;

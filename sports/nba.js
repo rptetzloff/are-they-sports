@@ -89,6 +89,14 @@ export const credits = [
 /** ESPN's type abbreviations that are not games between two clubs that count. */
 const NOT_COUNTED = new Set(['ALLSTAR', 'CC']);
 
+/** ESPN's words for the four playoff rounds. Anything else on a playoff game
+ *  is not a round: 2002 and 2003 call every playoff game STD, ESPN's word for
+ *  an ordinary game, and stored as a stage it filed 159 playoff games as
+ *  regular season on the page. Those get no stage, and the page files them by
+ *  `round` instead. */
+const ROUNDS = new Set(['RD16', 'QTR', 'SEMI', 'FINAL']);
+const stageOf = (abbr) => (ROUNDS.has(abbr) ? abbr : null);
+
 /** One sportsdataverse row as a game row, or null for a game that does not count.
  *
  *  `stage` is ESPN's round word — RD16, QTR, SEMI, FINAL — as 0011 keeps every
@@ -111,7 +119,7 @@ export function espnGameRow(r) {
 		// The local date. `date` is UTC, and a night game is already tomorrow there.
 		date: r.game_date,
 		round: !playoff ? 'regular' : r.type_abbreviation === 'FINAL' ? 'championship' : 'playoff',
-		stage: playoff ? (r.type_abbreviation || null) : null,
+		stage: playoff ? stageOf(r.type_abbreviation) : null,
 		home: r.home_abbreviation,
 		away: r.away_abbreviation,
 		homeScore: played ? Number(r.home_score) : null,
@@ -170,7 +178,7 @@ export function liveGameRow(event, { franchiseOf, knows, queryDate = null }) {
 		: String(event.date).slice(0, 10);
 	const played = comp.status?.type?.completed === true;
 	const playoff = type === 3;
-	const stage = playoff ? (comp.type?.abbreviation ?? null) : null;
+	const stage = playoff ? stageOf(comp.type?.abbreviation) : null;
 	return {
 		id: String(event.id),
 		season: Number(event.season?.year ?? date.slice(0, 4)),

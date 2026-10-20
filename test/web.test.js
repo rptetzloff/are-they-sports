@@ -46,6 +46,8 @@ const BRAND = {
 	mlb: ['#12284b', '#1a3558', '#1a3a6b', '#1a3660', '#16305a', '#16294a', '#0d1d38', '#ffc52f', '#ffd45e', '#e0a820', '#8a5d00', '#f3f5f9', '#eef2f8', '#e9eef6'],
 	nfl: ['#203731', '#152a1e', '#1a2e28', '#ffb612', '#ffd050', '#8a5d00', '#f4f6f2', '#e8eee9'],
 }
+// Basketball's stylesheet is baseball's, so its brand colours are the Brewers'.
+BRAND.nba = BRAND.mlb
 
 test('another club loses every brand colour and keeps every other one', () => {
 	const cubs = { base: '#0e3386', accent: '#cc3433' }
@@ -308,9 +310,11 @@ test('the front end names no club', () => {
 	// Per sport, because a code is only a club in its own sport: 'GB' in the
 	// baseball standings is Games Behind. And by name rather than city, because
 	// the league-wide name table rightly says Milwaukee Braves.
-	const CODES = { mlb: 'MIL|SE1|mil', nfl: 'GB|gb' }
+	// Basketball's page is the baseball site's, so its leftovers would be the
+	// Brewers' codes.
+	const CODES = { mlb: 'MIL|SE1|mil', nfl: 'GB|gb', nba: 'MIL|SE1|mil' }
 	const literal = (sport) => new RegExp(`(['"\`])(?:${CODES[sport]})\\1|teams/(?:mil|gb)/|#ThisIsMyCrew|#GoPackGo|['"\`][^'"\`\\n]*\\b(?:Brewers|Packers|Green Bay)\\b`, 'g')
-	const files = [...walk('web/mlb').map((f) => [f, 'mlb']), ...walk('web/nfl').map((f) => [f, 'nfl']),
+	const files = [...walk('web/mlb').map((f) => [f, 'mlb']), ...walk('web/nfl').map((f) => [f, 'nfl']), ...walk('web/nba').map((f) => [f, 'nba']),
 		['lib/calendar.js', 'mlb'], ['lib/espn-box.js', 'nfl']]
 	assert.ok(files.length >= 20, `only scanned ${files.length} files`)
 	for (const [f, sport] of files) {

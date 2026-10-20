@@ -27,6 +27,13 @@ test('the Finals are the championship round, and every playoff game keeps its ro
 		['playoff/RD16', 'playoff/QTR', 'playoff/SEMI', 'championship/FINAL'])
 })
 
+test('a playoff game with no round named has no stage, rather than ESPN\'s word for an ordinary game', () => {
+	// 2002 and 2003: ESPN types every playoff game STD. Stored as a stage, the
+	// front page filed 159 of them as regular season.
+	const r = espnGameRow(espn({ season_type: '3', type_abbreviation: 'STD' }))
+	assert.deepEqual([r.round, r.stage], ['playoff', null])
+})
+
 test('the play-in, the All-Star game, the Cup final and a postponement do not count', () => {
 	// As the NBA counts them: the play-in is neither season, and the Cup final
 	// is the one Cup game outside the standings.
