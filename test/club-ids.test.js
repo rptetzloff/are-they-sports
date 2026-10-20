@@ -27,7 +27,10 @@ test('two sports genuinely share club ids', () => {
 	const counts = new Map()
 	for (const t of TEAMS) counts.set(t.id, (counts.get(t.id) ?? 0) + 1)
 	const shared = [...counts].filter(([, n]) => n > 1).map(([id]) => id).sort()
-	assert.deepEqual(shared, ['cardinals', 'giants'])
+	// The two the tests below use must be shared. More may be: hockey added
+	// jets, kings, panthers and rangers, which is the premise holding, not
+	// breaking — this pinned the exact pair until then.
+	for (const id of ['cardinals', 'giants']) assert.ok(shared.includes(id), `${id} is no longer shared`)
 })
 
 test('every club is unique on sport and id together', () => {

@@ -468,10 +468,43 @@ How the history index is chosen changed with it: by the table's shape (a
 fourth sport needs no branch there.
 
 **Gaps, named.** No coaches: the leaders page renders "no one on record" for an
-NBA club until a source is chosen. No front page: an NBA club gets the
-server-rendered pages until `web/nba` exists, and the footer's team changer
-lists only clubs that have one. And the season label: 2026-27 reads "2027",
-which every source writes and no fan says.
+NBA club until a source is chosen. (Two gaps this listed are closed: `web/nba`
+is the front page, and its seasons read "2026-2027", Ray's wording; the
+server-rendered pages still say "2027".)
+
+### Hockey, the fourth sport
+
+Added on 2026-10-19, data first. What the adapter decides:
+
+- **One source, the league's own.** The NHL's stats API lists a season in one
+  request, every season back to 1917-18, and its schedule API scores the season
+  being played with the same game ids — so live and authoritative rows are one
+  row, which basketball got from ESPN and hockey gets from the NHL. Ray approved
+  using it, with the NHL credited. sportsdataverse's NHL files are a copy of it
+  and are not used.
+- **The round is in the game id**, YYYY03RRSG, round in two digits — read as one
+  digit first, which made every round 0 until a Cup Final game said otherwise.
+  The season's last round is the Stanley Cup Final.
+- **How a game ended is a column**, `ending` (0014): REG, OT or SO, from the
+  period count. A hockey record counts overtime losses, and two scores cannot
+  say whether a 3-2 game went to a shootout.
+- **The Cup Finals of 1918 to 1926** were against the western leagues'
+  champions. The stats API's team list does not carry those six clubs; they are
+  named from the NHL's own game records and loaded, so 1925 is the Victoria
+  Cougars' Cup, as it was, and not the Canadiens' league title.
+- **Unplayed playoff games are not stored.** Finished seasons keep the "if
+  necessary" games their series never needed — 17 in 2024, 23 in 2026.
+- **The franchise table uses the NHL's codes.** The prepared table reused WPG
+  for both Winnipeg Jets and DET for the Cougars and Falcons, and a code naming
+  two clubs merges their histories. It also chains the original Jets through
+  Phoenix and Arizona to Utah; the NHL files those Jets under today's Jets and
+  counts Utah as new. This follows the prepared table, and says so in the file.
+- **Counted, not asserted**: 107 champions for 109 seasons (1919's Final was
+  abandoned, 2005's season was cancelled), each sampled one right; 1,312
+  regular-season games with 32 clubs, 720 in 2013, 868 in 2021; ties until 2004,
+  shootouts from 2006.
+
+Gaps: no coaches, as for basketball, and no front page until `web/nhl` exists.
 
 ## A club is a sport and an id, never an id
 
@@ -499,8 +532,8 @@ and most produced a plausible wrong answer rather than an error.
 
 The rule: **anything that identifies a club carries the sport with it.** A bare
 code, a bare id or a bare franchise is a bug waiting for a second sport, and
-there are three more sports of data sitting in `data/sources/sportsdata`,
-basketball having been the fourth.
+there are two more sports of data sitting in `data/sources/sportsdata`,
+basketball and hockey having been the third and fourth.
 
 Where a function cannot carry it, it refuses: `computeLeague` and
 `computeSchedule` throw on clubs from two sports rather than producing something
