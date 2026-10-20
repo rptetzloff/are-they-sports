@@ -3310,3 +3310,32 @@ th.sorted-desc::after {
     border-color: rgb(var(--fg-rgb) / 0.4);
 }
 
+
+
+/* --- The history page's season table (are-they-sports) ---
+   The baseball site's, so every sport's history page carries the same table.
+   Sorting is this sheet's own (.sortable, .sorted-asc). */
+
+.history-section-title {
+    text-align: center;
+    margin: 1.5rem 0 0.75rem;
+    font-size: 1.25rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.season-table {
+    font-variant-numeric: tabular-nums;
+}
+
+.season-table tbody tr {
+    cursor: pointer;
+}
+
+.season-table .pos {
+    color: var(--win-light, #9BD7A3);
+}
+
+.season-table .neg {
+    color: var(--loss-light, #FF6B6B);
+}

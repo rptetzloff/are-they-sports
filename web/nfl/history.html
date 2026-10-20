@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Franchise History</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css">
+    <!-- The saved theme, applied before the page paints (theme.js). -->
+    <script>try{var t=localStorage.getItem('theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container records-container">
+        <a href="./" class="records-back"><i class="mdi mdi-arrow-left"></i> Home</a>
+        <h1 class="records-title">Franchise History</h1>
+        <p id="history-subtitle" class="records-subtitle"></p>
+        <div class="history-controls">
+            <div id="history-metrics" class="history-toggle" role="group" aria-label="Chart metrics (choose any)">
+                <button data-metric="winPct" class="history-toggle-btn">Win %</button>
+                <button data-metric="wins" class="history-toggle-btn">Wins</button>
+                <button data-metric="pf" class="history-toggle-btn">Points For</button>
+                <button data-metric="pa" class="history-toggle-btn">Points Against</button>
+            </div>
+            <label class="h2h-check"><input type="checkbox" id="history-playoffs"> Include playoffs</label>
+        </div>
+        <div id="history-chart" class="history-chart">
+            <div class="loading">Loading history...</div>
+        </div>
+        <div id="history-tooltip" class="history-tooltip" hidden></div>
+        <p class="history-legend">
+            <span class="history-legend-item"><span class="legend-dot legend-champ"></span> Championship season</span>
+            <span class="history-legend-item"><span class="legend-dot legend-perfect"></span> Undefeated season</span>
+            <span class="history-legend-item">Click any season to open it</span>
+        </p>
+        <h2 class="history-section-title">Season-by-Season Records</h2>
+        <div id="history-table-wrap" class="h2h-table-wrap">
+            <div class="loading">Loading history...</div>
+        </div>
+    </div>
+
+    <footer class="site-footer">
+        <nav class="footer-nav" aria-label="Site">
+            <a href="./" class="footer-nav-link"><i class="mdi mdi-home-outline"></i><span class="footer-nav-label">Home</span></a>
+            <a href="records.html" class="footer-nav-link"><i class="mdi mdi-trophy-outline"></i><span class="footer-nav-label">Records</span></a>
+            <a href="stadiums" class="footer-nav-link"><i class="mdi mdi-stadium"></i><span class="footer-nav-label">Stadiums</span></a>
+            <a href="splits" class="footer-nav-link"><i class="mdi mdi-call-split"></i><span class="footer-nav-label">Splits</span></a>
+            <a href="stats" class="footer-nav-link"><i class="mdi mdi-table-large"></i><span class="footer-nav-label">Stats</span></a>
+            <a href="vs.html" class="footer-nav-link"><i class="mdi mdi-sword-cross"></i><span class="footer-nav-label footer-label-full">Head-to-Head</span><span class="footer-nav-label footer-label-short">H2H</span></a>
+            <a href="history.html" class="footer-nav-link" aria-current="page"><i class="mdi mdi-chart-line"></i><span class="footer-nav-label">History</span></a>
+            <a href="coaches.html" class="footer-nav-link"><i class="mdi mdi-whistle-outline"></i><span class="footer-nav-label">Coaches</span></a>
+            <div class="footer-share-wrap">
+                <button id="footer-share-trigger" class="footer-nav-link footer-share-trigger" type="button" aria-haspopup="true" aria-expanded="false">
+                    <i class="mdi mdi-share-variant"></i><span class="footer-nav-label">Share</span> <i class="mdi mdi-chevron-down footer-share-caret"></i>
+                </button>
+                <div class="footer-share" id="footer-share" role="menu" hidden></div>
+            </div>
+            <a href="https://github.com/rptetzloff/AreThePackersUndefeated" target="_blank" rel="noopener noreferrer" class="footer-nav-link footer-github"><i class="mdi mdi-github"></i><span class="footer-nav-label">GitHub</span></a>
+        </nav>
+    </footer>
+
+    <script src="history.js" type="module"></script>
+    <script src="theme.js" defer></script>
+    <script src="license-modal.js" defer></script>
+</body>
+</html>

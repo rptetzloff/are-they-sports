@@ -4,7 +4,7 @@ import { readFileSync, existsSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { shell, clubConfig } from '../lib/web.js'
-import { navFor, leadersCsv, managersCsv, biofileCsv, createFront } from '../lib/web-routes.js'
+import { navFor, leadersCsv, managersCsv, biofileCsv, coachesJson, createFront } from '../lib/web-routes.js'
 import { loadSports, loadTeams } from '../lib/teams.js'
 import { loadHistory, resolver } from '../lib/names.js'
 // The page's parsers, which read the club's ids when they load: the club is
@@ -106,7 +106,7 @@ test('the coaches link waits for coaches; the other pages stay', () => {
 
 // --- the routes -------------------------------------------------------------
 
-async function front(sport, id, leaders = []) {
+async function front(sport, id, leaders = [], tenures = []) {
 	const teams = await loadTeams()
 	const team = teams.find((t) => t.sport === sport && t.id === id)
 	const adapters = await loadSports()
@@ -114,7 +114,7 @@ async function front(sport, id, leaders = []) {
 	const f = await createFront({
 		team, franchise: team.franchise ?? team.sourceIds?.[0], adapter: adapters[sport], namer: resolver(sport),
 		history: loadHistory(sport), currentCodes: new Set(), palette: null, base: `/${sport}/${id}`,
-		store: { rawGamesFor: async () => [], standingsTitles: async () => [], finalRounds: async () => new Map(), leaderGames: async () => leaders },
+		store: { rawGamesFor: async () => [], standingsTitles: async () => [], finalRounds: async () => new Map(), leaderGames: async () => leaders, leaderTenures: async () => tenures },
 		creditHtml: '', origin: () => 'http://x',
 	})
 	const get = async (path) => {
@@ -154,4 +154,58 @@ test('the leaders files come from game_leader, and say nobody when there is nobo
 	assert.equal((await none('/data/leaders.csv')).body, 'gid,team,mgr\n')
 	assert.match((await none('/data/biofile0.csv')).body, /^id,lastname,usename,fullname,birthdate/)
 	assert.match((await none('/coaches')).body, /<title>Wild Coaches<\/title>/)
+})
+
+// --- football ----------------------------------------------------------------
+// The same pages for the NFL (Ray, 2026-10-20: the two sites were examples of
+// one format), from the Packers site's, with the season table the others have.
+
+test('football\'s pages carry its own footer, its share menu and the season table', () => {
+	for (const [page, href] of [['history', 'history.html'], ['records', 'records.html'], ['vs', 'vs.html'], ['leaders', 'coaches.html']]) {
+		const html = read(`web/nfl/${page}.html`)
+		assert.equal((html.match(/aria-current="page"/g) ?? []).length, 1, page)
+		assert.match(html, new RegExp(`<a href="${href}" class="footer-nav-link" aria-current="page">`), page)
+		assert.ok(html.includes('<div class="footer-share" id="footer-share" role="menu" hidden></div>'), `${page} share`)
+		assert.ok(html.includes(`<script src="${page}.js" type="module">`), `${page} script`)
+	}
+	assert.ok(read('web/nfl/history.html').includes('id="history-table-wrap"'))
+	assert.ok(!read('web/nfl/leaders.html').includes('lightbox'), 'the photo viewer came without photos')
+})
+
+const coach = (leader, name, gameId, season, date, result = 'WIN') => ({ leader, name, franchise: 'GB', gameId, season, date, result, round: null, title: null })
+
+test('a coach is one row, and each spell in charge its own band', () => {
+	const tenures = [
+		{ leader: 'mclean', name: 'Ray McLean', franchise: 'GB', firstSeason: 1953, lastSeason: 1953, w: 0, l: 1, t: 0, playoffW: 0, playoffL: 0, titleSeasons: [], interim: false },
+		{ leader: 'black', name: 'Lisle Blackbourn', franchise: 'GB', firstSeason: 1954, lastSeason: 1957, w: 17, l: 31, t: 0, playoffW: 0, playoffL: 0, titleSeasons: [], interim: false },
+		{ leader: 'mclean', name: 'Ray McLean', franchise: 'GB', firstSeason: 1958, lastSeason: 1958, w: 1, l: 10, t: 1, playoffW: 0, playoffL: 0, titleSeasons: [], interim: false },
+	]
+	const games = [
+		coach('mcc', 'Mike McCarthy', 'g1', 2018, '2018-09-09'),
+		coach('phil', 'Joe Philbin', 'g2', 2018, '2018-12-09', 'LOSS'),
+		coach('laf', 'Matt LaFleur', 'g3', 2019, '2019-09-05'),
+	]
+	const { coaches, eras } = coachesJson(games, tenures)
+	assert.deepEqual(coaches.map((c) => [c.label, c.name]), [['1', 'Ray McLean'], ['2', 'Lisle Blackbourn'], ['3', 'Mike McCarthy'], ['3.1', 'Joe Philbin'], ['4', 'Matt LaFleur']])
+	assert.equal(coaches[0].w, 1)
+	assert.equal(coaches[0].seasons, undefined, 'a Set does not survive JSON')
+	assert.deepEqual(eras.map((e) => `${e.name} ${e.from}-${e.to}`),
+		['Ray McLean 1953-1953', 'Lisle Blackbourn 1954-1957', 'Ray McLean 1958-1958', 'Mike McCarthy 2018-2018', 'Matt LaFleur 2019-2019'])
+})
+
+test('football\'s pages are served where the server-rendered ones were', async () => {
+	const tenures = [{ leader: 'lamb', name: 'Curly Lambeau', franchise: 'GB', firstSeason: 1921, lastSeason: 1949, w: 209, l: 104, t: 21, playoffW: 3, playoffL: 2, titleSeasons: [], interim: false }]
+	const get = await front('nfl', 'packers', [], tenures)
+	for (const [path, title, card] of [['/history', 'Packers History', 'history'], ['/records/win-streaks', 'Packers Records', 'records'],
+		['/vs/chicago-bears', 'Packers Head-to-Head', 'vs'], ['/coaches', 'Packers Coaches', 'coaches']]) {
+		const r = await get(path)
+		assert.equal(r.handled, true, path)
+		assert.ok(r.body.includes(`<title>${title}</title>`), `${path}: ${r.body.match(/<title>[^<]*/)}`)
+		assert.deepEqual(r.meta, { card }, path)
+	}
+	assert.equal((await get('/coaches?format=json')).handled, false)
+	assert.equal((await get('/managers')).handled, false)
+	const json = JSON.parse((await get('/data/coaches.json')).body)
+	assert.deepEqual(json.coaches.map((c) => [c.name, c.w]), [['Curly Lambeau', 209]])
+	assert.deepEqual(json.eras.map((e) => [e.from, e.to]), [[1921, 1949]])
 })
