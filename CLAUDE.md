@@ -1,28 +1,21 @@
 # House rules
 
-21 rules, so they get applied rather than rediscovered. Short on purpose.
+22 rules, so they get applied rather than rediscovered. Short on purpose.
 
-(It said twelve, then sixteen. Twelve was the count in the two sites this file
-came from and was already wrong here before the scope rule was added; sixteen was
-wrong by two the day it was written, because nobody said what a rule WAS. A
-number in a heading is a claim like any other, and this one went stale exactly
-the way this file says claims do: nothing failed, nothing rendered wrong, and it
-stayed wrong until somebody counted.
+This is the shared repo the two sites' files were written for.
+`AreTheBrewersOnTV` and `AreThePackersUndefeated` each carry a near-identical
+copy of the first thirteen rules below, and say that "when a shared repo exists,
+everything above it becomes that repo's file unchanged." So those thirteen are
+their text, word for word, and a rule fixed in one place should be fixed in all
+three for as long as the sites run. Where this repo has learned more under a
+shared rule, it follows under **In this repo**. The rules after the thirteen are
+this repo's own, and the closing section is this repo's, as each site's is its
+own.
 
-Third time, so it stops being prose. **A rule is a `##` heading in this file**,
-and `test/source-hygiene.test.js` fails when the number here disagrees with the
-count. That is the rule below about invariants applied to this document: if a
-claim is worth writing down, write the test that fails when it stops being
-true.)
-
-This is that shared repo. `AreThePackersUndefeated` and `AreTheBrewersOnTV`
-each carry a near-identical copy of this file — 208 of 221 lines the same — from
-when they were two codebases that had forked and drifted. The rules were the
-part that should never have diverged, so they arrive here unchanged, with the
-examples they were learned from.
-
-The two sites still run. Until they stop, a rule fixed here should be fixed
-there, and the drift this file exists to prevent applies to this file.
+The count is checked: **a rule is a `##` heading in this file**, and
+`test/source-hygiene.test.js` fails when the number here disagrees with it. (The
+sites say "Twelve rules" and have thirteen. A number in a heading is a claim
+like any other, and this file's own count went stale twice before the test.)
 
 ## Measure, don't assert
 
@@ -40,6 +33,11 @@ That is cheap enough to be the default now: start the server on a spare port,
 `chrome --headless --screenshot --window-size=1400,1600`, and look at the image.
 Do it before and after, so the pair is evidence rather than hope.
 
+Corollary: a test that reads the source proves the source, not the behaviour.
+Keep both, and know which one you just wrote.
+
+### In this repo
+
 **That command lies below about 500px.** The window has a minimum width on
 Windows, so `--window-size=390,900` lays the page out wider than 390 and crops
 the image to 390 — which draws a clipped heading and a cut-off column on a page
@@ -48,9 +46,6 @@ and `Emulation.setDeviceMetricsOverride` instead, which also lets the page be
 asked `document.documentElement.scrollWidth` and, better, which element is over.
 Node ships a WebSocket client, so that costs no dependency. A phone-width list
 of four broken pages produced this way was wrong about two of them.
-
-Corollary: a test that reads the source proves the source, not the behaviour.
-Keep both, and know which one you just wrote.
 
 ## Don't jump to conclusions
 
@@ -71,6 +66,12 @@ cadence, which is refreshed by hand and whose workflow only validates.
 So: **if a claim is checkable in one command, run the command before saying the
 thing.** When it is not checkable, say which kind of claim it is.
 
+Never pipe a command whose exit code matters. `set -o pipefail`, or do not pipe.
+That rule was already written down in a sibling repo and then broken here in the
+same week, by piping a test run through `tail` and reading the pipe's status.
+
+### In this repo
+
 **And when it is not checkable from here, ASK — do not caveat and ship.** Added
 after the data credit, at the reviewer's request: "I mean, you can ask
 questions." Retrosheet's required attribution notice was reproduced from memory,
@@ -84,10 +85,6 @@ Creative Commons.
 A disclaimer moves the work to the reader without giving anyone the chance to
 answer cheaply. Asking took one message. Reading the two LICENSE files took two
 fetches. Both were available the entire time the caveat was being written.
-
-Never pipe a command whose exit code matters. `set -o pipefail`, or do not pipe.
-That rule was already written down in a sibling repo and then broken here in the
-same week, by piping a test run through `tail` and reading the pipe's status.
 
 ## Comments explain why, never what
 
@@ -107,11 +104,16 @@ question a reader would otherwise have gone and checked.
 ## Reversals stay visible
 
 When a decision is overturned, mark the old one and say what changed. Do not
-quietly edit it away. This repo already carries two: the MLB adapter's comment
+quietly edit it away. `ROADMAP.md` keeps its measured numbers and annotates the
+ones that have since moved rather than correcting them in place — a document
+that only ever agreed with itself is not evidence of anything.
+
+### In this repo
+
+This repo carries two: the MLB adapter's comment
 records the stateful-detection argument it made up before reading the file, and
 `scripts/franchises.mjs` records that its first draft emitted "Arizona Cardinals,
-1921" when they were the Chicago Cardinals. A document that only ever agreed with
-itself is not evidence of anything.
+1921" when they were the Chicago Cardinals.
 
 ## State the limit of the claim
 
@@ -137,6 +139,20 @@ while every past season rendered a 0-0 record and a schedule of 0-0 ties,
 because its `main.js` fetches its own CSV in the browser and `lib/seasons.js`
 reads the file at import and calls ESPN. Neither is reachable from `node --test`.
 Know which files your suite cannot see, and say so out loud.
+
+Two layers, on purpose. Unit tests build their own rows and pin exact numbers.
+Tests against the real data assert relations and floors — ordered, distinct, at
+least this many — and never snapshots, because the data is refreshed and a
+snapshot fails for reasons that are not defects.
+
+**An invariant claimed in a commit message is not an invariant.** The rename that
+introduced neutral row keys announced that "one function owns the CSV's own
+names." That was false as written: fourteen consumers still read
+`g['Packers Win']` and `g.packers_score`, each silently yielding `undefined`
+rather than throwing. If a property is worth asserting in prose, write the test
+that fails when it stops being true.
+
+### In this repo
 
 This repo now has 656, over the pure parts — `splitCsvLine`, `renderNdjson`, both
 `gameRow`s, `seedGameRow`, `isoDate`, `isScoringPlay`, `scoringRow`, `collapse`,
@@ -197,30 +213,166 @@ an `mlb` franchise without creating the `mlb` sport. CI runs empty and a
 developer runs loaded, so each of them is blind to exactly one of these. A test
 resting on state it did not create is the same defect either way.
 
-Two layers, on purpose. Unit tests build their own rows and pin exact numbers.
-Tests against the real data assert relations and floors — ordered, distinct, at
-least this many — and never snapshots, because the data is refreshed and a
-snapshot fails for reasons that are not defects.
-
-**An invariant claimed in a commit message is not an invariant.** The rename that
-introduced neutral row keys announced that "one function owns the CSV's own
-names." That was false as written: fourteen consumers still read
-`g['Packers Win']` and `g.packers_score`, each silently yielding `undefined`
-rather than throwing. If a property is worth asserting in prose, write the test
-that fails when it stops being true.
-
 ## Derived data stays derived
 
 If it can be rebuilt from sources, rebuild it; never store it and hand-edit.
-Committed is fine — see the tiers below — but a committed artifact is output,
-and editing one makes the next build silently disagree with it.
+Committed is fine — generated and committed is the normal case on both sites.
+The baseball site's `data/indices/` is written by `scripts/build-indices.mjs`,
+and CI re-derives it and compares digests, so a hand-refresh of the Retrosheet
+files cannot leave stale artifacts behind. The football site's
+`data/packers_games.csv` is written by `update-data.js` from the upstream feeds
+and never edited by hand, which is what lets its columns be renamed at all.
 
-Round-tripping is where derivations break, and the break is quiet. The baseball
-site once tagged only the top level of its indices; three of thirteen are Maps
-of Maps, so the server booted cleanly, logged success, served every page, and
-threw on every box score. Four of thirteen had been spot-checked. Diffing
-artifact output against source output is what found it — check every one, or
-check none and say which you did.
+Round-tripping is where derivations break, and the break is quiet. Three of the
+thirteen indices are Maps of Maps, and an early version tagged only the top
+level. The server booted cleanly, logged success, served every page, and threw
+`gameFirstPa?.get is not a function` on every box score. Four of the thirteen had
+been spot-checked. Diffing artifact output against CSV output is what found it —
+check every one, or check none and say which you did.
+
+### In this repo
+
+A committed artifact is output, and editing one makes the next build silently
+disagree with it. Which files are which is "The data has three tiers" below.
+
+## The vocabulary lives in `site.js`, and substitution is not translation
+
+`site.js` is the manifest: the nouns, the rules, the record list, the team ids,
+and whole-sentence copy overrides. Code reads it rather than naming a team.
+
+The trap is assuming one site's sentence becomes the other's by swapping a word:
+
+- `meetingPlural` exists because "clash" plus "s" is "clashs".
+- `scoreForLabel` exists because "Points For" and "Runs Scored" are not one
+  phrase with a different noun — the verb changes too.
+- `losslessSeasonNoun` exists because in football *perfect* means no losses and
+  no ties. 1929 went 12–0–1. It was undefeated; it was not perfect.
+
+Where the two sites genuinely disagree, declare it and test the declaration
+against the behaviour. `streaksSpanSeasons` is the live example: streaks end at
+the season boundary here and span seasons on the football site, whose longest
+run — 15 games — crossed from December 2010 into December 2011. Merging those
+two implementations without noticing would silently rewrite one record book.
+
+A flag that exists must be honoured. `SITE.records` is the list deciding which
+cards appear, and `records.js` ignored it and iterated a hardcoded array instead,
+so publishing a slug did nothing at all.
+
+## Colour and theme
+
+Colour belongs in CSS custom properties. Neither stylesheet has any: there are
+**282 hardcoded hex literals** across the two repos, and four brand values are
+the only real difference between the palettes — the status colours are already
+identical. Extracting them is roadmap work. Until then, do not add a literal
+where a neighbouring rule already names the same colour.
+
+### In this repo
+
+Measured before porting: the brand values are the only real difference between
+their palettes, and the status colours had independently converged — a win is
+`#4caf50` on both. So `colors` is team vocabulary and lives in the manifest,
+while `--win` and `--loss` live in the renderer. `lib/render.js` writes `:root`
+once, and a test asserts that **no colour literal appears anywhere after that
+block**, which is the check that would have caught the sites.
+
+## Dependencies default to none
+
+Both sites run on Node's standard library and `node --test`. A new runtime
+dependency needs a reason in the PR.
+
+The lockfile is part of that. The football site's `package-lock.json` locked
+`vite` and nothing else, while `package.json` had declared `@resvg/resvg-js` and
+`opentype.js` all along. Render's `npm install` resolved them fresh, so nothing
+broke and nothing was pinned either. After any install, confirm the lockfile
+actually contains what the manifest declares.
+
+### In this repo
+
+**Client-side JavaScript: a decision made when sortable tables were built, not
+a rule this project already had.**
+
+The measured fact is that there was none — zero script tags, zero handlers, and
+the standings modal is a CSS `:target` on an anchor. What did NOT exist was any
+statement that this was intended. Sortable tables were then built as header
+links with a `?sort=` parameter, and the change described that as "the design"
+and wrote this paragraph as though the repo had long since rejected browser
+JavaScript. It had not. An absence was read as a principle, the principle was
+attributed to the project, and it arrived here in the same commit that invented
+it.
+
+That is the failure at the top of this file — a plausible reading stated as
+established — committed into the file that exists to prevent it, which is worse
+than making it in code. **A rule enters this document when somebody decides it,
+and the entry says who and when.** Inferring one from what the codebase happens
+not to contain is how a habit becomes a constraint nobody chose.
+
+It has since been tested twice and held both times. Sortable tables are header
+links; share buttons are six plain links in a `<details>`, because sharing to a
+platform genuinely IS a link. The two things a script would have bought —
+copy-to-clipboard and the native share sheet — are named in lib/share.js as what
+the no-script version gives up, which is the shape this rule should take: not
+"never a script", but "say what it costs when there is not one".
+
+The decision itself stands, on its own reasoning rather than on precedent:
+rendering that happens in the browser is not reachable from `node --test`, which
+is how 118 tests passed while every past season rendered a 0-0 record. Sorting
+on the server costs a round trip per click and buys an order that is a pure
+function of the request, assertable by a test, and working with scripts off. It
+is a default worth keeping and worth arguing with, not a law — and the next
+feature that genuinely needs a script should say so and add one.
+
+**Reversed for the front page, 2026-10-19, by Ray.** The bar became "look
+exactly like the two sites", and he chose to get there by serving their own
+front end rather than re-rendering it here. So every club's front page is now
+the sites' client-side code, scripts and all. What that costs is
+the argument above, and it is paid knowingly: `node --test` cannot see what
+that page renders, so side-by-side renders against the running sites are its
+evidence, and the tests cover the server half — the files it is fed, the
+club it is told about, the colours it is given. The rest of this repo's pages
+keep the default until each is ported. See "The front page is the sites' own".
+
+This repo now has exactly two. `pg`, because reads happen against Postgres at
+request time and Node ships no Postgres client; and `@resvg/resvg-js`, because
+the social cards are pictures and nothing in the standard library draws one.
+
+The second was measured before it was taken, and cost less than this file
+feared: the Dockerfile had already moved to `node:24-slim` in anticipation, so
+the Alpine/musl problem was paid for months ago. What is left is 5MB of
+node_modules, a 4.2MB native binary and 810KB of committed fonts — 354MB to
+366MB on the image.
+
+The fonts are the part worth remembering. `loadSystemFonts` finds nothing on
+that image and reports success: the same SVG renders 492 bytes without fonts and
+3,968 with, and the 492 is the background with the text silently dropped.
+Installing a font package does not fix it, because discovery is what is broken.
+So fonts are passed explicitly, committed, and the test asserts the DIFFERENCE
+between the two renders rather than that a PNG came back — which is the
+assertion a naive test makes and the one that passes on a blank card. `node:sqlite` *is* built in and
+was measured as the alternative — every NFL game ever is 18,506 rows and 2.91MB
+— but a file-per-container means a poller per container, all fetching the same
+live data, which defeats one codebase serving many deployments.
+
+## Docs are part of the change, not a follow-up
+
+Every PR updates the documents the change made wrong: `ROADMAP.md`, this file,
+and the module headers describing the thing being changed. A claim written when
+it was true does not announce that it stopped being true — no test fails, no
+build breaks, no page renders wrong.
+
+`ROADMAP.md` covers both repositories, because most of what is left is about the
+two converging. It lives in the football repo because that is where the work
+started, and it moves if a shared repo appears.
+
+### In this repo
+
+Here the documents are `README.md`, this file, and the header comments that
+describe the thing being changed. There is no `ROADMAP.md` in this repo; what is
+left to do is in the parity sections below.
+
+The header comments in `scripts/` and `sports/` carry the measured numbers and
+the reasoning. They are the documentation, and they go stale the same way prose
+does — the "stateful scoring detection" comment was wrong for exactly as long as
+the code under it was.
 
 ## The sport is an adapter, the team is a manifest, and neither is code
 
@@ -563,105 +715,6 @@ Two things generalise:
 - **Derive where there are games; say nothing where there are not.** Football
   before 1999 gets no mark and the page says why, with the year read from the
   rows rather than written into the code.
-
-## Colour and theme
-
-Colour belongs in CSS custom properties, never a literal in a component. The two
-sites carry **282 hardcoded hex literals between them and not one variable**.
-
-Measured before porting: the brand values are the only real difference between
-their palettes, and the status colours had independently converged — a win is
-`#4caf50` on both. So `colors` is team vocabulary and lives in the manifest,
-while `--win` and `--loss` live in the renderer. `lib/render.js` writes `:root`
-once, and a test asserts that **no colour literal appears anywhere after that
-block**, which is the check that would have caught the sites.
-
-## Dependencies default to none
-
-Both sites run on Node's standard library and `node --test`. A new runtime
-dependency needs a reason in the PR.
-
-**Client-side JavaScript: a decision made when sortable tables were built, not
-a rule this project already had.**
-
-The measured fact is that there was none — zero script tags, zero handlers, and
-the standings modal is a CSS `:target` on an anchor. What did NOT exist was any
-statement that this was intended. Sortable tables were then built as header
-links with a `?sort=` parameter, and the change described that as "the design"
-and wrote this paragraph as though the repo had long since rejected browser
-JavaScript. It had not. An absence was read as a principle, the principle was
-attributed to the project, and it arrived here in the same commit that invented
-it.
-
-That is the failure at the top of this file — a plausible reading stated as
-established — committed into the file that exists to prevent it, which is worse
-than making it in code. **A rule enters this document when somebody decides it,
-and the entry says who and when.** Inferring one from what the codebase happens
-not to contain is how a habit becomes a constraint nobody chose.
-
-It has since been tested twice and held both times. Sortable tables are header
-links; share buttons are six plain links in a `<details>`, because sharing to a
-platform genuinely IS a link. The two things a script would have bought —
-copy-to-clipboard and the native share sheet — are named in lib/share.js as what
-the no-script version gives up, which is the shape this rule should take: not
-"never a script", but "say what it costs when there is not one".
-
-The decision itself stands, on its own reasoning rather than on precedent:
-rendering that happens in the browser is not reachable from `node --test`, which
-is how 118 tests passed while every past season rendered a 0-0 record. Sorting
-on the server costs a round trip per click and buys an order that is a pure
-function of the request, assertable by a test, and working with scripts off. It
-is a default worth keeping and worth arguing with, not a law — and the next
-feature that genuinely needs a script should say so and add one.
-
-**Reversed for the front page, 2026-10-19, by Ray.** The bar became "look
-exactly like the two sites", and he chose to get there by serving their own
-front end rather than re-rendering it here. So every club's front page is now
-the sites' client-side code, scripts and all. What that costs is
-the argument above, and it is paid knowingly: `node --test` cannot see what
-that page renders, so side-by-side renders against the running sites are its
-evidence, and the tests cover the server half — the files it is fed, the
-club it is told about, the colours it is given. The rest of this repo's pages
-keep the default until each is ported. See "The front page is the sites' own".
-
-This repo now has exactly two. `pg`, because reads happen against Postgres at
-request time and Node ships no Postgres client; and `@resvg/resvg-js`, because
-the social cards are pictures and nothing in the standard library draws one.
-
-The second was measured before it was taken, and cost less than this file
-feared: the Dockerfile had already moved to `node:24-slim` in anticipation, so
-the Alpine/musl problem was paid for months ago. What is left is 5MB of
-node_modules, a 4.2MB native binary and 810KB of committed fonts — 354MB to
-366MB on the image.
-
-The fonts are the part worth remembering. `loadSystemFonts` finds nothing on
-that image and reports success: the same SVG renders 492 bytes without fonts and
-3,968 with, and the 492 is the background with the text silently dropped.
-Installing a font package does not fix it, because discovery is what is broken.
-So fonts are passed explicitly, committed, and the test asserts the DIFFERENCE
-between the two renders rather than that a PNG came back — which is the
-assertion a naive test makes and the one that passes on a blank card. `node:sqlite` *is* built in and
-was measured as the alternative — every NFL game ever is 18,506 rows and 2.91MB
-— but a file-per-container means a poller per container, all fetching the same
-live data, which defeats one codebase serving many deployments.
-
-The lockfile is part of that. The football site's `package-lock.json` locked
-`vite` and nothing else, while `package.json` had declared `@resvg/resvg-js` and
-`opentype.js` all along. Render's `npm install` resolved them fresh, so nothing
-broke and nothing was pinned either. After any install, confirm the lockfile
-actually contains what the manifest declares.
-
-## Docs are part of the change, not a follow-up
-
-Every change updates the documents it made wrong: `README.md`, this file, and the
-header comments that describe the thing being changed. A claim written when it
-was true does not announce that it stopped being true — no test fails, no build
-breaks, no page renders wrong.
-
-The header comments in `scripts/` and `sports/` carry the measured numbers and
-the reasoning. They are the documentation, and they go stale the same way prose
-does — the "stateful scoring detection" comment was wrong for exactly as long as
-the code under it was.
 
 ## `main` means feature parity, and nothing less
 
@@ -1226,6 +1279,16 @@ squashed one, and the two looked like unrelated work. The residue was 220 commit
 that `main` carried and `dev` did not, so every release PR afterwards computed
 its diff against a base missing most of `main`'s history.
 
+**Branch from `dev`, not from another work branch.** A stacked PR was merged 21
+seconds after its own base, before GitHub retargeted it, and landed on the wrong
+branch.
+
+**Back-merge `main` into `dev` after each release.** Every release leaves `main`
+one merge commit that `dev` never sees, and that is what accumulated into the
+220. The merge is a no-op on the tree and takes one command.
+
+### In this repo
+
 **Check whether the PR is already merged before committing to its branch.**
 Three times now, a work branch has been merged and a commit made afterwards has
 pushed cleanly to it. Nothing fails: the push succeeds, CI runs green, and the
@@ -1243,42 +1306,40 @@ turns that on in a fresh checkout. It fails open when `gh` is missing or
 offline, because a guard that blocks work when the network is down gets
 disabled within a day. So it is a backstop, not the rule.
 
-**Branch from `dev`, not from another work branch.** A stacked PR was merged 21
-seconds after its own base, before GitHub retargeted it, and landed on the wrong
-branch.
-
-**Back-merge `main` into `dev` after each release.** Every release leaves `main`
-one merge commit that `dev` never sees, and that is what accumulated into the
-220. The merge is a no-op on the tree and takes one command.
-
 ## Files
 
-Extract when a file stops being readable, not at a line count.
+Extract when a file stops being readable, not at a line count. Known exception:
+`main.js` is far past that on both sites and should be reduced by extraction
+rather than a rewrite. It is also the file least covered by tests, which is not
+a coincidence.
 
-The two sites are the cautionary tale: `main.js` is 1,355 lines there and 3,004
-there, both the least-tested file in their repo, and both of this year's
-production bugs came out of them. Nothing here is close to that yet, which is
-the point at which it is cheap to keep it that way.
+### In this repo
 
+The two sites are the cautionary tale: `main.js` is 1,479 lines on the football
+site and 3,100 on the baseball one, both the least-tested file in their repo,
+and both of this year's production bugs came out of them. Since 2026-10-19 both
+are here as well — `web/nfl/main.js`, `web/mlb/main.js` and basketball's copy of
+the baseball one — adopted whole so the pages match the sites. Reducing them is
+the convergence work "The front page is the sites' own" describes, not a reason
+to have avoided adopting them.
 
 ---
 
-*This repo: `scripts/fetch.mjs` pulls sources, `scripts/build.mjs` derives
-artifacts, both sports are verified against the sites they came from — 1,534 of
-1,534 football games and 9,067 of 9,067 baseball games, matching on result and
-score — and `server.js` renders a club page and a selector under a configured
-scope, with `?format=json` on every route. `npm test` covers all of it in
-isolation, mutation-tested. What is missing is name resolution, the records and
-head-to-head views, and the social-card renderer.*
+*This repo: three sports from four sources — Retrosheet for baseball,
+nflverse and FiveThirtyEight for football, sportsdataverse and FiveThirtyEight
+for basketball — loaded into Postgres by `npm run load <sport>`, with ESPN
+keeping the season being played current from inside the server. The front page
+is each site's own (`web/mlb`, `web/nfl`, and `web/nba` adapted from the
+baseball one), served for every club at its own root; every other page is
+server-rendered. Where the sports disagree — whether streaks span seasons, how
+wide "on this day" is, what a season is called — the adapter declares it. Each
+sport the sites cover is verified against them: 9,067 of 9,067 baseball games
+and 1,540 of 1,540 football games agree on what the pages read (five neutral-site
+flags differ, the two sources disagreeing). The one deployment is
+testing.arethepackersundefeated.com, `SCOPE=all`.*
 
-*Branching is work branch → `dev` → `main`, the same as the two sites, from
-before there is anything deployed to protect. The earlier version of this
-paragraph said `main` only was fine until then; the reason to start now is that
-every serious git problem those repos had came from branch discipline, and the
-habit is cheaper to start than to retrofit. `main` is a known-good state even
-when nothing reads it.*
-
-*Everything the sites' rule says applies here: merge commits and never squash,
-branch from `dev` rather than another work branch, delete work branches on
-merge, never delete `dev` or `main`, and back-merge `main` into `dev` after each
-release so the next diff is clean.*
+*An earlier version of this section said the records and head-to-head views, name
+resolution and the social cards were missing; all four have been built since.
+Branching is work branch → `dev` → `main`, as on the two sites, and was started
+before anything was deployed: every serious git problem those repos had came
+from branch discipline, and the habit is cheaper to start than to retrofit.*
