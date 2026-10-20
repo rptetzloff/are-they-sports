@@ -10,7 +10,16 @@
 #                       every NHL game. The prepared table reused codes — WPG
 #                       for both Winnipeg Jets, DET for the Cougars and Falcons
 #                       — and a code naming two clubs merges their histories.
-#   espnAbbrv           on a current row, from ESPN's team list (LA, NJ, SJ, TB).
+#   franchiseAbbrv      the NHL's franchise (its team list's franchiseId), named
+#                       by the code of the franchise's latest era. The prepared
+#                       table chains the original Winnipeg Jets through Phoenix
+#                       and Arizona to Utah; the NHL files those Jets under
+#                       today's Jets (WPG), keeps the Coyotes as a franchise of
+#                       their own (ARI, inactive since 2024) and counts Utah as
+#                       new in 2025 (UTA). Ray chose the NHL's grouping on
+#                       2026-10-19. An era the NHL names differently (Chicago's
+#                       Black Hawks) keeps the prepared table's franchise.
+#   espnAbbrv          on a current row, from ESPN's team list (LA, NJ, SJ, TB).
 #   conference, division  the current row only, from ESPN's standings, as of
 #                       2026-10-19. A snapshot; see nhl-divisions.csv.
 #   the western clubs   the Cup Finals of 1918-1926 were against: named from the
@@ -18,16 +27,14 @@
 #   the defunct clubs   named and grouped as the NHL's stats API names and groups
 #                       them, with seasons computed from their games. No colours.
 #
-# Two deliberate departures. The prepared table's WHA rows are left out: no WHA
-# game is loaded, and one reused a current club's code. And the prepared table
-# chains the original Winnipeg Jets through Phoenix and Arizona to Utah as one
-# franchise, where the NHL files those Jets under today's Jets and counts Utah as
-# new; this follows the prepared table, and the NHL's grouping is the source's
-# claim, not the fact (CLAUDE.md, "A flag in a source file").
+# Left out: the prepared table's WHA rows. No WHA game is loaded, and one reused
+# a current club's code.
 franchiseAbbrv,teamAbbrv,espnAbbrv,league,conference,division,city,teamName,alternateName,startSeason,endSeason,locationCity,locationState,colorA,colorB,colorC,colorD,colorE
 ANA,ANA,,NHL,,,Anaheim,Mighty Ducks,Mighty Ducks of Anaheim,1994,2006,Anaheim,CA,#472A6B,#00685E,#C4CED4,#FFFFFF,
 ANA,ANA,,NHL,,,Anaheim,Ducks,,2007,2024,Anaheim,CA,#010101,#89734C,#FC4C02,,
 ANA,ANA,ANA,NHL,Western,Pacific,Anaheim,Ducks,,2025,,Anaheim,CA,#FF4C00,#000000,#89734C,#FFFFFF,
+ARI,PHX,,NHL,,,Phoenix,Coyotes,,1997,2014,Glendale,AZ,#8C2633,#E2D6B5,#154734,#5F259F,
+ARI,ARI,,NHL,,,Arizona,Coyotes,,2015,2024,Glendale,AZ,#8C2633,#E2D6B5,#111111,,
 BOS,BOS,,NHL,,,Boston,Bruins,,1925,1934,Boston,MA,#4E3629,#FFB81C,#FFFFFF,,
 BOS,BOS,BOS,NHL,Eastern,Atlantic,Boston,Bruins,,1935,,Boston,MA,#000000,#FFB81C,#FFFFFF,,
 BRK,NYA,,NHL,,,New York,Americans,,1926,1941,New York,,,,,,
@@ -102,9 +109,6 @@ TBL,TBL,TB,NHL,Eastern,Atlantic,Tampa Bay,Lightning,Bolts,1993,,Tampa,FL,#002868
 TOR,TAN,,NHL,,,Toronto,Arenas,,1918,1919,Toronto,ON,#00205B,#FFFFFF,,,
 TOR,TSP,,NHL,,,Toronto,St. Patricks,St. Pats,1920,1927,Toronto,ON,#046A38,#FFFFFF,,,
 TOR,TOR,TOR,NHL,Eastern,Atlantic,Toronto,Maple Leafs,Leafs,1928,,Toronto,ON,#00205B,#FFFFFF,,,
-UTA,WIN,,NHL,,,Winnipeg,Jets,,1980,1996,Winnipeg,MB,#0033A0,#C8102E,#FFFFFF,,
-UTA,PHX,,NHL,,,Phoenix,Coyotes,,1997,2014,Glendale,AZ,#8C2633,#E2D6B5,#154734,#5F259F,
-UTA,ARI,,NHL,,,Arizona,Coyotes,,2015,2024,Glendale,AZ,#8C2633,#E2D6B5,#111111,,
 UTA,UTA,,NHL,,,Utah,Hockey Club,,2025,2025,Salt Lake City,UT,#6CACE4,#010101,#FFFFFF,,
 UTA,UTA,UTAH,NHL,Western,Central,Utah,Mammoth,,2026,,Salt Lake City,UT,#6CACE4,#010101,#FFFFFF,,
 VAN,VAN,,NHL,,,Vancouver,Canucks,,1971,1978,Vancouver,BC,#0033A0,#046A38,#FFFFFF,,
@@ -115,6 +119,7 @@ VGK,VGK,VGK,NHL,Western,Pacific,Vegas,Golden Knights,Knights,2018,,Las Vegas,NV,
 VIC,VIC,,,,,Victoria,Cougars,,1925,1926,Victoria,,,,,,
 VMA,VMA,,,,,Vancouver,Maroons,,1923,1924,Vancouver,,,,,,
 VMI,VMI,,,,,Vancouver,Millionaires,,1918,1922,Vancouver,,,,,,
+WPG,WIN,,NHL,,,Winnipeg,Jets,,1980,1996,Winnipeg,MB,#0033A0,#C8102E,#FFFFFF,,
 WPG,ATL,,NHL,,,Atlanta,Thrashers,,2000,2011,Atlanta,GA,#041E42,#82C0E9,#FFB81C,#AC162C,
 WPG,WPG,WPG,NHL,Western,Central,Winnipeg,Jets,,2012,,Winnipeg,MB,#041E42,#004C97,#AC162C,#7B303E,
 WSH,WSH,,NHL,,,Washington,Capitals,Caps,1975,1995,Landover,MD,#C8102E,#0033A0,#FFFFFF,,

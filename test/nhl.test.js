@@ -75,7 +75,9 @@ const history = loadHistory('nhl')
 const table = codeTable('nhl', history)
 
 test('every era\'s NHL code reaches the right franchise, and no code names two', () => {
-	const cases = { WIN: 'UTA', PHX: 'UTA', ARI: 'UTA', WPG: 'WPG', ATL: 'WPG', DCG: 'DET', DFL: 'DET', TAN: 'TOR', TSP: 'TOR',
+	// The NHL's grouping (Ray, 2026-10-19): the first Jets are today's Jets'
+	// history, the Coyotes a franchise of their own, Utah new in 2025.
+	const cases = { WIN: 'WPG', PHX: 'ARI', ARI: 'ARI', UTA: 'UTA', WPG: 'WPG', ATL: 'WPG', DCG: 'DET', DFL: 'DET', TAN: 'TOR', TSP: 'TOR',
 		AFM: 'CGY', KCS: 'NJD', CLR: 'NJD', QUE: 'COL', HFD: 'CAR', MNS: 'DAL', OAK: 'CLE', CGS: 'CLE',
 		SEN: 'SLE', QBD: 'HAM', PIR: 'QUA', NYA: 'BRK', UTAH: 'UTA', LA: 'LAK', TB: 'TBL', NJ: 'NJD', SJ: 'SJS' }
 	for (const [code, franchise] of Object.entries(cases)) assert.equal(table.franchiseOf(code), franchise, code)
@@ -84,7 +86,10 @@ test('every era\'s NHL code reaches the right franchise, and no code names two',
 
 test('names follow the era', () => {
 	const name = resolver('nhl')
-	assert.equal(name('UTA', { season: 1990 }).name, 'Winnipeg Jets')
+	assert.equal(name('WPG', { season: 1990 }).name, 'Winnipeg Jets')
+	assert.equal(name('WPG', { season: 2005 }).name, 'Atlanta Thrashers')
+	assert.equal(name('ARI', { season: 2000 }).name, 'Phoenix Coyotes')
+	assert.equal(name('ARI', { season: 2020 }).name, 'Arizona Coyotes')
 	assert.equal(name('UTA', { season: 2026 }).name, 'Utah Mammoth')
 	assert.equal(name('TOR', { season: 1920 }).name, 'Toronto St. Patricks')
 	assert.equal(name('DET', { season: 1928 }).name, 'Detroit Cougars')

@@ -3,7 +3,7 @@ export const team = {
 	sport: 'nhl',
 	id: 'jets',
 	sourceIds: ['WPG'],
-	firstSeason: 2000,
+	firstSeason: 1980,
 
 	nouns: {
 		team: 'Jets',

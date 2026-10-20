@@ -496,9 +496,12 @@ Added on 2026-10-19, data first. What the adapter decides:
   necessary" games their series never needed — 17 in 2024, 23 in 2026.
 - **The franchise table uses the NHL's codes.** The prepared table reused WPG
   for both Winnipeg Jets and DET for the Cougars and Falcons, and a code naming
-  two clubs merges their histories. It also chains the original Jets through
-  Phoenix and Arizona to Utah; the NHL files those Jets under today's Jets and
-  counts Utah as new. This follows the prepared table, and says so in the file.
+  two clubs merges their histories.
+- **The franchises are the NHL's too.** The prepared table chains the original
+  Jets through Phoenix and Arizona to Utah. The NHL files those Jets under
+  today's Jets, keeps the Coyotes as an inactive franchise (ARI) and counts Utah
+  as new in 2025, and Ray chose the NHL's grouping on 2026-10-19. A franchise
+  move reaches the database only on `npm run load nhl`.
 - **Counted, not asserted**: 107 champions for 109 seasons (1919's Final was
   abandoned, 2005's season was cancelled), each sampled one right; 1,312
   regular-season games with 32 clubs, 720 in 2013, 868 in 2021; ties until 2004,
