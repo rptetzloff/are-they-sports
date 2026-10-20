@@ -61,14 +61,37 @@ const mb = (n) => `${(n / 1048576).toFixed(1)} MB`;
  *  Gzip's first two bytes are 1f 8b, so the stream can simply be asked. That
  *  makes the flag unnecessary and the upload unable to be configured wrong.
  */
-export async function download(url, dest, { credentials = credentialsFromEnv() } = {}) {
+/** How long to wait before asking again after a 429 or 503: what the server's
+ *  Retry-After says when it says it in seconds, otherwise 5, 10, 20, 40 and 60
+ *  seconds. */
+export const retryDelayMs = (attempt, retryAfter) => {
+	const said = Number(retryAfter);
+	if (retryAfter != null && retryAfter !== '' && Number.isFinite(said) && said >= 0) return Math.min(said, 120) * 1000;
+	return Math.min(5000 * 2 ** attempt, 60000);
+};
+
+const RETRY_STATUSES = new Set([429, 503]);
+
+export async function download(url, dest, { credentials = credentialsFromEnv(), retries = 5, sleep = (ms) => new Promise((r) => setTimeout(r, ms)) } = {}) {
 	mkdirSync(dirname(dest), { recursive: true });
 	// Signed only when credentials exist AND the URL is not a public one this
 	// repo already knows. nflverse and FiveThirtyEight are open URLs, and
 	// sending an S3 Authorization header to GitHub's CDN because a bucket was
 	// configured for baseball would be a strange way to break football.
 	const signed = shouldSign(url, credentials);
-	const res = await fetch(url, signed ? { headers: signGet(url, credentials) } : undefined);
+	let res;
+	// Rate limits are waited out, not reported. The NHL's stats API answers 429
+	// partway through hockey's 110 season files (Ray's first container load
+	// stopped at 1967), and a load that has to be rerun by hand until it gets
+	// through is a load that does not work.
+	for (let attempt = 0; ; attempt++) {
+		res = await fetch(url, signed ? { headers: signGet(url, credentials) } : undefined);
+		if (!RETRY_STATUSES.has(res.status) || attempt >= retries) break;
+		await res.body?.cancel().catch(() => {});
+		const ms = retryDelayMs(attempt, res.headers.get('retry-after'));
+		console.log(`  waiting      ${res.status} from ${new URL(url).host}; trying again in ${Math.round(ms / 1000)}s`);
+		await sleep(ms);
+	}
 	if (!res.ok) {
 		// Drain the refused body before throwing. Leaving it open kept a libuv
 		// handle alive, and process.exit on Windows then tripped

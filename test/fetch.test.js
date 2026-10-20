@@ -169,3 +169,49 @@ test('public sources are never signed, whatever credentials exist', () => {
 	// And never without them.
 	assert.equal(shouldSign('http://minio:9000/b/k', null), false)
 })
+
+test('a rate limit is waited out, and gives up after the retries', async () => {
+	// The NHL's stats API answered 429 partway through hockey's 110 season
+	// files and the load stopped. Each refusal waits, then asks again.
+	const { createServer } = await import('node:http')
+	const { mkdtempSync, readFileSync, rmSync } = await import('node:fs')
+	const { join } = await import('node:path')
+	const { tmpdir } = await import('node:os')
+	const { download } = await import('../scripts/fetch.mjs')
+
+	let refusals = 0
+	let asked = 0
+	const server = createServer((req, res) => {
+		asked++
+		if (refusals-- > 0) { res.writeHead(429, { 'retry-after': '7' }); res.end('slow down'); return }
+		res.writeHead(200, { 'content-type': 'text/csv' }); res.end('ok\n')
+	})
+	await new Promise((r) => server.listen(0, '127.0.0.1', r))
+	const url = `http://127.0.0.1:${server.address().port}/x`
+	const dir = mkdtempSync(join(tmpdir(), 'dl-'))
+	const dest = join(dir, 'out.csv')
+	const waits = []
+	const sleep = async (ms) => { waits.push(ms) }
+	try {
+		refusals = 2
+		await download(url, dest, { sleep })
+		assert.equal(readFileSync(dest, 'utf8'), 'ok\n')
+		assert.deepEqual(waits, [7000, 7000], 'Retry-After is honoured')
+		assert.equal(asked, 3)
+
+		refusals = 99; asked = 0; waits.length = 0
+		await assert.rejects(() => download(url, dest, { sleep, retries: 2 }), /429/)
+		assert.equal(asked, 3, 'the first try and two retries')
+	} finally {
+		server.close()
+		rmSync(dir, { recursive: true, force: true })
+	}
+})
+
+test('without a Retry-After the waits double, to a minute', async () => {
+	const { retryDelayMs } = await import('../scripts/fetch.mjs')
+	assert.deepEqual([0, 1, 2, 3, 4, 5].map((a) => retryDelayMs(a, null)), [5000, 10000, 20000, 40000, 60000, 60000])
+	assert.equal(retryDelayMs(0, '30'), 30000)
+	// An HTTP date is not seconds; it falls back rather than waiting NaN.
+	assert.equal(retryDelayMs(1, 'Wed, 21 Oct 2026 07:28:00 GMT'), 10000)
+})
