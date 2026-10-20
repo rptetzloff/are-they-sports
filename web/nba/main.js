@@ -1462,7 +1462,7 @@ getShareMessage() {
   const isPast = season && this.latestSeason && season < this.latestSeason;
 
   if (this._isOffseason) {
-     return `⚾ ${SITE.fullName} offseason - can't wait for the ${season} season!${SITE.tag}`;
+     return `🏀 ${SITE.fullName} offseason - can't wait for the ${season} season!${SITE.tag}`;
  }
 
  if (!this._lastResult) return `${SITE.fullName} ${season} season${SITE.tag}`;
@@ -1477,13 +1477,13 @@ getShareMessage() {
 
  if (isPast) {
      if (isUndefeated) {
-        return `⚾ The ${season} ${SITE.fullName} finished the regular season UNDEFEATED at ${recordText}!${SITE.tag}`;
+        return `🏀 The ${season} ${SITE.fullName} finished the regular season UNDEFEATED at ${recordText}!${SITE.tag}`;
     } else {
         return `The ${season} ${SITE.fullName} finished ${recordText}.${SITE.tag}`;
     }
 } else {
  const base = isUndefeated
-    ? `⚾ The ${SITE.fullName} are UNDEFEATED so far in ${season}! ${recordText} ⚾`
+    ? `🏀 The ${SITE.fullName} are UNDEFEATED so far in ${season}! ${recordText} 🏀`
     : `The ${SITE.fullName} are ${recordText} so far in the ${season} season.`;
  const tvLine = this._shareTvLine();
  return tvLine ? `${tvLine} ${base}${SITE.tag}` : `${base}${SITE.tag}`;

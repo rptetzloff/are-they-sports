@@ -19,7 +19,9 @@
 #                       new in 2025 (UTA). Ray chose the NHL's grouping on
 #                       2026-10-19. An era the NHL names differently (Chicago's
 #                       Black Hawks) keeps the prepared table's franchise.
-#   espnAbbrv          on a current row, from ESPN's team list (LA, NJ, SJ, TB).
+#   espnAbbrv           on a current row, the code ESPN's games carry (LA, NJ,
+#                       SJ, TB), from its standings. Its team list calls Utah
+#                       UTAH, which no game, schedule or standings entry uses.
 #   conference, division  the current row only, from ESPN's standings, as of
 #                       2026-10-19. A snapshot; see nhl-divisions.csv.
 #   the western clubs   the Cup Finals of 1918-1926 were against: named from the
@@ -110,7 +112,7 @@ TOR,TAN,,NHL,,,Toronto,Arenas,,1918,1919,Toronto,ON,#00205B,#FFFFFF,,,
 TOR,TSP,,NHL,,,Toronto,St. Patricks,St. Pats,1920,1927,Toronto,ON,#046A38,#FFFFFF,,,
 TOR,TOR,TOR,NHL,Eastern,Atlantic,Toronto,Maple Leafs,Leafs,1928,,Toronto,ON,#00205B,#FFFFFF,,,
 UTA,UTA,,NHL,,,Utah,Hockey Club,,2025,2025,Salt Lake City,UT,#6CACE4,#010101,#FFFFFF,,
-UTA,UTA,UTAH,NHL,Western,Central,Utah,Mammoth,,2026,,Salt Lake City,UT,#6CACE4,#010101,#FFFFFF,,
+UTA,UTA,UTA,NHL,Western,Central,Utah,Mammoth,,2026,,Salt Lake City,UT,#6CACE4,#010101,#FFFFFF,,
 VAN,VAN,,NHL,,,Vancouver,Canucks,,1971,1978,Vancouver,BC,#0033A0,#046A38,#FFFFFF,,
 VAN,VAN,,NHL,,,Vancouver,Canucks,,1979,1997,Vancouver,BC,#000000,#FF8200,#FFB81C,,
 VAN,VAN,,NHL,,,Vancouver,Canucks,,1998,2007,Vancouver,BC,#00205B,#97999B,#C8102E,,

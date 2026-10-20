@@ -507,7 +507,34 @@ Added on 2026-10-19, data first. What the adapter decides:
   regular-season games with 32 clubs, 720 in 2013, 868 in 2021; ties until 2004,
   shootouts from 2006.
 
-Gaps: no coaches, as for basketball, and no front page until `web/nhl` exists.
+**The front page** (`web/nhl`) is basketball's, which is baseball's, made hockey.
+What hockey needed that basketball did not:
+
+- **The record is the NHL's for its era**: W-L-T until 1998-99, W-L-T-OTL until
+  the shootout, W-L-OTL since, L being regulation losses wherever OTL is shown
+  (`web/nhl/site.js` hockeyRecord). An overtime loss is a regular-season loss
+  whose `ending` is OT or SO, from 1999-2000 on; before it, and in the playoffs,
+  it is a loss. Seasons rank by points percentage, as the NHL ranks them.
+- **`ending` reaches the page** as a column on the gameinfo file, which is
+  Retrosheet's shape plus one; empty for the other sports. The season being
+  played reads it off ESPN's short detail ("Final/OT", "Final/SO").
+- **Rounds are counted from the Final back** (`lib/web.js` nhlGametype). The NHL
+  numbers its rounds from the first, and 1918-1967 had two, so R2 was the
+  Final; counted from the front, a Cup would have read as a second-round win.
+  The page's labels are today's (First Round, Second Round, Conference Final),
+  so a 1960s semifinal reads "Conference Final" — a name, not a wrong result.
+- **The race is in points**, against the NHL's format: the top three of each
+  division and two wild cards per conference (`playoffPicture`), which the
+  standings tags and the race panel share so they cannot disagree. The club a
+  chaser has to pass is the last wild card, not the lowest club in — a
+  division's third can have fewer points than clubs left out.
+- **ESPN's code for Utah is UTA**, as every game, schedule and standings entry
+  carries it; its team list's UTAH is a label nothing else uses, and the page
+  finds its club in a game by this code.
+
+Gaps: no coaches, as for basketball. The clubs' colours are the prepared
+table's, darkest first, and about a dozen land on black; which to change is
+Ray's call, as it is for basketball's.
 
 ## A club is a sport and an id, never an id
 

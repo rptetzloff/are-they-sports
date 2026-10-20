@@ -79,7 +79,7 @@ test('every era\'s NHL code reaches the right franchise, and no code names two',
 	// history, the Coyotes a franchise of their own, Utah new in 2025.
 	const cases = { WIN: 'WPG', PHX: 'ARI', ARI: 'ARI', UTA: 'UTA', WPG: 'WPG', ATL: 'WPG', DCG: 'DET', DFL: 'DET', TAN: 'TOR', TSP: 'TOR',
 		AFM: 'CGY', KCS: 'NJD', CLR: 'NJD', QUE: 'COL', HFD: 'CAR', MNS: 'DAL', OAK: 'CLE', CGS: 'CLE',
-		SEN: 'SLE', QBD: 'HAM', PIR: 'QUA', NYA: 'BRK', UTAH: 'UTA', LA: 'LAK', TB: 'TBL', NJ: 'NJD', SJ: 'SJS' }
+		SEN: 'SLE', QBD: 'HAM', PIR: 'QUA', NYA: 'BRK', LA: 'LAK', TB: 'TBL', NJ: 'NJD', SJ: 'SJS' }
 	for (const [code, franchise] of Object.entries(cases)) assert.equal(table.franchiseOf(code), franchise, code)
 	assert.equal(table.knows('TBD'), false)
 })
@@ -100,6 +100,9 @@ test('thirty-two clubs, each with an ESPN code and a division, four of eight', (
 	const current = history.filter((r) => r.endSeason === '' && r.league === 'NHL')
 	assert.equal(current.length, 32)
 	for (const r of current) assert.ok(r.espnAbbrv && r.conference && r.division, `${r.teamAbbrv} is incomplete`)
+	// The code ESPN's games carry, which the front page finds the club by. Its
+	// team list says UTAH; every scoreboard, schedule and standings entry UTA.
+	assert.equal(current.find((r) => r.teamAbbrv === 'UTA').espnAbbrv, 'UTA')
 	const sizes = Object.values(Object.groupBy(loadDivisions('nhl'), (d) => `${d.conference}/${d.division}`)).map((g) => g.length)
 	assert.deepEqual(sizes, [8, 8, 8, 8])
 })
