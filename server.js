@@ -775,7 +775,7 @@ function main() {
 					// darkest-colour rule puts the Bucks on black, and they are green.
 					palette: clubFor(entry).colors ?? colorsFor(namers[entry.sport], entry.code,
 						{ season: today.getFullYear(), date: today.toISOString().slice(0, 10) }, NEUTRAL),
-					store: { rawGamesFor, standingsTitles, finalRounds, leaderGames },
+					store: { rawGamesFor, standingsTitles, finalRounds, leaderGames, leaderTenures },
 					creditHtml: creditLine(creditsFor([adapters[entry.sport]])),
 					origin: originOf,
 				}).catch((e) => {
