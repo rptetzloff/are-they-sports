@@ -1,0 +1,218 @@
+/* A league's page (league.html): the parts a club's front page has no use
+   for — a card that names both clubs, a line score, football's bracket — in
+   the variables both sites' stylesheets define (--fg, --accent, --shade-rgb,
+   --accent-rgb), so this one file serves every sport. The rest is styles.css. */
+
+.league-card {
+    text-align: left;
+    gap: 0.6rem;
+}
+
+.league-teams {
+    display: grid;
+    gap: 0.35rem;
+}
+
+.league-team {
+    display: grid;
+    grid-template-columns: 2rem 1fr auto;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 1.1rem;
+    opacity: 0.85;
+}
+
+.league-team.league-won,
+.league-card.next .league-team,
+.league-card.live .league-team {
+    opacity: 1;
+}
+
+.league-team.league-won .league-name,
+.league-team.league-won .league-score {
+    font-weight: 700;
+}
+
+.league-logo {
+    width: 2rem;
+    height: 2rem;
+    object-fit: contain;
+}
+
+.league-name a {
+    color: inherit;
+}
+
+.league-record {
+    font-size: 0.8rem;
+    opacity: 0.7;
+    font-weight: 400;
+}
+
+.league-score {
+    font-size: 1.4rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.league-venue,
+.league-probables,
+.league-links {
+    font-size: 0.85rem;
+    opacity: 0.8;
+}
+
+.league-links a {
+    color: var(--accent-text, var(--accent));
+}
+
+.league-leaders {
+    font-size: 0.85rem;
+    display: grid;
+    gap: 0.15rem;
+}
+
+.league-linescore {
+    border-collapse: collapse;
+    font-size: 0.85rem;
+    font-variant-numeric: tabular-nums;
+    width: 100%;
+    max-width: 100%;
+    display: block;
+    overflow-x: auto;
+}
+
+.league-linescore th,
+.league-linescore td {
+    padding: 0.15rem 0.4rem;
+    text-align: center;
+    font-weight: 400;
+}
+
+.league-linescore thead th {
+    opacity: 0.7;
+}
+
+.league-linescore tbody th {
+    text-align: left;
+    font-weight: 600;
+}
+
+.league-linescore .league-total {
+    font-weight: 700;
+}
+
+/* The schedule column's rows: a game on, and a winner's name. */
+.league-row-on {
+    background: rgb(var(--accent-rgb) / 0.16);
+    box-shadow: inset 3px 0 0 var(--accent);
+}
+
+.sched-opp .league-won {
+    font-weight: 700;
+}
+
+.league-period {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.league-period .season-label {
+    min-width: 12rem;
+    text-align: center;
+}
+
+.league-today {
+    font-size: 0.85rem;
+}
+
+.league-more {
+    text-align: center;
+    font-size: 0.9rem;
+}
+
+.league-more a {
+    color: var(--accent-text, var(--accent));
+}
+
+/* Football's bracket: a column a round, a button a game. */
+.lb {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(6.5rem, 1fr);
+    gap: 0.6rem;
+    overflow-x: auto;
+    padding-bottom: 0.25rem;
+}
+
+.lb-round {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    gap: 0.4rem;
+}
+
+.lb-head {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    opacity: 0.75;
+    text-align: center;
+}
+
+.lb-g {
+    display: grid;
+    gap: 0.1rem;
+    padding: 0.3rem 0.45rem;
+    border-radius: 6px;
+    border: 1px solid rgb(var(--fg-rgb) / 0.15);
+    background: rgb(var(--shade-rgb) / calc(0.2 * var(--well-k)));
+    color: inherit;
+    font: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+    text-align: left;
+}
+
+.lb-g.lb-live {
+    border-color: var(--accent);
+}
+
+.lb-t {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+    opacity: 0.8;
+}
+
+.lb-t.league-won {
+    opacity: 1;
+    font-weight: 700;
+}
+
+/* League rows carry more TV than a club's: a national game lists every
+   regional channel too, and an auto-width column squeezed the clubs' names to
+   nothing. The channels get a fixed width and an ellipsis (the card has them
+   all); the names keep the rest. */
+.home-schedule .schedule-grid {
+    align-content: start;
+}
+
+.sched-row.league-row {
+    grid-template-columns: 4.6rem minmax(0, 1fr) auto minmax(0, 7.5rem);
+}
+
+.league-row .sched-opp,
+.league-row .sched-tv {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+    .sched-row.league-row {
+        grid-template-columns: 4.3rem minmax(0, 1fr) auto;
+    }
+}
