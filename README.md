@@ -1797,8 +1797,9 @@ source code wins and the answer does not depend on scope order.
 At each club's root — `/` in a single-club scope, `/nfl/packers` under
 `SCOPE=all` — and at `{root}/{season}`, the page is the sites' own front page:
 `web/mlb` from arethebrewersontv.com for every baseball club, `web/nfl` from
-arethepackersundefeated.com for every football one, and `web/nba`, the
-baseball page adapted to basketball, for every NBA club. They are client-side, as
+arethepackersundefeated.com for every football one, `web/nba`, the
+baseball page adapted to basketball, for every NBA club, and `web/nhl`, the same
+adapted to hockey, for every NHL club. They are client-side, as
 the sites are; see "The front page is the sites' own" in CLAUDE.md for why,
 and for what it does not do yet.
 
@@ -1807,7 +1808,7 @@ What the page asks its server for, and where it comes from here:
 | request | answered from |
 |---|---|
 | the page, `/main.js`, `/styles.css`, … | `web/<sport>/`, with the club written in as `window.CLUB` and the stylesheet recoloured into the club's palette |
-| `/data/gameinfo.csv`, `/data/CurrentNames.csv` (baseball) | Postgres and the franchise history table, in Retrosheet's shape |
+| `/data/gameinfo.csv`, `/data/CurrentNames.csv` (baseball, basketball, hockey) | Postgres and the franchise history table, in Retrosheet's shape, plus an `ending` column (REG, OT, SO) |
 | `/data/games.csv`, `/data/season_records.csv`, `/api/current/games.csv` (football) | Postgres, in the football site's shape |
 | `/api/espn/*` | ESPN, through a cache, for this club's schedule and the league's scoreboard and summaries only |
 | `/api/live/:id`, `/api/bracket` (baseball) | ESPN, reduced as the baseball site reduced it |
@@ -1928,7 +1929,7 @@ turned a half-recorded score into a tie.
 ```
 sports/     adapters: where data comes from, and how it becomes neutral rows
 teams/      manifests: identity and colours; about a dozen lines each
-web/        the two sites' front pages, one per sport (see "The front page")
+web/        the front pages, one per sport (see "The front page")
 scripts/    fetch, build, franchise table
 lib/        csv, scope, routes, index reading, record core, rendering
 server.js   the server; HTML, with ?format=json on every route
