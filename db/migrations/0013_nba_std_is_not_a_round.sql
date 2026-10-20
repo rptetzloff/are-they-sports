@@ -1,0 +1,12 @@
+-- ESPN's word for an ordinary game is not a playoff round.
+--
+-- The first NBA load stored ESPN's type abbreviation as every playoff game's
+-- stage, and for 2002 and 2003 ESPN types every playoff game STD — 159 games,
+-- which the front page then filed as regular season. sports/nba.js now keeps
+-- only the four round words (RD16, QTR, SEMI, FINAL).
+--
+-- A reload cannot undo it: the upsert coalesces stage, so that a source with
+-- no round never erases one that has it (0011). That is the right rule for
+-- rounds and the wrong one for a value that should never have been written,
+-- so this clears it once.
+UPDATE game SET stage = NULL WHERE sport = 'nba' AND stage = 'STD';

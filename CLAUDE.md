@@ -1094,6 +1094,25 @@ pages. Now the shell writes `<base href="{club base}/">` and every fetch, link
 and `pushState` resolves against it; a test fails on a root-absolute path in
 `web/`. Check the deployment's `/healthz` scope before calling a page live.
 
+**Basketball's front end is the baseball one, adapted** (`web/nba`, 2026-10-19,
+Ray's choice of template). Neither site was ever a basketball site, so there
+was nothing to copy exactly; the baseball page fits the sport's shape — a
+near-daily schedule, best-of-seven series, a bracket — and keeps its look. What
+changed is what basketball is: the rounds keep baseball's internal codes (F, D,
+L, W in order) under the NBA's names; the race is 82 games, six seeds and a
+play-in, with no division; the bracket is two conferences of four, two and
+one; the live card and the line score are quarters and leading scorers, not
+innings, pitchers and bases; seasons read "2026-2027" (Ray's wording). The
+server answers it in baseball's file shapes, `FAMILY` in lib/web.js. Measured
+the same way as the others: rendered at 1400 and 390, every link followed, no
+JavaScript errors, all thirty clubs drawn.
+
+Its gaps: FiveThirtyEight's seasons name no rounds, so a pre-2002 playoff
+series that was not the Finals files under the semifinals; no line scores for
+a past season, as for baseball; and club colours — the darkest-colour rule
+puts half the league on black, and which clubs should change was put to Ray
+with a sheet of all thirty. The Bucks are green by his choice.
+
 **One front end per sport, on purpose, for now.** The two have drifted: 277 of
 684 and 456 selectors shared, `main.js` 3,100 lines against 1,479. Merging them
 in the same change as copying them would have made "exactly like the site"

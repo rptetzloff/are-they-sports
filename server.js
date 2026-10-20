@@ -761,8 +761,10 @@ function main() {
 					namer: namers[entry.sport],
 					history: loadHistory(entry.sport),
 					currentCodes: currentOf(entry.sport),
-					// Today's colours. The sites have one palette, not one per era.
-					palette: colorsFor(namers[entry.sport], entry.code,
+					// Today's colours. The sites have one palette, not one per era. A
+					// manifest's own colours win, as on the server-rendered pages: the
+					// darkest-colour rule puts the Bucks on black, and they are green.
+					palette: clubFor(entry).colors ?? colorsFor(namers[entry.sport], entry.code,
 						{ season: today.getFullYear(), date: today.toISOString().slice(0, 10) }, NEUTRAL),
 					store: { rawGamesFor, standingsTitles },
 					creditHtml: creditLine(creditsFor([adapters[entry.sport]])),
