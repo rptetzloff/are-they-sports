@@ -9,6 +9,9 @@ export const team = {
 		team: 'Rapids',
 		fullName: 'Colorado Rapids',
 	},
+
+	/** ESPN's id for the club, which its soccer schedules are asked by. */
+	site: { espnSlug: '184' },
 };
 
 export default team;

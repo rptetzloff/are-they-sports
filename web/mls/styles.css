@@ -1,0 +1,5087 @@
+/* The hidden attribute must always win. Several elements here set their own
+   display (flex/grid), which silently overrides the UA's [hidden] rule — this
+   has caused three real bugs (box score team panels, the license modal, the
+   schedule provider bar). */
+[hidden] {
+    display: none !important;
+}
+
+/* --- Themes ---
+   Every color comes from these. Dark is the site as it always was; light
+   is an off-white page with white cards and navy text. Gold stays gold where
+   it fills or outlines (buttons, active chips) and becomes a deeper gold
+   where it is text, which bright gold on white is not legible as. The
+   reader picks System, Light or Dark (theme.js); System follows the device.
+   A choice is the html element's data-theme; System is none.
+
+   The tones that read on navy and not on white — the win greens, the loss
+   reds, the pale golds, blues and purple — are written as
+   var(--win-light, <the color as it was>): the *-light variables exist only
+   in light, so dark falls back to each color exactly as written. */
+:root {
+    color-scheme: dark;
+    --bg: #12284B;
+    --fg: #ffffff;
+    --fg-rgb: 255 255 255;
+    --surface-rgb: 18 40 75;
+    --shade-rgb: 0 0 0;
+    /* Scales the shade wells (panel backgrounds): navy at full strength muddies white. */
+    --well-k: 1;
+    --accent: #FFC52F;
+    --accent-rgb: 255 197 47;
+    --accent-text: #FFC52F;
+    --accent-text-rgb: 255 197 47;
+    --on-accent: #12284B;
+    --raised-a: #1a3558;
+    --raised-b: #1a3a6b;
+    --raised-c: #1a3660;
+    --raised-d: #16305a;
+    --raised-e: #16294a;
+    --raised-f: #0d1d38;
+}
+
+/* Light: chosen, or System on a device set to light. The two blocks must
+   match; test/theme.test.js holds them equal. */
+:root[data-theme="light"] {
+    color-scheme: light;
+    --bg: #f3f5f9;
+    --fg: #12284B;
+    --fg-rgb: 18 40 75;
+    --surface-rgb: 255 255 255;
+    --shade-rgb: 18 40 75;
+    --well-k: 0.3;
+    --accent: #FFC52F;
+    --accent-rgb: 214 158 0;
+    --accent-text: #8a5d00;
+    --accent-text-rgb: 138 93 0;
+    --on-accent: #12284B;
+    --raised-a: #ffffff;
+    --raised-b: #ffffff;
+    --raised-c: #ffffff;
+    --raised-d: #e9eef6;
+    --raised-e: #eef2f8;
+    --raised-f: #12284B;
+    --gold-light: #8a5d00;
+    --win-light: #2e7d32;
+    --loss-light: #c62828;
+    --info-light: #1565c0;
+    --purple-light: #6a1b9a;
+    --warn-light: #b45309;
+    --teal-light: #0f766e;
+}
+
+@media (prefers-color-scheme: light) {
+    :root:not([data-theme]) {
+        color-scheme: light;
+        --bg: #f3f5f9;
+        --fg: #12284B;
+        --fg-rgb: 18 40 75;
+        --surface-rgb: 255 255 255;
+        --shade-rgb: 18 40 75;
+        --well-k: 0.3;
+        --accent: #FFC52F;
+        --accent-rgb: 214 158 0;
+        --accent-text: #8a5d00;
+        --accent-text-rgb: 138 93 0;
+        --on-accent: #12284B;
+        --raised-a: #ffffff;
+        --raised-b: #ffffff;
+        --raised-c: #ffffff;
+        --raised-d: #e9eef6;
+        --raised-e: #eef2f8;
+        --raised-f: #12284B;
+        --gold-light: #8a5d00;
+        --win-light: #2e7d32;
+        --loss-light: #c62828;
+        --info-light: #1565c0;
+        --purple-light: #6a1b9a;
+        --warn-light: #b45309;
+        --teal-light: #0f766e;
+    }
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--fg);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+/* The headline every page carries in a title season (playoff-core.js,
+   added by the server): gold, edge to edge, above everything. Navy on gold
+   in both themes. */
+.title-banner {
+    align-self: stretch;
+    display: block;
+    box-sizing: border-box;
+    padding: 0.55rem 1rem;
+    background: #FFC52F;
+    color: #12284B;
+    text-align: center;
+    text-decoration: none;
+    font-weight: 800;
+    font-size: clamp(0.85rem, 0.6rem + 1.2vw, 1.15rem);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    box-shadow: 0 2px 8px rgb(0 0 0 / 0.25);
+}
+
+/* One line on a phone: at 360px the spacing pushed the second trophy onto
+   its own. */
+@media (max-width: 480px) {
+    .title-banner {
+        letter-spacing: 0.03em;
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
+}
+
+.title-banner:hover,
+.title-banner:focus-visible {
+    background: #ffd45e;
+    outline: none;
+}
+
+body.undefeated {
+    background: var(--bg) !important;
+}
+
+
+.container {
+    text-align: center;
+    max-width: 800px;
+    padding: 2rem;
+}
+
+h1 {
+    font-size: 3rem;
+    margin-bottom: 2rem;
+    text-shadow: 2px 2px 4px rgb(var(--shade-rgb) / 0.3);
+    color: var(--accent-text);
+}
+
+.site-title {
+    margin-bottom: 0;
+}
+
+.site-title-link {
+    color: inherit;
+    text-decoration: none;
+}
+
+.answer {
+    font-size: 4rem;
+    font-weight: bold;
+    margin: 2rem 0;
+    padding: 1rem;
+    border-radius: 10px;
+    text-shadow: 2px 2px 4px rgb(var(--shade-rgb) / 0.3);
+}
+
+.emoji-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.1em;
+    line-height: 1.3;
+}
+
+.yes {
+    background: transparent;
+    color: var(--fg);
+}
+
+.champions {
+    background: linear-gradient(135deg, #b8860b 0%, #ffd700 40%, #b8860b 70%, #ffd700 100%);
+    color: #1a1a1a;
+    font-size: 3rem;
+    animation: championShine 2s ease-in-out infinite alternate;
+    text-shadow: 1px 1px 2px rgb(var(--shade-rgb) / 0.2);
+}
+
+@keyframes championShine {
+    from { box-shadow: 0 0 20px rgba(255, 215, 0, 0.5); }
+    to   { box-shadow: 0 0 50px rgba(255, 215, 0, 0.9), 0 0 80px rgb(var(--accent-rgb) / 0.5); }
+}
+
+.no {
+    background: transparent;
+    color: var(--fg);
+}
+
+.streaming {
+    background: transparent;
+    color: var(--info-light, #a8c8f0);
+}
+
+.record {
+    font-size: 1.5rem;
+    margin: 1rem 0;
+    opacity: 0.9;
+    color: var(--accent-text);
+}
+
+.preseason-record {
+    font-size: 1.1rem;
+    opacity: 0.7;
+}
+
+.playoff-record {
+    font-size: 1.1rem;
+    opacity: 0.8;
+}
+
+.next-game {
+    background: rgb(var(--surface-rgb) / 0.8);
+    padding: 1.5rem;
+    border-radius: 10px;
+    margin-top: 2rem;
+    backdrop-filter: blur(10px);
+    border: 2px solid var(--accent);
+}
+
+.next-game h3 {
+    margin-top: 0;
+    color: var(--accent-text);
+}
+
+.countdown {
+    font-size: 1.1rem;
+    color: var(--accent-text);
+    font-weight: bold;
+    margin-top: 0.5rem;
+    padding: 0.5rem;
+    background: rgb(var(--accent-rgb) / 0.1);
+    border-radius: 5px;
+}
+
+.live-game {
+    background: rgba(255, 0, 0, 0.1) !important;
+    border: 2px solid #ff0000 !important;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(255, 0, 0, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0); }
+}
+
+.live-indicator {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background: #ff0000;
+    border-radius: 50%;
+    margin-right: 0.5rem;
+    animation: blink 1s infinite;
+}
+
+@keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0.3; }
+}
+
+.game-status {
+    font-size: 1rem;
+    color: var(--loss-light, #ff0000);
+    font-weight: bold;
+    margin: 0.5rem 0;
+}
+
+.score-display {
+    font-size: 1.4rem;
+    font-weight: bold;
+    margin: 0.5rem 0;
+    padding: 0.5rem;
+    background: rgb(var(--shade-rgb) / calc(0.3 * var(--well-k)));
+    border-radius: 5px;
+}
+
+.brewers-score {
+    color: var(--accent-text);
+}
+
+.opponent-score {
+    color: var(--fg);
+}
+
+.loading {
+    font-size: 1.2rem;
+    opacity: 0.8;
+    color: var(--accent-text);
+}
+
+.error {
+    color: var(--loss-light, #ff6b6b);
+    font-size: 1.1rem;
+}
+
+.brewers-logo {
+    font-size: 2rem;
+    margin: 0 1rem;
+}
+
+.season-selector {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin: 1rem auto 0.5rem;
+}
+
+.season-label {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: var(--accent-text);
+    min-width: 8rem;
+    text-align: center;
+}
+
+.season-nav {
+    background: rgb(var(--accent-rgb) / 0.15);
+    border: 2px solid var(--accent);
+    color: var(--accent-text);
+    font-size: 1.6rem;
+    line-height: 1;
+    width: 3rem;
+    height: 2.2rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    flex-shrink: 0;
+}
+
+.season-nav-jump {
+    opacity: 0.75;
+    width: 3rem;
+}
+
+.season-nav:hover:not(:disabled) {
+    background: rgb(var(--accent-rgb) / 0.3);
+    transform: scale(1.1);
+}
+
+.season-divider {
+    text-align: center;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent-text);
+    padding: 0.4rem 0;
+    border-top: 1px solid rgb(var(--accent-rgb) / 0.3);
+    border-bottom: 1px solid rgb(var(--accent-rgb) / 0.3);
+    margin: 0.25rem 0;
+}
+
+.season-nav:disabled {
+    opacity: 0.3;
+    cursor: default;
+}
+
+.last-updated {
+    margin-top: 2rem;
+    font-size: 0.9rem;
+    opacity: 0.7;
+    color: var(--accent-text);
+}
+
+/* Collapsible toggle sections */
+.collapsible-section {
+    width: 572px;
+    margin: 0.4rem auto 0;
+    box-sizing: border-box;
+}
+
+.collapsible-section[open] > .collapsible-summary {
+    margin-bottom: 0.4rem;
+}
+
+.collapsible-summary {
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    cursor: pointer;
+    user-select: none;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: rgb(var(--accent-text-rgb) / 0.55);
+    padding: 0.1rem 0;
+    width: fit-content;
+    transition: color 0.2s;
+}
+
+.collapsible-summary::-webkit-details-marker { display: none; }
+
+.collapsible-summary::before {
+    content: '\F0142'; /* mdi chevron-down */
+    font-family: 'Material Design Icons';
+    font-size: 0.85rem;
+    transition: transform 0.2s;
+    display: inline-block;
+}
+
+details:not([open]) > .collapsible-summary::before {
+    transform: rotate(-90deg);
+}
+
+.collapsible-summary:hover {
+    color: rgb(var(--accent-text-rgb) / 0.85);
+}
+
+/* keep streak-banner from having its own outer margin when inside details */
+.collapsible-section .streak-banner {
+    margin-top: 0;
+}
+
+.otd-game-link {
+    text-decoration: none;
+    color: inherit;
+    border-bottom: 1px dotted rgb(var(--accent-rgb) / 0.5);
+}
+
+.otd-game-link:hover {
+    color: var(--accent-text);
+}
+
+.streak-extra {
+    margin-top: 0.35rem;
+    padding-top: 0.35rem;
+    border-top: 1px solid rgb(var(--accent-rgb) / 0.15);
+    font-size: 0.82rem;
+    color: rgb(var(--fg-rgb) / 0.65);
+}
+
+.streak-extra a {
+    color: inherit;
+    text-decoration: none;
+    border-bottom: 1px dotted rgb(var(--accent-rgb) / 0.5);
+}
+
+.streak-extra a:hover {
+    color: var(--accent-text);
+}
+
+/* keep on-this-day from having its own outer margin when inside details */
+.collapsible-section .on-this-day {
+    margin-top: 0;
+    width: 100%;
+}
+
+.streak-banner {
+    background: rgb(var(--accent-rgb) / 0.08);
+    border: 1px solid rgb(var(--accent-rgb) / 0.3);
+    border-radius: 8px;
+    padding: 0.55rem 1rem;
+    margin: 0.5rem auto 0;
+    font-size: 0.9rem;
+    color: rgb(var(--fg-rgb) / 0.8);
+    text-align: center;
+    max-width: 540px;
+}
+
+.streak-banner strong {
+    color: var(--accent-text);
+    font-size: 1rem;
+}
+
+/* Playoff panel: the series scoreboard, or the race's magic numbers. Same
+   box as the streak banner so the three panels read as a set. */
+.playoff-panel {
+    background: rgb(var(--accent-rgb) / 0.08);
+    border: 1px solid rgb(var(--accent-rgb) / 0.3);
+    border-radius: 8px;
+    padding: 0.6rem 1rem;
+    font-size: 0.9rem;
+    color: rgb(var(--fg-rgb) / 0.85);
+    text-align: center;
+}
+
+.playoff-panel strong {
+    color: var(--accent-text);
+}
+
+.po-head {
+    font-size: 1rem;
+    font-weight: bold;
+    color: var(--fg);
+}
+
+.po-round {
+    color: var(--accent-text);
+}
+
+.po-best {
+    font-size: 0.75rem;
+    font-weight: normal;
+    opacity: 0.7;
+    margin-left: 0.3rem;
+}
+
+/* A grid, so the pips line up under a nickname of any length. */
+.po-board {
+    display: inline-grid;
+    grid-template-columns: auto auto auto;
+    align-items: center;
+    column-gap: 0.5rem;
+    row-gap: 0.3rem;
+    margin: 0.5rem 0 0.35rem;
+}
+
+.po-row {
+    display: contents;
+}
+
+.po-pips {
+    display: flex;
+    gap: 0.35rem;
+}
+
+.po-team {
+    text-align: right;
+    font-weight: bold;
+    font-size: 0.8rem;
+}
+
+.po-pip {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2px solid rgb(var(--fg-rgb) / 0.45);
+    box-sizing: border-box;
+}
+
+.po-pip.on.us {
+    background: var(--accent);
+    border-color: var(--accent);
+}
+
+.po-pip.on.them {
+    background: rgb(var(--fg-rgb) / 0.75);
+    border-color: rgb(var(--fg-rgb) / 0.75);
+}
+
+.po-wins {
+    width: 1rem;
+    font-weight: bold;
+    font-variant-numeric: tabular-nums;
+}
+
+.po-countdown {
+    font-weight: bold;
+    color: var(--accent-text);
+}
+
+.po-line + .po-line {
+    margin-top: 0.15rem;
+}
+
+.po-next {
+    margin-top: 0.3rem;
+    font-size: 0.8rem;
+    opacity: 0.85;
+}
+
+/* Earlier series: the same scoreboard, smaller, under a rule. */
+.po-earlier {
+    margin-top: 0.5rem;
+    padding-top: 0.45rem;
+    border-top: 1px solid rgb(var(--accent-rgb) / 0.2);
+    font-size: 0.85rem;
+}
+
+.po-earlier .po-head {
+    font-size: 0.85rem;
+}
+
+.po-earlier .po-board {
+    margin: 0.3rem 0 0;
+}
+
+.po-earlier .po-pip {
+    width: 11px;
+    height: 11px;
+}
+
+.po-result {
+    margin-left: 0.3rem;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.po-result.po-won { color: var(--win-light, #9BD7A3); }
+.po-result.po-lost { color: var(--loss-light, #f28b82); }
+
+/* The series deciding the next opponent (bracket-core.js), under the
+   team's own: the same scoreboard, its pips in blue. */
+.po-tracker {
+    margin-top: 0.5rem;
+    padding-top: 0.45rem;
+    border-top: 1px solid rgb(var(--accent-rgb) / 0.2);
+}
+
+.po-tracker-head {
+    font-size: 0.85rem;
+    font-weight: bold;
+    color: var(--accent-text);
+}
+
+.po-tracker .po-board {
+    margin: 0.35rem 0 0.2rem;
+}
+
+.po-pip.on.other {
+    background: var(--info-light, #7fc4ff);
+    border-color: var(--info-light, #7fc4ff);
+}
+
+.po-row.po-out > * {
+    opacity: 0.5;
+}
+
+.po-espn {
+    color: var(--accent-text);
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.po-tracker-status {
+    font-weight: bold;
+    font-size: 0.85rem;
+}
+
+/* The full bracket, folded under the panel. */
+.po-bracket {
+    margin-top: 0.5rem;
+    padding-top: 0.4rem;
+    border-top: 1px solid rgb(var(--accent-rgb) / 0.2);
+}
+
+.po-bracket > summary {
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--accent-text);
+}
+
+.bk {
+    display: grid;
+    gap: 0.6rem;
+    margin-top: 0.5rem;
+}
+
+/* A league: wild card, division series, LCS in three columns, the LCS
+   centered across the rows that feed it. */
+.bk-league {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    column-gap: 0.4rem;
+    row-gap: 0.35rem;
+    align-items: center;
+}
+
+.bk-col {
+    grid-row: 1;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: rgb(var(--fg-rgb) / 0.55);
+}
+
+.bk-cell {
+    min-width: 0;
+}
+
+.bk-ws {
+    display: grid;
+    justify-items: center;
+    gap: 0.2rem;
+}
+
+.bk-ws .bk-s {
+    width: min(100%, 9rem);
+}
+
+.bk-s {
+    border: 1px solid rgb(var(--fg-rgb) / 0.15);
+    border-radius: 6px;
+    background: rgb(var(--fg-rgb) / 0.04);
+    padding: 0.15rem 0.4rem;
+    font-size: 0.8rem;
+    text-align: left;
+}
+
+.bk-s.bk-on {
+    border-color: rgb(var(--accent-rgb) / 0.6);
+}
+
+.bk-tbd {
+    text-align: center;
+    color: rgb(var(--fg-rgb) / 0.4);
+    border-style: dashed;
+}
+
+.bk-t {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.4rem;
+    line-height: 1.5;
+}
+
+.bk-abbr {
+    font-weight: 600;
+}
+
+.bk-w {
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+}
+
+.bk-won {
+    color: var(--fg);
+}
+
+.bk-lost {
+    opacity: 0.45;
+}
+
+.bk-us .bk-abbr {
+    color: var(--accent-text);
+}
+
+.bk-live {
+    font-size: 0.7rem;
+    color: rgb(var(--fg-rgb) / 0.75);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.last-undefeated {
+    margin-top: 1.25rem;
+    font-size: 0.95rem;
+    color: rgb(var(--accent-text-rgb) / 0.85);
+    min-height: 1.5rem;
+}
+
+.last-undefeated-link {
+    color: var(--accent-text);
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-color: rgb(var(--accent-rgb) / 0.5);
+    transition: color 0.2s, text-decoration-color 0.2s;
+}
+
+.last-undefeated-link:hover {
+    color: var(--fg);
+    text-decoration-color: var(--fg);
+}
+
+.data-credit {
+    margin-top: 0.5rem;
+    font-size: 0.8rem;
+    opacity: 0.6;
+    color: var(--accent-text);
+}
+
+.data-credit a {
+    color: var(--accent-text);
+    text-decoration: underline;
+}
+
+.data-credit a:hover {
+    opacity: 1;
+}
+
+.share-section {
+    margin: 1.25rem auto 0;
+    width: 572px;
+    max-width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+/* On This Day */
+.on-this-day {
+    background: rgb(var(--surface-rgb) / 0.8);
+    border: 1px solid rgb(var(--accent-rgb) / 0.25);
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    box-sizing: border-box;
+}
+
+.otd-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+}
+
+.otd-label {
+    color: var(--accent-text);
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.otd-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.otd-reset {
+    font-size: 0.72rem;
+    color: rgb(var(--accent-text-rgb) / 0.6);
+    border: 1px solid rgb(var(--accent-rgb) / 0.3);
+    border-radius: 5px;
+    padding: 0.15rem 0.5rem;
+    text-decoration: none;
+    transition: color 0.2s, border-color 0.2s;
+    white-space: nowrap;
+}
+
+.otd-reset:hover {
+    color: var(--accent-text);
+    border-color: var(--accent);
+}
+
+.otd-refresh {
+    background: none;
+    border: 1px solid rgb(var(--accent-rgb) / 0.35);
+    border-radius: 6px;
+    color: rgb(var(--accent-text-rgb) / 0.7);
+    cursor: pointer;
+    padding: 0.2rem 0.45rem;
+    font-size: 1rem;
+    line-height: 1;
+    transition: color 0.2s, border-color 0.2s;
+}
+
+.otd-refresh:hover {
+    color: var(--accent-text);
+    border-color: var(--accent);
+}
+
+.otd-body {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+}
+
+.otd-photo-link {
+    flex-shrink: 0;
+}
+
+.otd-photo {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid rgb(var(--accent-rgb) / 0.3);
+    display: block;
+}
+
+.otd-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.otd-season-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.otd-year {
+    color: var(--accent-text);
+    font-weight: 700;
+    font-size: 1rem;
+    text-decoration: none;
+}
+
+.otd-year:hover {
+    text-decoration: underline;
+    color: var(--gold-light, #e0a820);
+}
+
+.otd-game-type {
+    font-size: 0.75rem;
+    color: rgb(var(--fg-rgb) / 0.5);
+    background: rgb(var(--fg-rgb) / 0.08);
+    padding: 0.1rem 0.45rem;
+    border-radius: 4px;
+}
+
+.otd-game-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.otd-result-badge {
+    font-size: 0.75rem;
+    font-weight: 800;
+    padding: 0.15rem 0.45rem;
+    border-radius: 4px;
+    letter-spacing: 0.03em;
+}
+
+.otd-result-badge.win  { background: rgba(76, 175, 80, 0.25); color: var(--win-light, #4caf50); }
+.otd-result-badge.loss { background: rgba(244, 67, 54, 0.25); color: var(--loss-light, #f44336); }
+.otd-result-badge.tie  { background: rgba(255, 152, 0, 0.25); color: var(--warn-light, #ff9800); }
+
+.otd-matchup {
+    color: rgb(var(--fg-rgb) / 0.9);
+    font-size: 0.95rem;
+}
+
+.otd-score {
+    color: rgb(var(--fg-rgb) / 0.55);
+    font-size: 0.85rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.otd-date {
+    font-size: 0.78rem;
+    color: rgb(var(--fg-rgb) / 0.45);
+}
+
+/* Birthdays under the game, or alone on a day without one. */
+.otd-born {
+    margin-top: 0.6rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid rgb(var(--accent-rgb) / 0.2);
+    font-size: 0.85rem;
+    color: rgb(var(--fg-rgb) / 0.8);
+}
+
+.otd-header + .otd-born {
+    border-top: none;
+    padding-top: 0;
+}
+
+.otd-born .mdi {
+    color: var(--accent-text);
+}
+
+.otd-born a {
+    color: var(--fg);
+    font-weight: 600;
+    text-decoration: none;
+    border-bottom: 1px dotted rgb(var(--accent-rgb) / 0.5);
+    /* A name wraps between players, never inside one. */
+    white-space: nowrap;
+}
+
+.otd-born a:hover {
+    color: var(--accent-text);
+}
+
+.otd-born-year {
+    color: rgb(var(--fg-rgb) / 0.5);
+}
+
+@media (max-width: 620px) {
+    .collapsible-section {
+        width: 100%;
+    }
+    .on-this-day {
+        border-radius: 10px;
+        padding: 0.9rem 1rem;
+    }
+}
+
+
+.share-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 1rem;
+    background: rgb(var(--accent-rgb) / 0.12);
+    border: 1.5px solid rgb(var(--accent-rgb) / 0.5);
+    border-radius: 20px;
+    color: var(--accent-text);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s, transform 0.15s;
+    letter-spacing: 0.03em;
+    text-decoration: none;
+}
+
+.share-btn:hover {
+    background: rgb(var(--accent-rgb) / 0.25);
+    border-color: var(--accent);
+    transform: translateY(-1px);
+}
+
+.share-icon {
+    font-size: 1rem;
+}
+
+.copy-success {
+    background: rgba(32, 201, 151, 0.2) !important;
+    border-color: #20c997 !important;
+    color: var(--teal-light, #20c997) !important;
+}
+
+.schedule-section {
+    background: rgb(var(--surface-rgb) / 0.8);
+    margin: 0.25rem auto;
+    width: 100%;
+    max-width: 572px;
+    box-sizing: border-box;
+    padding: 1.5rem;
+    backdrop-filter: blur(10px);
+    border: 2px solid var(--accent);
+    border-radius: 10px;
+    overflow-x: auto;
+}
+
+.schedule-section h3 {
+    margin-top: 0;
+    color: var(--accent-text);
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+/* minmax(0, 1fr): one column that never grows past the list. Left to auto,
+   a card's longest unbreakable line — a live pitch list's "Knuckle Curve 81
+   Ground Rule Double" — set the column's width, and on a 412px phone the
+   card ran past the list's edge and scrolled sideways inside it. */
+/* The list of compact rows. position: relative so each row's offsetTop is
+   measured from the list, which the month chips and the opening scroll use. */
+.schedule-grid {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+    max-height: 520px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--accent) var(--bg);
+}
+
+/* --- Compact schedule rows (schedule-core.js) --- */
+
+/* The pinned game under the answer: a section's width, centered. */
+.schedule-featured {
+    max-width: 572px;
+    margin: 0.5rem auto 1rem;
+    text-align: center;
+}
+
+/* The chips wrap rather than scroll sideways: scrolled, the Spring chip sat
+   out of sight past the left edge with nothing to say it was there. */
+.schedule-months {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.3rem;
+    padding: 0 0 0.5rem;
+    margin-bottom: 0.25rem;
+}
+
+.sched-chip {
+    flex: none;
+    background: transparent;
+    color: rgb(var(--fg-rgb) / 0.75);
+    border: 1px solid rgb(var(--accent-rgb) / 0.35);
+    border-radius: 999px;
+    padding: 0.2rem 0.5rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.sched-chip:hover {
+    color: var(--fg);
+    border-color: var(--accent);
+}
+
+.sched-chip.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--on-accent);
+}
+
+/* A phase's chips together — Spring, the regular season's months, Playoffs —
+   in a faint pill of their own, so the phases read apart and a row breaks
+   between them. */
+.sched-chip-group {
+    display: inline-flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.25rem;
+    padding: 0.15rem;
+    border-radius: 999px;
+    background: rgb(var(--fg-rgb) / 0.05);
+}
+
+/* A month's heading stays at the top of the list while its games scroll. */
+.sched-month {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: var(--raised-d);
+    color: var(--accent-text);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-align: left;
+    padding: 0.35rem 0.6rem;
+}
+
+/* One game: date, opponent, result or time, TV. A phone moves the TV under
+   the opponent so the row fits. */
+.sched-row {
+    display: grid;
+    grid-template-columns: 4.6rem minmax(0, 1fr) auto auto;
+    grid-template-areas: "date opp out tv";
+    align-items: center;
+    column-gap: 0.6rem;
+    padding: 0.45rem 0.6rem;
+    border-left: 3px solid transparent;
+    border-bottom: 1px solid rgb(var(--fg-rgb) / 0.06);
+    font-size: 0.9rem;
+    text-align: left;
+}
+
+.sched-date { grid-area: date; color: rgb(var(--fg-rgb) / 0.75); white-space: nowrap; }
+.sched-dow { color: rgb(var(--fg-rgb) / 0.5); font-size: 0.8em; }
+.sched-opp { grid-area: opp; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sched-out { grid-area: out; font-weight: 700; white-space: nowrap; text-align: right; font-variant-numeric: tabular-nums; }
+.sched-tv { grid-area: tv; color: rgb(var(--fg-rgb) / 0.6); font-size: 0.8rem; white-space: nowrap; text-align: right; }
+.sched-tv:empty { display: none; }
+
+/* A played game's links — summary, box score, ESPN — in the slot the TV
+   takes for a game to come. Icons on a wide row, words on a phone's second
+   line. */
+.sched-links {
+    grid-area: tv;
+    display: inline-flex;
+    gap: 0.25rem;
+    justify-content: flex-end;
+    white-space: nowrap;
+}
+
+.sched-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+    background: transparent;
+    border: 1px solid rgb(var(--accent-rgb) / 0.3);
+    border-radius: 6px;
+    color: rgb(var(--fg-rgb) / 0.75);
+    font: inherit;
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1;
+    padding: 0.2rem 0.35rem;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.sched-link:hover,
+.sched-link:focus-visible {
+    color: var(--on-accent);
+    background: var(--accent);
+    border-color: var(--accent);
+    outline: none;
+}
+
+.sched-link .mdi { font-size: 0.95rem; }
+.sched-link-label { display: none; }
+.sched-link-espn { letter-spacing: 0.03em; }
+
+.sched-win { border-left-color: #4CAF50; }
+.sched-win .sched-out { color: var(--win-light, #4CAF50); }
+.sched-loss { border-left-color: #f44336; }
+.sched-loss .sched-out { color: var(--loss-light, #f66); }
+.sched-tie .sched-out { color: rgb(var(--fg-rgb) / 0.8); }
+.sched-live { border-left-color: #ff0000; background: rgba(255, 0, 0, 0.12); }
+.sched-live .sched-out { color: var(--loss-light, #ff6b6b); }
+.sched-next { border-left-color: var(--accent); background: rgb(var(--accent-rgb) / 0.12); }
+.sched-next .sched-out { color: var(--accent-text); }
+.sched-upcoming .sched-out { color: rgb(var(--fg-rgb) / 0.85); font-weight: 600; }
+.sched-postponed { opacity: 0.6; }
+
+.sched-click { cursor: pointer; }
+.sched-click:hover,
+.sched-click:focus-visible { background: rgb(var(--accent-rgb) / 0.1); outline: none; }
+
+.sched-row.highlight {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+    background: rgb(var(--accent-rgb) / 0.18);
+}
+
+@media (max-width: 480px) {
+    .sched-row {
+        grid-template-columns: 4.3rem minmax(0, 1fr) auto;
+        grid-template-areas: "date opp out" "date tv tv";
+        row-gap: 0.1rem;
+        font-size: 0.85rem;
+    }
+    .sched-tv { text-align: left; }
+    .sched-links { justify-content: flex-start; margin-top: 0.15rem; }
+    .sched-link-label { display: inline; }
+}
+
+/* --- Home page layout --- */
+
+/* From 1100px the page splits: the answer and the season's story on the
+   left, the schedule on the right as a panel the height of the screen (less
+   the sticky footer), its list scrolling inside. Narrower, the blocks stack
+   in source order: story, schedule, notes. */
+@media (min-width: 1100px) {
+    .container.home-layout {
+        max-width: 1280px;
+        width: 100%;
+        box-sizing: border-box;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(420px, 520px);
+        /* The title stays over the left column, so the schedule panel starts
+           at the top of the page and its full height fits above the footer
+           without scrolling first. */
+        grid-template-areas: "title sched" "main sched" "notes sched";
+        grid-template-rows: auto auto 1fr;
+        column-gap: 2rem;
+        align-items: start;
+        padding-top: 1rem;
+    }
+    .home-layout > .site-title { margin-top: 0.5rem; }
+    .home-layout > .site-title { grid-area: title; }
+    .home-main { grid-area: main; min-width: 0; }
+    .home-notes { grid-area: notes; }
+    .home-schedule {
+        grid-area: sched;
+        position: sticky;
+        top: 1rem;
+        height: calc(100vh - 1rem - 4.5rem);
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+    }
+    .home-schedule .schedule-section {
+        flex: 1;
+        min-height: 0;
+        max-width: none;
+        display: flex;
+        flex-direction: column;
+        margin: 0.5rem 0 0;
+    }
+    .home-schedule .schedule-section h3 {
+        margin-bottom: 0.75rem;
+    }
+    .home-schedule .schedule-grid {
+        flex: 1;
+        min-height: 0;
+        max-height: none;
+    }
+}
+
+.schedule-grid::-webkit-scrollbar,
+#card-ties .record-list::-webkit-scrollbar {
+    width: 8px;
+}
+
+.schedule-grid::-webkit-scrollbar-track,
+#card-ties .record-list::-webkit-scrollbar-track {
+    background: var(--bg);
+    border-radius: 4px;
+}
+
+.schedule-grid::-webkit-scrollbar-thumb,
+#card-ties .record-list::-webkit-scrollbar-thumb {
+    background: var(--accent);
+    border-radius: 4px;
+    border: 1px solid var(--bg);
+}
+
+.schedule-grid::-webkit-scrollbar-thumb:hover,
+#card-ties .record-list::-webkit-scrollbar-thumb:hover {
+    background: #e0a820;
+}
+
+.schedule-provider-bar {
+    margin-top: 0.6rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+/* Calendar subscription row under the provider: label, three links, and a
+   one-line note that wraps under them on a phone. */
+.schedule-calendar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.4rem 0.6rem;
+    padding: 0.45rem 0.7rem;
+}
+
+.schedule-calendar-link {
+    background: none;
+    border: 1px solid rgb(var(--accent-rgb) / 0.45);
+    border-radius: 999px;
+    color: var(--accent-text);
+    font: inherit;
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 0.2rem 0.65rem;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.schedule-calendar-link:hover {
+    background: rgb(var(--accent-rgb) / 0.12);
+}
+
+.schedule-calendar-note {
+    flex-basis: 100%;
+    font-size: 0.75rem;
+    color: rgb(var(--fg-rgb) / 0.6);
+}
+
+.schedule-provider-display {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0.5rem 0.7rem;
+    background: rgb(var(--shade-rgb) / calc(0.2 * var(--well-k)));
+    border-radius: 8px;
+    border-left: 3px solid var(--accent);
+}
+
+.schedule-provider-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: rgb(var(--fg-rgb) / 0.55);
+}
+
+.schedule-provider-name {
+    font-weight: 600;
+    color: var(--accent-text);
+    margin-right: auto;
+}
+
+.schedule-provider-name.schedule-provider-none {
+    color: rgb(var(--fg-rgb) / 0.5);
+    font-style: italic;
+    font-weight: 400;
+}
+
+.schedule-provider-change {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.8rem;
+    padding: 0.3rem 0.6rem;
+    border-radius: 6px;
+    border: 1px solid rgb(var(--accent-rgb) / 0.4);
+    background: rgb(var(--accent-rgb) / 0.08);
+    color: var(--accent-text);
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+}
+
+.schedule-provider-change:hover {
+    background: rgb(var(--accent-rgb) / 0.18);
+    border-color: var(--accent);
+}
+
+.provider-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    cursor: pointer;
+}
+
+.provider-dialog {
+    position: relative;
+    background: var(--raised-c);
+    border: 1px solid rgb(var(--accent-rgb) / 0.3);
+    border-radius: 12px;
+    padding: 1.25rem;
+    width: 90%;
+    max-width: 460px;
+    max-height: 80vh;
+    overflow-y: auto;
+    z-index: 1;
+    color: var(--fg);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+    animation: galleryIn 0.2s ease-out;
+}
+
+.provider-dialog .gallery-header {
+    padding: 0 0 0.8rem;
+}
+
+.provider-dialog .watch-channels {
+    gap: 0;
+}
+
+.provider-dialog .watch-provider-picker {
+    margin: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.game-item {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    padding: 0.8rem;
+    background: rgb(var(--shade-rgb) / calc(0.2 * var(--well-k)));
+    border-radius: 8px;
+    border-left: 4px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.game-item.completed.win {
+    border-left-color: #4CAF50;
+    background: rgba(76, 175, 80, 0.1);
+}
+
+.game-item.completed.loss {
+    border-left-color: #f44336;
+    background: rgba(244, 67, 54, 0.1);
+}
+
+.game-item.live {
+    border-left-color: #ff0000;
+    background: rgba(255, 0, 0, 0.1);
+    animation: pulse 2s infinite;
+}
+
+.game-item.next {
+    border-left-color: var(--accent);
+    background: rgb(var(--accent-rgb) / 0.15);
+    box-shadow: 0 0 10px rgb(var(--accent-rgb) / 0.3);
+}
+
+.game-item.highlight {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+    box-shadow: 0 0 14px rgb(var(--accent-rgb) / 0.55);
+    animation: pulse 1.5s 2;
+}
+
+/* min-width: 0 on both: as flex items they would otherwise never be
+   narrower than their longest unbreakable line, and the live card's pitch
+   list pushed a 360px phone's card 11px past the schedule list. */
+.game-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    width: 100%;
+    min-width: 0;
+}
+
+.game-details {
+    flex: 1;
+    min-width: 0;
+}
+
+.game-opponent {
+    font-weight: bold;
+    font-size: 1rem;
+    margin-bottom: 0.3rem;
+}
+
+.game-date {
+    font-size: 0.85rem;
+    opacity: 0.8;
+    color: var(--accent-text);
+}
+
+/* All-time head-to-head note on current-season schedule items */
+.game-h2h {
+    display: block;
+    font-size: 0.78rem;
+    color: rgb(var(--fg-rgb) / 0.65);
+    text-decoration: none;
+    margin-top: 0.15rem;
+}
+
+.game-h2h:hover {
+    color: var(--accent-text);
+    text-decoration: underline;
+}
+
+.game-network {
+    opacity: 0.7;
+    font-style: italic;
+}
+
+.game-channum {
+    font-style: normal;
+    font-weight: 600;
+    opacity: 1;
+    color: var(--accent-text);
+    background: rgb(var(--accent-rgb) / 0.14);
+    padding: 0.05rem 0.35rem;
+    border-radius: 0.3rem;
+    margin-left: 0.2rem;
+    white-space: nowrap;
+}
+
+.game-channel {
+    font-size: 0.8rem;
+    margin-top: 0.15rem;
+    line-height: 1.3;
+}
+
+.game-channel-watchable {
+    cursor: pointer;
+    transition: color 0.15s;
+}
+
+.game-channel-watchable:hover {
+    color: var(--accent-text);
+}
+
+.game-channel-watchable:hover .game-network {
+    opacity: 1;
+}
+
+.watch-service-area-picker {
+    margin-top: 0.6rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.watch-service-area-picker[hidden] {
+    display: none;
+}
+
+.watch-service-area-label {
+    font-size: 0.7rem;
+    color: rgb(var(--fg-rgb) / 0.65);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.watch-service-area-select {
+    font-size: 0.85rem;
+    padding: 0.4rem 0.55rem;
+    border-radius: 6px;
+    border: 1px solid rgb(var(--fg-rgb) / 0.2);
+    background: rgb(var(--fg-rgb) / 0.06);
+    color: var(--fg);
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+}
+
+.watch-service-area-select:hover {
+    border-color: rgb(var(--accent-rgb) / 0.5);
+}
+
+.watch-service-area-select:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: rgb(var(--accent-rgb) / 0.08);
+}
+
+.watch-service-area-select option {
+    color: #15161e;
+    background: var(--fg);
+}
+
+.game-result {
+    text-align: center;
+    width: 100%;
+    margin-top: 0.5rem;
+}
+
+.game-score {
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.game-score.win {
+    color: var(--win-light, #4CAF50);
+}
+
+.game-score.loss {
+    color: var(--loss-light, #f44336);
+}
+
+.game-score.live {
+    color: var(--loss-light, #ff0000);
+}
+
+.game-score a:hover {
+    text-decoration: underline !important;
+    opacity: 0.8;
+}
+
+.game-status {
+    font-size: 0.8rem;
+    opacity: 0.9;
+    margin-top: 0.2rem;
+}
+
+.live-indicator-small {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    background: #ff0000;
+    border-radius: 50%;
+    margin-right: 0.3rem;
+    animation: blink 1s infinite;
+}
+
+.countdown-small {
+    font-size: 0.8rem;
+    color: var(--accent-text);
+    font-weight: bold;
+    margin-top: 0.2rem;
+}
+
+.last-play {
+    font-size: 0.75rem;
+    color: var(--fg);
+    background: rgb(var(--shade-rgb) / calc(0.3 * var(--well-k)));
+    padding: 0.4rem;
+    border-radius: 4px;
+    margin-top: 0.5rem;
+    white-space: pre-line;
+    line-height: 1.3;
+    border-left: 2px solid var(--accent);
+}
+
+.last-play strong {
+    color: var(--accent-text);
+    font-weight: bold;
+}
+
+/* Live card detail (live-core.js): the matchup, this at-bat on a strike
+   zone with its pitches listed, the other team's pitcher, the last plays. */
+/* Text and drawings scale with the screen: 0.76rem and 84px on a phone,
+   up to 0.88rem and 124px with room to spare, so a phone sees the card
+   whole without scrolling. */
+.live-detail {
+    margin-top: 0.5rem;
+    padding: 0.5rem 0.55rem;
+    background: rgb(var(--shade-rgb) / calc(0.3 * var(--well-k)));
+    border-radius: 6px;
+    font-size: clamp(0.76rem, 0.45rem + 1.2vw, 0.88rem);
+    line-height: 1.4;
+    text-align: left;
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+
+.live-row + .live-row,
+.live-matchup + *,
+.live-atbat + *,
+.live-other + .live-log {
+    margin-top: 0.3rem;
+}
+
+.live-role {
+    color: rgb(var(--fg-rgb) / 0.6);
+    text-transform: uppercase;
+    font-size: 0.76em;
+    letter-spacing: 0.04em;
+    margin-right: 0.15rem;
+}
+
+.live-row strong,
+.probables strong {
+    color: var(--fg);
+}
+
+.live-team {
+    color: var(--accent-text);
+    font-weight: 700;
+    font-size: 0.82em;
+}
+
+.live-pos {
+    color: rgb(var(--fg-rgb) / 0.85);
+    font-weight: 600;
+}
+
+/* A stat line moves to the next row whole rather than breaking mid-line,
+   and wraps within itself only when it is wider than the card. (nowrap
+   here once made the whole detail box wider than a phone's card.) */
+.live-stats {
+    color: rgb(var(--fg-rgb) / 0.8);
+    display: inline-block;
+}
+
+.live-note {
+    color: rgb(var(--fg-rgb) / 0.65);
+    font-style: italic;
+    margin-top: 0.1rem;
+}
+
+.live-atbat {
+    display: flex;
+    gap: 0.6rem;
+    align-items: center;
+}
+
+.live-zone {
+    width: clamp(84px, 22vw, 124px);
+    flex: none;
+    background: rgb(var(--fg-rgb) / 0.04);
+    border-radius: 4px;
+}
+
+/* The batter's box on the side he stands, behind the pitches. */
+.live-zone .zone-batter {
+    fill: rgb(var(--accent-rgb) / 0.16);
+    stroke: rgb(var(--accent-rgb) / 0.45);
+    stroke-width: 0.8;
+}
+
+.live-zone .zone-batter-label {
+    fill: var(--accent-text);
+    font-size: 11px;
+    font-weight: 800;
+    text-anchor: middle;
+}
+
+.live-zone .zone-box {
+    fill: none;
+    stroke: rgb(var(--fg-rgb) / 0.7);
+    stroke-width: 1.2;
+}
+
+.live-zone text {
+    font-size: 9px;
+    font-weight: 700;
+    fill: var(--bg);
+    text-anchor: middle;
+}
+
+/* Gameday's colors: green a ball, red a strike or foul, blue in play. */
+.zone-pitch.zone-ball circle { fill: #4caf50; }
+.zone-pitch.zone-strike circle,
+.zone-pitch.zone-foul circle { fill: #f44336; }
+.zone-pitch.zone-inplay circle { fill: #42a5f5; }
+.zone-pitch.zone-hbp circle { fill: #ff9800; }
+.zone-pitch circle { stroke: var(--bg); stroke-width: 0.8; }
+
+.live-pitches {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    flex: 1;
+    min-width: 0;
+}
+
+.live-pitches li {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.live-pitch-n {
+    display: inline-block;
+    width: 1.5em;
+    height: 1.5em;
+    line-height: 1.5em;
+    border-radius: 50%;
+    text-align: center;
+    font-weight: 700;
+    font-size: 0.78em;
+    color: var(--on-accent);
+    background: #f44336;
+}
+
+.live-pitches .zone-ball .live-pitch-n { background: #4caf50; }
+.live-pitches .zone-inplay .live-pitch-n { background: #42a5f5; }
+.live-pitches .zone-hbp .live-pitch-n { background: #ff9800; }
+
+.live-mph {
+    color: rgb(var(--fg-rgb) / 0.65);
+}
+
+.live-call {
+    color: rgb(var(--fg-rgb) / 0.85);
+    font-weight: 600;
+}
+
+/* The last ball in play: a field from behind home plate with the ball's
+   path, gold for a hit and red for an out. */
+.live-hit {
+    display: flex;
+    gap: 0.6rem;
+    align-items: center;
+}
+
+.live-field {
+    width: clamp(84px, 22vw, 124px);
+    flex: none;
+}
+
+.live-field .field-grass {
+    fill: rgba(76, 175, 80, 0.18);
+    stroke: rgb(var(--fg-rgb) / 0.35);
+    stroke-width: 1.2;
+}
+
+.live-field .field-infield {
+    fill: rgb(var(--accent-rgb) / 0.12);
+    stroke: rgb(var(--fg-rgb) / 0.45);
+    stroke-width: 1;
+}
+
+.live-field .field-path {
+    fill: none;
+    stroke: #f44336;
+    stroke-width: 2.4;
+    stroke-linecap: round;
+}
+
+.live-field .field-ball {
+    fill: #f44336;
+    stroke: var(--bg);
+    stroke-width: 1.2;
+}
+
+.live-field .field-path.field-hit { stroke: var(--accent); }
+.live-field .field-ball.field-hit { fill: var(--accent); }
+
+.live-hit-text {
+    flex: 1;
+    min-width: 0;
+}
+
+.live-hit-result {
+    color: var(--loss-light, #f88);
+    font-weight: 600;
+}
+
+.live-hit-result.live-hit-good {
+    color: var(--accent-text);
+}
+
+.live-log {
+    list-style: none;
+    margin: 0;
+    padding: 0.3rem 0 0;
+    border-top: 1px solid rgb(var(--fg-rgb) / 0.12);
+}
+
+.live-log li + li {
+    margin-top: 0.15rem;
+    opacity: 0.75;
+}
+
+.live-inning {
+    color: var(--accent-text);
+    font-weight: 700;
+    margin-right: 0.2rem;
+}
+
+.live-scoring {
+    font-weight: 700;
+}
+
+/* The next game's probable starters, under its countdown. */
+.probables {
+    font-size: 0.85rem;
+    margin-top: 0.25rem;
+}
+
+.probables-sep {
+    color: rgb(var(--fg-rgb) / 0.6);
+}
+
+/* Live base-out state: diamond, out dots, count. Centred like every other line
+   of the card — flex does not inherit text-align, and left to itself it sat
+   flush left under a centred inning line. */
+.situation {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.6rem;
+    margin-top: 0.35rem;
+}
+
+.situation-bases {
+    width: 50px;
+    height: 35px;
+    flex: none;
+}
+
+.situation-bases .base {
+    fill: none;
+    stroke: rgb(var(--fg-rgb) / 0.6);
+    stroke-width: 1.5;
+}
+
+.situation-bases .base.on {
+    fill: var(--accent);
+    stroke: var(--accent);
+}
+
+.situation-outs {
+    display: flex;
+    gap: 4px;
+}
+
+.out-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    border: 1.5px solid rgb(var(--fg-rgb) / 0.6);
+    box-sizing: border-box;
+}
+
+.out-dot.on {
+    background: var(--accent);
+    border-color: var(--accent);
+}
+
+.situation-count {
+    font-size: 0.8rem;
+    font-weight: bold;
+    font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 600px) {
+    h1 {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+    }
+    
+    .answer {
+        font-size: 2.5rem;
+        margin: 1rem 0;
+    }
+    
+    .container {
+        padding: 1rem;
+        width: 100%;
+        box-sizing: border-box;
+    }
+    
+    .schedule-section {
+        width: 100%;
+        padding: 1rem;
+        margin: 1rem 0;
+        box-sizing: border-box;
+        border-radius: 10px;
+    }
+
+    .share-section {
+        width: 100%;
+    }
+
+    .schedule-grid {
+        max-height: 60vh;
+    }
+
+    .season-selector {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.4rem;
+        width: 100%;
+    }
+
+    .season-selector #season-first,
+    .season-selector #season-prev10,
+    .season-selector #season-prev  { order: 1; }
+    .season-selector #season-label { order: 2; width: 100%; }
+    .season-selector #season-next,
+    .season-selector #season-next10,
+    .season-selector #season-last  { order: 3; }
+
+    .schedule-section h3 {
+        margin-bottom: 1.5rem;
+    }
+}
+
+.site-footer {
+    position: sticky;
+    bottom: 0;
+    margin-top: 1.5rem;
+    padding: 0.4rem 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
+    border-top: 1px solid rgb(var(--fg-rgb) / 0.08);
+    background: linear-gradient(to top, rgb(var(--surface-rgb) / 0.98), rgb(var(--surface-rgb) / 0.92));
+    backdrop-filter: blur(8px);
+    z-index: 50;
+}
+
+.footer-nav {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.15rem;
+    width: 100%;
+    max-width: 960px;
+}
+
+.footer-nav-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.35rem 0.6rem;
+    border-radius: 6px;
+    color: rgb(var(--fg-rgb) / 0.6);
+    text-decoration: none;
+    font-size: 0.8rem;
+    font-weight: 500;
+    white-space: nowrap;
+    transition: color 0.15s, background 0.15s;
+}
+
+/* The theme switcher is a button among links: drop the button chrome. */
+.theme-toggle {
+    background: none;
+    border: none;
+    font-family: inherit;
+    cursor: pointer;
+}
+
+.footer-nav-link:hover {
+    color: var(--fg);
+    background: rgb(var(--fg-rgb) / 0.08);
+}
+
+.footer-nav-link[aria-current="page"] {
+    color: var(--accent-text);
+}
+
+.footer-nav-link .mdi {
+    font-size: 0.95rem;
+}
+
+/* Mobile-only short label variant (e.g. "H2H" for "Head-to-Head"). */
+.footer-label-short {
+    display: none;
+}
+
+.footer-share-wrap {
+    position: relative;
+    display: inline-flex;
+}
+
+.footer-share-trigger {
+    cursor: pointer;
+    border: none;
+    background: none;
+    /* font:inherit makes the button pick up the page font, but the shorthand
+       also resets size/weight to the parent's — re-assert the nav-link's. */
+    font: inherit;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.footer-share-caret {
+    font-size: 0.85rem;
+    transition: transform 0.2s;
+}
+
+.footer-share-trigger[aria-expanded="true"] .footer-share-caret {
+    transform: rotate(180deg);
+}
+
+.footer-share {
+    position: absolute;
+    bottom: calc(100% + 0.4rem);
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    min-width: 180px;
+    padding: 0.35rem;
+    border-radius: 8px;
+    border: 1px solid rgb(var(--accent-rgb) / 0.25);
+    background: var(--raised-a);
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.5);
+    gap: 0.1rem;
+    z-index: 60;
+}
+
+.footer-share[hidden] {
+    display: none;
+}
+
+.footer-share-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.65rem;
+    border: none;
+    border-radius: 6px;
+    background: none;
+    font: inherit;
+    cursor: pointer;
+    color: rgb(var(--fg-rgb) / 0.85);
+    text-decoration: none;
+    font-size: 0.82rem;
+    white-space: nowrap;
+    transition: background 0.15s, color 0.15s;
+}
+
+.footer-share-item:hover {
+    background: rgb(var(--accent-rgb) / 0.15);
+    color: var(--fg);
+}
+
+.footer-share-item .mdi {
+    font-size: 1rem;
+    color: var(--accent-text);
+}
+
+@media (max-width: 640px) {
+    .footer-nav {
+        gap: 0.05rem;
+    }
+
+    /* Tab-bar style: icon with a tiny label underneath, one row total.
+       Side padding 0.1rem: the Stats link made the home page's nine items
+       331px against 326 available at 390px, and GitHub wrapped to a second
+       row; at 0.25rem it did not fit, at 0.1rem the row needs 288px, which
+       also fits a 360px phone. */
+    .footer-nav-link {
+        flex-direction: column;
+        gap: 0.1rem;
+        padding: 0.25rem 0.1rem;
+        font-size: 0.55rem;
+        line-height: 1;
+    }
+
+    .footer-nav-link .mdi {
+        font-size: 1.05rem;
+    }
+
+    /* The theme switcher (theme.js) made the home page's row 339px against
+       328 at 360px; without the gap between items and the switcher's own
+       side padding, with its icon a touch smaller, the row fits again. */
+    .footer-nav {
+        gap: 0;
+    }
+
+    .footer-nav .theme-toggle {
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    .footer-nav .theme-toggle .mdi {
+        font-size: 0.95rem;
+    }
+
+    .footer-label-full {
+        display: none;
+    }
+
+    .footer-label-short {
+        display: inline;
+    }
+
+    .footer-share-caret {
+        display: none;
+    }
+
+    .footer-share {
+        right: auto;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+}
+
+/* Disclaimer / licenses modal. The trigger renders as a .footer-nav-link;
+   only the button chrome needs resetting (size/weight/color come from the
+   nav-link rule, including its mobile override). */
+.license-link {
+    background: none;
+    border: none;
+    font-family: inherit;
+    cursor: pointer;
+}
+
+.license-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    background: rgba(6, 17, 34, 0.75);
+}
+
+/* display:flex above would defeat the hidden attribute's UA display:none. */
+.license-overlay[hidden] {
+    display: none;
+}
+
+.license-modal {
+    position: relative;
+    max-width: 34rem;
+    max-height: 85vh;
+    overflow-y: auto;
+    padding: 1.5rem 1.75rem;
+    border-radius: 12px;
+    border: 1px solid rgb(var(--accent-rgb) / 0.35);
+    background: var(--raised-e);
+    text-align: left;
+    font-size: 0.88rem;
+    color: rgb(var(--fg-rgb) / 0.8);
+    line-height: 1.5;
+}
+
+.license-modal h2 {
+    margin: 0 0 0.75rem;
+    font-size: 1.1rem;
+    color: var(--accent-text);
+}
+
+.license-modal h3 {
+    margin: 1rem 0 0.3rem;
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: rgb(var(--accent-text-rgb) / 0.85);
+}
+
+.license-modal p {
+    margin: 0.35rem 0;
+}
+
+.license-modal a {
+    color: var(--accent-text);
+}
+
+.license-close {
+    position: absolute;
+    top: 0.7rem;
+    right: 0.7rem;
+    width: 1.8rem;
+    height: 1.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: 1px solid rgb(var(--fg-rgb) / 0.2);
+    background: none;
+    color: rgb(var(--fg-rgb) / 0.6);
+    cursor: pointer;
+}
+
+.license-close:hover {
+    color: var(--fg);
+    border-color: rgb(var(--fg-rgb) / 0.4);
+}
+
+/* Photo gallery button */
+.gallery-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-top: 0.6rem;
+    padding: 0.4rem 1rem;
+    background: rgb(var(--accent-rgb) / 0.12);
+    border: 1.5px solid rgb(var(--accent-rgb) / 0.5);
+    border-radius: 20px;
+    color: var(--accent-text);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s, transform 0.15s;
+    letter-spacing: 0.03em;
+}
+
+.gallery-btn:hover {
+    background: rgb(var(--accent-rgb) / 0.25);
+    border-color: var(--accent);
+    transform: translateY(-1px);
+}
+
+.gallery-btn .mdi {
+    font-size: 1rem;
+}
+
+/* Modal overlay */
+.gallery-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.gallery-modal[hidden] {
+    display: none;
+}
+
+.gallery-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(4px);
+}
+
+.gallery-dialog {
+    position: relative;
+    background: var(--raised-a);
+    border: 2px solid var(--accent);
+    border-radius: 12px;
+    width: 100%;
+    max-width: 860px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+    animation: galleryIn 0.2s ease-out;
+}
+
+@keyframes galleryIn {
+    from { opacity: 0; transform: scale(0.95) translateY(8px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.gallery-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid rgb(var(--accent-rgb) / 0.3);
+    flex-shrink: 0;
+}
+
+.gallery-title {
+    margin: 0;
+    font-size: 1.2rem;
+    color: var(--accent-text);
+}
+
+.gallery-close {
+    background: none;
+    border: none;
+    color: rgb(var(--fg-rgb) / 0.6);
+    font-size: 1.5rem;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0.25rem;
+    border-radius: 4px;
+    transition: color 0.2s, background 0.2s;
+    display: flex;
+    align-items: center;
+}
+
+.gallery-close:hover {
+    color: var(--fg);
+    background: rgb(var(--fg-rgb) / 0.1);
+}
+
+.gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1rem;
+    padding: 1.25rem;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--accent) var(--raised-a);
+}
+
+.gallery-grid::-webkit-scrollbar { width: 8px; }
+.gallery-grid::-webkit-scrollbar-track { background: var(--raised-a); border-radius: 4px; }
+.gallery-grid::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 4px; }
+
+.gallery-item {
+    display: flex;
+    flex-direction: column;
+    background: rgb(var(--shade-rgb) / calc(0.3 * var(--well-k)));
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid rgb(var(--accent-rgb) / 0.15);
+    transition: border-color 0.2s, transform 0.2s;
+}
+
+.gallery-item:hover {
+    border-color: rgb(var(--accent-rgb) / 0.5);
+    transform: translateY(-2px);
+}
+
+.gallery-item img {
+    width: 100%;
+    aspect-ratio: 4/3;
+    object-fit: cover;
+    display: block;
+    background: rgb(var(--shade-rgb) / calc(0.4 * var(--well-k)));
+    cursor: zoom-in;
+}
+
+.gallery-item-info {
+    padding: 0.6rem 0.75rem 0.75rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.gallery-caption {
+    font-size: 0.85rem;
+    color: rgb(var(--fg-rgb) / 0.9);
+    line-height: 1.4;
+}
+
+.gallery-license {
+    font-size: 0.72rem;
+    color: rgb(var(--accent-text-rgb) / 0.7);
+    margin-top: auto;
+}
+
+.gallery-license a {
+    color: rgb(var(--accent-text-rgb) / 0.7);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    transition: color 0.2s;
+}
+
+.gallery-license a:hover {
+    color: var(--accent-text);
+}
+
+/* Lightbox */
+.lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 1100;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    background: rgba(0, 0, 0, 0.92);
+    backdrop-filter: blur(6px);
+    cursor: zoom-out;
+    animation: lightboxIn 0.18s ease-out;
+}
+
+.lightbox[hidden] {
+    display: none;
+}
+
+@keyframes lightboxIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+.lightbox img {
+    max-width: 100%;
+    max-height: 80vh;
+    object-fit: contain;
+    border-radius: 4px;
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.8);
+    animation: lightboxImgIn 0.18s ease-out;
+}
+
+@keyframes lightboxImgIn {
+    from { transform: scale(0.96); }
+    to   { transform: scale(1); }
+}
+
+.lightbox-info {
+    margin-top: 1rem;
+    text-align: center;
+    max-width: 640px;
+    pointer-events: none;
+}
+
+.lightbox-caption {
+    font-size: 0.9rem;
+    color: rgb(var(--fg-rgb) / 0.9);
+    line-height: 1.4;
+    margin-bottom: 0.4rem;
+}
+
+.lightbox-license {
+    font-size: 0.75rem;
+    color: rgb(var(--accent-text-rgb) / 0.7);
+    pointer-events: auto;
+}
+
+.lightbox-license a {
+    color: rgb(var(--accent-text-rgb) / 0.7);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.lightbox-license a:hover {
+    color: var(--accent-text);
+}
+
+.lightbox-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: rgb(var(--fg-rgb) / 0.1);
+    border: none;
+    color: rgb(var(--fg-rgb) / 0.7);
+    font-size: 1.5rem;
+    width: 2.2rem;
+    height: 2.2rem;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, color 0.2s;
+}
+
+.lightbox-close:hover {
+    background: rgb(var(--fg-rgb) / 0.2);
+    color: var(--fg);
+}
+
+.lightbox-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgb(var(--fg-rgb) / 0.1);
+    border: 1.5px solid rgb(var(--fg-rgb) / 0.2);
+    color: rgb(var(--fg-rgb) / 0.8);
+    font-size: 2rem;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+    z-index: 10;
+}
+
+.lightbox-nav:hover:not(:disabled) {
+    background: rgb(var(--fg-rgb) / 0.2);
+    border-color: rgb(var(--fg-rgb) / 0.5);
+    color: var(--fg);
+}
+
+.lightbox-nav.hidden {
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.lightbox-nav-prev { left: 1rem; }
+.lightbox-nav-next { right: 1rem; }
+
+@media (max-width: 600px) {
+    .gallery-dialog {
+        max-height: 95vh;
+    }
+
+    .gallery-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* --- Records & Superlatives page --- */
+
+.records-container {
+    /* width, not just max-width. body is a column flexbox with
+       align-items: center, so a flex item carrying only a max-width is sized
+       shrink-to-fit and its inline size is indefinite. An auto-fit track list
+       resolves to exactly one repetition when the available inline size is
+       indefinite, so .records-grid below collapsed to a single column and the
+       page rendered as one tall stack. The mobile rule already sets
+       width: 100%, which is why this only ever went wrong above 600px. */
+    width: 100%;
+    max-width: 900px;
+    box-sizing: border-box;
+}
+
+.records-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--accent-text);
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    margin-bottom: 1rem;
+}
+
+.records-back:hover {
+    text-decoration: underline;
+}
+
+.records-title {
+    margin-bottom: 0.25rem;
+}
+
+.records-subtitle {
+    color: rgb(var(--fg-rgb) / 0.75);
+    margin: 0 0 2rem;
+    font-size: 1.05rem;
+}
+
+.records-grid {
+    display: grid;
+    /* Columns never drop below 300px — narrower and the entry detail lines
+       (dates, pitcher/fielder attributions) wrap badly. The container caps at
+       900px (836px inner), so this yields two comfortable columns.
+       min(100%, …) keeps very small phones from overflowing.
+
+       That 836px only exists because .records-container sets an explicit
+       width. This rule read as correct for months while rendering a single
+       column: auto-fit against an indefinite inline size is one repetition,
+       however generous the minmax. */
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+    gap: 1.25rem;
+    text-align: left;
+}
+
+.record-card {
+    background: rgb(var(--surface-rgb) / 0.8);
+    border: 2px solid var(--accent);
+    border-radius: 10px;
+    padding: 1.25rem 1.25rem 1rem;
+    display: flex;
+    flex-direction: column;
+    backdrop-filter: blur(10px);
+}
+
+.record-card-focus {
+    box-shadow: 0 0 24px rgb(var(--accent-rgb) / 0.55);
+}
+
+.record-card-title {
+    color: var(--accent-text);
+    font-size: 1.25rem;
+    margin: 0 0 0.15rem;
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+}
+
+.record-note {
+    color: rgb(var(--fg-rgb) / 0.6);
+    font-size: 0.82rem;
+    margin: 0 0 0.9rem;
+}
+
+.record-list {
+    list-style: none;
+    margin: 0 0 1rem;
+    padding: 0;
+    flex: 1;
+}
+
+.record-entry {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    column-gap: 0.6rem;
+    align-items: baseline;
+    padding: 0.3rem 0;
+    border-bottom: 1px solid rgb(var(--fg-rgb) / 0.08);
+}
+
+.record-entry:last-child {
+    border-bottom: none;
+}
+
+.record-entry-main {
+    font-weight: bold;
+    font-variant-numeric: tabular-nums;
+    color: var(--fg);
+}
+
+.record-entry-sub {
+    color: rgb(var(--fg-rgb) / 0.85);
+}
+
+.record-entry-detail {
+    /* A consistent small indent from the card edge — aligning under the sub
+       text pushed details far right whenever the first column was wide. */
+    grid-column: 1 / -1;
+    padding-left: 1rem;
+    color: rgb(var(--fg-rgb) / 0.55);
+    font-size: 0.8rem;
+}
+
+.record-entry a {
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-color: rgb(var(--accent-rgb) / 0.45);
+    text-underline-offset: 2px;
+}
+
+.record-entry a:hover {
+    color: var(--accent-text);
+    text-decoration-color: var(--accent);
+}
+
+.record-empty {
+    color: rgb(var(--fg-rgb) / 0.7);
+    flex: 1;
+}
+
+/* The ties card lists every tie (39 and counting) — scroll it instead of
+   letting it stretch the whole grid row. Scrollbar matches .schedule-grid
+   (shared ::-webkit-scrollbar rules above). */
+#card-ties .record-list {
+    max-height: 21rem;
+    overflow-y: auto;
+    padding-right: 0.4rem;
+    scrollbar-width: thin;
+    scrollbar-color: var(--accent) var(--bg);
+}
+
+.record-share {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+}
+
+.record-share-btn {
+    padding: 0.35rem 0.6rem;
+    border-radius: 50%;
+    font-size: 1rem;
+}
+
+/* Pill styling comes from .share-btn on the same element. */
+.records-link {
+    margin: 0.75rem 0.25rem 0;
+}
+
+/* --- Head-to-Head page --- */
+
+.h2h-focus-card {
+    margin-bottom: 1.5rem;
+    text-align: left;
+    position: relative;
+}
+
+.h2h-focus-close {
+    position: absolute;
+    top: 0.6rem;
+    right: 0.6rem;
+    width: 2rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: 50%;
+    background: rgb(var(--fg-rgb) / 0.08);
+    color: rgb(var(--fg-rgb) / 0.7);
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    z-index: 1;
+}
+
+.h2h-focus-close:hover {
+    background: rgb(var(--accent-rgb) / 0.2);
+    color: var(--accent-text);
+}
+
+.h2h-focus-close:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px rgb(var(--accent-rgb) / 0.6);
+}
+
+.h2h-record {
+    color: var(--accent-text);
+    font-size: 2.6rem;
+    font-weight: bold;
+    font-variant-numeric: tabular-nums;
+    margin: 0.1rem 0 0.35rem;
+}
+
+.h2h-stats {
+    margin-bottom: 1rem;
+}
+
+.h2h-stat {
+    display: grid;
+    grid-template-columns: 8.5rem 1fr;
+    column-gap: 0.6rem;
+    padding: 0.3rem 0;
+    border-bottom: 1px solid rgb(var(--fg-rgb) / 0.08);
+}
+
+.h2h-stat:last-child {
+    border-bottom: none;
+}
+
+.h2h-stat-label {
+    color: rgb(var(--fg-rgb) / 0.6);
+}
+
+.h2h-stat a {
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-color: rgb(var(--accent-rgb) / 0.45);
+    text-underline-offset: 2px;
+}
+
+.h2h-stat a:hover {
+    color: var(--accent-text);
+    text-decoration-color: var(--accent);
+}
+
+/* --- Head-to-Head breakdown card --- */
+
+.h2h-breakdown {
+    margin-top: 0.75rem;
+    border-top: 1px solid rgb(var(--accent-rgb) / 0.25);
+    padding-top: 0.75rem;
+}
+
+.h2h-breakdown-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+    gap: 0.5rem 1.25rem;
+    margin-bottom: 0.75rem;
+}
+
+.h2h-breakdown-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    padding: 0.4rem 0.6rem;
+    background: rgb(var(--surface-rgb) / 0.6);
+    border-radius: 8px;
+    border: 1px solid rgb(var(--fg-rgb) / 0.06);
+}
+
+.h2h-breakdown-val {
+    color: var(--fg);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.h2h-breakdown-meta {
+    color: rgb(var(--fg-rgb) / 0.55);
+    font-weight: 400;
+    font-size: 0.85rem;
+}
+
+.h2h-breakdown-extra {
+    margin-bottom: 0.75rem;
+}
+
+.h2h-breakdown-section {
+    margin-top: 0.5rem;
+}
+
+.h2h-breakdown-heading {
+    color: var(--accent-text);
+    font-size: 0.85rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin: 0 0 0.4rem;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.h2h-breakdown-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.h2h-breakdown-table td {
+    padding: 0.3rem 0.6rem;
+    border-bottom: 1px solid rgb(var(--fg-rgb) / 0.06);
+}
+
+.h2h-breakdown-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Clickable table rows */
+.h2h-row {
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.h2h-row:hover,
+.h2h-row:focus-visible {
+    background: rgb(var(--accent-rgb) / 0.12);
+    outline: none;
+}
+
+.h2h-row:focus-visible {
+    box-shadow: inset 0 0 0 2px rgb(var(--accent-rgb) / 0.6);
+}
+
+.h2h-row-name {
+    font-weight: 600;
+}
+
+@media (max-width: 600px) {
+    .h2h-breakdown-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 0.4rem 0.6rem;
+    }
+
+    .h2h-breakdown-stat {
+        padding: 0.3rem 0.45rem;
+    }
+}
+
+.h2h-controls {
+    margin-bottom: 0.35rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+    justify-content: center;
+    /* The centered page layout sizes the container to its widest child (the
+       table); span it so the controls center as one row instead of
+       shrink-wrapping into a ragged stack. */
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.h2h-select {
+    padding: 0.5rem 0.9rem;
+    background: rgb(var(--surface-rgb) / 0.8);
+    border: 1.5px solid rgb(var(--accent-rgb) / 0.5);
+    border-radius: 20px;
+    color: var(--fg);
+    font-size: 0.9rem;
+}
+
+.h2h-select:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+
+.h2h-select option {
+    background: var(--bg);
+}
+
+.h2h-check {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: rgb(var(--fg-rgb) / 0.85);
+    font-size: 0.9rem;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.h2h-check input {
+    accent-color: var(--accent);
+}
+
+.h2h-count {
+    text-align: center;
+    color: rgb(var(--fg-rgb) / 0.6);
+    font-size: 0.85rem;
+    margin: 0 0 0.75rem;
+    min-height: 1em;
+}
+
+.h2h-filter {
+    width: 100%;
+    max-width: 12rem;
+    box-sizing: border-box;
+    padding: 0.5rem 0.9rem;
+    background: rgb(var(--surface-rgb) / 0.8);
+    border: 1.5px solid rgb(var(--accent-rgb) / 0.5);
+    border-radius: 20px;
+    color: var(--fg);
+    font-size: 0.95rem;
+}
+
+.h2h-filter::placeholder {
+    color: rgb(var(--fg-rgb) / 0.5);
+}
+
+.h2h-filter:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+
+.h2h-table-wrap {
+    overflow-x: auto;
+}
+
+.h2h-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: rgb(var(--surface-rgb) / 0.8);
+    border: 2px solid var(--accent);
+    border-radius: 10px;
+    overflow: hidden;
+    text-align: left;
+}
+
+.h2h-table th,
+.h2h-table td {
+    padding: 0.45rem 0.9rem;
+    border-bottom: 1px solid rgb(var(--fg-rgb) / 0.08);
+}
+
+.h2h-table th {
+    color: var(--accent-text);
+    font-size: 0.85rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.h2h-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.h2h-table tbody tr:hover {
+    background: rgb(var(--accent-rgb) / 0.08);
+}
+
+.h2h-table td a {
+    color: var(--fg);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.h2h-table td a:hover {
+    color: var(--accent-text);
+}
+
+.h2h-num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+/* Stats page. Eighteen batting columns do not fit 900px, so the page is
+   wider and the table scrolls sideways inside its wrap, with the player
+   column pinned so a row stays readable mid-scroll. The pinned cell needs an
+   opaque background — the table's own is translucent — so it takes the
+   page's navy. */
+.stats-container {
+    max-width: 1200px;
+}
+
+/* clip, not the shared table's hidden: hidden makes the table a scroll
+   container of its own, so the sticky player column stuck to the table —
+   which never scrolls — and slid away with the numbers. clip keeps the
+   rounded corners without that.
+   Separate borders, not collapsed: with collapsed borders the scrolled cells
+   painted a sliver of their digits over the pinned column's left edge. */
+.stats-table {
+    overflow: clip;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.stats-table th,
+.stats-table td {
+    padding: 0.4rem 0.55rem;
+}
+
+.stats-table th:first-child,
+.stats-table td:first-child {
+    position: sticky;
+    left: 0;
+    background: var(--bg);
+    white-space: nowrap;
+}
+
+.stats-season-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    margin: 0.5rem 0 1rem;
+}
+
+.stats-season-nav .season-nav[aria-disabled="true"] {
+    opacity: 0.3;
+    pointer-events: none;
+}
+
+.stats-season-select {
+    background: rgb(var(--accent-rgb) / 0.15);
+    border: 2px solid var(--accent);
+    color: var(--accent-text);
+    font-size: 1.1rem;
+    font-weight: 700;
+    border-radius: 6px;
+    padding: 0.25rem 0.5rem;
+}
+
+.stats-season-select option {
+    background: var(--bg);
+}
+
+.stats-tabs {
+    margin-bottom: 0.75rem;
+}
+
+/* Team splits: a heading row per group (Where, When, Month...), and the
+   season's overall line in bold above them. */
+/* Seven columns: at the stats page's 1200px they spread too thin to read
+   across, so the table keeps to a readable width. */
+.splits-table {
+    max-width: 720px;
+    margin: 0 auto;
+}
+
+.splits-table .splits-group th {
+    padding-top: 0.8rem;
+    font-size: 0.75rem;
+    background: var(--bg);
+}
+
+.splits-table .splits-overall td {
+    font-weight: 700;
+}
+
+/* Seven columns fit a phone if a label may wrap ("Blowouts / (5+ runs)");
+   the shared stats column never wraps, for player names. */
+.splits-table td:first-child {
+    white-space: normal;
+}
+
+/* Player game log: the result in the schedule's win and loss colors. */
+.log-result-W { color: var(--win-light, #4caf50); }
+.log-result-L { color: var(--loss-light, #f44336); }
+
+.log-table td {
+    white-space: nowrap;
+}
+
+/* Wide screens get Opp and Result (App and Dec) as columns; a phone gets
+   each pair stacked in one cell. */
+.log-table .log-narrow {
+    display: none;
+}
+
+@media (max-width: 600px) {
+    .log-table .log-wide {
+        display: none;
+    }
+
+    .log-table .log-narrow {
+        display: table-cell;
+        line-height: 1.25;
+    }
+
+    .log-table .log-narrow .log-result {
+        font-size: 0.8rem;
+    }
+}
+
+#player-log .stats-season-nav {
+    justify-content: flex-start;
+}
+
+/* Splits over many seasons: five-digit run totals do not fit a phone
+   beside everything else, so RS and RA step aside there and the
+   differential stays. */
+@media (max-width: 480px) {
+    .splits-span-table .splits-runs {
+        display: none;
+    }
+}
+
+/* Two classes: the shared phone rule for .h2h-table cells comes later in
+   the file and would win a tie. */
+@media (max-width: 600px) {
+    .stats-table.splits-table th,
+    .stats-table.splits-table td,
+    .stats-table.log-table th,
+    .stats-table.log-table td,
+    .stats-table.compare-table th,
+    .stats-table.compare-table td {
+        padding-left: 0.3rem;
+        padding-right: 0.3rem;
+    }
+}
+
+/* Ballparks page: section headings between the park cards and the boards. */
+.ballparks-heading {
+    color: var(--accent-text);
+    font-size: 1.15rem;
+    margin: 1.5rem 0 0.75rem;
+    text-align: left;
+}
+
+/* A park's card is facts, not a ranking: no gold first row. */
+.ballparks-facts .record-entry-top .record-entry-main {
+    color: inherit;
+}
+
+/* "L 1–3" wraps as one piece, never as "L 1–" over "3". */
+.ballparks-score {
+    white-space: nowrap;
+}
+
+.records-see-also {
+    text-align: center;
+    margin: -0.5rem 0 1rem;
+    font-size: 0.9rem;
+}
+
+.records-see-also a {
+    color: var(--accent-text);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+/* Player search, on the stats and player pages. The list floats over the
+   page below the box rather than pushing the tables down. */
+.player-search {
+    position: relative;
+    max-width: 360px;
+    margin: 0 auto 1rem;
+}
+
+.player-search-icon {
+    position: absolute;
+    left: 0.7rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgb(var(--accent-text-rgb) / 0.7);
+    pointer-events: none;
+}
+
+.player-search-input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.5rem 0.75rem 0.5rem 2.1rem;
+    border: 1px solid rgb(var(--accent-rgb) / 0.45);
+    border-radius: 999px;
+    background: rgb(var(--fg-rgb) / 0.06);
+    color: var(--fg);
+    font: inherit;
+    font-size: 0.95rem;
+}
+
+.player-search-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: rgb(var(--fg-rgb) / 0.1);
+}
+
+.player-search-list {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(100% + 0.3rem);
+    z-index: 20;
+    margin: 0;
+    padding: 0.25rem 0;
+    list-style: none;
+    background: var(--bg);
+    border: 1px solid var(--accent);
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgb(var(--shade-rgb) / 0.4);
+    text-align: left;
+}
+
+.player-search-list li {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.45rem 0.85rem;
+    cursor: pointer;
+}
+
+.player-search-list li[aria-selected="true"],
+.player-search-list li[data-i]:hover {
+    background: rgb(var(--accent-rgb) / 0.15);
+}
+
+.player-search-name {
+    color: var(--fg);
+    font-weight: 600;
+}
+
+.player-search-meta {
+    color: rgb(var(--fg-rgb) / 0.55);
+    font-size: 0.85rem;
+    white-space: nowrap;
+}
+
+.player-search-none {
+    color: rgb(var(--fg-rgb) / 0.55);
+    cursor: default;
+}
+
+/* Player page. */
+.player-bio {
+    text-align: center;
+    color: rgb(var(--fg-rgb) / 0.7);
+    font-size: 0.9rem;
+    margin: -0.25rem 0 1.25rem;
+}
+
+.player-hof {
+    color: var(--accent-text);
+    font-weight: 700;
+}
+
+.player-actions {
+    text-align: center;
+    margin: -0.5rem 0 1rem;
+}
+
+/* Compare page: a card per column — name, career or season, remove — then
+   the tables, with the better number in each row in gold. */
+.compare-slots {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 0.6rem;
+    margin: 1rem 0;
+}
+
+.compare-slot {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.6rem;
+    border: 1px solid rgb(var(--accent-rgb) / 0.3);
+    border-radius: 8px;
+    background: rgb(var(--surface-rgb) / 0.8);
+}
+
+.compare-slot-name {
+    flex: 1;
+    min-width: 0;
+    color: var(--fg);
+    font-weight: 700;
+    text-decoration: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.compare-slot-name:hover {
+    color: var(--accent-text);
+}
+
+.compare-slot-missing {
+    color: rgb(var(--fg-rgb) / 0.55);
+    font-size: 0.85rem;
+}
+
+.compare-slot .stats-season-select {
+    font-size: 0.9rem;
+    padding: 0.15rem 0.3rem;
+}
+
+.compare-remove {
+    background: none;
+    border: none;
+    color: rgb(var(--fg-rgb) / 0.6);
+    font-size: 1.3rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0 0.2rem;
+}
+
+.compare-remove:hover {
+    color: var(--loss-light, #f44336);
+}
+
+.compare-table {
+    max-width: 720px;
+    margin: 0 auto;
+}
+
+.compare-table th .compare-when {
+    color: rgb(var(--fg-rgb) / 0.6);
+    font-weight: 600;
+}
+
+.compare-table td.compare-best {
+    color: var(--accent-text);
+    font-weight: 700;
+}
+
+.player-section {
+    margin-bottom: 1.5rem;
+}
+
+.player-section-title {
+    color: var(--accent-text);
+    font-size: 1.1rem;
+    margin: 0 0 0.5rem;
+}
+
+/* Batting and Pitching inside a section, like the splits vs right/left. */
+.player-subsection-title {
+    color: rgb(var(--fg-rgb) / 0.75);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0.75rem 0 0.35rem;
+    text-align: left;
+}
+
+.player-career td {
+    font-weight: 700;
+    border-top: 1px solid rgb(var(--accent-rgb) / 0.4);
+}
+
+/* A season's all-positions line, under its position rows. */
+.player-subtotal td {
+    font-style: italic;
+    color: rgb(var(--fg-rgb) / 0.75);
+}
+
+/* Fielding: by position or all positions, under the tabs. */
+.stats-subviews {
+    display: flex;
+    justify-content: center;
+    gap: 0.4rem;
+    margin: -0.25rem 0 0.75rem;
+}
+
+.stats-subviews button {
+    background: none;
+    border: 1px solid rgb(var(--accent-rgb) / 0.3);
+    border-radius: 999px;
+    color: rgb(var(--fg-rgb) / 0.7);
+    font: inherit;
+    font-size: 0.8rem;
+    padding: 0.25rem 0.75rem;
+    cursor: pointer;
+}
+
+.stats-subviews button[aria-pressed="true"] {
+    color: var(--on-accent);
+    background: var(--accent);
+    border-color: var(--accent);
+    font-weight: 600;
+}
+
+/* By Season / Career / Single-Season: links, since each is its own URL. */
+.stats-views {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+    margin: 0.25rem 0 1rem;
+}
+
+.stats-view-link {
+    color: rgb(var(--fg-rgb) / 0.7);
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 0.35rem 0.8rem;
+    border: 1px solid rgb(var(--accent-rgb) / 0.3);
+    border-radius: 999px;
+}
+
+.stats-view-link:hover {
+    color: var(--fg);
+    border-color: var(--accent);
+}
+
+.stats-view-link[aria-current="page"] {
+    color: var(--on-accent);
+    background: var(--accent);
+    border-color: var(--accent);
+}
+
+.records-subtitle a {
+    color: var(--accent-text);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.records-subtitle a:hover {
+    text-decoration: underline;
+}
+
+@media (max-width: 600px) {
+    /* Tighten the table so it fits a phone viewport instead of overflowing
+       into a horizontal scroll (opponent names wrap; numbers stay nowrap). */
+    .h2h-table th,
+    .h2h-table td {
+        padding: 0.4rem 0.45rem;
+    }
+
+    .h2h-table td {
+        font-size: 0.9rem;
+    }
+
+    .h2h-table th {
+        font-size: 0.72rem;
+    }
+
+    .h2h-filter {
+        max-width: 100%;
+    }
+}
+
+
+/* --- Franchise history --- */
+
+.history-spark {
+    display: block;
+    max-width: 600px;
+    margin: 0.25rem auto 0.5rem;
+    opacity: 0.9;
+    transition: opacity 0.2s;
+}
+
+.history-spark:hover {
+    opacity: 1;
+}
+
+/* The history chart draws its colors into the SVG itself (history-chart.js,
+   shared with the server's preview cards, which cannot use these variables):
+   a white wins line and pale series meant for navy. In light, the chart and
+   its tooltip keep the dark theme as a navy tile on the light page —
+   `initial` drops the light-only tones, so they fall back to dark's. */
+:root[data-theme="light"] :is(.history-spark, .history-chart, .history-tooltip) {
+    --bg: #12284B;
+    --fg: #ffffff;
+    --fg-rgb: 255 255 255;
+    --surface-rgb: 18 40 75;
+    --accent-text: #FFC52F;
+    --accent-text-rgb: 255 197 47;
+    --raised-f: #0d1d38;
+    --shade-rgb: 0 0 0;
+    --well-k: 1;
+    --gold-light: initial;
+    --win-light: initial;
+    --loss-light: initial;
+    --info-light: initial;
+    --purple-light: initial;
+    --warn-light: initial;
+    --teal-light: initial;
+    color-scheme: dark;
+}
+
+:root[data-theme="light"] .history-spark {
+    background: #12284B;
+    border-radius: 8px;
+    padding: 0.35rem 0.5rem;
+}
+
+:root[data-theme="light"] .history-chart {
+    background: #12284B;
+}
+
+/* An active metric chip takes its series' chart color (history.js), which
+   is chosen for the navy chart, so it sits on navy too. */
+:root[data-theme="light"] .history-toggle-btn.history-toggle-active {
+    background: #12284B;
+}
+
+@media (prefers-color-scheme: light) {
+    :root:not([data-theme]) :is(.history-spark, .history-chart, .history-tooltip) {
+        --bg: #12284B;
+        --fg: #ffffff;
+        --fg-rgb: 255 255 255;
+        --surface-rgb: 18 40 75;
+        --accent-text: #FFC52F;
+        --accent-text-rgb: 255 197 47;
+        --raised-f: #0d1d38;
+        --shade-rgb: 0 0 0;
+        --well-k: 1;
+        --gold-light: initial;
+        --win-light: initial;
+        --loss-light: initial;
+        --info-light: initial;
+        --purple-light: initial;
+        --warn-light: initial;
+        --teal-light: initial;
+        color-scheme: dark;
+    }
+    :root:not([data-theme]) .history-spark {
+        background: #12284B;
+        border-radius: 8px;
+        padding: 0.35rem 0.5rem;
+    }
+    :root:not([data-theme]) .history-chart {
+        background: #12284B;
+    }
+    :root:not([data-theme]) .history-toggle-btn.history-toggle-active {
+        background: #12284B;
+    }
+}
+
+.history-spark svg {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.history-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+    margin-bottom: 0.75rem;
+}
+
+.history-toggle {
+    display: inline-flex;
+    border: 1.5px solid rgb(var(--accent-rgb) / 0.5);
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.history-toggle-btn {
+    padding: 0.4rem 1.1rem;
+    background: transparent;
+    border: none;
+    color: var(--accent-text);
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    cursor: pointer;
+}
+
+.history-toggle-btn.history-toggle-active {
+    background: rgb(var(--accent-rgb) / 0.25);
+    color: var(--fg);
+}
+
+.history-chart {
+    position: relative;
+    background: rgb(var(--surface-rgb) / 0.8);
+    border: 2px solid var(--accent);
+    border-radius: 10px;
+    padding: 0.75rem;
+}
+
+.history-chart svg {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.history-tooltip {
+    position: absolute;
+    pointer-events: none;
+    background: var(--raised-f);
+    border: 1px solid var(--accent);
+    border-radius: 6px;
+    padding: 0.3rem 0.6rem;
+    font-size: 0.85rem;
+    color: var(--fg);
+    white-space: nowrap;
+    z-index: 5;
+}
+
+.history-legend {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.5rem;
+    color: rgb(var(--fg-rgb) / 0.7);
+    font-size: 0.85rem;
+    margin: 0.75rem 0 1rem;
+}
+
+.history-legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.legend-glyph {
+    font-size: 14px;
+    line-height: 1;
+    text-align: center;
+    width: 12px;
+    display: inline-block;
+}
+
+.legend-wswin {
+    color: var(--accent-text);
+    text-shadow: 0 0 1px var(--raised-f);
+}
+
+.legend-wsapp {
+    color: var(--gold-light, #FFD66B);
+}
+
+.legend-lcs {
+    color: var(--info-light, #7FC4FF);
+}
+
+.legend-division {
+    color: var(--win-light, #9BD7A3);
+}
+
+.legend-wildcard {
+    color: var(--purple-light, #C9A8E8);
+}
+
+#history-share {
+    justify-content: center;
+}
+
+.history-section-title {
+    text-align: center;
+    margin: 1.5rem 0 0.75rem;
+    font-size: 1.25rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.season-table,
+.sortable-table {
+    font-variant-numeric: tabular-nums;
+}
+
+.sortable-table thead th {
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+    transition: color 0.15s, background 0.15s;
+}
+
+.sortable-table thead th:hover {
+    color: var(--fg);
+    background: rgb(var(--accent-rgb) / 0.12);
+}
+
+.season-table tbody tr {
+    cursor: pointer;
+}
+
+.season-table .pos {
+    color: var(--win-light, #9BD7A3);
+}
+
+.season-table .neg {
+    color: var(--loss-light, #FF6B6B);
+}
+
+
+/* --- Coach photos & interim markers --- */
+
+.coach-photo-cell {
+    width: 44px;
+}
+
+.coach-photo {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+    border: 1.5px solid rgb(var(--accent-rgb) / 0.5);
+}
+
+.coach-photo-none {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgb(var(--fg-rgb) / 0.08);
+    color: rgb(var(--fg-rgb) / 0.4);
+    font-size: 1.1rem;
+}
+
+.coach-interim {
+    color: var(--accent-text);
+    margin-left: 0.15rem;
+}
+
+@media (max-width: 600px) {
+    .coaches-table .coach-photo-cell {
+        display: none;
+    }
+    .coaches-table thead th:first-child {
+        display: none;
+    }
+}
+
+/* ── Watch modal ──────────────────────────────────────────────── */
+.watch-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    cursor: pointer;
+}
+
+.watch-dialog {
+    position: relative;
+    background: var(--raised-c);
+    border: 1px solid rgb(var(--accent-rgb) / 0.3);
+    border-radius: 12px;
+    padding: 1.5rem;
+    width: 90%;
+    max-width: 480px;
+    max-height: 80vh;
+    overflow-y: auto;
+    z-index: 1;
+    color: var(--fg);
+}
+
+.watch-game-info {
+    font-size: 0.9rem;
+    color: rgb(var(--fg-rgb) / 0.65);
+    margin: 0 0 1.25rem;
+    text-align: center;
+}
+
+.watch-channels {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.watch-group-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent-text);
+    margin: 0 0 0.6rem;
+}
+
+.watch-channel-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.watch-channel-item {
+    background: rgb(var(--fg-rgb) / 0.06);
+    border: 1px solid rgb(var(--fg-rgb) / 0.1);
+    border-radius: 8px;
+    padding: 0.65rem 0.9rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    transition: border-color 0.15s;
+}
+
+.watch-channel-item:hover {
+    border-color: rgb(var(--accent-rgb) / 0.4);
+}
+
+.watch-channel-name {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--fg);
+}
+
+.watch-channel-name a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.watch-channel-name a:hover {
+    color: var(--accent-text);
+}
+
+.watch-channel-desc {
+    font-size: 0.78rem;
+    color: rgb(var(--fg-rgb) / 0.55);
+}
+
+.watch-providers {
+    font-size: 0.75rem;
+    color: rgb(var(--accent-text-rgb) / 0.8);
+    margin-top: 0.15rem;
+}
+
+.watch-no-data {
+    text-align: center;
+    color: rgb(var(--fg-rgb) / 0.5);
+    font-size: 0.9rem;
+    padding: 1rem 0;
+}
+
+.watch-disclaimer {
+    margin-top: 1.25rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgb(var(--fg-rgb) / 0.1);
+    font-size: 0.72rem;
+    line-height: 1.5;
+    color: rgb(var(--fg-rgb) / 0.45);
+}
+
+.watch-provider-picker {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin: 0 0 1.25rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid rgb(var(--fg-rgb) / 0.1);
+}
+
+.watch-provider-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent-text);
+}
+
+.watch-provider-input {
+    width: 100%;
+    box-sizing: border-box;
+    background: rgb(var(--fg-rgb) / 0.08);
+    border: 1px solid rgb(var(--accent-rgb) / 0.35);
+    border-radius: 8px;
+    color: var(--fg);
+    font-size: 0.95rem;
+    padding: 0.55rem 0.8rem;
+    transition: border-color 0.15s, background 0.15s;
+}
+
+.watch-provider-input::placeholder {
+    color: rgb(var(--fg-rgb) / 0.4);
+}
+
+.watch-provider-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: rgb(var(--fg-rgb) / 0.12);
+}
+
+.watch-provider-hint {
+    font-size: 0.78rem;
+    color: rgb(var(--fg-rgb) / 0.55);
+}
+
+.watch-provider-input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.watch-provider-input-wrap .watch-provider-input {
+    padding-right: 2.2rem;
+}
+
+.watch-provider-clear {
+    position: absolute;
+    right: 0.4rem;
+    background: transparent;
+    border: none;
+    color: rgb(var(--fg-rgb) / 0.55);
+    cursor: pointer;
+    padding: 0.2rem 0.35rem;
+    font-size: 1.05rem;
+    line-height: 1;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.watch-provider-clear:hover {
+    color: var(--accent-text);
+    background: rgb(var(--accent-rgb) / 0.15);
+}
+
+.watch-provider-suggestions {
+    position: absolute;
+    top: calc(100% + 0.25rem);
+    left: 0;
+    right: 0;
+    z-index: 30;
+    display: flex;
+    flex-direction: column;
+    max-height: 240px;
+    overflow-y: auto;
+    border-radius: 8px;
+    border: 1px solid rgb(var(--accent-rgb) / 0.3);
+    background: var(--raised-a);
+    box-shadow: 0 8px 24px rgb(var(--shade-rgb) / 0.4);
+}
+
+.watch-provider-suggestion {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.5rem 0.7rem;
+    border: none;
+    background: none;
+    color: rgb(var(--fg-rgb) / 0.85);
+    font-size: 0.85rem;
+    text-align: left;
+    cursor: pointer;
+}
+
+.watch-provider-suggestion:hover,
+.watch-provider-suggestion.active {
+    background: rgb(var(--accent-rgb) / 0.15);
+    color: var(--accent-text);
+}
+
+.watch-provider-suggestion-via {
+    margin-left: auto;
+    font-size: 0.72rem;
+    font-style: italic;
+    color: rgb(var(--fg-rgb) / 0.45);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 55%;
+}
+
+/* Optional provider logo, with an optional color block behind it (many
+   provider logos are white-on-transparent and need one). */
+.provider-logo {
+    display: inline-flex;
+    align-items: center;
+    flex: 0 0 auto;
+    padding: 0.15rem 0.3rem;
+    border-radius: 4px;
+    line-height: 0;
+}
+
+.provider-logo img {
+    display: block;
+    height: 16px;
+    max-width: 72px;
+    object-fit: contain;
+}
+
+/* Sponsor-style banner slot for the selected provider in the schedule bar:
+   the logo block spans the bar's width, name captioned underneath. */
+.schedule-provider-display-banner {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+}
+
+.schedule-provider-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.provider-logo-large {
+    width: 100%;
+    box-sizing: border-box;
+    justify-content: center;
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+}
+
+.provider-logo-large img {
+    height: auto;
+    max-height: 56px;
+    width: auto;
+    max-width: 100%;
+}
+
+.schedule-provider-slot {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+/* Sponsor banner logos link out; the anchor must keep the banner's width. */
+.schedule-provider-logo-link {
+    display: block;
+    width: 100%;
+    line-height: 0;
+}
+
+.schedule-provider-caption {
+    font-size: 0.75rem;
+    color: rgb(var(--fg-rgb) / 0.65);
+}
+
+.record-combined {
+    font-style: italic;
+    color: rgb(var(--fg-rgb) / 0.5);
+}
+
+/* Provider line under the big YES ("X has the next game on Y (Ch. N)"). */
+.answer-provider-note {
+    margin-top: 0.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: normal;
+    color: rgb(var(--fg-rgb) / 0.75);
+}
+
+/* Sponsor version: a large logo banner on the sponsor's background color,
+   with the channel line centered underneath. The whole answer is already
+   clickable (Where to Watch). */
+.answer-sponsor-banner {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+    cursor: pointer;
+}
+
+.answer-sponsor-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: min(100%, 320px);
+    box-sizing: border-box;
+    padding: 0.55rem 1.2rem;
+    border-radius: 10px;
+    transition: filter 0.15s;
+}
+
+.answer-sponsor-banner:hover .answer-sponsor-logo {
+    filter: brightness(1.08);
+}
+
+.answer-sponsor-logo img {
+    display: block;
+    height: 50px;
+    max-width: 100%;
+    object-fit: contain;
+}
+
+.answer-sponsor-ch {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: rgb(var(--fg-rgb) / 0.85);
+}
+
+.answer-sponsor-ch strong {
+    color: var(--accent-text);
+}
+
+.answer-provider-ch {
+    background: var(--accent);
+    color: var(--on-accent);
+    font-weight: 800;
+    font-size: 0.8rem;
+    border-radius: 999px;
+    padding: 0.15rem 0.55rem;
+    white-space: nowrap;
+}
+
+/* Inline mode (the dedicated provider dialog): the list is in-flow dialog
+   content below the input rather than a floating overlay, so it can't clip
+   against the dialog's own scroll container. */
+.watch-provider-suggestions-inline {
+    position: static;
+    margin-top: 0.4rem;
+    max-height: 45vh;
+    box-shadow: none;
+}
+
+/* Service areas rendered as the same tappable rows. */
+.watch-area-options {
+    display: flex;
+    flex-direction: column;
+    margin-top: 0.3rem;
+    max-height: 30vh;
+    overflow-y: auto;
+    border-radius: 8px;
+    border: 1px solid rgb(var(--accent-rgb) / 0.3);
+    background: var(--raised-a);
+}
+
+.watch-area-option.active .watch-provider-suggestion-name::before {
+    content: '✓ ';
+    color: var(--accent-text);
+}
+
+.watch-channel-num {
+    display: flex;
+    align-items: baseline;
+    gap: 0.4rem;
+    margin-top: 0.2rem;
+    font-size: 0.85rem;
+}
+
+.watch-channel-num-label {
+    color: rgb(var(--fg-rgb) / 0.55);
+}
+
+.watch-channel-num-value {
+    color: var(--accent-text);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.watch-channel-num-none {
+    font-style: italic;
+}
+
+.watch-channel-num-note {
+    font-size: 0.75rem;
+    font-style: italic;
+    color: rgb(var(--fg-rgb) / 0.5);
+}
+
+/* ── Line score modal ── */
+.linescore-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 0;
+}
+
+.linescore-dialog {
+    position: relative;
+    z-index: 1;
+    background: var(--raised-b);
+    border: 1px solid rgb(var(--accent-rgb) / 0.3);
+    border-radius: 12px;
+    padding: 1.5rem;
+    width: min(96vw, 720px);
+    max-height: 80vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.linescore-body {
+    overflow-x: auto;
+}
+
+.linescore-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.linescore-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.linescore-table thead th {
+    background: rgb(var(--accent-rgb) / 0.12);
+    color: rgb(var(--fg-rgb) / 0.7);
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 0.45rem 0.6rem;
+    text-align: center;
+    border-bottom: 1px solid rgb(var(--accent-rgb) / 0.25);
+}
+
+.linescore-table td {
+    padding: 0.5rem 0.6rem;
+    text-align: center;
+    border-bottom: 1px solid rgb(var(--fg-rgb) / 0.06);
+    color: rgb(var(--fg-rgb) / 0.85);
+}
+
+.linescore-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.linescore-team-col {
+    text-align: left !important;
+    font-weight: 700;
+    min-width: 90px;
+    color: rgb(var(--fg-rgb) / 0.95) !important;
+}
+
+.linescore-rhe {
+    border-left: 1px solid rgb(var(--accent-rgb) / 0.2) !important;
+    font-weight: 600;
+}
+
+.linescore-total {
+    color: var(--accent-text) !important;
+    font-weight: 800 !important;
+}
+
+.linescore-brewers td {
+    background: rgb(var(--accent-rgb) / 0.05);
+}
+
+/* Score cell clickable indicator */
+.linescore-trigger {
+    cursor: pointer;
+    position: relative;
+}
+
+.linescore-trigger::after {
+    content: '';
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    background: rgb(var(--accent-rgb) / 0.6);
+    border-radius: 50%;
+    margin-left: 5px;
+    vertical-align: middle;
+}
+
+.linescore-trigger:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.linescore-box-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: var(--accent-text);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    padding: 0.5rem 0.1rem;
+    border-bottom: 1px solid rgb(var(--accent-rgb) / 0.4);
+    transition: border-color 0.15s, color 0.15s;
+    align-self: flex-start;
+}
+
+.linescore-box-link:hover {
+    color: var(--gold-light, #FFD45E);
+    border-bottom-color: #FFD45E;
+}
+
+/* Every scoring play, under the line score. */
+.scoring-plays {
+    margin-top: 0.75rem;
+    text-align: left;
+}
+
+.scoring-plays-title {
+    color: var(--accent-text);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0 0 0.35rem;
+}
+
+.scoring-plays ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-size: 0.85rem;
+    line-height: 1.4;
+}
+
+.scoring-plays li {
+    padding: 0.35rem 0;
+    border-top: 1px solid rgb(var(--fg-rgb) / 0.1);
+}
+
+.scoring-inning {
+    color: var(--accent-text);
+    font-weight: 700;
+}
+
+.scoring-score {
+    display: block;
+    color: rgb(var(--fg-rgb) / 0.6);
+    font-size: 0.78rem;
+}
+
+.linescore-pitchers {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.25rem;
+    padding: 0.6rem 0 0.1rem;
+    font-size: 0.82rem;
+}
+
+.linescore-pitcher {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.4rem;
+}
+
+.linescore-pitcher-label {
+    font-weight: 700;
+    color: var(--accent-text);
+    letter-spacing: 0.04em;
+    min-width: 1.5em;
+}
+
+.linescore-pitcher-name {
+    color: rgb(var(--fg-rgb) / 0.85);
+}
+
+/* ── Record standings link ── */
+.record-standings-link {
+    cursor: pointer;
+    border-bottom: 1px dashed rgb(var(--accent-rgb) / 0.6);
+    transition: border-color 0.15s, color 0.15s;
+}
+
+.record-standings-link:hover {
+    border-bottom-color: var(--accent);
+    color: var(--accent-text);
+}
+
+/* ── Standings modal ── */
+.standings-dialog {
+    position: relative;
+    z-index: 1;
+    background: var(--raised-b);
+    border: 1px solid rgb(var(--accent-rgb) / 0.3);
+    border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+    animation: galleryIn 0.2s ease-out;
+    width: min(96vw, 680px);
+    max-height: 88vh;
+    overflow: hidden;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.standings-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    overflow: hidden;
+    flex: 1;
+    min-height: 0;
+    padding: 0 1rem;
+}
+
+.standings-tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid rgb(var(--accent-rgb) / 0.2);
+    flex-shrink: 0;
+}
+
+.standings-tab {
+    flex: 1;
+    background: none;
+    border: none;
+    color: rgb(var(--fg-rgb) / 0.55);
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 0.6rem 0.25rem;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: color 0.15s, border-color 0.15s;
+    white-space: nowrap;
+}
+
+.standings-tab:hover {
+    color: rgb(var(--fg-rgb) / 0.85);
+}
+
+.standings-tab-active {
+    color: var(--accent-text);
+    border-bottom-color: var(--accent);
+}
+
+.standings-panel {
+    overflow-y: auto;
+    max-height: calc(88vh - 130px);
+    padding: 0.5rem 0 0.5rem;
+    scrollbar-width: thin;
+    scrollbar-color: var(--accent) var(--raised-a);
+}
+
+.standings-panel::-webkit-scrollbar { width: 6px; }
+.standings-panel::-webkit-scrollbar-track { background: var(--raised-a); border-radius: 3px; }
+.standings-panel::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
+
+.standings-league-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.standings-league-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--accent-text);
+    padding: 0.15rem 0.5rem;
+    border-left: 2px solid var(--accent);
+    margin-bottom: 0.1rem;
+}
+
+.standings-block {
+    background: rgb(var(--shade-rgb) / calc(0.18 * var(--well-k)));
+    border-radius: 7px;
+    overflow: hidden;
+    margin-bottom: 0.75rem;
+}
+
+.standings-div-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: rgb(var(--fg-rgb) / 0.5);
+    padding: 0.4rem 0.6rem 0.1rem;
+}
+
+.standings-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.standings-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+    min-width: 320px;
+}
+
+.standings-table th {
+    color: rgb(var(--fg-rgb) / 0.45);
+    font-weight: 600;
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.25rem 0.5rem;
+    border-bottom: 1px solid rgb(var(--fg-rgb) / 0.08);
+    white-space: nowrap;
+}
+
+.standings-table td {
+    padding: 0.32rem 0.5rem;
+    border-bottom: 1px solid rgb(var(--fg-rgb) / 0.04);
+    color: rgb(var(--fg-rgb) / 0.82);
+    white-space: nowrap;
+}
+
+.standings-table tr:last-child td {
+    border-bottom: none;
+}
+
+.standings-table tbody tr:hover td {
+    background: rgb(var(--fg-rgb) / 0.04);
+}
+
+.standings-num {
+    text-align: right;
+}
+
+.standings-team-cell {
+    text-align: left;
+    white-space: nowrap;
+    padding-left: 0.6rem !important;
+    min-width: 90px;
+}
+
+.standings-brewers td {
+    color: var(--accent-text);
+    font-weight: 700;
+}
+
+.standings-tag {
+    display: inline-block;
+    font-size: 0.6rem;
+    font-weight: 700;
+    padding: 0 4px;
+    border-radius: 3px;
+    vertical-align: middle;
+    line-height: 1.4;
+    letter-spacing: 0.03em;
+}
+
+.standings-tag-div {
+    background: var(--accent);
+    color: var(--on-accent);
+}
+
+.standings-tag-wc {
+    background: rgb(var(--accent-rgb) / 0.25);
+    color: var(--accent-text);
+    border: 1px solid rgb(var(--accent-rgb) / 0.5);
+}
+
+
+@media (max-width: 480px) {
+    .standings-tab {
+        font-size: 0.7rem;
+        padding: 0.5rem 0.1rem;
+    }
+}
+
+/* ── Box score page (/game/:gid) ── */
+
+/* The box score page's column takes the screen's width, not its content's.
+   body is a centered flex column, so .container is otherwise as wide as
+   its widest line, and a 12-inning line score (567px) made a phone lay the
+   page out 489px wide and shrink it all to fit; the line score now scrolls
+   in its own box as it was meant to. */
+.boxscore-container {
+    width: 100%;
+    max-width: 800px;
+    box-sizing: border-box;
+    min-width: 0;
+}
+
+#boxscore-root {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    margin-bottom: 2rem;
+}
+
+.boxscore-header {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgb(var(--accent-rgb) / 0.2);
+}
+
+.boxscore-navrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.boxscore-navbtn {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    border: 1px solid rgb(var(--fg-rgb) / 0.15);
+    color: rgb(var(--fg-rgb) / 0.6);
+    font-size: 1.3rem;
+    text-decoration: none;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.boxscore-navbtn:hover {
+    background: rgb(var(--accent-rgb) / 0.15);
+    border-color: rgb(var(--accent-rgb) / 0.5);
+    color: var(--accent-text);
+}
+
+.boxscore-navbtn-empty {
+    visibility: hidden;
+}
+
+.boxscore-close {
+    position: absolute;
+    top: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.8rem;
+    height: 1.8rem;
+    border-radius: 50%;
+    border: 1px solid rgb(var(--fg-rgb) / 0.15);
+    color: rgb(var(--fg-rgb) / 0.55);
+    font-size: 1.05rem;
+    text-decoration: none;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+    z-index: 1;
+}
+
+.boxscore-close:hover {
+    background: rgb(var(--fg-rgb) / 0.1);
+    border-color: rgb(var(--fg-rgb) / 0.35);
+    color: rgb(var(--fg-rgb) / 0.9);
+}
+
+.boxscore-matchup {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+    font-size: 1.3rem;
+    font-weight: 700;
+}
+
+/* On the box score page the WP/LP/S line sits between centered sections;
+   center it there (the season-page line score modal keeps it left-aligned). */
+#boxscore-root .linescore-pitchers {
+    justify-content: center;
+}
+
+.boxscore-team {
+    color: rgb(var(--fg-rgb) / 0.95);
+}
+
+.boxscore-score {
+    color: var(--accent-text);
+    font-size: 1.5rem;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+}
+
+.boxscore-sep {
+    color: rgb(var(--fg-rgb) / 0.4);
+}
+
+.boxscore-date {
+    font-size: 0.9rem;
+    color: rgb(var(--fg-rgb) / 0.7);
+}
+
+.boxscore-meta {
+    font-size: 0.8rem;
+    color: rgb(var(--fg-rgb) / 0.5);
+    margin-top: 0.1rem;
+}
+
+.boxscore-section-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--accent-text);
+    margin: 0.25rem 0 0.5rem;
+    padding-bottom: 0.3rem;
+    border-bottom: 1px solid rgb(var(--accent-rgb) / 0.2);
+}
+
+.boxscore-tables {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+/* Batting and pitching tables scroll sideways in their own box on a narrow
+   phone. Unwrapped, the 11-column batting table (473px) set the page's
+   width, and the phone laid the whole page out wider and shrank it. */
+.boxscore-table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.boxscore-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.boxscore-table thead th {
+    background: rgb(var(--accent-rgb) / 0.1);
+    color: rgb(var(--fg-rgb) / 0.6);
+    font-weight: 600;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 0.4rem 0.55rem;
+    text-align: center;
+    border-bottom: 1px solid rgb(var(--accent-rgb) / 0.22);
+}
+
+.boxscore-table thead th:first-child {
+    text-align: left;
+}
+
+.boxscore-table td {
+    padding: 0.38rem 0.55rem;
+    text-align: center;
+    border-bottom: 1px solid rgb(var(--fg-rgb) / 0.05);
+    color: rgb(var(--fg-rgb) / 0.82);
+}
+
+.boxscore-table td:first-child {
+    text-align: left;
+}
+
+.boxscore-brewers td:first-child {
+    color: var(--accent-text);
+    font-weight: 600;
+}
+
+.boxscore-player {
+    font-weight: 600;
+    color: rgb(var(--fg-rgb) / 0.92) !important;
+    white-space: normal;
+    min-width: 110px;
+}
+
+/* A substitute, indented under the starter whose lineup spot he took. */
+.boxscore-sub .boxscore-player {
+    padding-left: 1.4rem;
+    font-weight: 500;
+}
+
+/* A game in progress on the box score page: the scorebug and the live
+   card's detail, at a card's width in the middle of the page. */
+.boxscore-livepanel {
+    width: 100%;
+    max-width: 560px;
+    margin: 0 auto;
+}
+
+.boxscore-livepanel .situation {
+    margin-bottom: 0.25rem;
+}
+
+/* A current-season game still being played: its inning under the date. */
+.boxscore-live {
+    color: var(--loss-light, #ff4d4d);
+    font-weight: 700;
+    font-size: 0.9rem;
+    margin-top: 0.2rem;
+}
+
+.boxscore-totals td {
+    font-weight: 700;
+    color: rgb(var(--fg-rgb) / 0.95) !important;
+    border-top: 1px solid rgb(var(--accent-rgb) / 0.25);
+    border-bottom: none;
+    padding-top: 0.45rem;
+}
+
+.boxscore-totals td:first-child {
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.04em;
+    color: rgb(var(--fg-rgb) / 0.6) !important;
+}
+
+.boxscore-brewers.boxscore-totals td:first-child {
+    color: var(--accent-text) !important;
+}
+
+.boxscore-dec {
+    display: inline-block;
+    font-size: 0.65rem;
+    font-weight: 800;
+    color: var(--on-accent);
+    background: var(--accent);
+    border-radius: 3px;
+    padding: 0 0.25rem;
+    margin-left: 0.3rem;
+    vertical-align: middle;
+    letter-spacing: 0.02em;
+}
+
+.boxscore-umps {
+    font-size: 0.8rem;
+    color: rgb(var(--fg-rgb) / 0.55);
+}
+
+.boxscore-umps-label {
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    letter-spacing: 0.06em;
+    color: rgb(var(--fg-rgb) / 0.45);
+    margin-right: 0.3rem;
+}
+
+.boxscore-ump-pos {
+    font-weight: 700;
+    color: rgb(var(--accent-text-rgb) / 0.75);
+    font-size: 0.72rem;
+}
+
+.boxscore-scoring td {
+    text-align: left;
+}
+
+.boxscore-scoring-inn {
+    font-weight: 700;
+    color: rgb(var(--fg-rgb) / 0.6);
+    font-variant-numeric: tabular-nums;
+    width: 2.6rem;
+    white-space: nowrap;
+}
+
+.boxscore-scoring-inn .mdi {
+    color: rgb(var(--accent-text-rgb) / 0.85);
+    font-size: 0.9rem;
+    margin-right: 0.1rem;
+    vertical-align: -0.08em;
+}
+
+.boxscore-scoring-desc {
+    white-space: normal;
+    min-width: 200px;
+}
+
+.boxscore-scoring-score {
+    font-variant-numeric: tabular-nums;
+    color: rgb(var(--fg-rgb) / 0.6);
+    white-space: nowrap;
+}
+
+.boxscore-scoring-brewers .boxscore-scoring-desc {
+    color: var(--accent-text);
+}
+
+.boxscore-notes {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    font-size: 0.8rem;
+    color: rgb(var(--fg-rgb) / 0.7);
+    text-align: left;
+    padding: 0.2rem 0.1rem 0;
+}
+
+.boxscore-note-ph {
+    font-style: italic;
+    color: rgb(var(--fg-rgb) / 0.55);
+    font-size: 0.75rem;
+}
+
+.boxscore-note-label {
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    letter-spacing: 0.05em;
+    color: rgb(var(--accent-text-rgb) / 0.8);
+}
+
+.boxscore-teamtabs {
+    display: flex;
+    gap: 0.5rem;
+    border-bottom: 1px solid rgb(var(--accent-rgb) / 0.25);
+}
+
+.boxscore-teamtab {
+    flex: 1;
+    background: rgb(var(--fg-rgb) / 0.04);
+    border: 1px solid rgb(var(--fg-rgb) / 0.1);
+    border-bottom: none;
+    border-radius: 8px 8px 0 0;
+    color: rgb(var(--fg-rgb) / 0.65);
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 0.55rem 0.75rem;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+
+.boxscore-teamtab:hover {
+    background: rgb(var(--fg-rgb) / 0.08);
+    color: rgb(var(--fg-rgb) / 0.85);
+}
+
+.boxscore-teamtab.active {
+    background: rgb(var(--accent-rgb) / 0.15);
+    border-color: rgb(var(--accent-rgb) / 0.4);
+    color: var(--accent-text);
+}
+
+.boxscore-teampanel {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+/* display:flex above would defeat the hidden attribute's UA display:none,
+   leaving both team panels stacked and the tabs seemingly dead. */
+.boxscore-teampanel[hidden] {
+    display: none;
+}
+
+.boxscore-subtabs {
+    display: flex;
+    gap: 0.4rem;
+}
+
+.boxscore-subtab {
+    background: none;
+    border: 1px solid rgb(var(--fg-rgb) / 0.15);
+    border-radius: 999px;
+    color: rgb(var(--fg-rgb) / 0.6);
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.3rem 0.9rem;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+
+.boxscore-subtab:hover {
+    color: rgb(var(--fg-rgb) / 0.85);
+    border-color: rgb(var(--fg-rgb) / 0.3);
+}
+
+.boxscore-subtab.active {
+    background: rgb(var(--accent-rgb) / 0.15);
+    border-color: rgb(var(--accent-rgb) / 0.5);
+    color: var(--accent-text);
+}
+
+@media (max-width: 540px) {
+    .boxscore-matchup {
+        font-size: 1.1rem;
+    }
+    .boxscore-teamtab {
+        font-size: 0.78rem;
+        padding: 0.45rem 0.4rem;
+    }
+    .boxscore-navrow {
+        padding: 0 1.9rem;
+    }
+    .boxscore-navbtn {
+        width: 1.7rem;
+        height: 1.7rem;
+        font-size: 1.1rem;
+    }
+    .boxscore-score {
+        font-size: 1.25rem;
+    }
+    .boxscore-table {
+        font-size: 0.78rem;
+    }
+    .boxscore-table th,
+    .boxscore-table td {
+        padding: 0.32rem 0.4rem;
+    }
+    .boxscore-player {
+        min-width: 90px;
+    }
+}
+

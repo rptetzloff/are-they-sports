@@ -9,6 +9,9 @@ export const team = {
 		team: 'Dynamo',
 		fullName: 'Houston Dynamo FC',
 	},
+
+	/** ESPN's id for the club, which its soccer schedules are asked by. */
+	site: { espnSlug: '6077' },
 };
 
 export default team;

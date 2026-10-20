@@ -9,6 +9,9 @@ export const team = {
 		team: 'Real Salt Lake',
 		fullName: 'Real Salt Lake',
 	},
+
+	/** ESPN's id for the club, which its soccer schedules are asked by. */
+	site: { espnSlug: '4771' },
 };
 
 export default team;

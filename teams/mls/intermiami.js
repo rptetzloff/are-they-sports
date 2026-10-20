@@ -9,6 +9,9 @@ export const team = {
 		team: 'Inter Miami',
 		fullName: 'Inter Miami CF',
 	},
+
+	/** ESPN's id for the club, which its soccer schedules are asked by. */
+	site: { espnSlug: '20232' },
 };
 
 export default team;

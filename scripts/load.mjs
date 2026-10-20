@@ -234,6 +234,81 @@ export async function repairAliasFranchises(client, sportId, codes) {
 	return repaired;
 }
 
+/** Number a sport's playoff rounds, R1 to Rn, from how far each series was
+ *  from the Final.
+ *
+ *  A series is a pair of clubs in one postseason: two legs, three games or
+ *  one. Every series but the Final has a winner, who goes on to exactly one
+ *  next series — the next one either club began after it ended — and a
+ *  series is one round further from the Final than that one. The Final is the
+ *  championship game's pair. Counting back is what puts a wild card a round
+ *  before Round One however their dates fall, and a first-round winner and a
+ *  seed with a bye in the same round; counting forward by dates split MLS's
+ *  2023 Round One across two rounds.
+ *
+ *  A season whose Final is not played yet is numbered forward: a new round
+ *  when a club already in the current one begins another. The season being
+ *  played is the page's to name from ESPN, so this only has to be close.
+ *
+ *  Writes the stage of the playoff games `where` selects; returns how many. */
+export function seriesRounds(games) {
+	const series = new Map();
+	for (const g of games) {
+		const key = `${g.season}|${[g.home, g.away].sort().join('|')}`;
+		const x = series.get(key) ?? { season: g.season, clubs: [g.home, g.away].sort(), first: g.date, last: g.date, final: false };
+		if (g.date < x.first) x.first = g.date;
+		if (g.date > x.last) x.last = g.date;
+		if (g.round === 'championship') x.final = true;
+		series.set(key, x);
+	}
+	const bySeason = new Map();
+	for (const x of series.values()) bySeason.set(x.season, [...(bySeason.get(x.season) ?? []), x]);
+	const out = new Map(); // series key -> round
+	for (const list of bySeason.values()) {
+		list.sort((a, b) => (a.first < b.first ? -1 : a.first > b.first ? 1 : 0));
+		const key = (x) => `${x.season}|${x.clubs.join('|')}`;
+		if (list.some((x) => x.final)) {
+			const distance = new Map();
+			const of = (x) => {
+				if (distance.has(x)) return distance.get(x);
+				let d = 0;
+				if (!x.final) {
+					const next = list.find((y) => y !== x && y.first > x.last && y.clubs.some((c) => x.clubs.includes(c)));
+					d = next ? of(next) + 1 : 0;
+				}
+				distance.set(x, d);
+				return d;
+			};
+			const most = Math.max(...list.map(of));
+			for (const x of list) out.set(key(x), most - of(x) + 1);
+		} else {
+			let round = 1, inRound = new Set();
+			for (const x of list) {
+				if (x.clubs.some((c) => inRound.has(c))) { round++; inRound = new Set(); }
+				for (const c of x.clubs) inRound.add(c);
+				out.set(key(x), round);
+			}
+		}
+	}
+	return out;
+}
+
+async function numberSeriesRounds(client, sportId, where) {
+	const { rows } = await client.query(`
+		SELECT season, home, away, date::text AS date, round FROM game
+		 WHERE sport = $1 AND round <> 'regular' AND ${where}`, [sportId]);
+	let staged = 0;
+	for (const [key, round] of seriesRounds(rows)) {
+		const [season, a, b] = key.split('|');
+		const r = await client.query(
+			`UPDATE game SET stage = $5 WHERE sport = $1 AND season = $2 AND round <> 'regular' AND ${where}
+			    AND ((home = $3 AND away = $4) OR (home = $4 AND away = $3))`,
+			[sportId, Number(season), a, b, `R${round}`]);
+		staged += r.rowCount;
+	}
+	return staged;
+}
+
 /** Fetch the season being played now from a live feed, and upsert it.
  *
  *  Separate from the main load so it can run often: it touches nine URLs rather
@@ -1402,33 +1477,9 @@ async function main() {
 
 	if (sportId === 'wnba') {
 		// 1997-2001's ids name no round, so the page could not say which a game
-		// was in. Each series is numbered from the order it was played: one round
-		// past the deepest either club had reached that postseason. Taking the
-		// deeper of the two is what copes with a bye, where a seed meets a club a
-		// round ahead of it.
-		const { rows } = await client.query(`
-			SELECT season, home, away, min(date) AS first FROM game
-			 WHERE sport = 'wnba' AND round <> 'regular' AND stage IS NULL AND source = 'wnba'
-			 GROUP BY season, LEAST(home, away), GREATEST(home, away), home, away
-			 ORDER BY season, first`);
-		const series = new Map();
-		for (const r of rows) {
-			const key = `${r.season}|${[r.home, r.away].sort().join('|')}`;
-			if (!series.has(key)) series.set(key, { season: r.season, clubs: [r.home, r.away].sort(), first: r.first });
-			else if (r.first < series.get(key).first) series.get(key).first = r.first;
-		}
-		const deepest = new Map();
-		let staged = 0;
-		for (const s of [...series.values()].sort((a, b) => a.season - b.season || a.first - b.first)) {
-			const round = 1 + Math.max(...s.clubs.map((c) => deepest.get(`${s.season}|${c}`) ?? 0));
-			for (const c of s.clubs) deepest.set(`${s.season}|${c}`, round);
-			const r = await client.query(
-				`UPDATE game SET stage = $4 WHERE sport = 'wnba' AND season = $1 AND round <> 'regular'
-				    AND ((home = $2 AND away = $3) OR (home = $3 AND away = $2))`,
-				[s.season, s.clubs[0], s.clubs[1], `R${round}`]);
-			staged += r.rowCount;
-		}
-		console.log(`  rounds       ${staged} playoff games of 1997-2001 numbered by the order their series were played`);
+		// was in; see numberSeriesRounds.
+		const staged = await numberSeriesRounds(client, 'wnba', "stage IS NULL AND source = 'wnba'");
+		console.log(`  rounds       ${staged} playoff games of 1997-2001 numbered back from their Finals`);
 	}
 
 	if (sportId === 'mls') {
@@ -1444,6 +1495,16 @@ async function main() {
 			 WHERE g.sport = 'mls' AND g.id = last.id`);
 		await client.query(`UPDATE game SET title = 'MLS Cup' WHERE sport = 'mls' AND round = 'championship'`);
 		console.log(`  finals       ${r.rowCount} MLS Cups found as their season's last playoff game`);
+
+		// After the Finals are known, because the rounds are counted back from
+		// them. MLS has named its rounds a dozen ways since 1996 ("Quarterfinals",
+		// "Quarter-Finals", "conferenceFinal", "MATCHWEEK 1" in 2013-2015), and
+		// some seasons had a wild card or a knockout round before the first, so
+		// every season's are numbered, R1 to R5, and the page names them from
+		// MLS Cup back (lib/web.js mlsGametype). The source's word is in its
+		// season's file.
+		const staged = await numberSeriesRounds(client, 'mls', 'TRUE');
+		console.log(`  rounds       ${staged} playoff games numbered back from MLS Cup`);
 	}
 
 	if (sportId === 'nhl') {

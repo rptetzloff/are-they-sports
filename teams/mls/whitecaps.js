@@ -9,6 +9,9 @@ export const team = {
 		team: 'Whitecaps',
 		fullName: 'Vancouver Whitecaps FC',
 	},
+
+	/** ESPN's id for the club, which its soccer schedules are asked by. */
+	site: { espnSlug: '9727' },
 };
 
 export default team;

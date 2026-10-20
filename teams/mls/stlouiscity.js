@@ -9,6 +9,9 @@ export const team = {
 		team: 'St. Louis City',
 		fullName: 'St. Louis CITY SC',
 	},
+
+	/** ESPN's id for the club, which its soccer schedules are asked by. */
+	site: { espnSlug: '21812' },
 };
 
 export default team;
