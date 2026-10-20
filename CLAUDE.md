@@ -536,6 +536,36 @@ Gaps: no coaches, as for basketball. The clubs' colours are the prepared
 table's, darkest first, and about a dozen land on black; which to change is
 Ray's call, as it is for basketball's.
 
+### The WNBA, the fifth sport
+
+Added on 2026-10-20, data first. What the adapter decides:
+
+- **The league's own logs for every finished season.** ESPN lists the WNBA from
+  1997, but has none of 1997's scores and gaps through 2001, and against the
+  league's logs its 2002-2019 has seven games missing (two of them 2002 playoff
+  games), four wrong scores, one game twice and one on the wrong date. Ray chose
+  the league's logs for 1997-2025, credited. They come from stats.wnba.com, which
+  answers only a browser, so they are committed (`data/reference/wnba-games.csv`,
+  6,669 games) rather than fetched; ESPN carries 2026 on. Compared game by game,
+  the load and the logs agree on every game and every score.
+- **The round is in the league's id from 2002** (104 YY 00 R S G), and each
+  season's last round is its Finals. 1997-2001 number their playoff games in
+  order, and their Finals are found as the NBA's early ones are, as the last
+  series played.
+- **sportsdataverse's WNBA files leave `season_type` empty from 2024**; ESPN's
+  type word still says it (STD regular, a round's word the playoffs). Their
+  embedded video data breaks lines, and only `csvRows` reads them whole — a
+  quick count with `parseCsv` once made 2026's file look eight games long.
+- **One code, two clubs**: the first Portland Fire (2000-2002) and today's
+  (2026) are both POR in every source. The first is POF, and the adapter reads
+  POR as POF before 2026.
+- **A season is the calendar year**, May to October, as every source writes it.
+- **Counted, not asserted**: 29 champions for 1997-2025, each one right, Finals
+  of one game (1997) to five; every season's regular season is its clubs times
+  games, halved.
+
+Gaps: no coaches, and no front page until `web/wnba` exists.
+
 ## A club is a sport and an id, never an id
 
 Six times now the same bug: something keyed, cached, looked up or chosen without
@@ -562,8 +592,8 @@ and most produced a plausible wrong answer rather than an error.
 
 The rule: **anything that identifies a club carries the sport with it.** A bare
 code, a bare id or a bare franchise is a bug waiting for a second sport, and
-there are two more sports of data sitting in `data/sources/sportsdata`,
-basketball and hockey having been the third and fourth.
+there is one more sport of data sitting in `data/sources/sportsdata`,
+basketball, hockey and the WNBA having been the third, fourth and fifth.
 
 Where a function cannot carry it, it refuses: `computeLeague` and
 `computeSchedule` throw on clubs from two sports rather than producing something

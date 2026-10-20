@@ -1,0 +1,22 @@
+# Current WNBA conference membership, from ESPN's 2026 standings (via
+# data/reference/wnba-franchise-history.csv, whose current rows carry it).
+#
+# A SNAPSHOT, NOT A HISTORY, as nfl-divisions.csv explains at length: a
+# conference scope means today's clubs, each with its whole history. The WNBA
+# has no divisions, so every division is empty.
+code,conference,division
+ATL,Eastern,
+CHI,Eastern,
+CON,Eastern,
+IND,Eastern,
+NYL,Eastern,
+TOR,Eastern,
+WAS,Eastern,
+DAL,Western,
+GSV,Western,
+LAS,Western,
+LVA,Western,
+MIN,Western,
+PHX,Western,
+POR,Western,
+SEA,Western,

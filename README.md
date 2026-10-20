@@ -71,6 +71,7 @@ DATABASE_URL=... npm run load nfl
 DATABASE_URL=... npm run load mlb
 DATABASE_URL=... npm run load nba     # FiveThirtyEight 1947-2001, sportsdataverse 2002-
 DATABASE_URL=... npm run load nhl     # the NHL's own APIs, 1917-18 on
+DATABASE_URL=... npm run load wnba    # the WNBA's own logs 1997-2025, ESPN after
 ```
 
 Both work **inside the deployed container**, which is usually where the database

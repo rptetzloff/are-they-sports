@@ -1,0 +1,62 @@
+# Every WNBA franchise's eras: codes, names, seasons and colours. Curated.
+#
+# A WNBA season is the calendar year it is played in, as every source writes it.
+#
+# The eras of the 15 current franchises are the prepared table that came with
+# this repo's sources (sportsdata/coaches/WnbaFranchiseNames.csv). Added, each
+# from a source:
+#
+#   statsAbbrv          the WNBA's own code for the era (stats.wnba.com's game
+#                       logs), 1997-2025, the seasons its logs are loaded for.
+#   espnAbbrv           ESPN's code for the era, read from every game ESPN lists
+#                       1997-2026 by matching the name within the season. An era
+#                       is split where it changes: the Sun were CT, CONN and CON,
+#                       the Sparks LOS then LA. ESPN files Detroit's Shock as TUL,
+#                       its later code, and this keeps that.
+#   conference          the current row only, from ESPN's 2026 standings. The
+#                       WNBA has no divisions.
+#   the defunct clubs   Houston, Sacramento, Charlotte, Cleveland, Miami and the
+#                       first Portland Fire, named as the sources name them, with
+#                       seasons computed from their games. No colours.
+#
+# One deliberate departure. The first Portland Fire (2000-2002) and today's
+# (2026) are different franchises, and every source calls both POR. A code
+# naming two clubs merges their histories, so the first is POF here, and
+# sports/wnba.js reads POR as POF before 2026.
+franchiseAbbrv,teamAbbrv,statsAbbrv,espnAbbrv,league,conference,division,city,teamName,alternateName,startSeason,endSeason,locationCity,locationState,colorA,colorB,colorC,colorD,colorE
+ATL,ATL,ATL,ATL,WNBA,Eastern,,Atlanta,Dream,,2008,,Atlanta,GA,#E31837,#418FDE,#FDB927,,
+CHA,CHA,CHA,CHA,WNBA,,,Charlotte,Sting,,1997,2006,Charlotte,,,,,,
+CHI,CHI,CHI,CHI,WNBA,Eastern,,Chicago,Sky,,2006,,Chicago,IL,#5091CC,#FFD520,#212E56,,
+CLE,CLE,CLE,CLE,WNBA,,,Cleveland,Rockers,,1997,2003,Cleveland,,,,,,
+CON,ORL,ORL,ORL,WNBA,,,Orlando,Miracle,,1999,2002,Orlando,FL,#0077C0,#C8102E,#C4CED4,,
+CON,CON,CON,CT,WNBA,,,Connecticut,Sun,,2003,2010,Uncasville,CT,#F05023,#0A2240,#C8102E,,
+CON,CON,CON,CONN,WNBA,,,Connecticut,Sun,,2011,2023,Uncasville,CT,#F05023,#0A2240,#C8102E,,
+CON,CON,CON,CON,WNBA,Eastern,,Connecticut,Sun,,2024,,Uncasville,CT,#F05023,#0A2240,#C8102E,,
+DAL,DET,DET,TUL,WNBA,,,Detroit,Shock,,1998,2009,Detroit,MI,#1D42BA,#C8102E,#FFFFFF,,
+DAL,TUL,TUL,TUL,WNBA,,,Tulsa,Shock,,2010,2015,Tulsa,OK,#000000,#FDB927,#C8102E,,
+DAL,DAL,DAL,DAL,WNBA,Western,,Dallas,Wings,,2016,,Arlington,TX,#002B5C,#C4D600,#A2AAAD,,
+GSV,GSV,GSV,GS,WNBA,Western,,Golden State,Valkyries,,2025,,San Francisco,CA,#B399D4,#000000,#FFFFFF,,
+HOU,HOU,HOU,HOU,WNBA,,,Houston,Comets,,1997,2008,Houston,,,,,,
+IND,IND,IND,IND,WNBA,Eastern,,Indiana,Fever,,2000,,Indianapolis,IN,#041E42,#C8102E,#FFC633,,
+LAS,LAS,LAS,LOS,WNBA,,,Los Angeles,Sparks,,1997,2010,Los Angeles,CA,#552583,#FDB927,#00A9B7,,
+LAS,LAS,LAS,LA,WNBA,Western,,Los Angeles,Sparks,,2011,,Los Angeles,CA,#552583,#FDB927,#00A9B7,,
+LVA,UTA,UTA,UTH,WNBA,,,Utah,Starzz,,1997,2002,Salt Lake City,UT,#5F259F,#FDB927,#046A38,,
+LVA,SAS,SAN,SAS,WNBA,,,San Antonio,Silver Stars,Stars,2003,2010,San Antonio,TX,#000000,#C4CED4,#C8102E,,
+LVA,SAS,SAN,SA,WNBA,,,San Antonio,Silver Stars,Stars,2011,2013,San Antonio,TX,#000000,#C4CED4,#C8102E,,
+LVA,SAS,SAN,SA,WNBA,,,San Antonio,Stars,,2014,2017,San Antonio,TX,#000000,#C4CED4,#C8102E,,
+LVA,LVA,LVA,LV,WNBA,Western,,Las Vegas,Aces,,2018,,Las Vegas,NV,#000000,#A6192E,#85714D,,
+MIA,MIA,MIA,MIA,WNBA,,,Miami,Sol,,2000,2002,Miami,,,,,,
+MIN,MIN,MIN,MIN,WNBA,Western,,Minnesota,Lynx,,1999,,Minneapolis,MN,#002B5C,#78BE20,#9EA2A2,,
+NYL,NYL,NYL,NYL,WNBA,,,New York,Liberty,,1997,2010,New York,NY,#008E97,#000000,#FFFFFF,,
+NYL,NYL,NYL,NY,WNBA,,,New York,Liberty,,2011,2019,New York,NY,#008E97,#000000,#FFFFFF,,
+NYL,NYL,NYL,NY,WNBA,Eastern,,New York,Liberty,,2020,,Brooklyn,NY,#6ECEB2,#000000,#FFFFFF,,
+PHX,PHX,PHO,PHO,WNBA,,,Phoenix,Mercury,,1997,2010,Phoenix,AZ,#201747,#E56020,#CB6015,,
+PHX,PHX,PHO,PHX,WNBA,,,Phoenix,Mercury,,2011,2024,Phoenix,AZ,#201747,#E56020,#CB6015,,
+PHX,PHX,PHX,PHX,WNBA,Western,,Phoenix,Mercury,,2025,,Phoenix,AZ,#201747,#E56020,#CB6015,,
+POF,POF,,,WNBA,,,Portland,Fire,,2000,2002,Portland,,,,,,
+POR,POR,,POR,WNBA,Western,,Portland,Fire,,2026,,Portland,OR,#E93CAC,#C8102E,#000000,#8BB8E8,#FFFFFF
+SAC,SAC,SAC,SAC,WNBA,,,Sacramento,Monarchs,,1997,2009,Sacramento,,,,,,
+SEA,SEA,SEA,SEA,WNBA,Western,,Seattle,Storm,,2000,,Seattle,WA,#2C5234,#FFC600,#DB6015,,
+TOR,TOR,,TOR,WNBA,Eastern,,Toronto,Tempo,,2026,,Toronto,ON,#6C1D45,#3EB1C8,#000000,#FFFFFF,
+WAS,WAS,WAS,WAS,WNBA,,,Washington,Mystics,,1998,2010,Washington,DC,#002B5C,#C8102E,#C4CED4,,
+WAS,WAS,WAS,WSH,WNBA,Eastern,,Washington,Mystics,,2011,,Washington,DC,#002B5C,#C8102E,#C4CED4,,

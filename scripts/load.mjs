@@ -1152,6 +1152,51 @@ async function main() {
 		}
 	}
 
+	if (sportId === 'wnba') {
+		// The WNBA's own 1997-2025, committed, then sportsdataverse a season at a
+		// time; see sports/wnba.js. Both sides must be clubs the franchise table
+		// knows, as for the NBA: ESPN files its All-Star sides (EAST, WEST, TEAM
+		// CLARK ...) as regular-season games.
+		const codes = codeTable('wnba', loadHistory('wnba'));
+		const notClubs = new Map();
+		const putClub = async (row) => {
+			for (const c of [row.home, row.away]) {
+				if (!codes.knows(c)) { notClubs.set(c, (notClubs.get(c) ?? 0) + 1); return; }
+			}
+			await put(row);
+		};
+		for await (const r of csvRows(join(REFERENCE_DIR, adapter.sources.history.reference))) {
+			if (Number(r.season) >= adapter.sources.history.useBefore) continue;
+			const row = adapter.statsGameRow(r);
+			if (row) await putClub(row);
+		}
+		const last = adapter.sources.live.seasonOf(new Date());
+		for (let season = adapter.sources.schedules.from; season <= last; season++) {
+			const path = join(SOURCE_DIR, 'wnba', `wnba_schedule_${season}.csv`);
+			const ok = await ensureSource('wnba', path, { url: adapter.sources.schedules.url(season) }, `sportsdataverse WNBA ${season}`);
+			let n = 0;
+			if (ok) {
+				for await (const r of csvRows(path)) {
+					const row = adapter.espnGameRow(r);
+					if (row) { n++; await putClub(row); }
+				}
+			}
+			// A season's file can be missing, or published part-way through, while
+			// ESPN's scoreboard has every game so far. A season of fewer than a
+			// hundred games from the file (the shortest season, 1997's, had 115) is
+			// read from the scoreboard, day by day, under the same ESPN ids. In May,
+			// before a season's file has much in it, that is the normal case.
+			if (n < 100) {
+				const seen = await loadLive(client, 'wnba', adapter.sources.live, season, putClub);
+				console.log(`  scoreboard   WNBA ${season}: ${n} games in the file, ${seen} from ESPN`);
+			}
+		}
+		if (notClubs.size) {
+			const list = [...notClubs].map(([c, n]) => `${c} ${n}`).join(', ');
+			console.log(`  not clubs    ${[...notClubs.values()].reduce((a, b) => a + b, 0)} games skipped: ${list}`);
+		}
+	}
+
 	if (sportId === 'nhl') {
 		// The league's own record, one stats-API file per season; see
 		// sports/nhl.js. Team ids become the NHL's codes from its team list, and
@@ -1258,7 +1303,21 @@ async function main() {
 		console.log(`  championships ${marked} title games identified`);
 	}
 
-	if (sportId === 'nba') {
+	if (sportId === 'wnba') {
+		await flush();
+		// The league's ids name the round from 2002 (sports/wnba.js roundOf), and
+		// each season's last is its Finals. 1997-2001 name none and fall to the
+		// last-series pass below, as the NBA's early seasons do.
+		const r = await client.query(`
+			UPDATE game g SET round = 'championship'
+			  FROM (SELECT season, max(substring(stage from 2)::int) AS last FROM game
+			         WHERE sport = 'wnba' AND round = 'playoff' AND stage ~ '^R[0-9]+$' GROUP BY season) f
+			 WHERE g.sport = 'wnba' AND g.season = f.season AND g.stage = 'R' || f.last
+			   AND g.season NOT IN (SELECT season FROM game WHERE sport = 'wnba' AND round = 'championship')`);
+		console.log(`  finals       ${r.rowCount} WNBA Finals games named by the league's ids`);
+	}
+
+	if (sportId === 'nba' || sportId === 'wnba') {
 		await flush();
 		// ESPN names the Finals from 2004 (measured: 2002 and 2003 carry no round);
 		// FiveThirtyEight names no round at all.
@@ -1269,22 +1328,24 @@ async function main() {
 		// "every meeting" the same as "the series".
 		const { rows: seasons } = await client.query(`
 			SELECT DISTINCT ON (season) season, home, away FROM game
-			 WHERE sport = 'nba' AND round = 'playoff'
-			   AND season NOT IN (SELECT season FROM game WHERE sport = 'nba' AND round = 'championship')
-			 ORDER BY season, date DESC, id DESC`);
+			 WHERE sport = $1 AND round = 'playoff'
+			   AND season NOT IN (SELECT season FROM game WHERE sport = $1 AND round = 'championship')
+			 ORDER BY season, date DESC, id DESC`, [sportId]);
 		let finals = 0;
 		for (const f of seasons) {
 			const r = await client.query(
 				`UPDATE game SET round = 'championship'
-				  WHERE sport = 'nba' AND season = $1 AND round = 'playoff'
+				  WHERE sport = $4 AND season = $1 AND round = 'playoff'
 				    AND ((home = $2 AND away = $3) OR (home = $3 AND away = $2))`,
-				[f.season, f.home, f.away]);
+				[f.season, f.home, f.away, sportId]);
 			finals += r.rowCount;
 		}
-		// Named as each era named it, ESPN's seasons included.
-		await client.query(
-			`UPDATE game SET title = CASE WHEN season <= 1949 THEN 'BAA Finals' ELSE 'NBA Finals' END
-			  WHERE sport = 'nba' AND round = 'championship'`);
+		// Named as each era named it, ESPN's seasons included; the WNBA's have
+		// always been the WNBA Finals.
+		await client.query(sportId === 'nba'
+			? `UPDATE game SET title = CASE WHEN season <= 1949 THEN 'BAA Finals' ELSE 'NBA Finals' END
+			  WHERE sport = 'nba' AND round = 'championship'`
+			: `UPDATE game SET title = 'WNBA Finals' WHERE sport = 'wnba' AND round = 'championship'`);
 		console.log(`  finals       ${finals} games across ${seasons.length} seasons derived as the last series`);
 	}
 
