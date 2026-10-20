@@ -46,10 +46,11 @@ const BRAND = {
 	mlb: ['#12284b', '#1a3558', '#1a3a6b', '#1a3660', '#16305a', '#16294a', '#0d1d38', '#ffc52f', '#ffd45e', '#e0a820', '#8a5d00', '#f3f5f9', '#eef2f8', '#e9eef6'],
 	nfl: ['#203731', '#152a1e', '#1a2e28', '#ffb612', '#ffd050', '#8a5d00', '#f4f6f2', '#e8eee9'],
 }
-// Basketball's and hockey's stylesheets are baseball's, so their brand colours
+// Basketball's, hockey's and the WNBA's stylesheets are baseball's, so their brand colours
 // are the Brewers'.
 BRAND.nba = BRAND.mlb
 BRAND.nhl = BRAND.mlb
+BRAND.wnba = BRAND.mlb
 
 test('another club loses every brand colour and keeps every other one', () => {
 	const cubs = { base: '#0e3386', accent: '#cc3433' }
