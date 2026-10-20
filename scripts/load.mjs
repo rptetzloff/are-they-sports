@@ -12,7 +12,7 @@
 // replaces the capture with the authoritative version, and running it twice in
 // a row changes nothing. Authority is a column in `source`, not a branch here.
 
-import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import pg from 'pg';
@@ -81,8 +81,8 @@ export function franchiseMap(sportId, dir) {
    publishes the result. Finishing one is worth a write; restating that it has
    not started is not. */
 const SQL_UPSERT_GAME = `
-INSERT INTO game (sport, id, season, date, round, home, away, home_score, away_score, neutral, status, source, week, stage, ending)
-VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
+INSERT INTO game (sport, id, season, date, round, home, away, home_score, away_score, neutral, status, source, week, stage, ending, home_pens, away_pens)
+VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)
 ON CONFLICT (sport, id) DO UPDATE SET
 	season = EXCLUDED.season, date = EXCLUDED.date, round = EXCLUDED.round,
 	home = EXCLUDED.home, away = EXCLUDED.away,
@@ -94,6 +94,8 @@ ON CONFLICT (sport, id) DO UPDATE SET
 	week = COALESCE(EXCLUDED.week, game.week),
 	stage = COALESCE(EXCLUDED.stage, game.stage),
 	ending = COALESCE(EXCLUDED.ending, game.ending),
+	home_pens = COALESCE(EXCLUDED.home_pens, game.home_pens),
+	away_pens = COALESCE(EXCLUDED.away_pens, game.away_pens),
 	source = EXCLUDED.source, observed_at = now()
 WHERE (SELECT authority FROM source WHERE id = EXCLUDED.source)
    >= (SELECT authority FROM source WHERE id = game.source)
@@ -330,9 +332,10 @@ async function loadChampionships(client, sportId, byCode) {
 				       -- Series ran to eight games because game two was called
 				       -- 6-6 for darkness; Boston won it 4-3 and this made it
 				       -- 4-4, so the season came out with no champion at all.
-				       count(*) FILTER (
-				           WHERE g.home_score <> g.away_score
-				             AND (g.home = c.fr) = (g.home_score > g.away_score)) AS wins
+				       --
+				       -- The game's winner (0016) settles it now: the higher score,
+				       -- else the higher shootout, else nobody.
+				       count(*) FILTER (WHERE g.winner = c.fr) AS wins
 				  FROM game g
 				  CROSS JOIN LATERAL (VALUES (g.home), (g.away)) AS c(fr)
 				 WHERE g.sport = $1 AND g.round = 'championship' AND g.status = 'final'
@@ -966,11 +969,11 @@ async function main() {
 				row.homeScore, row.awayScore, row.neutral, row.status, row.source,
 				// Undefined and null both mean "this source has no week", and the
 				// upsert coalesces so a source without one never erases one.
-				row.week ?? null, row.stage ?? null, row.ending ?? null);
-			return `(${Array.from({ length: 15 }, (_, i) => `$${at + i + 1}`).join(',')})`;
+				row.week ?? null, row.stage ?? null, row.ending ?? null, row.homePens ?? null, row.awayPens ?? null);
+			return `(${Array.from({ length: 17 }, (_, i) => `$${at + i + 1}`).join(',')})`;
 		});
 		pending = [];
-		const r = await client.query(SQL_UPSERT_GAME.replace('VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)',
+		const r = await client.query(SQL_UPSERT_GAME.replace('VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)',
 			`VALUES ${tuples.join(',')}`), params);
 		loaded += r.rowCount;
 	};
@@ -1197,6 +1200,54 @@ async function main() {
 		}
 	}
 
+	if (sportId === 'mls') {
+		// MLS's own record, one file per season, fetched a page at a time and
+		// kept; see sports/mls.js. Clubs are MLS's team ids, which the franchise
+		// table carries as mlsAbbrv.
+		const codes = codeTable('mls', loadHistory('mls'));
+		// The 2000-2012 playoff shootouts MLS's data lacks, by its match id.
+		const shootouts = new Map(parseCsv(readFileSync(join(REFERENCE_DIR, adapter.sources.shootouts.reference), 'utf8'))
+			.map((r) => [r.match_id, r]));
+		let applied = 0, unplayed = 0;
+		const playing = adapter.sources.live.seasonOf(new Date());
+		for (let season = adapter.sources.schedules.from; season <= playing; season++) {
+			const path = join(SOURCE_DIR, 'mls', `mls-${season}.json`);
+			if (!existsSync(path)) {
+				console.log(`  fetching     MLS ${season} ...`);
+				try {
+					const matches = await adapter.sources.schedules.fetch(season);
+					mkdirSync(dirname(path), { recursive: true });
+					writeFileSync(path, JSON.stringify(matches));
+					console.log(`  fetched      MLS ${season}  ${matches.length} matches`);
+				} catch (e) {
+					console.error(`could not fetch MLS ${season}`);
+					console.error(`  ${e.message}`);
+					await client.query('ROLLBACK');
+					await client.end();
+					return 1;
+				}
+			}
+			for (const m of JSON.parse(readFileSync(path, 'utf8'))) {
+				const row = adapter.gameRow(m, { franchiseOf: codes.franchiseOf, knows: codes.knows });
+				if (!row) continue;
+				// A finished season's unplayed games were never played: 2001's
+				// last weekend after September 11, 2020's lost to the pandemic.
+				if (row.status !== 'final' && season < playing) { unplayed++; continue; }
+				const so = shootouts.get(row.id);
+				if (so) {
+					row.homePens = Number(so.home_pens);
+					row.awayPens = Number(so.away_pens);
+					if (row.homeScore === row.awayScore) row.ending = 'SO';
+					applied++;
+				}
+				await put(row);
+			}
+		}
+		if (applied !== shootouts.size) console.error(`  shootouts    ${applied} of ${shootouts.size} in ${adapter.sources.shootouts.reference} found a game`);
+		else console.log(`  shootouts    ${applied} from ${adapter.sources.shootouts.reference}`);
+		if (unplayed) console.log(`  unplayed     ${unplayed} games of finished seasons, never played, left out`);
+	}
+
 	if (sportId === 'nhl') {
 		// The league's own record, one stats-API file per season; see
 		// sports/nhl.js. Team ids become the NHL's codes from its team list, and
@@ -1378,6 +1429,21 @@ async function main() {
 			staged += r.rowCount;
 		}
 		console.log(`  rounds       ${staged} playoff games of 1997-2001 numbered by the order their series were played`);
+	}
+
+	if (sportId === 'mls') {
+		await flush();
+		// MLS Cup is MLS's Final; 2013-2015 name no round at all ("MATCHWEEK 1",
+		// "singleMatch"), and MLS Cup is always a season's last playoff game.
+		const r = await client.query(`
+			UPDATE game g SET round = 'championship'
+			  FROM (SELECT DISTINCT ON (season) id, season FROM game
+			         WHERE sport = 'mls' AND round = 'playoff' AND status = 'final'
+			           AND season NOT IN (SELECT season FROM game WHERE sport = 'mls' AND round = 'championship')
+			         ORDER BY season, date DESC, id DESC) last
+			 WHERE g.sport = 'mls' AND g.id = last.id`);
+		await client.query(`UPDATE game SET title = 'MLS Cup' WHERE sport = 'mls' AND round = 'championship'`);
+		console.log(`  finals       ${r.rowCount} MLS Cups found as their season's last playoff game`);
 	}
 
 	if (sportId === 'nhl') {

@@ -1,0 +1,70 @@
+# Every MLS franchise's eras: codes, names, seasons and colours. Curated.
+#
+# A season is the calendar year it is played in, MLS Cup included.
+#
+# The franchises and their eras are MLS's own (its stats API, every game since
+# 1996): a club is MLS's team id (mlsAbbrv), which stays with it through every
+# rename — the Wiz, Wizards and Sporting Kansas City are one, and so are the
+# MetroStars and the Red Bulls. An era is a run of seasons under one name and
+# one code, each season's name the one MLS's games use most; MLS's own records
+# swing between "New York Red Bulls" and "Red Bull New York", and this follows
+# them. San Jose's 2006-2007 absence is a gap between two eras of one club.
+#
+#   teamAbbrv       MLS's three-letter code for the era (KCW for the Wizards).
+#                   The Mutiny and the Fusion are "Mutiny" and "Fusion" in most
+#                   of MLS's rows; their codes are the ones MLS gives them where
+#                   it gives one, TBM and MIAF.
+#   mlsAbbrv        MLS's team id, which every game is filed under: MLS's rows
+#                   for 2013-2015 often carry no code at all.
+#   espnAbbrv       on a current row, ESPN's code, which is MLS's.
+#   city, teamName  a club's whole name as MLS gives it, in teamName, with no
+#                   city: "D.C. United" and "Real Salt Lake" do not split into
+#                   place and nickname. alternateName is MLS's short name.
+#   conference      the current row only, from ESPN's standings on 2026-10-20;
+#                   MLS's own come back as one table. MLS has no divisions.
+#   location, colours  the prepared table that came with this repo's sources
+#                   (sportsdata/coaches/MlsFranchiseNames.csv), by franchise.
+franchiseAbbrv,teamAbbrv,mlsAbbrv,espnAbbrv,league,conference,division,city,teamName,alternateName,startSeason,endSeason,locationCity,locationState,colorA,colorB,colorC,colorD,colorE
+ATL,ATL,MLS-CLU-00000A,ATL,MLS,Eastern,,,Atlanta United,Atlanta,2017,,Atlanta,GA,#A71930,#000000,#A29061,,
+ATX,ATX,MLS-CLU-000003,ATX,MLS,Western,,,Austin FC,Austin,2021,,Austin,TX,#00B140,#000000,#FFFFFF,,
+CHI,CHI,MLS-CLU-00000F,CHI,MLS,Eastern,,,Chicago Fire FC,Chicago,1998,,Chicago,IL,#FF0000,#141946,#FFFFFF,,
+CHV,CHV,MLS-CLU-000034,,MLS,,,,Chivas USA,,2005,2014,,,,,,,
+CIN,CIN,MLS-CLU-000007,CIN,MLS,Eastern,,,FC Cincinnati,Cincinnati,2019,,Cincinnati,OH,#FE5000,#263B80,#FFFFFF,,
+CLB,CLB,MLS-CLU-00000E,CLB,MLS,Eastern,,,Columbus Crew,Columbus,1996,,Columbus,OH,#FEDD00,#000000,#FFFFFF,,
+CLT,CLT,MLS-CLU-00000I,CLT,MLS,Eastern,,,Charlotte FC,Charlotte,2022,,Charlotte,NC,#1A85C8,#000000,#FFFFFF,,
+COL,COL,MLS-CLU-00000J,COL,MLS,Western,,,Colorado Rapids,Colorado,1996,,Commerce City,CO,#960A2C,#8BB8E8,#A2AAAD,,
+DAL,DAL,MLS-CLU-000005,,MLS,,,,Dallas Burn,Dallas,1996,2003,Dallas,TX,#C8102E,#000000,#FFFFFF,,
+DAL,DAL,MLS-CLU-000005,DAL,MLS,Western,,,FC Dallas,Dallas,2004,,Frisco,TX,#E81F3E,#0E2240,#C4CED4,,
+DC,DC,MLS-CLU-00000D,DC,MLS,Eastern,,,D.C. United,,1996,,Washington,DC,#231F20,#EF3E42,#FFFFFF,,
+HOU,HOU,MLS-CLU-00000H,HOU,MLS,Western,,,Houston Dynamo FC,Houston,2006,,Houston,TX,#FF6B00,#101820,#FFFFFF,,
+LA,LA,MLS-CLU-00000G,LA,MLS,Western,,,LA Galaxy,,1996,,Carson,CA,#00245D,#FFD200,#FFFFFF,,
+LAFC,LAFC,MLS-CLU-000001,LAFC,MLS,Western,,,Los Angeles Football Club,LAFC,2018,,Los Angeles,CA,#000000,#C39E6D,#FFFFFF,,
+MIA,MIA,MLS-CLU-000008,MIA,MLS,Eastern,,,Inter Miami CF,Miami,2020,,Fort Lauderdale,FL,#F7B5CD,#231F20,#FFFFFF,,
+MIAF,MIAF,MLS-CLU-00007W,,MLS,,,,Miami Fusion FC,Fusion,1998,2001,,,,,,,
+MIN,MIN,MLS-CLU-00000L,MIN,MLS,Western,,,Minnesota United FC,Minnesota,2017,,St. Paul,MN,#8CD2F4,#231F20,#97999B,,
+MTL,MTL,MLS-CLU-000006,,MLS,,,,Montreal Impact,Montréal,2012,2020,Montreal,QC,#003DA5,#000000,#C4CED4,,
+MTL,MTL,MLS-CLU-000006,MTL,MLS,Eastern,,,CF Montréal,Montréal,2021,,Montreal,QC,#000000,#003DA5,#8A8D8F,,
+NE,NE,MLS-CLU-00000N,NE,MLS,Eastern,,,New England Revolution,New England,1996,,Foxborough,MA,#0A2240,#CE0E2D,#A2AAAD,,
+NSH,NSH,MLS-CLU-000009,NSH,MLS,Eastern,,,Nashville SC,Nashville,2020,,Nashville,TN,#ECE83A,#1F1646,#FFFFFF,,
+NYC,NYC,MLS-CLU-000004,NYC,MLS,Eastern,,,New York City Football Club,New York City,2015,,New York,NY,#6CACE4,#041E42,#F15524,,
+ORL,ORL,MLS-CLU-00000O,ORL,MLS,Eastern,,,Orlando City,Orlando,2015,,Orlando,FL,#633492,#FDE192,#FFFFFF,,
+PHI,PHI,MLS-CLU-000002,PHI,MLS,Eastern,,,Philadelphia Union,Philadelphia,2010,,Chester,PA,#002D55,#B49759,#418FDE,,
+POR,POR,MLS-CLU-00000P,POR,MLS,Western,,,Portland Timbers,Portland,2011,,Portland,OR,#004812,#EAE827,#FFFFFF,,
+RBNY,MET,MLS-CLU-00000B,,MLS,,,,New York/New Jersey MetroStars,MetroStars,1996,2005,East Rutherford,NJ,#C8102E,#000000,#FFFFFF,,
+RBNY,RBNY,MLS-CLU-00000B,,MLS,,,,New York Red Bulls,New York,2006,2007,Harrison,NJ,#ED1E36,#23326A,#FFC20E,,
+RBNY,RBNY,MLS-CLU-00000B,,MLS,,,,Red Bull New York,New York,2008,2008,Harrison,NJ,#ED1E36,#23326A,#FFC20E,,
+RBNY,RBNY,MLS-CLU-00000B,,MLS,,,,New York Red Bulls,New York,2009,2010,Harrison,NJ,#ED1E36,#23326A,#FFC20E,,
+RBNY,RBNY,MLS-CLU-00000B,RBNY,MLS,Eastern,,,Red Bull New York,New York,2011,,Harrison,NJ,#ED1E36,#23326A,#FFC20E,,
+RSL,RSL,MLS-CLU-00000R,RSL,MLS,Western,,,Real Salt Lake,Salt Lake,2005,,Sandy,UT,#B30838,#013A81,#F2A900,,
+SD,SD,MLS-CLU-000065,SD,MLS,Western,,,San Diego FC,San Diego,2025,,San Diego,CA,#0080BF,#C4CED4,#000000,,
+SEA,SEA,MLS-CLU-00000S,SEA,MLS,Western,,,Seattle Sounders FC,Seattle,2009,,Seattle,WA,#5D9732,#005595,#A5ACAF,,
+SJ,SJ,MLS-CLU-00000Q,,MLS,,,,San Jose Clash,Clash,1996,1999,San Jose,CA,#008E97,#C8102E,#000000,,
+SJ,SJ,MLS-CLU-00000Q,,MLS,,,,San Jose Earthquakes,San Jose,2000,2005,San Jose,CA,#0033A0,#000000,#FFFFFF,,
+SJ,SJ,MLS-CLU-00000Q,SJ,MLS,Western,,,San Jose Earthquakes,San Jose,2008,,San Jose,CA,#0067B1,#000000,#C4CED4,,
+SKC,KCW,MLS-CLU-00000K,,MLS,,,,Kansas City Wiz,Wiz,1996,1996,Kansas City,MO,#0033A0,#FFFFFF,,,
+SKC,KCW,MLS-CLU-00000K,,MLS,,,,Kansas City Wizards,Wizards,1997,2010,Kansas City,MO,#0033A0,#FFFFFF,,,
+SKC,SKC,MLS-CLU-00000K,SKC,MLS,Western,,,Sporting Kansas City,Kansas City,2011,,Kansas City,KS,#91B0D5,#002A5C,#FFFFFF,,
+STL,STL,MLS-CLU-00001L,STL,MLS,Western,,,St. Louis CITY SC,St. Louis,2023,,St. Louis,MO,#DF1F2D,#041C2C,#FFDD00,,
+TBM,TBM,MLS-CLU-00007V,,MLS,,,,Tampa Bay Mutiny,Mutiny,1996,2001,,,,,,,
+TOR,TOR,MLS-CLU-00000M,TOR,MLS,Eastern,,,Toronto FC,Toronto,2007,,Toronto,ON,#B81137,#455560,#FFFFFF,,
+VAN,VAN,MLS-CLU-00000C,VAN,MLS,Western,,,Vancouver Whitecaps FC,Vancouver,2011,,Vancouver,BC,#04265C,#94C2E4,#97999B,,

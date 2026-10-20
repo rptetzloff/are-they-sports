@@ -583,6 +583,41 @@ Added on 2026-10-20, data first. What the adapter decides:
 
 Gaps: no coaches.
 
+### MLS, the sixth sport
+
+Added on 2026-10-20, data first. What the adapter decides:
+
+- **MLS's own stats API for every season** (stats-api.mlssoccer.com), 1996 on,
+  credited, which Ray approved. It answers a script, so the load fetches it, a
+  page at a time, and keeps each season's file. The season being played is the
+  same API under the same ids. A club is MLS's team id (`mlsAbbrv`), which
+  survives every rename and every blank code (2013-2015 have many).
+- **A shootout winner wins** (Ray, 2026-10-20), as MLS's own 1996-1999
+  standings count it: Tampa Bay's 1996 is 20-0-12. The score stays the score;
+  the shootout is `home_pens` and `away_pens`, and **`winner`** (0016, a
+  generated column) is the one place a result is decided — the higher score,
+  else the higher shootout, else nobody. Every "home_score > away_score" in the
+  result queries became it, for every sport, with no change to any other's
+  results (checked: the NBA, NHL and WNBA reload to the same champions).
+- **MLS's data has no playoff shootouts for 2000-2012.** Eight decided a game
+  or a series in those seasons — every one-game round left level and every
+  two-game series level on aggregate — and Wikipedia has all eight, in
+  `data/reference/mls-shootouts.csv`, each tied to MLS's match id. Where both
+  have a shootout, they agree (29). Without them 2006 and 2009 had no champion.
+- **MLS Cup is MLS's Final**, except 2013-2015, whose playoff games are named
+  "MATCHWEEK 1" and "singleMatch"; there the season's last playoff game is it.
+- **A finished season's unplayed games are left out**: 2001's last weekend
+  after September 11, 2020's lost to the pandemic.
+- **Names are MLS's whole names** ("D.C. United", "Real Salt Lake") with no
+  city: soccer's do not split into place and nickname. MLS's own records swing
+  between "New York Red Bulls" and "Red Bull New York", and the table follows.
+- **Counted, not asserted**: 30 MLS Cups, each right, six of them on penalties;
+  every regular season clubs times games, halved.
+
+Gaps: no coaches; no front page until `web/mls` exists. The server's league
+standings rank by winning percentage, which is not how MLS (points) or the NHL
+ranks; that is a server page's, and was already true of hockey.
+
 ## A club is a sport and an id, never an id
 
 Six times now the same bug: something keyed, cached, looked up or chosen without
@@ -609,8 +644,8 @@ and most produced a plausible wrong answer rather than an error.
 
 The rule: **anything that identifies a club carries the sport with it.** A bare
 code, a bare id or a bare franchise is a bug waiting for a second sport, and
-there is one more sport of data sitting in `data/sources/sportsdata`,
-basketball, hockey and the WNBA having been the third, fourth and fifth.
+basketball, hockey, the WNBA and MLS were the third to sixth sports, each
+from data that sat in `data/sources/sportsdata` first.
 
 Where a function cannot carry it, it refuses: `computeLeague` and
 `computeSchedule` throw on clubs from two sports rather than producing something
