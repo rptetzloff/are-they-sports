@@ -788,6 +788,38 @@ function main() {
 			}
 			return fronts.get(key);
 		};
+		// A league's page (/nfl/, /mlb/ ...), where the scope holds more than one
+		// club: built on the sport's first club with games, whose ESPN cache and
+		// bracket it shares, and said of the league (lib/web-routes.js). Neutral
+		// colours, as the server's league pages have: it is nobody's club.
+		const leagueFor = (sport) => {
+			if (!needsSelector(table) || !hasFrontEnd(sport) || !dbHealth.ok) return null;
+			const entry = table.find((e) => e.sport === sport && e.available && clubFor(e));
+			if (!entry) return null;
+			const key = `league/${sport}`;
+			if (!fronts.has(key)) {
+				fronts.set(key, createFront({
+					league: true,
+					team: clubFor(entry),
+					franchise: entry.franchise,
+					base: `/${sport}`,
+					clubs: frontClubs,
+					adapter: adapters[sport],
+					namer: namers[sport],
+					history: loadHistory(sport),
+					currentCodes: currentOf(sport),
+					palette: NEUTRAL,
+					store: { rawGamesFor, standingsTitles, finalRounds, leaderGames, leaderTenures },
+					creditHtml: creditLine(creditsFor([adapters[sport]])),
+					origin: originOf,
+				}).catch((e) => {
+					console.error(`  league page  ${sport} failed: ${e.message}`);
+					fronts.delete(key);
+					return null;
+				}));
+			}
+			return fronts.get(key);
+		};
 		const withFront = table.filter((e) => e.available && clubFor(e) && hasFrontEnd(e.sport)).length;
 		if (withFront) console.log(`  front page   ${withFront} of ${table.length} clubs, built on first request`);
 
@@ -843,6 +875,19 @@ function main() {
 				if (handled) return;
 			}
 
+			// A league's page and what it asks for, under /{sport}/. Anything it
+			// does not answer — /nfl/standings, /nfl/schedule — goes on to the
+			// server's own routes below.
+			const leagueHit = !claimed && url.pathname.match(/^\/([a-z]+)(\/.*)?$/);
+			const leagueFront = leagueHit && SPORTS.includes(leagueHit[1]) && await leagueFor(leagueHit[1]);
+			if (leagueFront) {
+				if (!leagueHit[2]) {
+					res.writeHead(301, { location: `/${leagueHit[1]}/${url.search}` });
+					return res.end();
+				}
+				if (await leagueFront(req, res, leagueHit[2], url, (r, body) => html(r, 200, body))) return;
+			}
+
 			// The selector. Only exists when the scope holds more than one club;
 			// a single-club scope serves that club at the root instead.
 			// The credits this deployment owes, from the sports in its scope. A
@@ -883,6 +928,8 @@ function main() {
 					// The root is where anyone lands, and the league pages were
 					// reachable only by typing their paths.
 					nav: leagueNav('clubs'),
+					// Each league's heading opens its page (/nfl/), where it has a front end.
+					leagueHref: (sport) => (hasFrontEnd(sport) ? `/${sport}/` : null),
 				}));
 			}
 
