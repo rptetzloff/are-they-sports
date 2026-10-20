@@ -1,0 +1,122 @@
+# Every NHL franchise's eras: codes, names, seasons and colours. Curated.
+#
+# The eras of the 32 current franchises are the prepared table that came with
+# this repo's sources (sportsdata/coaches/NhlFranchiseNames.csv), as the other
+# sports' were, shifted from the year a season starts to the year it ends, which
+# the NHL and every game source use. Changed and added, each from a source:
+#
+#   teamAbbrv           the NHL's own code for the era (its stats API team
+#                       list), matched to the era by name and season against
+#                       every NHL game. The prepared table reused codes — WPG
+#                       for both Winnipeg Jets, DET for the Cougars and Falcons
+#                       — and a code naming two clubs merges their histories.
+#   espnAbbrv           on a current row, from ESPN's team list (LA, NJ, SJ, TB).
+#   conference, division  the current row only, from ESPN's standings, as of
+#                       2026-10-19. A snapshot; see nhl-divisions.csv.
+#   the western clubs   the Cup Finals of 1918-1926 were against: named from the
+#                       NHL's own game records, with no league claimed.
+#   the defunct clubs   named and grouped as the NHL's stats API names and groups
+#                       them, with seasons computed from their games. No colours.
+#
+# Two deliberate departures. The prepared table's WHA rows are left out: no WHA
+# game is loaded, and one reused a current club's code. And the prepared table
+# chains the original Winnipeg Jets through Phoenix and Arizona to Utah as one
+# franchise, where the NHL files those Jets under today's Jets and counts Utah as
+# new; this follows the prepared table, and the NHL's grouping is the source's
+# claim, not the fact (CLAUDE.md, "A flag in a source file").
+franchiseAbbrv,teamAbbrv,espnAbbrv,league,conference,division,city,teamName,alternateName,startSeason,endSeason,locationCity,locationState,colorA,colorB,colorC,colorD,colorE
+ANA,ANA,,NHL,,,Anaheim,Mighty Ducks,Mighty Ducks of Anaheim,1994,2006,Anaheim,CA,#472A6B,#00685E,#C4CED4,#FFFFFF,
+ANA,ANA,,NHL,,,Anaheim,Ducks,,2007,2024,Anaheim,CA,#010101,#89734C,#FC4C02,,
+ANA,ANA,ANA,NHL,Western,Pacific,Anaheim,Ducks,,2025,,Anaheim,CA,#FF4C00,#000000,#89734C,#FFFFFF,
+BOS,BOS,,NHL,,,Boston,Bruins,,1925,1934,Boston,MA,#4E3629,#FFB81C,#FFFFFF,,
+BOS,BOS,BOS,NHL,Eastern,Atlantic,Boston,Bruins,,1935,,Boston,MA,#000000,#FFB81C,#FFFFFF,,
+BRK,NYA,,NHL,,,New York,Americans,,1926,1941,New York,,,,,,
+BRK,BRK,,NHL,,,Brooklyn,Americans,,1942,1942,Brooklyn,,,,,,
+BUF,BUF,,NHL,,,Buffalo,Sabres,,1971,1996,Buffalo,NY,#002654,#FDBB30,#FFFFFF,,
+BUF,BUF,,NHL,,,Buffalo,Sabres,,1997,2006,Buffalo,NY,#000000,#A60F2D,#C4CED4,,
+BUF,BUF,,NHL,,,Buffalo,Sabres,,2007,2010,Buffalo,NY,#002654,#B79257,#C4CED4,,
+BUF,BUF,BUF,NHL,Eastern,Atlantic,Buffalo,Sabres,,2011,,Buffalo,NY,#002654,#FDBB30,#ADAFAA,,
+CAR,HFD,,NHL,,,Hartford,Whalers,,1980,1992,Hartford,CT,#046A38,#002D62,#FFFFFF,,
+CAR,HFD,,NHL,,,Hartford,Whalers,,1993,1997,Hartford,CT,#002D62,#046A38,#C4CED4,,
+CAR,CAR,CAR,NHL,Eastern,Metropolitan,Carolina,Hurricanes,Canes,1998,,Raleigh,NC,#CC0000,#000000,#A2AAAD,,
+CAT,CAT,,,,,Calgary,Tigers,,1924,1924,Calgary,,,,,,
+CBJ,CBJ,CBJ,NHL,Eastern,Metropolitan,Columbus,Blue Jackets,,2001,,Columbus,OH,#002654,#CE1126,#A4A9AD,,
+CGY,AFM,,NHL,,,Atlanta,Flames,,1973,1980,Atlanta,GA,#C8102E,#FFB81C,#FFFFFF,,
+CGY,CGY,,NHL,,,Calgary,Flames,,1981,1995,Calgary,AB,#C8102E,#F1BE48,#FFFFFF,,
+CGY,CGY,,NHL,,,Calgary,Flames,,1996,2020,Calgary,AB,#C8102E,#F1BE48,#000000,,
+CGY,CGY,CGY,NHL,Western,Pacific,Calgary,Flames,,2021,,Calgary,AB,#C8102E,#F1BE48,#FFFFFF,,
+CHI,CHI,,NHL,,,Chicago,Black Hawks,,1927,1955,Chicago,IL,#000000,#C8102E,#FFFFFF,,
+CHI,CHI,,NHL,,,Chicago,Black Hawks,,1956,1986,Chicago,IL,#CF0A2C,#000000,#FFFFFF,#FF671B,#FFD100
+CHI,CHI,CHI,NHL,Western,Central,Chicago,Blackhawks,,1987,,Chicago,IL,#CF0A2C,#000000,#FFFFFF,#FF671B,#FFD100
+CLE,OAK,,NHL,,,Oakland,Seals,,1968,1970,Oakland,,,,,,
+CLE,CGS,,NHL,,,California,Golden Seals,,1971,1976,California,,,,,,
+CLE,CLE,,NHL,,,Cleveland,Barons,,1977,1978,Cleveland,,,,,,
+COL,QUE,,NHL,,,Quebec,Nordiques,,1980,1995,Quebec City,QC,#0033A0,#C8102E,#FFFFFF,,
+COL,COL,COL,NHL,Western,Central,Colorado,Avalanche,Avs,1996,,Denver,CO,#6F263D,#236192,#A2AAAD,#000000,
+DAL,MNS,,NHL,,,Minnesota,North Stars,,1968,1991,Bloomington,MN,#007A33,#FFB81C,#FFFFFF,,
+DAL,MNS,,NHL,,,Minnesota,North Stars,,1992,1993,Bloomington,MN,#000000,#007A33,#FFB81C,,
+DAL,DAL,,NHL,,,Dallas,Stars,,1994,2013,Dallas,TX,#006847,#000000,#B9975B,,
+DAL,DAL,DAL,NHL,Western,Central,Dallas,Stars,,2014,,Dallas,TX,#006847,#8F8F8C,#000000,,
+DET,DCG,,NHL,,,Detroit,Cougars,,1927,1930,Detroit,MI,#C8102E,#FFFFFF,,,
+DET,DFL,,NHL,,,Detroit,Falcons,,1931,1932,Detroit,MI,#C8102E,#FFFFFF,,,
+DET,DET,DET,NHL,Eastern,Atlantic,Detroit,Red Wings,Wings,1933,,Detroit,MI,#CE1126,#FFFFFF,,,
+EDE,EDE,,,,,Edmonton,Eskimos,,1923,1923,Edmonton,,,,,,
+EDM,EDM,,NHL,,,Edmonton,Oilers,,1980,1996,Edmonton,AB,#0033A0,#FF4C00,#FFFFFF,,
+EDM,EDM,,NHL,,,Edmonton,Oilers,,1997,2011,Edmonton,AB,#041E42,#B87333,#C8102E,,
+EDM,EDM,EDM,NHL,Western,Pacific,Edmonton,Oilers,,2012,,Edmonton,AB,#041E42,#FF4C00,#FFFFFF,,
+FLA,FLA,FLA,NHL,Eastern,Atlantic,Florida,Panthers,,1994,,Sunrise,FL,#C8102E,#041E42,#B9975B,,
+HAM,QBD,,NHL,,,Quebec,Bulldogs,,1920,1920,Quebec,,,,,,
+HAM,HAM,,NHL,,,Hamilton,Tigers,,1921,1925,Hamilton,,,,,,
+LAK,LAK,,NHL,,,Los Angeles,Kings,,1968,1988,Los Angeles,CA,#552583,#FDB927,#FFFFFF,,
+LAK,LAK,,NHL,,,Los Angeles,Kings,,1989,1998,Los Angeles,CA,#A2AAAD,#000000,#FFFFFF,,
+LAK,LAK,,NHL,,,Los Angeles,Kings,,1999,2011,Los Angeles,CA,#572A84,#000000,#A2AAAD,,
+LAK,LAK,LA,NHL,Western,Pacific,Los Angeles,Kings,,2012,,Los Angeles,CA,#111111,#A2AAAD,#FFFFFF,,
+MIN,MIN,MIN,NHL,Western,Central,Minnesota,Wild,,2001,,St. Paul,MN,#154734,#A6192E,#EAAA00,#DDCBA4,
+MMR,MMR,,NHL,,,Montreal,Maroons,,1925,1938,Montreal,,,,,,
+MTL,MTL,MTL,NHL,Eastern,Atlantic,Montreal,Canadiens,Habs,1918,,Montreal,QC,#AF1E2D,#192168,#FFFFFF,,
+MWN,MWN,,NHL,,,Montreal,Wanderers,,1918,1918,Montreal,,,,,,
+NJD,KCS,,NHL,,,Kansas City,Scouts,,1975,1976,Kansas City,MO,#C8102E,#0033A0,#FFB81C,,
+NJD,CLR,,NHL,,,Colorado,Rockies,,1977,1982,Denver,CO,#C8102E,#0033A0,#FFB81C,,
+NJD,NJD,,NHL,,,New Jersey,Devils,,1983,1992,East Rutherford,NJ,#C8102E,#046A38,#FFFFFF,,
+NJD,NJD,NJ,NHL,Eastern,Metropolitan,New Jersey,Devils,,1993,,Newark,NJ,#CE1126,#000000,#FFFFFF,,
+NSH,NSH,NSH,NHL,Western,Central,Nashville,Predators,Preds,1999,,Nashville,TN,#FFB81C,#041E42,#FFFFFF,,
+NYI,NYI,,NHL,,,New York,Islanders,Isles,1973,1995,Uniondale,NY,#00539B,#F47D30,#FFFFFF,,
+NYI,NYI,,NHL,,,New York,Islanders,Isles,1996,1997,Uniondale,NY,#003087,#FF6600,#00B2A9,,
+NYI,NYI,NYI,NHL,Eastern,Metropolitan,New York,Islanders,Isles,1998,,Elmont,NY,#00539B,#F47D30,#FFFFFF,,
+NYR,NYR,NYR,NHL,Eastern,Metropolitan,New York,Rangers,,1927,,New York,NY,#0038A8,#CE1126,#FFFFFF,,
+OTT,OTT,OTT,NHL,Eastern,Atlantic,Ottawa,Senators,Sens,1993,,Ottawa,ON,#000000,#C8102E,#B79257,,
+PHI,PHI,PHI,NHL,Eastern,Metropolitan,Philadelphia,Flyers,,1968,,Philadelphia,PA,#F74902,#000000,#FFFFFF,,
+PIT,PIT,,NHL,,,Pittsburgh,Penguins,Pens,1968,1980,Pittsburgh,PA,#418FDE,#002D62,#FFFFFF,,
+PIT,PIT,,NHL,,,Pittsburgh,Penguins,Pens,1981,2002,Pittsburgh,PA,#000000,#FCB514,#FFFFFF,,
+PIT,PIT,,NHL,,,Pittsburgh,Penguins,Pens,2003,2016,Pittsburgh,PA,#000000,#B4975A,#FFFFFF,,
+PIT,PIT,PIT,NHL,Eastern,Metropolitan,Pittsburgh,Penguins,Pens,2017,,Pittsburgh,PA,#000000,#FCB514,#FFFFFF,,
+QUA,PIR,,NHL,,,Pittsburgh,Pirates,,1926,1930,Pittsburgh,,,,,,
+QUA,QUA,,NHL,,,Philadelphia,Quakers,,1931,1931,Philadelphia,,,,,,
+SEA,SEA,SEA,NHL,Western,Pacific,Seattle,Kraken,,2022,,Seattle,WA,#001628,#99D9D9,#E9072B,#355464,
+SJS,SJS,SJ,NHL,Western,Pacific,San Jose,Sharks,,1992,,San Jose,CA,#006D75,#000000,#EA7200,,
+SLE,SEN,,NHL,,,Ottawa,Senators,,1918,1934,Ottawa,,,,,,
+SLE,SLE,,NHL,,,St. Louis,Eagles,,1935,1935,St. Louis,,,,,,
+SMT,SMT,,,,,Seattle,Metropolitans,,1919,1920,Seattle,,,,,,
+STL,STL,STL,NHL,Western,Central,St. Louis,Blues,,1968,,St. Louis,MO,#002F87,#FCB514,#041E42,,
+TBL,TBL,TB,NHL,Eastern,Atlantic,Tampa Bay,Lightning,Bolts,1993,,Tampa,FL,#002868,#FFFFFF,#000000,,
+TOR,TAN,,NHL,,,Toronto,Arenas,,1918,1919,Toronto,ON,#00205B,#FFFFFF,,,
+TOR,TSP,,NHL,,,Toronto,St. Patricks,St. Pats,1920,1927,Toronto,ON,#046A38,#FFFFFF,,,
+TOR,TOR,TOR,NHL,Eastern,Atlantic,Toronto,Maple Leafs,Leafs,1928,,Toronto,ON,#00205B,#FFFFFF,,,
+UTA,WIN,,NHL,,,Winnipeg,Jets,,1980,1996,Winnipeg,MB,#0033A0,#C8102E,#FFFFFF,,
+UTA,PHX,,NHL,,,Phoenix,Coyotes,,1997,2014,Glendale,AZ,#8C2633,#E2D6B5,#154734,#5F259F,
+UTA,ARI,,NHL,,,Arizona,Coyotes,,2015,2024,Glendale,AZ,#8C2633,#E2D6B5,#111111,,
+UTA,UTA,,NHL,,,Utah,Hockey Club,,2025,2025,Salt Lake City,UT,#6CACE4,#010101,#FFFFFF,,
+UTA,UTA,UTAH,NHL,Western,Central,Utah,Mammoth,,2026,,Salt Lake City,UT,#6CACE4,#010101,#FFFFFF,,
+VAN,VAN,,NHL,,,Vancouver,Canucks,,1971,1978,Vancouver,BC,#0033A0,#046A38,#FFFFFF,,
+VAN,VAN,,NHL,,,Vancouver,Canucks,,1979,1997,Vancouver,BC,#000000,#FF8200,#FFB81C,,
+VAN,VAN,,NHL,,,Vancouver,Canucks,,1998,2007,Vancouver,BC,#00205B,#97999B,#C8102E,,
+VAN,VAN,VAN,NHL,Western,Pacific,Vancouver,Canucks,,2008,,Vancouver,BC,#00205B,#00843D,#97999B,,
+VGK,VGK,VGK,NHL,Western,Pacific,Vegas,Golden Knights,Knights,2018,,Las Vegas,NV,#333F42,#B4975A,#C8102E,#000000,
+VIC,VIC,,,,,Victoria,Cougars,,1925,1926,Victoria,,,,,,
+VMA,VMA,,,,,Vancouver,Maroons,,1923,1924,Vancouver,,,,,,
+VMI,VMI,,,,,Vancouver,Millionaires,,1918,1922,Vancouver,,,,,,
+WPG,ATL,,NHL,,,Atlanta,Thrashers,,2000,2011,Atlanta,GA,#041E42,#82C0E9,#FFB81C,#AC162C,
+WPG,WPG,WPG,NHL,Western,Central,Winnipeg,Jets,,2012,,Winnipeg,MB,#041E42,#004C97,#AC162C,#7B303E,
+WSH,WSH,,NHL,,,Washington,Capitals,Caps,1975,1995,Landover,MD,#C8102E,#0033A0,#FFFFFF,,
+WSH,WSH,,NHL,,,Washington,Capitals,Caps,1996,2007,Washington,DC,#00205B,#000000,#B79257,,
+WSH,WSH,WSH,NHL,Eastern,Metropolitan,Washington,Capitals,Caps,2008,,Washington,DC,#C8102E,#041E42,#FFFFFF,,

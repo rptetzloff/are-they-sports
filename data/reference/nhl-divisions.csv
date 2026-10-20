@@ -1,0 +1,37 @@
+# Current NHL division membership, from ESPN's standings on 2026-10-19 (via
+# data/reference/nhl-franchise-history.csv, whose current rows carry it).
+#
+# A SNAPSHOT, NOT A HISTORY, as nfl-divisions.csv explains at length.
+code,conference,division
+BOS,Eastern,Atlantic
+BUF,Eastern,Atlantic
+DET,Eastern,Atlantic
+FLA,Eastern,Atlantic
+MTL,Eastern,Atlantic
+OTT,Eastern,Atlantic
+TBL,Eastern,Atlantic
+TOR,Eastern,Atlantic
+CAR,Eastern,Metropolitan
+CBJ,Eastern,Metropolitan
+NJD,Eastern,Metropolitan
+NYI,Eastern,Metropolitan
+NYR,Eastern,Metropolitan
+PHI,Eastern,Metropolitan
+PIT,Eastern,Metropolitan
+WSH,Eastern,Metropolitan
+CHI,Western,Central
+COL,Western,Central
+DAL,Western,Central
+MIN,Western,Central
+NSH,Western,Central
+STL,Western,Central
+UTA,Western,Central
+WPG,Western,Central
+ANA,Western,Pacific
+CGY,Western,Pacific
+EDM,Western,Pacific
+LAK,Western,Pacific
+SEA,Western,Pacific
+SJS,Western,Pacific
+VAN,Western,Pacific
+VGK,Western,Pacific

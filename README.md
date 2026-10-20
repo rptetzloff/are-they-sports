@@ -70,6 +70,7 @@ DATABASE_URL=postgres://user:pass@host:5432/ats npm run migrate
 DATABASE_URL=... npm run load nfl
 DATABASE_URL=... npm run load mlb
 DATABASE_URL=... npm run load nba     # FiveThirtyEight 1947-2001, sportsdataverse 2002-
+DATABASE_URL=... npm run load nhl     # the NHL's own APIs, 1917-18 on
 ```
 
 Both work **inside the deployed container**, which is usually where the database

@@ -81,8 +81,8 @@ export function franchiseMap(sportId, dir) {
    publishes the result. Finishing one is worth a write; restating that it has
    not started is not. */
 const SQL_UPSERT_GAME = `
-INSERT INTO game (sport, id, season, date, round, home, away, home_score, away_score, neutral, status, source, week, stage)
-VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
+INSERT INTO game (sport, id, season, date, round, home, away, home_score, away_score, neutral, status, source, week, stage, ending)
+VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
 ON CONFLICT (sport, id) DO UPDATE SET
 	season = EXCLUDED.season, date = EXCLUDED.date, round = EXCLUDED.round,
 	home = EXCLUDED.home, away = EXCLUDED.away,
@@ -93,6 +93,7 @@ ON CONFLICT (sport, id) DO UPDATE SET
 	-- otherwise null out a real week every time it ran after nflverse.
 	week = COALESCE(EXCLUDED.week, game.week),
 	stage = COALESCE(EXCLUDED.stage, game.stage),
+	ending = COALESCE(EXCLUDED.ending, game.ending),
 	source = EXCLUDED.source, observed_at = now()
 WHERE (SELECT authority FROM source WHERE id = EXCLUDED.source)
    >= (SELECT authority FROM source WHERE id = game.source)
@@ -942,7 +943,7 @@ async function main() {
 	// latency, not Postgres — the same rows go in at a fraction of the time when
 	// several hundred travel together.
 	//
-	// 500 at a time: 14 columns means 7,000 parameters, well inside Postgres's
+	// 500 at a time: 15 columns means 7,500 parameters, well inside Postgres's
 	// 65,535 limit, and small enough that a failure names a manageable slice.
 	const BATCH = 500;
 	let pending = [];
@@ -965,11 +966,11 @@ async function main() {
 				row.homeScore, row.awayScore, row.neutral, row.status, row.source,
 				// Undefined and null both mean "this source has no week", and the
 				// upsert coalesces so a source without one never erases one.
-				row.week ?? null, row.stage ?? null);
-			return `(${Array.from({ length: 14 }, (_, i) => `$${at + i + 1}`).join(',')})`;
+				row.week ?? null, row.stage ?? null, row.ending ?? null);
+			return `(${Array.from({ length: 15 }, (_, i) => `$${at + i + 1}`).join(',')})`;
 		});
 		pending = [];
-		const r = await client.query(SQL_UPSERT_GAME.replace('VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)',
+		const r = await client.query(SQL_UPSERT_GAME.replace('VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)',
 			`VALUES ${tuples.join(',')}`), params);
 		loaded += r.rowCount;
 	};
@@ -1151,6 +1152,42 @@ async function main() {
 		}
 	}
 
+	if (sportId === 'nhl') {
+		// The league's own record, one stats-API file per season; see
+		// sports/nhl.js. Team ids become the NHL's codes from its team list, and
+		// the western clubs of the 1918-1926 Cup Finals from WESTERN_CLUBS.
+		const teamsPath = join(SOURCE_DIR, 'nhl', 'nhl-teams.json');
+		if (!await ensureSource('nhl', teamsPath, adapter.sources.teams, 'NHL team list')) {
+			await client.query('ROLLBACK');
+			await client.end();
+			return 1;
+		}
+		const { WESTERN_CLUBS } = await import('../sports/nhl.js');
+		const codeById = new Map(JSON.parse(readFileSync(teamsPath, 'utf8')).data.map((t) => [t.id, t.triCode]));
+		for (const [id, code] of Object.entries(WESTERN_CLUBS)) codeById.set(Number(id), code);
+		const codes = codeTable('nhl', loadHistory('nhl'));
+		const codeOf = (id) => {
+			const code = codeById.get(id);
+			return code && codes.knows(code) ? code : null;
+		};
+		let notClubs = 0;
+		const last = adapter.sources.live.seasonOf(new Date());
+		for (let season = adapter.sources.schedules.from; season <= last; season++) {
+			const path = join(SOURCE_DIR, 'nhl', `stats-games-${season}.json`);
+			if (!await ensureSource('nhl', path, { url: adapter.sources.schedules.url(season) }, `NHL ${season}`)) {
+				await client.query('ROLLBACK');
+				await client.end();
+				return 1;
+			}
+			for (const g of JSON.parse(readFileSync(path, 'utf8')).data ?? []) {
+				if ((g.gameType === 2 || g.gameType === 3) && (!codeOf(g.homeTeamId) || !codeOf(g.visitingTeamId))) { notClubs++; continue; }
+				const row = adapter.gameRow(g, codeOf);
+				if (row) await put(row);
+			}
+		}
+		if (notClubs) console.log(`  not clubs    ${notClubs} games with a side the franchise table does not know`);
+	}
+
 	// Championship games, marked after the fact.
 	//
 	// Neither football source says which playoff game was the title. nflverse
@@ -1249,6 +1286,19 @@ async function main() {
 			`UPDATE game SET title = CASE WHEN season <= 1949 THEN 'BAA Finals' ELSE 'NBA Finals' END
 			  WHERE sport = 'nba' AND round = 'championship'`);
 		console.log(`  finals       ${finals} games across ${seasons.length} seasons derived as the last series`);
+	}
+
+	if (sportId === 'nhl') {
+		await flush();
+		// Reset, so a rerun finds the same rounds; then each season's last round
+		// is the Stanley Cup Final. The round comes from the game id, R1 to R4.
+		await client.query(`UPDATE game SET round = 'playoff', title = NULL WHERE sport = 'nhl' AND round = 'championship'`);
+		const r = await client.query(`
+			UPDATE game g SET round = 'championship', title = 'Stanley Cup Final'
+			  FROM (SELECT season, max(substring(stage from 2)::int) AS last FROM game
+			         WHERE sport = 'nhl' AND round = 'playoff' AND stage LIKE 'R%' GROUP BY season) f
+			 WHERE g.sport = 'nhl' AND g.season = f.season AND g.stage = 'R' || f.last`);
+		console.log(`  finals       ${r.rowCount} Stanley Cup Final games`);
 	}
 
 	// After the flush above, because game_leader points at game.
