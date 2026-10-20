@@ -775,7 +775,7 @@ function main() {
 					// darkest-colour rule puts the Bucks on black, and they are green.
 					palette: clubFor(entry).colors ?? colorsFor(namers[entry.sport], entry.code,
 						{ season: today.getFullYear(), date: today.toISOString().slice(0, 10) }, NEUTRAL),
-					store: { rawGamesFor, standingsTitles, finalRounds },
+					store: { rawGamesFor, standingsTitles, finalRounds, leaderGames },
 					creditHtml: creditLine(creditsFor([adapters[entry.sport]])),
 					origin: originOf,
 				}).catch((e) => {
@@ -836,8 +836,9 @@ function main() {
 			if (front) {
 				// The page goes out through `html`, so it gets the canonical URL and
 				// the preview tags every other page gets.
-				const handled = await front(req, res, claimed.rest, url, (r, body) => html(r, 200, body, {
-					image: `${origin}${claimed.entry.base}/og/default.png`,
+				// A club page names its own card (`card`), the front page the default.
+				const handled = await front(req, res, claimed.rest, url, (r, body, { card = 'default' } = {}) => html(r, 200, body, {
+					image: `${origin}${claimed.entry.base}/og/${card}.png`,
 				}));
 				if (handled) return;
 			}
