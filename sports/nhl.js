@@ -162,6 +162,16 @@ export function liveGameRow(game, { franchiseOf, knows }) {
 	};
 }
 
+/** A game's points in the standings, from one club's side: two a win, one a
+ *  tie, and from 1999-2000 one for a loss in overtime or a shootout — the NHL
+ *  ranks by them, not by winning percentage. */
+export function standingsPoints(g) {
+	if (g.result === 'WIN') return 2;
+	if (g.result === 'TIE') return 1;
+	if (g.result === 'LOSS' && Number(g.season) >= 2000 && (g.ending === 'OT' || g.ending === 'SO')) return 1;
+	return 0;
+}
+
 /** No doubleheaders, and the NHL's ids are unique. */
 export const numberEvents = (events) => events.map((event) => ({ event, number: 0 }));
 
@@ -208,6 +218,7 @@ export const sport = {
 	liveGameRow,
 	numberEvents,
 	championshipTitle,
+	standingsPoints,
 	gameKey: 'id',
 };
 

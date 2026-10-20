@@ -140,6 +140,15 @@ export function gameRow(m, { franchiseOf, knows = null } = {}) {
 /** The live refresh's row: the same match, the same reading. */
 export const liveGameRow = (m, opts) => gameRow(m, opts);
 
+/** A game's points in the standings, from one club's side: three a win, one a
+ *  draw. A shootout win (1996-1999, when no game was drawn) was worth one, as
+ *  MLS's own standings count it: Tampa Bay's 1996 is 20 wins and 58 points. */
+export function standingsPoints(g) {
+	if (g.result === 'WIN') return g.ending === 'SO' ? 1 : 3;
+	if (g.result === 'TIE') return 1;
+	return 0;
+}
+
 /** No doubleheaders, and MLS's ids are unique. */
 export const numberEvents = (events) => events.map((event) => ({ event, number: 0 }));
 
@@ -183,6 +192,7 @@ export const sport = {
 	liveGameRow,
 	numberEvents,
 	championshipTitle,
+	standingsPoints,
 	gameKey: 'id',
 };
 

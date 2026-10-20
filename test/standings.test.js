@@ -285,3 +285,61 @@ test('the sport travels with every peer', () => {
 		assert.equal(p.team.sport, 'nfl')
 	}
 })
+
+// --- by points, where the sport ranks by them ---------------------------------
+
+import { standingsPoints as nhlPoints } from '../sports/nhl.js'
+import { standingsPoints as mlsPoints } from '../sports/mls.js'
+import { standingsColumns, standingsFlags } from '../lib/render.js'
+
+// A season's games from a pattern: W win, L loss, O a loss in overtime, T tie,
+// S a win in a shootout.
+const pointsEntry = (club, pattern, season) => ({
+	conference: 'West',
+	division: 'Central',
+	team: { id: club.toLowerCase(), sport: 'nhl', nouns: { team: club, fullName: club } },
+	rows: pattern.split('').map((c, i) => ({
+		result: { W: 'WIN', S: 'WIN', L: 'LOSS', O: 'LOSS', T: 'TIE' }[c],
+		ending: { O: 'OT', S: 'SO' }[c] ?? 'REG',
+		date: `${season}-01-${String(i + 1).padStart(2, '0')}`,
+		season: String(season),
+		regular_season: '1',
+		scoreFor: '2',
+		scoreAgainst: '1',
+	})),
+})
+
+test('hockey ranks by points: an overtime loss is a point, and its own column', () => {
+	// Jets 3-1-1 are 7 points. Wild 3-2 and Stars 2-1-2 are 6 each in as many
+	// games, so wins decide; by percentage Stars' overtime losses were losses.
+	const s = computeStandings([
+		pointsEntry('Wild', 'WWWLL', 2026),
+		pointsEntry('Stars', 'WWOOL', 2026),
+		pointsEntry('Jets', 'WWWOL', 2026),
+	], { season: 2026, points: nhlPoints })
+	const clubs = s.groups[0].clubs
+	assert.deepEqual(clubs.map((c) => [c.club, c.pts, c.w, c.l, c.otl]),
+		[['Jets', 7, 3, 1, 1], ['Wild', 6, 3, 2, 0], ['Stars', 6, 2, 1, 2]])
+	// Before 1999-2000 an overtime loss was a loss.
+	const old = computeStandings([pointsEntry('Stars', 'WWOOL', 1995)], { season: 1995, points: nhlPoints }).groups[0].clubs[0]
+	assert.deepEqual([old.pts, old.l, old.otl], [4, 3, 0])
+})
+
+test('soccer ranks by points: three a win, one a draw, one a 1996-1999 shootout win', () => {
+	const s = computeStandings([
+		pointsEntry('Galaxy', 'WWTTL', 2024),
+		pointsEntry('Sounders', 'WWWLL', 2024),
+	], { season: 2024, points: mlsPoints })
+	assert.deepEqual(s.groups[0].clubs.map((c) => [c.club, c.pts]), [['Sounders', 9], ['Galaxy', 8]])
+	// Tampa Bay's 1996: 20 wins, one in a shootout of these, for 58 points.
+	const tb = computeStandings([pointsEntry('Mutiny', 'W'.repeat(19) + 'S' + 'L'.repeat(12), 1996)], { season: 1996, points: mlsPoints })
+	assert.deepEqual([tb.groups[0].clubs[0].w, tb.groups[0].clubs[0].pts], [20, 58])
+})
+
+test('a points table shows points, and a percentage table percentage and games back', () => {
+	const hockey = computeStandings([pointsEntry('Jets', 'WWWOL', 2026)], { season: 2026, points: nhlPoints }).groups[0].clubs
+	assert.deepEqual(standingsColumns(standingsFlags(hockey)).map((c) => c.label), ['Club', 'W', 'L', 'OTL', 'Pts'])
+	const football = computeStandings([entry('Bills', 'AFC', 'East', 'WLT')], { season: 2011 }).groups[0].clubs
+	assert.deepEqual(standingsColumns(standingsFlags(football)).map((c) => c.label), ['Club', 'W', 'L', 'T', 'Pct', 'GB'])
+	assert.equal(football[0].pts, null)
+})

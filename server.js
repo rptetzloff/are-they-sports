@@ -592,7 +592,7 @@ function main() {
 			}
 			const version = versionOf(withRows, stampOf);
 			const standings = memo(derivedCache, `division/${entry.sport}/${entry.code}/${season}`, version,
-				() => computeStandings(withRows, { season: Number(season) }));
+				() => computeStandings(withRows, { season: Number(season), points: adapters[entry.sport]?.standingsPoints }));
 			if (!standings.groups.length) return null;
 			// Mark the club whose page this is, and link the ones this deployment
 			// actually serves. A club with no manifest has no page here, and a
@@ -984,7 +984,7 @@ function main() {
 						// played moves every time a game ends.
 						standings: await summarised(`standings/${sport}/${season}`,
 							{ scope: scopeKey, sport, view: 'standings', season: season ?? 0 }, version,
-							async () => computeStandings(await inSport(), { season })),
+							async () => computeStandings(await inSport(), { season, points: adapters[sport]?.standingsPoints })),
 					};
 				}));
 				const [firstSport, ...otherSports] = bySport;
@@ -995,7 +995,7 @@ function main() {
 				}
 				return html(res, 200, standingsPage({
 					// Sorting is a query parameter, read here and drawn there.
-					sort: parseSort(url.searchParams, standingsColumns(true), null),
+					sort: parseSort(url.searchParams, standingsColumns({ ties: true, otl: true, points: true }).concat(standingsColumns(true)), null),
 					path: url.pathname,
 					params: url.searchParams,
 					standings: firstSport.standings,
