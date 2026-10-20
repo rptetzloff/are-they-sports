@@ -1349,6 +1349,37 @@ async function main() {
 		console.log(`  finals       ${finals} games across ${seasons.length} seasons derived as the last series`);
 	}
 
+	if (sportId === 'wnba') {
+		// 1997-2001's ids name no round, so the page could not say which a game
+		// was in. Each series is numbered from the order it was played: one round
+		// past the deepest either club had reached that postseason. Taking the
+		// deeper of the two is what copes with a bye, where a seed meets a club a
+		// round ahead of it.
+		const { rows } = await client.query(`
+			SELECT season, home, away, min(date) AS first FROM game
+			 WHERE sport = 'wnba' AND round <> 'regular' AND stage IS NULL AND source = 'wnba'
+			 GROUP BY season, LEAST(home, away), GREATEST(home, away), home, away
+			 ORDER BY season, first`);
+		const series = new Map();
+		for (const r of rows) {
+			const key = `${r.season}|${[r.home, r.away].sort().join('|')}`;
+			if (!series.has(key)) series.set(key, { season: r.season, clubs: [r.home, r.away].sort(), first: r.first });
+			else if (r.first < series.get(key).first) series.get(key).first = r.first;
+		}
+		const deepest = new Map();
+		let staged = 0;
+		for (const s of [...series.values()].sort((a, b) => a.season - b.season || a.first - b.first)) {
+			const round = 1 + Math.max(...s.clubs.map((c) => deepest.get(`${s.season}|${c}`) ?? 0));
+			for (const c of s.clubs) deepest.set(`${s.season}|${c}`, round);
+			const r = await client.query(
+				`UPDATE game SET stage = $4 WHERE sport = 'wnba' AND season = $1 AND round <> 'regular'
+				    AND ((home = $2 AND away = $3) OR (home = $3 AND away = $2))`,
+				[s.season, s.clubs[0], s.clubs[1], `R${round}`]);
+			staged += r.rowCount;
+		}
+		console.log(`  rounds       ${staged} playoff games of 1997-2001 numbered by the order their series were played`);
+	}
+
 	if (sportId === 'nhl') {
 		await flush();
 		// Reset, so a rerun finds the same rounds; then each season's last round

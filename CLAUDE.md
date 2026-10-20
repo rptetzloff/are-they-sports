@@ -564,7 +564,24 @@ Added on 2026-10-20, data first. What the adapter decides:
   of one game (1997) to five; every season's regular season is its clubs times
   games, halved.
 
-Gaps: no coaches, and no front page until `web/wnba` exists.
+**The front page** (`web/wnba`) is basketball's, made the WNBA's:
+
+- **A season is one year**, "2026"; until April the page shows the last one.
+- **The playoffs are one bracket of eight**, the best eight overall, so the
+  seeds are the league's, ranked by winning percentage. ESPN's `playoffSeed`
+  for the WNBA is per conference and would put a 16-28 East club in.
+- **Rounds are named against the Final** (`lib/web.js` wnbaGametype): the last
+  two are Semifinals and Finals, any before them First Round and Second Round,
+  because the league has played two, three and four rounds. 1997-2001's games
+  name no round, so the load numbers each series from the order it was played,
+  one round past the deepest either club had reached — the deeper of the two
+  is what copes with a bye.
+- **The Commissioner's Cup final counts in no record.** ESPN puts it in the
+  regular season; the league leaves it out of the standings. The page shows it
+  and does not count it — and so does the NBA's for the NBA Cup final, which
+  had the same bug.
+
+Gaps: no coaches.
 
 ## A club is a sport and an id, never an id
 

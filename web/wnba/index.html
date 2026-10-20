@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Are the Brewers On TV?</title>
+    <meta name="description" content="Are the Milwaukee Brewers on TV today? Check the current schedule and browse every season from 1969 to the present.">
+    <meta property="og:title" content="Are the Brewers On TV?">
+    <meta property="og:description" content="Are the Milwaukee Brewers on TV today? Check the current schedule.">
+    <meta property="og:image" content="https://arethebrewersontv.com/og-default.png">
+    <meta property="og:url" content="https://arethebrewersontv.com">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Are the Brewers On TV?">
+    <meta name="twitter:description" content="Are the Milwaukee Brewers on TV today? Check the current schedule.">
+    <meta name="twitter:image" content="https://arethebrewersontv.com/og-default.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css">
+    <!-- The saved theme, applied before the page paints (theme.js). -->
+    <script>try{var t=localStorage.getItem('theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Three blocks: the answer and the season's story, the schedule panel,
+         and the notes. A phone stacks them in that order; from 1100px the
+         schedule panel takes a right-hand column the height of the screen. -->
+    <div class="container home-layout">
+        <h1 id="site-title" class="site-title"><a href="./" class="site-title-link">Are the Brewers On TV?</a></h1>
+        <div class="home-main">
+        <div id="answer" class="answer loading">Loading...</div>
+        <div id="record" class="record"></div>
+        <!-- The live game, else the next one, as its full card: right under
+             the answer, on a phone and in the left column on a desktop. A
+             live card is ~550px tall, which in the schedule panel left its
+             list almost no room. -->
+        <div id="schedule-featured" class="schedule-featured" hidden></div>
+        <a id="history-spark" class="history-spark" href="history.html" aria-label="Franchise history, season by season" title="Franchise history, season by season"></a>
+        <details id="playoff-details" class="collapsible-section" open hidden>
+            <summary id="playoff-summary" class="collapsible-summary">Postseason</summary>
+            <div id="playoff-panel" class="playoff-panel"></div>
+        </details>
+
+        <details id="streak-details" class="collapsible-section" open>
+            <summary class="collapsible-summary">Streak</summary>
+            <div id="streak-banner" class="streak-banner" hidden></div>
+        </details>
+
+        <details id="otd-details" class="collapsible-section" open>
+            <summary class="collapsible-summary">On This Day</summary>
+            <div id="on-this-day" class="on-this-day" hidden></div>
+        </details>
+
+        </div>
+
+        <aside class="home-schedule" aria-label="Schedule">
+        <div id="season-selector" class="season-selector">
+            <button id="season-first" class="season-nav season-nav-jump" aria-label="Earliest season"><i class="mdi mdi-chevron-triple-left"></i></button>
+            <button id="season-prev10" class="season-nav season-nav-jump" aria-label="Back 10 years"><i class="mdi mdi-chevron-double-left"></i></button>
+            <button id="season-prev" class="season-nav" aria-label="Previous season"><i class="mdi mdi-chevron-left"></i></button>
+            <span id="season-label" class="season-label"></span>
+            <button id="season-next" class="season-nav" aria-label="Next season"><i class="mdi mdi-chevron-right"></i></button>
+            <button id="season-next10" class="season-nav season-nav-jump" aria-label="Forward 10 years"><i class="mdi mdi-chevron-double-right"></i></button>
+            <button id="season-last" class="season-nav season-nav-jump" aria-label="Latest season"><i class="mdi mdi-chevron-triple-right"></i></button>
+        </div>
+
+        <div id="schedule" class="schedule-section">
+            <h3 id="schedule-title"><i class="mdi mdi-calendar-month"></i> Schedule</h3>
+            <!-- A chip a month, to jump the list. -->
+            <div id="schedule-months" class="schedule-months" hidden></div>
+            <div id="schedule-grid" class="schedule-grid">
+                <div class="loading">Loading schedule...</div>
+            </div>
+            <div id="schedule-provider-bar" class="schedule-provider-bar" hidden></div>
+        </div>
+        </aside>
+
+        <div class="home-notes">
+        <div id="last-updated" class="last-updated"></div>
+        <div id="data-credit" class="data-credit" style="display:none">Historical data obtained free of charge from and copyrighted by <a href="https://www.retrosheet.org/" target="_blank" rel="noopener noreferrer">Retrosheet</a>. Contact: 20 Sunset Rd., Newark, DE 19711.</div>
+
+        <div id="last-undefeated" class="last-undefeated"></div>
+        </div>
+    </div>
+    <!-- .container closes here, as on every other page. It was never closed,
+         so the footer and the dialogs below sat inside the 800px column: the
+         footer got 768px on a desktop where the others get the full width,
+         and wrapped to two rows when the Ballparks link was added. -->
+
+    <footer class="site-footer">
+        <nav class="footer-nav">
+            <a href="./" class="footer-nav-link" aria-current="page"><i class="mdi mdi-home-outline"></i><span class="footer-nav-label">Home</span></a>
+            <a href="records.html" class="footer-nav-link"><i class="mdi mdi-trophy-outline"></i><span class="footer-nav-label">Records</span></a>
+            <a href="ballparks" class="footer-nav-link"><i class="mdi mdi-stadium"></i><span class="footer-nav-label footer-label-full">Ballparks</span><span class="footer-nav-label footer-label-short">Parks</span></a>
+            <a href="stats" class="footer-nav-link"><i class="mdi mdi-table-large"></i><span class="footer-nav-label">Stats</span></a>
+            <a href="vs.html" class="footer-nav-link"><i class="mdi mdi-sword-cross"></i><span class="footer-nav-label footer-label-full">Head-to-Head</span><span class="footer-nav-label footer-label-short">H2H</span></a>
+            <a href="history.html" class="footer-nav-link"><i class="mdi mdi-chart-line"></i><span class="footer-nav-label">History</span></a>
+            <a href="coaches.html" class="footer-nav-link"><i class="mdi mdi-whistle-outline"></i><span class="footer-nav-label">Coaches</span></a>
+            <div class="footer-share-wrap">
+                <button id="footer-share-trigger" class="footer-nav-link footer-share-trigger" type="button" aria-haspopup="true" aria-expanded="false">
+                    <i class="mdi mdi-share-variant"></i><span class="footer-nav-label">Share</span> <i class="mdi mdi-chevron-down footer-share-caret"></i>
+                </button>
+                <div class="footer-share" id="footer-share" role="menu" hidden>
+                    <button id="share-native" class="footer-share-item" type="button" role="menuitem" hidden>
+                        <i class="mdi mdi-share-variant"></i> Share
+                    </button>
+                    <a id="share-x" class="footer-share-item" href="#" target="_blank" rel="noopener noreferrer" role="menuitem" hidden>
+                        <i class="mdi mdi-twitter"></i> Post on X
+                    </a>
+                    <a id="share-bsky" class="footer-share-item" href="#" target="_blank" rel="noopener noreferrer" role="menuitem" hidden>
+                        <i class="mdi mdi-butterfly"></i> Post on Bluesky
+                    </a>
+                    <a id="share-fb" class="footer-share-item" href="#" target="_blank" rel="noopener noreferrer" role="menuitem" hidden>
+                        <i class="mdi mdi-facebook"></i> Share on Facebook
+                    </a>
+                    <a id="share-reddit" class="footer-share-item" href="#" target="_blank" rel="noopener noreferrer" role="menuitem" hidden>
+                        <i class="mdi mdi-reddit"></i> Post on Reddit
+                    </a>
+                    <button id="share-copy" class="footer-share-item" type="button" role="menuitem" hidden>
+                        <i class="mdi mdi-clipboard-outline"></i> Copy link
+                    </button>
+                </div>
+            </div>
+            <a href="https://github.com/rptetzloff/AreTheBrewersOnTV" target="_blank" rel="noopener noreferrer" class="footer-nav-link footer-github"><i class="mdi mdi-github"></i><span class="footer-nav-label">GitHub</span></a>
+        </nav>
+    </footer>
+
+    <div id="lightbox" class="lightbox" role="dialog" aria-modal="true" aria-label="Full size photo" hidden>
+        <button id="lightbox-close" class="lightbox-close" aria-label="Close"><i class="mdi mdi-close"></i></button>
+        <button id="lightbox-prev" class="lightbox-nav lightbox-nav-prev" aria-label="Previous photo"><i class="mdi mdi-chevron-left"></i></button>
+        <button id="lightbox-next" class="lightbox-nav lightbox-nav-next" aria-label="Next photo"><i class="mdi mdi-chevron-right"></i></button>
+        <img id="lightbox-img" src="" alt="">
+        <div class="lightbox-info">
+            <p id="lightbox-caption" class="lightbox-caption"></p>
+            <p id="lightbox-license" class="lightbox-license"></p>
+        </div>
+    </div>
+
+    <div id="photo-gallery-modal" class="gallery-modal" role="dialog" aria-modal="true" aria-label="Season photo gallery" hidden>
+        <div class="gallery-backdrop"></div>
+        <div class="gallery-dialog">
+            <div class="gallery-header">
+                <h2 id="gallery-title" class="gallery-title"></h2>
+                <button id="gallery-close" class="gallery-close" aria-label="Close gallery"><i class="mdi mdi-close"></i></button>
+            </div>
+            <div id="gallery-grid" class="gallery-grid"></div>
+        </div>
+    </div>
+
+    <div id="watch-modal" class="gallery-modal" role="dialog" aria-modal="true" aria-label="Where to watch" hidden>
+        <div class="watch-backdrop"></div>
+        <div class="watch-dialog">
+            <div class="gallery-header">
+                <h2 id="watch-title" class="gallery-title">Where to Watch</h2>
+                <button id="watch-close" class="gallery-close" aria-label="Close"><i class="mdi mdi-close"></i></button>
+            </div>
+            <p id="watch-game-info" class="watch-game-info"></p>
+            <div id="watch-channels" class="watch-channels"></div>
+            <p class="watch-disclaimer">Channel information is based on publicly available channel listings. Please check your local channel guide for the most accurate broadcast information.</p>
+        </div>
+    </div>
+
+    <div id="provider-modal" class="gallery-modal" role="dialog" aria-modal="true" aria-label="Change TV provider" hidden>
+        <div class="provider-backdrop"></div>
+        <div class="provider-dialog">
+            <div class="gallery-header">
+                <h2 class="gallery-title">TV Provider</h2>
+                <button id="provider-close" class="gallery-close" aria-label="Close"><i class="mdi mdi-close"></i></button>
+            </div>
+            <p class="watch-game-info">Choose your TV provider to see channel numbers in the schedule.</p>
+            <div id="provider-picker-container" class="watch-channels"></div>
+        </div>
+    </div>
+
+    <div id="linescore-modal" class="gallery-modal" role="dialog" aria-modal="true" aria-label="Line score" hidden>
+        <div class="linescore-backdrop"></div>
+        <div class="linescore-dialog">
+            <div class="gallery-header">
+                <h2 id="linescore-title" class="gallery-title"></h2>
+                <button id="linescore-close" class="gallery-close" aria-label="Close"><i class="mdi mdi-close"></i></button>
+            </div>
+            <div id="linescore-body" class="linescore-body"></div>
+        </div>
+    </div>
+
+    <div id="standings-modal" class="gallery-modal" role="dialog" aria-modal="true" aria-label="WNBA Standings" hidden>
+        <div class="linescore-backdrop standings-backdrop"></div>
+        <div class="standings-dialog">
+            <div class="gallery-header">
+                <h2 class="gallery-title">WNBA Standings</h2>
+                <button id="standings-close" class="gallery-close" aria-label="Close"><i class="mdi mdi-close"></i></button>
+            </div>
+            <div id="standings-body" class="standings-body">
+                <div class="loading">Loading standings...</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="main.js" type="module"></script>
+    <script src="theme.js" defer></script>
+    <script src="license-modal.js" defer></script>
+</body>
+</html>

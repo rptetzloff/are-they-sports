@@ -353,7 +353,10 @@ async fetchBrewersData(season) {
     ]);
 
      const preEvents = (preData.events || []).map(e => ({ ...e, _seasonType: 'pre' }));
-     const regularEvents = (regularData.events || []).map(e => ({ ...e, _seasonType: 'regular' }));
+     // The NBA Cup final (ESPN's type CC) is in ESPN's regular season and not in the
+     // league's standings: it shows on the schedule and counts in no record,
+     // as sports/nba.js leaves it out of the load.
+     const regularEvents = (regularData.events || []).map(e => ({ ...e, _seasonType: 'regular', _notCounted: e.competitions?.[0]?.type?.abbreviation === 'CC' }));
      const postEvents = (postData.events || []).map(e => ({ ...e, _seasonType: 'post' }));
      const allEvents = [...preEvents, ...regularEvents, ...postEvents];
 
@@ -761,7 +764,7 @@ markActiveMonth() {
 
         		const completedRegular = events.filter(event => {
         			const status = event.competitions?.[0]?.status?.type?.name;
-        			return status === 'STATUS_FINAL' && event._seasonType === 'regular';
+        			return status === 'STATUS_FINAL' && event._seasonType === 'regular' && !event._notCounted;
         		});
 
         		const completedPost = events.filter(event => {

@@ -1800,7 +1800,7 @@ At each club's root — `/` in a single-club scope, `/nfl/packers` under
 `web/mlb` from arethebrewersontv.com for every baseball club, `web/nfl` from
 arethepackersundefeated.com for every football one, `web/nba`, the
 baseball page adapted to basketball, for every NBA club, and `web/nhl`, the same
-adapted to hockey, for every NHL club. They are client-side, as
+adapted to hockey, for every NHL club, and `web/wnba` for every WNBA club. They are client-side, as
 the sites are; see "The front page is the sites' own" in CLAUDE.md for why,
 and for what it does not do yet.
 
@@ -1809,7 +1809,7 @@ What the page asks its server for, and where it comes from here:
 | request | answered from |
 |---|---|
 | the page, `/main.js`, `/styles.css`, … | `web/<sport>/`, with the club written in as `window.CLUB` and the stylesheet recoloured into the club's palette |
-| `/data/gameinfo.csv`, `/data/CurrentNames.csv` (baseball, basketball, hockey) | Postgres and the franchise history table, in Retrosheet's shape, plus an `ending` column (REG, OT, SO) |
+| `/data/gameinfo.csv`, `/data/CurrentNames.csv` (baseball, basketball, hockey, the WNBA) | Postgres and the franchise history table, in Retrosheet's shape, plus an `ending` column (REG, OT, SO) |
 | `/data/games.csv`, `/data/season_records.csv`, `/api/current/games.csv` (football) | Postgres, in the football site's shape |
 | `/api/espn/*` | ESPN, through a cache, for this club's schedule and the league's scoreboard and summaries only |
 | `/api/live/:id`, `/api/bracket` (baseball) | ESPN, reduced as the baseball site reduced it |
