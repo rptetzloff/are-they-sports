@@ -3,7 +3,7 @@ export const team = {
 	sport: 'nhl',
 	id: 'mammoth',
 	sourceIds: ['UTA'],
-	firstSeason: 1980,
+	firstSeason: 2025,
 
 	nouns: {
 		team: 'Mammoth',
