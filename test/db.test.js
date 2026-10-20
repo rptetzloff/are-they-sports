@@ -580,6 +580,39 @@ test('schema', { skip: !DATABASE_URL && 'no DATABASE_URL — constraints and the
 		})
 	})
 
+	await t.test('a game that leaves a club is missed by the merge, and the count says so', async () => {
+		// Hockey's regrouping moved the first Jets off UTA in the same load that
+		// rewrote Utah's own games: the stamp moved forward, the cache merged, and
+		// the moved games stayed on the Mammoth page. gamesSince cannot see a row
+		// that is no longer the club's; gameCount is what the cache checks.
+		const { gameCount, gamesFor, gamesSince } = await import('../lib/store.js')
+		const { mergeGames } = await import('../lib/derived.js')
+		await inRollback(async () => {
+			await fixture()
+			await client.query("INSERT INTO source (id,authority,reproducible,note) VALUES ('t',1,true,'test') ON CONFLICT DO NOTHING")
+			for (const f of ['ZZA', 'ZZB', 'ZZC']) {
+				await client.query('INSERT INTO franchise VALUES ($1,$2) ON CONFLICT DO NOTHING', ['nfl', f])
+			}
+			const early = '2026-01-01T00:00:00Z'
+			for (const [id, date] of [['a', '2026-09-10'], ['b', '2026-09-17']]) {
+				await client.query(
+					`INSERT INTO game (sport,id,season,date,round,home,away,home_score,away_score,status,source,observed_at)
+					 VALUES ('nfl',$1,2026,$2,'regular','ZZA','ZZB',1,0,'final','t',$3)`, [id, date, early])
+			}
+			const held = await gamesFor('nfl', 'ZZA', client)
+			assert.equal(await gameCount('nfl', 'ZZA', client), 2)
+
+			const later = '2026-06-01T00:00:00Z'
+			await client.query("UPDATE game SET home='ZZC', observed_at=$1 WHERE sport='nfl' AND id='a'", [later])
+			await client.query("UPDATE game SET home_score=2, observed_at=$1 WHERE sport='nfl' AND id='b'", [later])
+
+			const merged = mergeGames(held, await gamesSince('nfl', 'ZZA', early, client))
+			assert.equal(merged.length, 2, 'the premise: the merge still holds the game that left')
+			assert.equal(await gameCount('nfl', 'ZZA', client), 1)
+			assert.notEqual(merged.length, await gameCount('nfl', 'ZZA', client))
+		})
+	})
+
 	await t.test('every franchise stamp in one query agrees with asking one at a time', async () => {
 		// The per-club version was 429ms for 236 franchises, on any league page
 		// whose check window had expired. One query is 73ms — and has to give the

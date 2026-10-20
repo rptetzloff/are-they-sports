@@ -38,7 +38,7 @@ import { computeStandings, divisionPeers, playedSeasons } from './lib/standings.
 import { Lru, memo, mergeGames, versionOf } from './lib/derived.js';
 import { chartGeometry, coachEras, historyPoints } from './lib/history.js';
 import { codeTables, franchisesForClub, staleFranchises } from './lib/codes.js';
-import { availability, championships, close, connect, franchisesWithGames, gamesFor, gamesSince, health, lastUpdated, lastUpdatedAll, leaderGames, leaderTenures, rawGamesFor, readSummary, standingsTitles, withClient, writeSummary } from './lib/store.js';
+import { availability, championships, close, connect, franchisesWithGames, gameCount, gamesFor, gamesSince, health, lastUpdated, lastUpdatedAll, leaderGames, leaderTenures, rawGamesFor, readSummary, standingsTitles, withClient, writeSummary } from './lib/store.js';
 import { lockKeyFor, nextDelay, refreshLive, withLock } from './lib/live.js';
 import {
 	daysToNextGame, lastLosslessSeason, latestSeason, recordText, seasons, seasonTally, seasonVerdict,
@@ -187,6 +187,15 @@ async function games(entry, season) {
 			// to pick that up is the waste this exists to avoid. The Brewers are
 			// 9,229 rows and the feed touched one of them.
 			rows = mergeGames(hit.rows, await gamesSince(entry.sport, entry.franchise, hit.stamp));
+			// Rows can leave while others move forward, and a merge cannot see
+			// them go. Hockey's regrouping (2026-10-19) moved the first Jets and
+			// the Coyotes off UTA in a load that also rewrote Utah's own games,
+			// so the stamp moved forward and the Mammoth kept 2,800 games that
+			// were no longer theirs until the container restarted. A count that
+			// disagrees means something left; read the club again.
+			if (rows.length !== await gameCount(entry.sport, entry.franchise)) {
+				rows = await gamesFor(entry.sport, entry.franchise);
+			}
 			gameCache.set(key, { rows, stamp, checkedAt: now });
 		} else if (hit.stamp !== stamp) {
 			// The stamp moved and did not move FORWARD, which means rows left:
