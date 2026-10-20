@@ -645,9 +645,14 @@ Added on 2026-10-20, data first. What the adapter decides:
 - **The race is for ninth** in the club's conference, in points; the standings
   lead with the conference, tagged PO (1-7) and WC (8-9).
 
-Gaps: no coaches. The server's league standings rank by winning percentage,
-which is not how MLS (points) or the NHL ranks; that is a server page's, and was
-already true of hockey.
+Gaps: no coaches.
+
+**The server's standings rank hockey and soccer by points** (2026-10-20), as
+the leagues do: a sport's adapter gives `standingsPoints(row)` and
+`computeStandings` ranks by it, then by fewer games played, then by wins, and
+the table shows OTL and Pts where it showed Pct and GB. Checked against ESPN's
+final tables: the NHL's 2025-26 agrees for all 32 clubs, MLS's 2024 for every
+club compared, and MLS's own 1996 for the one-point shootout win.
 
 ## A club is a sport and an id, never an id
 
