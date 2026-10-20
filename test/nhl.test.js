@@ -64,8 +64,11 @@ test('the live refresh reads the NHL\'s `games` and writes the ending in its col
 	assert.ok(writes.length, 'nothing was written')
 	const { sql, params } = writes[0]
 	const columns = sql.match(/INSERT INTO game \(([^)]*)\)/)[1].split(',').map((c) => c.trim())
-	assert.equal(columns.length, 15)
+	assert.equal(columns.length, 17)
 	assert.equal(params[columns.indexOf('ending')], 'SO')
+	// A hockey shootout is in the score (the NHL adds the deciding goal); the
+	// penalty columns (0016) are soccer's.
+	assert.equal(params[columns.indexOf('home_pens')], null)
 	assert.equal(params[columns.indexOf('id')], '2026020135')
 })
 

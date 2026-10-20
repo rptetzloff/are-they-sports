@@ -580,6 +580,35 @@ test('schema', { skip: !DATABASE_URL && 'no DATABASE_URL — constraints and the
 		})
 	})
 
+	await t.test('a shootout decides the winner of a level game, and only of a level game', async () => {
+		// 0016. MLS's 1996-1999 shootouts and its playoff ones: the score stays
+		// the score, and the winner is the higher shootout. A second leg won on
+		// the day and lost on penalties (2010, Columbus 2-1 Colorado) is the
+		// day's winner's game.
+		const { gamesFor } = await import('../lib/store.js')
+		await inRollback(async () => {
+			await fixture()
+			await client.query("INSERT INTO source (id,authority,reproducible,note) VALUES ('t',1,true,'test') ON CONFLICT DO NOTHING")
+			for (const f of ['ZZA', 'ZZB']) await client.query('INSERT INTO franchise VALUES ($1,$2) ON CONFLICT DO NOTHING', ['nfl', f])
+			const put = (id, hs, as_, hp, ap) => client.query(
+				`INSERT INTO game (sport,id,season,date,round,home,away,home_score,away_score,home_pens,away_pens,status,source)
+				 VALUES ('nfl',$1,2026,'2026-09-10','playoff','ZZA','ZZB',$2,$3,$4,$5,'final','t')`, [id, hs, as_, hp, ap])
+			await put('so', 1, 1, 1, 3)
+			await put('so-home', 0, 0, 5, 4)
+			await put('draw', 1, 1, null, null)
+			await put('leg', 2, 1, 4, 5)
+			const winner = async (id) => (await client.query("SELECT winner FROM game WHERE sport='nfl' AND id=$1", [id])).rows[0].winner
+			assert.equal(await winner('so'), 'ZZB')
+			assert.equal(await winner('so-home'), 'ZZA')
+			assert.equal(await winner('draw'), null)
+			assert.equal(await winner('leg'), 'ZZA')
+			const result = Object.fromEntries((await gamesFor('nfl', 'ZZA', client)).map((g) => [g.gid, g.result]))
+			assert.deepEqual(result, { so: 'LOSS', 'so-home': 'WIN', draw: 'TIE', leg: 'WIN' })
+			// One shootout total without the other is refused.
+			await assert.rejects(() => put('half', 0, 0, 3, null), /game_pens_check/)
+		})
+	})
+
 	await t.test('a game that leaves a club is missed by the merge, and the count says so', async () => {
 		// Hockey's regrouping moved the first Jets off UTA in the same load that
 		// rewrote Utah's own games: the stamp moved forward, the cache merged, and

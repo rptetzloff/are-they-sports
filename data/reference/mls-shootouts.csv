@@ -1,0 +1,26 @@
+# The MLS playoff shootouts of 2000-2012, which MLS's own data does not record.
+#
+# MLS's stats API has every game's score, and a shootout's from 1996 to 1999
+# and from 2013; for 2000-2012 it has none. A shootout had to follow every
+# one-game playoff round left level and every two-game series left level on
+# aggregate. In those seasons that is eight games: five level in themselves
+# (two MLS Cups among them, 2006 and 2009) and three second legs that were not
+# but left the series level (2010: Columbus 2-1 Colorado, 2-2 on aggregate,
+# Colorado through on penalties). Wikipedia records exactly those eight, each
+# on the page in `source`.
+#
+# Each is matched to MLS's own game by `match_id`; `score` is MLS's, as a
+# check. A shootout decides the winner only of a game level in itself
+# (db/migrations/0016); on a second leg it is the series', and is kept for that.
+#
+# Checked: where MLS's data does have a shootout, Wikipedia's agrees on every
+# one matched (29), and every level-aggregate series of 2000-2012 is here.
+match_id,season,date,home,away,score,home_pens,away_pens,source
+MLS-MAT-0008YP,2004,2004-11-06,DC,NE,3-3,4,3,https://en.wikipedia.org/wiki/2004_Major_League_Soccer_season
+MLS-MAT-0008YW,2005,2005-10-29,DAL,COL,2-2,4,5,https://en.wikipedia.org/wiki/2005_Major_League_Soccer_season
+MLS-MAT-0008Z6,2006,2006-10-28,NE,CHI,2-1,4,2,https://en.wikipedia.org/wiki/2006_Major_League_Soccer_season
+MLS-MAT-0008Z7,2006,2006-10-28,DAL,COL,2-3,4,5,https://en.wikipedia.org/wiki/2006_Major_League_Soccer_season
+MLS-MAT-0008ZC,2006,2006-11-12,NE,HOU,1-1,3,4,https://en.wikipedia.org/wiki/2006_Major_League_Soccer_season
+MLS-MAT-000908,2009,2009-11-14,CHI,RSL,0-0,4,5,https://en.wikipedia.org/wiki/2009_MLS_Cup_playoffs
+MLS-MAT-000909,2009,2009-11-22,LA,RSL,1-1,4,5,https://en.wikipedia.org/wiki/MLS_Cup_2009
+MLS-MAT-00090F,2010,2010-11-06,CLB,COL,2-1,4,5,https://en.wikipedia.org/wiki/2010_MLS_Cup_playoffs

@@ -165,8 +165,8 @@ async function main() {
 		  FROM game g
 		  CROSS JOIN LATERAL (VALUES (g.home), (g.away)) AS s(fr)
 		  CROSS JOIN LATERAL (SELECT CASE
-		      WHEN g.home_score = g.away_score THEN 'T'
-		      WHEN (g.home = s.fr) = (g.home_score > g.away_score) THEN 'W'
+		      WHEN g.winner IS NULL THEN 'T'
+		      WHEN g.winner = s.fr THEN 'W'
 		      ELSE 'L' END) AS res(r)
 		 WHERE g.sport = 'nfl' AND g.status = 'final' AND g.season < $1
 		 GROUP BY s.fr, g.season`, [COUNTED_FROM]);
@@ -226,8 +226,8 @@ async function main() {
 		  JOIN game g   ON g.sport = gl.sport AND g.id = gl.game_id
 		  JOIN leader l ON l.sport = gl.sport AND l.id = gl.leader
 		  CROSS JOIN LATERAL (SELECT CASE
-		      WHEN g.home_score = g.away_score THEN 'T'
-		      WHEN (g.home = gl.franchise) = (g.home_score > g.away_score) THEN 'W'
+		      WHEN g.winner IS NULL THEN 'T'
+		      WHEN g.winner = gl.franchise THEN 'W'
 		      ELSE 'L' END) AS res(r)
 		 WHERE gl.sport = 'nfl' AND g.status = 'final'
 		 GROUP BY l.name, gl.franchise, g.season`);
