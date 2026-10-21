@@ -39,22 +39,6 @@ export function withScoreboard(events, scoreboard) {
 	});
 }
 
-/** Whether a game is on TV, by ESPN's own word for each of its broadcasts:
- *  'yes' for any TV, 'streaming' for streaming only, 'no' for neither or no
- *  game. The baseball pages' rule (tv-core.js tvStatus) without a channel
- *  table, which no football club here has. */
-export function tvStatusOf(event) {
-	const broadcasts = event?.competitions?.[0]?.broadcasts ?? [];
-	let tv = false, streaming = false;
-	for (const b of broadcasts) {
-		if (!b?.media?.shortName) continue;
-		const t = b.type?.shortName ?? '';
-		if (t === 'TV') tv = true;
-		else if (t === 'Streaming') streaming = true;
-	}
-	return tv ? 'yes' : streaming ? 'streaming' : 'no';
-}
-
 /** The answer's second line: where and when, "Sun, Oct 25 · CBS". Empty
  *  without a game. */
 export function tvLineOf(event, { timeZone } = {}) {

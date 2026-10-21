@@ -2,7 +2,8 @@
 import { SITE } from './site.js';
 import { scheduleListHtml, monthChipsHtml } from './schedule-core.js';
 import { loadGames } from './games-client.js';
-import { withScoreboard, tvStatusOf, tvLineOf } from './scoreboard-core.js';
+import { withScoreboard, tvLineOf } from './scoreboard-core.js';
+import { installTvUi } from './tv-ui.js';
 import { fieldTrackerHtml } from './field-core.js';
 import { gameSummaryHtml, gameTitle } from './game-core.js';
 import { seasonVerdict } from './lib/season-state.js';
@@ -33,6 +34,8 @@ import { seasonVerdict } from './lib/season-state.js';
         		this.csvMaxSeason = 2020;
         		this.seasonRecords = {};
         		this.photosBySeason = {};
+        		// The TV provider picker's state (tv-ui.js).
+        		this.initTvState();
         		this.init();
         	}
 
@@ -52,6 +55,9 @@ import { seasonVerdict } from './lib/season-state.js';
         				loadGames().catch(() => null),
         				fetch('data/season_records.csv'),
         				fetch('./data/photos.csv'),
+        				// Providers and channel numbers (tv-ui.js), before the schedule
+        				// that shows them. Without them the page has no picker.
+        				this.loadTv().catch(e => console.error(e)),
         			]);
         			if (loaded) {
         				// The season map is the file's alone: it decides which seasons
@@ -415,6 +421,14 @@ renderScheduleList(rows, phaseLabels, { season, featured, scrollTo }) {
   this.markActiveMonth();
 }
 
+// A row opens where to watch a game still to come (tv-ui.js), and the
+// summary of one played or being played.
+openScheduleRow(row) {
+  const event = this._eventsById?.get(row.dataset.key);
+  if (event?.competitions?.[0]?.status?.type?.state === 'pre') return this.openWatchModal(event);
+  return this.openGameSummary(row.dataset.key, row);
+}
+
 // The month chips and the list's scrolling, wired once: the list is
 // redrawn, its container is not.
 wireSchedule() {
@@ -430,12 +444,12 @@ wireSchedule() {
     const link = e.target.closest('.sched-link, .sched-h2h');
     if (link && link.dataset.act !== 'summary') return;
     const row = e.target.closest('.sched-row.sched-click');
-    if (row) this.openGameSummary(row.dataset.key, row);
+    if (row) this.openScheduleRow(row);
   });
   grid.addEventListener('keydown', (e) => {
     if (e.target.closest('.sched-link, .sched-h2h')) return;
     const row = e.target.closest('.sched-row.sched-click');
-    if (row && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); this.openGameSummary(row.dataset.key, row); }
+    if (row && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); this.openScheduleRow(row); }
   });
   chips.addEventListener('click', (e) => {
     const chip = e.target.closest('.sched-chip');
@@ -666,6 +680,21 @@ markActiveMonth() {
         		recordEl.textContent = 'The season hasn\'t started yet!';
         	}
 
+        	// The answer's second line: the selected provider's channel when there
+        	// is one (tv-ui.js _providerNoteHtml), else when and where the game is.
+        	// The baseball page's version adds only the provider's line; this page
+        	// has said when and where since it began asking the TV question.
+        	refreshAnswerNote() {
+        		const answerEl = document.getElementById('answer');
+        		if (!answerEl) return;
+        		answerEl.querySelector('.answer-provider-note')?.remove();
+        		const { tvGame, isPastSeason, superBowlName } = this._lastResult || {};
+        		if (isPastSeason || superBowlName || !tvGame) return;
+        		const where = tvLineOf(tvGame);
+        		const html = this._providerNoteHtml() || (where ? `<div class="answer-provider-note">${esc(where)}</div>` : '');
+        		if (html) answerEl.insertAdjacentHTML('beforeend', html);
+        	}
+
         	displayResult(verdict, wins, losses, ties, isPastSeason = false, superBowlName = null, postRecord = null, preRecord = null, tvGame = null) {
         		const answerEl = document.getElementById('answer');
         		const recordEl = document.getElementById('record');
@@ -683,12 +712,19 @@ markActiveMonth() {
         		} else if (!isPastSeason) {
         			// On TV: the game on now, else the next, by ESPN's word for each
         			// of its broadcasts. Nothing left on the schedule is a NO.
-        			const status = tvStatusOf(tvGame);
-        			const word = { yes: 'YES!!!', streaming: 'STREAMING ONLY', no: 'NO' }[status];
-        			const where = tvGame ? tvLineOf(tvGame) : '';
-        			answerEl.innerHTML = `${word}${where ? `<div class="answer-provider-note">${esc(where)}</div>` : ''}`;
+        			// tv-core.js's rule, with the channel table where it knows a
+        			// network and ESPN's own word where it does not.
+        			const status = this.getTvStatus(tvGame);
+        			this._lastResult.tvStatus = status;
+        			answerEl.textContent = { yes: 'YES!!!', streaming: 'STREAMING ONLY', no: 'NO' }[status];
         			answerEl.className = `answer ${status}`;
         			document.body.classList.toggle('undefeated', status === 'yes');
+        			this.refreshAnswerNote();
+        			// As on the baseball page: the answer opens where to watch.
+        			const watchable = tvGame && this.broadcastsFor(tvGame).some(b => b.media?.shortName);
+        			answerEl.style.cursor = watchable ? 'pointer' : '';
+        			answerEl.title = watchable ? 'Click to see where to watch' : '';
+        			answerEl.onclick = watchable ? () => this.openWatchModal(tvGame) : null;
         		} else if (verdict === 'undefeated') {
         			// A past season without a loss still says so, as a fact rather
         			// than as the answer to the question.
@@ -731,6 +767,12 @@ markActiveMonth() {
 
          displaySchedule(events, isPastSeason = false) {
           const now = new Date();
+          // Kept for the TV picker, which redraws the schedule with channel
+          // numbers when the provider changes (tv-ui.js _rerenderSchedule), and
+          // for a row's click to find its game.
+          this._lastScheduleEvents = events;
+          this._lastIsPastSeason = isPastSeason;
+          this._eventsById = new Map(events.map(e => [String(e.id), e]));
 
           const sortedEvents = events.sort((a, b) => new Date(a.date) - new Date(b.date));
 
@@ -755,6 +797,7 @@ markActiveMonth() {
           });
 
           if (!isPastSeason && liveGame) this.startLiveUpdates();
+          this.renderScheduleProviderBar();
     }
 
     // One ESPN game as a schedule row: result, live score or start time, and
@@ -784,13 +827,18 @@ markActiveMonth() {
         text = event.timeValid === false ? 'TBD' : date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
       }
       const upcoming = state === 'next' || state === 'upcoming';
-      const network = comp.broadcasts?.[0]?.media?.shortName;
+      // The networks to name, with the selected provider's channel number
+      // (tv-ui.js), as the baseball page's rows have them.
+      const tvLabels = this.scheduleBroadcasts(event).map(b => {
+        const num = this.scheduleChannelNumber(b);
+        return `${b.media.shortName}${num ? ` ${num}` : ''}`;
+      });
       return {
         key: String(event.id), date, phase: event._seasonType,
         home: gb?.homeAway === 'home',
         opp: opp.team?.shortDisplayName || opp.team?.name || opp.team?.displayName || '',
         state, text,
-        tv: upcoming && network ? [network] : [],
+        tv: upcoming ? tvLabels : [],
         // H2H only on the current season's schedule (offseason included).
         h2h: this.currentSeason === this.latestSeason ? this.h2hLink(opp.team?.displayName) : null,
         // A game played or being played: its summary pop-up, which a click
@@ -800,7 +848,8 @@ markActiveMonth() {
           box: SITE.gamePages ? `game/${encodeURIComponent(event.id)}` : null,
           espn: `https://www.espn.com/nfl/game/_/gameId/${encodeURIComponent(event.id)}`,
         },
-        clickable: !upcoming && state !== 'postponed',
+        // A game to come opens where to watch it; a played one its summary.
+        clickable: state !== 'postponed' && (!upcoming || tvLabels.length > 0),
         title: !upcoming && state !== 'postponed' ? 'Summary' : '',
       };
     }
@@ -927,7 +976,12 @@ opponentDiv.textContent = `${isHome ? 'vs' : '@'} ${opponent}`;
 const dateDiv = document.createElement('div');
 dateDiv.className = 'game-date';
 
-const network = competition.broadcasts?.[0]?.media?.shortName || '';
+// The networks, with the selected provider's channel number, as the baseball
+// card has them (tv-ui.js).
+const network = this.scheduleBroadcasts(event).map(b => {
+  const num = this.scheduleChannelNumber(b);
+  return `${esc(b.media.shortName)}${num ? ` <span class="game-channum">Ch. ${esc(num)}</span>` : ''}`;
+}).join('<span class="game-network-sep"> · </span>');
 
 if (isLive || isInProgress) {
  dateDiv.innerHTML = `<span class="live-indicator-small"></span>LIVE NOW${network ? ` · <span class="game-network">${network}</span>` : ''}`;
@@ -1496,6 +1550,9 @@ showError(message) {
  }
 }
 }
+
+// The baseball page's TV provider picker, "where to watch" and channel numbers.
+installTvUi(PackersTracker);
 
 document.addEventListener('DOMContentLoaded', () => {
    new PackersTracker();

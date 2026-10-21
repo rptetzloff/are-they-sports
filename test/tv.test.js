@@ -112,3 +112,46 @@ test('a club without the TV tables yet still has its page', async () => {
 	assert.equal(await front({ headers: {} }, res, url.pathname, url, () => {}), true)
 	assert.match(body, /^provider,display_name/)
 })
+
+// --- football's picker (web/nfl/tv-ui.js) -------------------------------------
+
+test('football\'s page has the picker\'s bar and dialogs, and its own methods win', async () => {
+	const html = read('web/nfl/index.html')
+	for (const id of ['schedule-provider-bar', 'watch-modal', 'watch-channels', 'provider-modal', 'provider-picker-container']) {
+		assert.ok(html.includes(`id="${id}"`), `no #${id}`)
+	}
+	const { installTvUi } = await import('../web/nfl/tv-ui.js')
+	class Page { refreshAnswerNote() { return 'mine' } }
+	installTvUi(Page)
+	const p = new Page()
+	assert.equal(p.refreshAnswerNote(), 'mine', 'the module overwrote a method the page defines')
+	for (const m of ['loadTv', 'openWatchModal', 'renderScheduleProviderBar', 'scheduleChannelNumber', 'getTvStatus', 'calendarRowEl']) {
+		assert.equal(typeof p[m], 'function', `${m} was not installed`)
+	}
+})
+
+test('football\'s club is served the same TV files', async () => {
+	const { createFront } = await import('../lib/web-routes.js')
+	const { loadSports, loadTeams } = await import('../lib/teams.js')
+	const { loadHistory, resolver } = await import('../lib/names.js')
+	const teams = await loadTeams()
+	const adapters = await loadSports()
+	const front = await createFront({
+		team: teams.find((t) => t.sport === 'nfl' && t.id === 'packers'), franchise: 'GB', adapter: adapters.nfl, namer: resolver('nfl'),
+		history: loadHistory('nfl'), currentCodes: new Set(), palette: null, base: '/nfl/packers', clubs: [],
+		store: { rawGamesFor: async () => [], standingsTitles: async () => [], finalRounds: async () => new Map(), tvTables: async () => TV, simulcastsFor: async () => [] },
+		creditHtml: '', origin: () => 'http://x',
+	})
+	const get = async (path) => {
+		const url = new URL(`http://x${path}`)
+		let body = null
+		const res = { writeHead() {}, end(b) { body = String(b) } }
+		const handled = await front({ headers: {} }, res, url.pathname, url, () => {})
+		return { handled, body }
+	}
+	const ch = await get('/data/channel_lookup.csv')
+	assert.equal(ch.handled, true)
+	assert.ok(ch.body.includes('ESPN') && !ch.body.includes('Brewers.TV'), 'football got everyone\'s networks and not the Brewers\' own')
+	assert.match((await get('/data/provider_lookup.csv')).body, /^provider,display_name/)
+	assert.match((await get('/data/simulcasts.csv')).body, /^date,channels,note/)
+})

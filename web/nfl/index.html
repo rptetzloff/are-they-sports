@@ -62,6 +62,8 @@
             <div id="schedule-grid" class="schedule-grid">
                 <div class="loading">Loading schedule...</div>
             </div>
+            <!-- The TV provider and the season's calendar (tv-ui.js). -->
+            <div id="schedule-provider-bar" class="schedule-provider-bar" hidden></div>
         </div>
         </aside>
 
@@ -144,6 +146,32 @@
                 <button id="summary-close" class="gallery-close" aria-label="Close summary"><i class="mdi mdi-close"></i></button>
             </div>
             <div id="summary-body" class="summary-body"></div>
+        </div>
+    </div>
+
+    <!-- Where to watch a game, and the TV provider picker: the baseball page's (tv-ui.js). -->
+    <div id="watch-modal" class="gallery-modal" role="dialog" aria-modal="true" aria-label="Where to watch" hidden>
+        <div class="watch-backdrop"></div>
+        <div class="watch-dialog">
+            <div class="gallery-header">
+                <h2 id="watch-title" class="gallery-title">Where to Watch</h2>
+                <button id="watch-close" class="gallery-close" aria-label="Close"><i class="mdi mdi-close"></i></button>
+            </div>
+            <p id="watch-game-info" class="watch-game-info"></p>
+            <div id="watch-channels" class="watch-channels"></div>
+            <p class="watch-disclaimer">Channel information is based on publicly available channel listings. Please check your local channel guide for the most accurate broadcast information.</p>
+        </div>
+    </div>
+
+    <div id="provider-modal" class="gallery-modal" role="dialog" aria-modal="true" aria-label="Change TV provider" hidden>
+        <div class="provider-backdrop"></div>
+        <div class="provider-dialog">
+            <div class="gallery-header">
+                <h2 class="gallery-title">TV Provider</h2>
+                <button id="provider-close" class="gallery-close" aria-label="Close"><i class="mdi mdi-close"></i></button>
+            </div>
+            <p class="watch-game-info">Choose your TV provider to see channel numbers in the schedule.</p>
+            <div id="provider-picker-container" class="watch-channels"></div>
         </div>
     </div>
 
