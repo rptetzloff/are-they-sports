@@ -205,9 +205,10 @@ test('a live football playoff game is staged as nflverse stages it', () => {
 const team = (o = {}) => ({ sport: 'mlb', id: 'cubs', sourceIds: ['CHN'], firstSeason: 1876,
 	nouns: { team: 'Cubs', fullName: 'Chicago Cubs' }, copy: { seasonNotStarted: 'GO CUBS' }, ...o })
 
-test('a club without channel listings asks whether it is undefeated', () => {
+test('every club asks whether it is on TV; channel listings are a separate flag', () => {
+	// Ray, 2026-10-21: the question is the TV one for every club, listings or not.
 	const cfg = clubConfig({ team: team(), current: { espnAbbr: 'CHC', league: 'NL' } })
-	assert.equal(cfg.site.title, 'Are the Cubs Undefeated?')
+	assert.equal(cfg.site.title, 'Are the Cubs On TV?')
 	assert.equal(cfg.site.tv, false)
 	assert.deepEqual([cfg.site.espnAbbr, cfg.site.espnSlug, cfg.site.leagueGroup, cfg.site.tag], ['CHC', 'chc', 8, ''])
 	const brewers = clubConfig({ team: team({ id: 'brewers', nouns: { team: 'Brewers', fullName: 'Milwaukee Brewers' }, site: { hashtag: '#ThisIsMyCrew' } }), current: { espnAbbr: 'MIL', league: 'NL' } })
@@ -223,7 +224,7 @@ test('the shell carries the club, its question and its base', () => {
 	assert.ok(html.indexOf('window.CLUB') < html.indexOf('main.js'))
 	const script = html.slice(html.indexOf('window.CLUB = ') + 'window.CLUB = '.length).split('</script>')[0]
 	assert.deepEqual(JSON.parse(script.replace(/;$/, '')), cfg)
-	assert.match(html, /<title>Are the Cubs&lt;\/script&gt; Undefeated\?<\/title>/)
+	assert.match(html, /<title>Are the Cubs&lt;\/script&gt; On TV\?<\/title>/)
 	assert.ok(!html.includes('Are the Brewers On TV?'), 'the source club\'s question survived')
 	assert.ok(!html.includes('og:image') && !html.includes('twitter:'), 'the source site\'s preview tags survived')
 	// The base comes before anything that resolves against it.

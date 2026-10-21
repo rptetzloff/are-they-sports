@@ -1551,9 +1551,17 @@ function main() {
 							isPastSeason: rows.every((g) => g.result !== ''),
 							daysToNextGame: daysToNextGame(all, new Date()),
 						});
-						answer = verdictText(verdict, team);
-						record = `${season} Record: ${recordText(tally)}`;
-						if (tally.postseason) sub = `Postseason ${tally.postseason.w}-${tally.postseason.l}`;
+						// The club, the season and its record. The page asks whether
+						// they are on TV (Ray, 2026-10-21), which a picture cached for
+						// a day cannot answer, so the card says what does not change:
+						// how the season went, and that it went unbeaten if it did.
+						question = team.nouns.fullName;
+						answer = String(season);
+						record = `Record: ${recordText(tally)}`;
+						sub = [
+							verdict === 'undefeated' ? 'Undefeated' : null,
+							tally.postseason ? `Postseason ${tally.postseason.w}-${tally.postseason.l}` : null,
+						].filter(Boolean).join(' · ') || null;
 					} else {
 						// The fixed pages. The card names the page rather than
 						// answering the club's question, because "NO" over a record

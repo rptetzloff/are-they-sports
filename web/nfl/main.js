@@ -2,7 +2,7 @@
 import { SITE } from './site.js';
 import { scheduleListHtml, monthChipsHtml } from './schedule-core.js';
 import { loadGames } from './games-client.js';
-import { withScoreboard } from './scoreboard-core.js';
+import { withScoreboard, tvStatusOf, tvLineOf } from './scoreboard-core.js';
 import { fieldTrackerHtml } from './field-core.js';
 import { gameSummaryHtml, gameTitle } from './game-core.js';
 import { seasonVerdict } from './lib/season-state.js';
@@ -599,7 +599,19 @@ markActiveMonth() {
         		});
 
         		const verdict = seasonVerdict({ wins, losses, ties, isPastSeason });
-        		this.displayResult(verdict, wins, losses, ties, isPastSeason, superBowlName, postRecord, preRecord);
+        		// The question is whether they are on TV (Ray, 2026-10-21): the
+        		// game on now, else the next one, as the baseball page asks it.
+        		// Only for the season being played; a past season answers with
+        		// how it ended.
+        		let tvGame = null;
+        		if (!isPastSeason) {
+        			const now = new Date();
+        			tvGame = events.find(e => e.competitions?.[0]?.status?.type?.state === 'in')
+        				|| events.filter(e => new Date(e.date) > now && e.competitions?.[0]?.status?.type?.state === 'pre')
+        					.sort((a, b) => new Date(a.date) - new Date(b.date))[0]
+        				|| null;
+        		}
+        		this.displayResult(verdict, wins, losses, ties, isPastSeason, superBowlName, postRecord, preRecord, tvGame);
         		this.displaySchedule(events, isPastSeason);
         		this.showLastUpdated();
         		this.setDataCredit(false);
@@ -654,34 +666,39 @@ markActiveMonth() {
         		recordEl.textContent = 'The season hasn\'t started yet!';
         	}
 
-        	displayResult(verdict, wins, losses, ties, isPastSeason = false, superBowlName = null, postRecord = null, preRecord = null) {
+        	displayResult(verdict, wins, losses, ties, isPastSeason = false, superBowlName = null, postRecord = null, preRecord = null, tvGame = null) {
         		const answerEl = document.getElementById('answer');
         		const recordEl = document.getElementById('record');
 
-        		this._lastResult = { verdict, wins, losses, ties, isPastSeason, superBowlName, postRecord, preRecord };
+        		this._lastResult = { verdict, wins, losses, ties, isPastSeason, superBowlName, postRecord, preRecord, tvGame };
         		this._isOffseason = false;
 
         		// The answer is the word alone. It used to sit between rows of
         		// emoji, a cheese a win and a sad face a loss, behind a toggle;
         		// both went in October 2026.
-        		if (verdict === 'not-started') {
-        			// No games played and the season is not over: not YES, which
-        			// would be hollow, and emphatically not NO, which is what it
-        			// used to say about a team that had not lost.
-        			answerEl.textContent = SITE.copy.seasonNotStarted;
-        			answerEl.className = 'answer not-started';
-        			document.body.classList.remove('undefeated');
-        		} else if (verdict === 'undefeated') {
-        			answerEl.textContent = 'YES!!!';
-        			answerEl.className = 'answer yes';
-        			document.body.classList.add('undefeated');
-        		} else if (superBowlName) {
+        		if (superBowlName) {
         			answerEl.innerHTML = `${esc(superBowlName.toUpperCase())}<br>CHAMPIONS!`;
         			answerEl.className = 'answer champions';
         			document.body.classList.remove('undefeated');
+        		} else if (!isPastSeason) {
+        			// On TV: the game on now, else the next, by ESPN's word for each
+        			// of its broadcasts. Nothing left on the schedule is a NO.
+        			const status = tvStatusOf(tvGame);
+        			const word = { yes: 'YES!!!', streaming: 'STREAMING ONLY', no: 'NO' }[status];
+        			const where = tvGame ? tvLineOf(tvGame) : '';
+        			answerEl.innerHTML = `${word}${where ? `<div class="answer-provider-note">${esc(where)}</div>` : ''}`;
+        			answerEl.className = `answer ${status}`;
+        			document.body.classList.toggle('undefeated', status === 'yes');
+        		} else if (verdict === 'undefeated') {
+        			// A past season without a loss still says so, as a fact rather
+        			// than as the answer to the question.
+        			answerEl.textContent = 'UNDEFEATED';
+        			answerEl.className = 'answer yes';
+        			document.body.classList.add('undefeated');
         		} else {
-        			answerEl.textContent = 'NO';
-        			answerEl.className = 'answer no';
+        			// A past season: no answer; the record says it.
+        			answerEl.textContent = '';
+        			answerEl.className = 'answer past';
         			document.body.classList.remove('undefeated');
         		}
 
