@@ -89,3 +89,26 @@ test('the migration\'s seed is the Brewers\' spreadsheets', { skip: !DATABASE_UR
 	}
 	assert.ok(compared >= 600, `only ${compared} compared`)
 })
+
+test('a club without the TV tables yet still has its page', async () => {
+	// Coolify deploys before the migration is run; the page must not wait on it.
+	const { createFront } = await import('../lib/web-routes.js')
+	const { loadSports, loadTeams } = await import('../lib/teams.js')
+	const { loadHistory, resolver } = await import('../lib/names.js')
+	const teams = await loadTeams()
+	const adapters = await loadSports()
+	const front = await createFront({
+		team: teams.find((t) => t.sport === 'nhl' && t.id === 'wild'), franchise: 'MIN', adapter: adapters.nhl, namer: resolver('nhl'),
+		history: loadHistory('nhl'), currentCodes: new Set(), palette: null, base: '/nhl/wild', clubs: [],
+		store: {
+			rawGamesFor: async () => [], standingsTitles: async () => [], finalRounds: async () => new Map(),
+			tvTables: async () => { throw new Error('relation "tv_provider" does not exist') },
+		},
+		creditHtml: '', origin: () => 'http://x',
+	})
+	const url = new URL('http://x/data/provider_lookup.csv')
+	let body = null
+	const res = { writeHead() {}, end(b) { body = String(b) } }
+	assert.equal(await front({ headers: {} }, res, url.pathname, url, () => {}), true)
+	assert.match(body, /^provider,display_name/)
+})
