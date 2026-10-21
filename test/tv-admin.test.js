@@ -136,3 +136,38 @@ test('approving sets the channel and creates what is new; rejecting changes noth
 		await c.end()
 	}
 })
+
+// Ray, 2026-10-21: the form's colours were bad, its menu unreadable, and "they
+// need to be able to list a service area within the provider".
+
+test('a service area is one on file, a new one by name, or none', () => {
+	const base = { provider: 'amherst', network: '1', channel: '7' }
+	assert.equal(readSubmission({ ...base, area: 'Waushara' }, TV).value.areaName, 'Waushara')
+	assert.equal(readSubmission({ ...base, area: '' }, TV).value.areaName, null, 'the same in every area')
+	assert.equal(readSubmission({ ...base, area: '__new', area_new: ' Marquette  County ' }, TV).value.areaName, 'Marquette County')
+	assert.ok(readSubmission({ ...base, area: '__new', area_new: '' }, TV).errors?.includes('Name the service area.'))
+	const form = submitPage(TV)
+	assert.match(form, /<select name="area" data-areas/)
+	assert.match(form, /name="area_new"/)
+	assert.ok(form.includes('"amherst":["Portage","Waushara"]'), 'the provider\'s areas are not given to the form')
+})
+
+test('the form wears the club\'s colours and posts back to the club', () => {
+	const form = submitPage(TV, { colors: { base: '#203731', accent: '#ffb612' }, action: '/nfl/packers/tv/submit' })
+	assert.match(form, /--base: #203731/)
+	assert.match(form, /action="\/nfl\/packers\/tv\/submit"/)
+	assert.ok(form.includes('color-scheme: dark') && form.includes('.tv-form option { background: var(--base)'), 'the menu opens light under white text')
+	assert.ok(submitPage(TV).includes('action="/tv/submit"'))
+})
+
+test('a club\'s address answers with its colours and its page to go back to', async () => {
+	const h = createTvAdmin({ pool: null, readTv: async () => TV, password: 'pw', secure: false })
+	let status = null, body = ''
+	const res = { headersSent: false, writeHead(s) { status = s }, end(b) { body = String(b ?? '') } }
+	const handled = await h({ method: 'GET', headers: {}, socket: {} }, res, new URL('http://x/nfl/packers/tv/submit'),
+		{ colors: { base: '#203731', accent: '#ffb612' }, home: '/nfl/packers/' })
+	assert.equal(handled, true)
+	assert.equal(status, 200)
+	assert.match(body, /--accent: #ffb612/)
+	assert.match(body, /action="\/nfl\/packers\/tv\/submit"/)
+})

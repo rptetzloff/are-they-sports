@@ -874,7 +874,15 @@ function main() {
 
 			// Suggesting a channel, and approving one: before the clubs, so a
 			// single-club site, whose club answers everything at its root, has them.
-			if (dbHealth.ok && await tvAdmin(req, res, url).catch((e) => {
+			// The form under a club (/nfl/packers/tv/submit), which is where a club
+			// page's dialogs link: in that club's colours, and back to its page.
+			const tvClub = url.pathname.endsWith('/tv/submit') ? matchRoute(url.pathname, table) : null;
+			const tvAs = tvClub?.rest === '/tv/submit' && clubFor(tvClub.entry) ? {
+				home: `${tvClub.entry.base}/`,
+				colors: clubFor(tvClub.entry).colors ?? colorsFor(namers[tvClub.entry.sport], tvClub.entry.code,
+					{ season: new Date().getFullYear(), date: new Date().toISOString().slice(0, 10) }, NEUTRAL),
+			} : null;
+			if (dbHealth.ok && await tvAdmin(req, res, url, tvAs).catch((e) => {
 				console.error(`  tv admin     ${e.message}`);
 				if (!res.headersSent) { res.writeHead(500, { 'content-type': 'text/plain' }); res.end('Something went wrong.\n'); }
 				return true;
