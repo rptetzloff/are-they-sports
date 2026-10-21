@@ -321,10 +321,7 @@ test('the front end names no path from the root', () => {
 	for (const f of walk('web')) {
 		const code = read(f).replace(/\/\*[\s\S]*?\*\//g, '').replace(/<!--[\s\S]*?-->/g, '').split('\n')
 			.map((l) => l.replace(/(^|\s)\/\/.*$/, '')).join('\n')
-		// /tv/submit is the one deliberate exception: suggesting a channel is the
-		// site's, not a club's, and answers at the root in every scope
-		// (lib/tv-admin.js).
-		for (const m of code.matchAll(/(?:['"`]|(?:href|src)=")\/(?!\/|g[,)]|unknown|tv\/submit")[a-z$]/g)) offenders.push(`${f}: ${m[0]}`)
+		for (const m of code.matchAll(/(?:['"`]|(?:href|src)=")\/(?!\/|g[,)]|unknown)[a-z$]/g)) offenders.push(`${f}: ${m[0]}`)
 	}
 	assert.deepEqual(offenders, [])
 })
