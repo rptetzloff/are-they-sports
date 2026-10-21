@@ -3339,3 +3339,13 @@ th.sorted-desc::after {
 .season-table .neg {
     color: var(--loss-light, #FF6B6B);
 }
+
+/* The TV answer's second line, where and when the game is on (main.js
+   displayResult). The baseball sheet's rule (are-they-sports). */
+.answer-provider-note {
+    margin-top: 0.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: normal;
+    color: rgb(var(--fg-rgb) / 0.75);
+}

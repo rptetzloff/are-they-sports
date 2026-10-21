@@ -802,9 +802,10 @@ markActiveMonth() {
         				.filter(e => new Date(e.date) > now && e.competitions?.[0]?.status?.type?.name === 'STATUS_SCHEDULED')
         				.sort((a, b) => new Date(a.date) - new Date(b.date))[0];
         			tvGame = liveNow || nextScheduled;
-        			// Only a club with channel listings asks the TV question; any
-        			// other gets null, which displayResult answers as Undefeated.
-        			tvStatus = SITE.tv ? this.getTvStatus(tvGame) : null;
+        			// Every club asks the TV question (Ray, 2026-10-21). One without
+        			// channel listings answers it from ESPN's word for each broadcast
+        			// (tv-core.js tvStatus, with an empty table).
+        			tvStatus = this.getTvStatus(tvGame);
         		}
 
         		this.displayResult(isUndefeated, wins, losses, ties, isPastSeason, worldSeriesName, postRecord, preRecord, tvStatus, tvGame);
