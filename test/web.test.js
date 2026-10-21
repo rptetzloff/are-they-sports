@@ -236,7 +236,7 @@ test('the shell carries the club, its question and its base', () => {
 	// The credit goes to the Disclaimer modal (Ray, 2026-10-19): out of the main
 	// column, into a template the modal reads.
 	assert.ok(!html.includes('<div id="data-credit"'), 'the credit is still in the main column')
-	assert.ok(html.includes('<template id="data-credit"><p class="notice">credit</p></template>'))
+	assert.ok(html.includes('<template id="data-credit"><p class="notice">credit</p><p class="limitations-link">'))
 	assert.ok(!html.includes('Sunset Rd'), 'the outdated Retrosheet address survived')
 })
 
