@@ -63,6 +63,7 @@ import { matchRoute, parseView, routeTable } from './lib/routes.js';
 import { LEADERS_DEFAULT_SORT, leaderColumns, leaderStints, mergeLeaders, numberLeaders, rankLeaders, tallyLeaders, tallyTenures } from './lib/leaders.js';
 import { parseSort, sortRows } from './lib/sort.js';
 import { loadDivisions, needsSelector, parseScope, resolveScope } from './lib/scope.js';
+import { createTvAdmin } from './lib/tv-admin.js';
 
 const PORT = Number(process.env.PORT ?? 3000);
 
@@ -823,6 +824,15 @@ function main() {
 		const withFront = table.filter((e) => e.available && clubFor(e) && hasFrontEnd(e.sport)).length;
 		if (withFront) console.log(`  front page   ${withFront} of ${table.length} clubs, built on first request`);
 
+		// Channel submissions and their approval (lib/tv-admin.js). The cookie is
+		// Secure unless the site is served over plain http.
+		const tvAdmin = createTvAdmin({
+			pool: connect(),
+			readTv: () => tvTables(),
+			secure: !String(process.env.PUBLIC_ORIGIN ?? '').startsWith('http:'),
+		});
+		if (!process.env.ADMIN_PASSWORD) console.log('  admin        ADMIN_PASSWORD is not set: /admin signs nobody in');
+
 		const server = createServer(async (req, res) => {
 			// Before anything reads `available`, including /healthz and the
 			// selector.
@@ -861,6 +871,14 @@ function main() {
 					missing: table.filter((e) => !e.available).map((e) => `${e.sport}/${e.code}`),
 				});
 			}
+
+			// Suggesting a channel, and approving one: before the clubs, so a
+			// single-club site, whose club answers everything at its root, has them.
+			if (dbHealth.ok && await tvAdmin(req, res, url).catch((e) => {
+				console.error(`  tv admin     ${e.message}`);
+				if (!res.headersSent) { res.writeHead(500, { 'content-type': 'text/plain' }); res.end('Something went wrong.\n'); }
+				return true;
+			})) return;
 
 			// A club's front page, and everything it asks for, under the club's base.
 			const claimed = matchRoute(url.pathname, table);
