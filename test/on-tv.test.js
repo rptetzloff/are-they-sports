@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { crumbsHtml, shell, clubConfig } from '../lib/web.js'
-import { tvStatusOf, tvLineOf } from '../web/nfl/scoreboard-core.js'
+import { tvLineOf } from '../web/nfl/scoreboard-core.js'
 import { loadTeams } from '../lib/teams.js'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
@@ -19,13 +19,18 @@ const event = (broadcasts, { state = 'pre', date = '2026-10-25T20:25:00Z' } = {}
 })
 const b = (name, type) => ({ media: { shortName: name }, type: { shortName: type } })
 
-test('football answers the TV question from ESPN\'s word for each broadcast', () => {
-	assert.equal(tvStatusOf(event([b('FOX', 'TV')])), 'yes')
-	assert.equal(tvStatusOf(event([b('Prime Video', 'Streaming'), b('KMSP', 'TV')])), 'yes')
-	assert.equal(tvStatusOf(event([b('Prime Video', 'Streaming')])), 'streaming')
-	assert.equal(tvStatusOf(event([b('WTMJ', 'Radio')])), 'no')
-	assert.equal(tvStatusOf(event([{ type: { shortName: 'TV' } }])), 'no', 'a broadcast without a name is nothing to watch')
-	assert.equal(tvStatusOf(null), 'no')
+test('football answers the TV question by the baseball page\'s rule', async () => {
+	// tv-core.js tvStatus, reached through tv-ui.js getTvStatus with the channel
+	// table, rather than a rule of football's own.
+	const main = read('web/nfl/main.js')
+	assert.ok(main.includes('const status = this.getTvStatus(tvGame);'))
+	assert.ok(main.includes('installTvUi(PackersTracker);'))
+	assert.equal(read('web/nfl/tv-core.js'), read('web/mlb/tv-core.js'), 'football\'s tv-core.js has drifted from baseball\'s')
+	globalThis.CLUB ??= { team: 'x', fullName: 'x', teamIds: [], copy: {}, site: {} }
+	const { tvStatus, EMPTY_LOOKUP } = await import('../web/nfl/tv-core.js')
+	assert.equal(tvStatus(EMPTY_LOOKUP, [b('FOX', 'TV')]), 'yes')
+	assert.equal(tvStatus(EMPTY_LOOKUP, [b('Prime Video', 'Streaming')]), 'streaming')
+	assert.equal(tvStatus(EMPTY_LOOKUP, [b('WTMJ', 'Radio')]), 'no')
 })
 
 test('the answer\'s second line says when and where', () => {
