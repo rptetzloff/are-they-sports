@@ -38,7 +38,7 @@ import { computeStandings, divisionPeers, playedSeasons } from './lib/standings.
 import { Lru, memo, mergeGames, versionOf } from './lib/derived.js';
 import { chartGeometry, coachEras, historyPoints } from './lib/history.js';
 import { codeTables, franchisesForClub, staleFranchises } from './lib/codes.js';
-import { availability, championships, close, connect, finalRounds, franchisesWithGames, gameCount, gamesFor, gamesSince, health, lastUpdated, lastUpdatedAll, leaderGames, leaderTenures, rawGamesFor, readSummary, standingsTitles, withClient, writeSummary } from './lib/store.js';
+import { availability, championships, close, connect, finalRounds, franchisesWithGames, gameCount, gamesFor, gamesSince, health, lastUpdated, lastUpdatedAll, leaderGames, leaderTenures, rawGamesFor, readSummary, simulcastsFor, standingsTitles, tvTables, withClient, writeSummary } from './lib/store.js';
 import { lockKeyFor, nextDelay, refreshLive, withLock } from './lib/live.js';
 import {
 	daysToNextGame, lastLosslessSeason, latestSeason, recordText, seasons, seasonTally, seasonVerdict,
@@ -775,7 +775,7 @@ function main() {
 					// darkest-colour rule puts the Bucks on black, and they are green.
 					palette: clubFor(entry).colors ?? colorsFor(namers[entry.sport], entry.code,
 						{ season: today.getFullYear(), date: today.toISOString().slice(0, 10) }, NEUTRAL),
-					store: { rawGamesFor, standingsTitles, finalRounds, leaderGames, leaderTenures },
+					store: { rawGamesFor, standingsTitles, finalRounds, leaderGames, leaderTenures, tvTables, simulcastsFor },
 					creditHtml: creditLine(creditsFor([adapters[entry.sport]])),
 					origin: originOf,
 				}).catch((e) => {

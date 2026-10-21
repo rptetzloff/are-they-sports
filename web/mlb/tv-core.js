@@ -146,10 +146,13 @@ export function providerChannel(lookup, providerKey, networkName, areaIndex = 0)
 	}
 	if (!raw) return null;
 	if (p.service_areas.length > 1 && raw.includes('|')) {
-		const parts = raw.split('|').map((s) => s.trim()).filter(Boolean);
+		// Empty places are kept: an area without the channel is an empty one
+		// (lib/tv.js channelLookupCsv), and dropping it read the next area's
+		// channel as this one's. Not carried there is null, not a neighbour's.
+		const parts = raw.split('|').map((s) => s.trim());
 		if (parts.length > 1) {
 			const i = Number.isInteger(areaIndex) && areaIndex >= 0 && areaIndex < parts.length ? areaIndex : 0;
-			return parts[i] || parts[0];
+			return parts[i] || null;
 		}
 	}
 	return raw;

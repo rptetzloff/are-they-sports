@@ -358,7 +358,7 @@ test('the calendar finds a simulcast on the club\'s own clock', async () => {
 	// runs Central, and a Central club passed here by falling back to it.
 	const { buildCalendar } = await import('../lib/calendar.js')
 	const { parseTvLookup } = await import('../web/mlb/tv-core.js')
-	const lookup = parseTvLookup(read('data/clubs/mlb/brewers/channel_lookup.csv'), read('data/clubs/mlb/brewers/provider_lookup.csv'))
+	const lookup = parseTvLookup(read('test/fixtures/brewers-tv/channel_lookup.csv'), read('test/fixtures/brewers-tv/provider_lookup.csv'))
 	const event = { id: '1', date: '2026-07-04T05:30Z', _t: 'regular', competitions: [{
 		status: { type: { name: 'STATUS_SCHEDULED' } }, broadcasts: [], competitors: [
 			{ homeAway: 'home', team: { abbreviation: 'MIL', shortDisplayName: 'Brewers' } },
