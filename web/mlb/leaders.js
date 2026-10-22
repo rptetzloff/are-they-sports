@@ -5,9 +5,11 @@
 // any sport's (SITE.leaderNoun). Who led each game arrives as leaders.csv —
 // teamstats' gid, team and mgr columns, built from game_leader — and the
 // official tenures as managers.csv, from the same rows (lib/web-routes.js).
-// No photos are on record here, so the photo column is gone.
+// No photos are on record here, so the photo column is gone. Where no game
+// names its coach (hockey's come as stated tenures), the rows are the
+// server's tally instead, data/coaches.json.
 import { parseGameinfoCsv, computeSeasonHistory, esc } from './records-core.js';
-import { parseBiofile, parseTeamstatsMgr, parseManagersCsv, computeCoachesFromData, coachesCopy } from './coaches-core.js';
+import { parseBiofile, parseTeamstatsMgr, parseManagersCsv, computeCoachesFromData, coachesFromJson, coachesCopy } from './coaches-core.js';
 import { labeledShareButtonsHtml, wireShareRow, wireShareDropdown } from './share-core.js';
 import { sortableHeadHtml, sortRows, wireSortable } from './sortable.js';
 import { SITE } from './site.js';
@@ -68,7 +70,17 @@ async function init() {
 		const mgrNames = parseBiofile(await biofileRes.text());
 		const officialTenures = parseManagersCsv(await managersRes.text());
 		const champions = computeSeasonHistory(rows).filter((s) => s.champion).map((s) => s.season);
-		const data = computeCoachesFromData(rows, gidToMgr, mgrNames, champions, officialTenures);
+		let data = computeCoachesFromData(rows, gidToMgr, mgrNames, champions, officialTenures);
+		if (!data.coaches.length) {
+			const res = await fetch('data/coaches.json');
+			if (res.ok) data = coachesFromJson(await res.json());
+			// Tenures by season, not by date: say so where the games' version
+			// says its stints are dated.
+			const note = document.querySelector('.history-legend-item');
+			if (note) note.textContent = '* interim · records are regular season, through last season; a coach changed in mid-season shares that season';
+		}
+		// Hockey's fourth column, said in the heading's title when it is there.
+		if (data.coaches.some((c) => c.otl)) MANAGER_COLUMNS[2].title = 'Win-Loss-Tie-Overtime loss';
 
 		// Nobody on record is a page that says so, not one that throws.
 		if (!data.coaches.length) {

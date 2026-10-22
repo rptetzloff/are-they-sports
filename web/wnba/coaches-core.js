@@ -311,3 +311,56 @@ export function computeCoachesFromData(rows, gidToMgr, mgrNames, championSeasons
 
 	return { coaches, bySlug: new Map(coaches.map((c) => [c.slug, c])) };
 }
+
+/** A tenure in the site's own season names: a season that spans two years
+ *  (SITE.seasonLabel) is "1999-2000" alone and "1967–1969" in a run, from
+ *  the year the first began to the year the last ended. */
+const tenureOf = (first, last) => {
+	if (!SITE.seasonLabel) return first === last ? String(first) : `${first}–${last}`;
+	return first === last ? SITE.seasonLabel(first) : `${first - 1}–${last}`;
+};
+
+/** A record with overtime losses, hockey's fourth column, when there are any. */
+export const recOtl = (w, l, t, otl) => (otl > 0 ? `${w}–${l}–${t}–${otl}` : rec(w, l, t));
+
+/** The server's tally (data/coaches.json, lib/web-routes.js coachesJson), for
+ *  a sport whose games do not say who coached them: hockey's coaches come as
+ *  stated tenures (data/reference/nhl-coaches.csv), so leaders.csv is empty
+ *  and computeCoachesFromData finds nobody. `coaches` is one row a person, in
+ *  the shape computeCoachesFromData gives; `eras` one a spell in charge, for
+ *  the history chart's bands, carrying its person's record for the tooltip. */
+export function coachesFromJson({ coaches = [], eras = [] } = {}) {
+	const rows = coaches.map((l) => {
+		const otl = l.otl ?? 0;
+		const games = l.w + l.l + l.t + otl;
+		const playoffGames = (l.playoffW ?? 0) + (l.playoffL ?? 0);
+		return {
+			name: l.name, slug: slugifyCoach(l.name), leader: l.leader,
+			interim: Boolean(l.interim),
+			image: null, imagePage: null,
+			firstSeason: l.firstSeason, lastSeason: l.lastSeason,
+			tenure: tenureOf(l.firstSeason, l.lastSeason),
+			games,
+			wins: l.w, losses: l.l, ties: l.t, otl,
+			record: recOtl(l.w, l.l, l.t, otl),
+			winPct: games ? (l.w + l.t / 2) / games : 0,
+			playoffGames,
+			playoffRecord: playoffGames ? rec(l.playoffW ?? 0, l.playoffL ?? 0, 0) : null,
+			titles: (l.titles ?? []).length,
+		};
+	});
+	const byLeader = new Map(rows.map((r) => [r.leader, r]));
+	const seen = new Map();
+	const spells = eras.map((e) => {
+		const person = byLeader.get(e.leader) ?? { name: e.name, record: '', winPct: 0, titles: 0, playoffRecord: null };
+		const base = slugifyCoach(e.name);
+		const n = (seen.get(base) || 0) + 1;
+		seen.set(base, n);
+		// Seasons, not dates: the chart takes either, and a stated tenure has
+		// only its seasons. Half a season either side, so a one-season spell is
+		// a band and not a line.
+		return { ...person, slug: n > 1 ? `${base}-${n}` : base, fromDate: e.from - 0.5, toDate: e.to + 0.5,
+			tenure: tenureOf(e.from, e.to) };
+	});
+	return { coaches: rows, eras: spells };
+}

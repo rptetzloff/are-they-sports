@@ -10,7 +10,7 @@
 // from game_leader (lib/web-routes.js). The ballpark milestones are gone: no
 // park is on record here.
 import { parseGameinfoCsv, computeSeasonHistory, historyCopy, esc, championships } from './records-core.js';
-import { parseBiofile, parseTeamstatsMgr, parseManagersCsv, computeCoachesFromData } from './coaches-core.js';
+import { parseBiofile, parseTeamstatsMgr, parseManagersCsv, computeCoachesFromData, coachesFromJson } from './coaches-core.js';
 import { buildChartSvg, METRICS, POSTSEASON, postseasonTier } from './history-chart.js';
 import { labeledShareButtonsHtml, wireShareRow, wireShareDropdown } from './share-core.js';
 import { sortableHeadHtml, sortRows, wireSortable } from './sortable.js';
@@ -213,7 +213,18 @@ async function init() {
 		const officialTenures = parseManagersCsv(await managersRes.text());
 		const { coaches } = computeCoachesFromData(rows, gidToMgr, mgrNames, champions, officialTenures);
 		// History timeline: official leaders only — interim stints are hidden.
-		const officialCoaches = coaches.filter((c) => !c.interim);
+		let officialCoaches = coaches.filter((c) => !c.interim);
+		// No game names its coach (hockey's are stated tenures): the server's
+		// tally, a band a spell in charge, and the count is of people.
+		let leaderCount = officialCoaches.length;
+		if (!coaches.length) {
+			const res = await fetch('data/coaches.json').catch(() => null);
+			if (res?.ok) {
+				const fromJson = coachesFromJson(await res.json());
+				officialCoaches = fromJson.eras;
+				leaderCount = fromJson.coaches.filter((c) => !c.interim).length;
+			}
+		}
 
 		const titles = histories.regular.filter((s) => s.champion).length;
 		const first = histories.regular[0].season;
@@ -222,7 +233,7 @@ async function init() {
 		const range = first === last ? seasonName(first) : `${seasonName(first)}${SITE.seasonLabel ? ' to ' : '–'}${seasonName(last)}`;
 		document.getElementById('history-subtitle').textContent = [
 			SITE.fullName, range, championships(titles),
-			officialCoaches.length ? `${officialCoaches.length} ${SITE.leaderPlural}` : null,
+			leaderCount ? `${leaderCount} ${SITE.leaderPlural}` : null,
 		].filter(Boolean).join(' · ');
 
 		let metrics;

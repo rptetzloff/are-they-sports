@@ -683,6 +683,10 @@ async function gameLogDir(client, sportId, sport) {
  */
 async function loadLeaders(client, sportId, sport, { byCode }) {
 	if (!sport.leaderRows) {
+		// No game names its coach in this sport's sources; the curated table
+		// (data/reference/<sport>-coaches.csv) is the whole of it.
+		const { rows } = await client.query('SELECT id FROM franchise WHERE sport = $1', [sportId]);
+		if (loadCoachesFile(sportId).length) return loadTenures(client, sportId, new Set(rows.map((r) => r.id)));
 		console.log(`  leaders      none: sports/${sportId}.js has no leaders source yet`);
 		return;
 	}
@@ -867,8 +871,13 @@ async function loadLeaders(client, sportId, sport, { byCode }) {
  *  lost is the pre-1999 half of the page and the Mora disambiguation. Both are
  *  reported by the load rather than assumed.
  */
-function loadNflCoaches() {
-	const path = join(REFERENCE_DIR, 'nfl-coaches.csv');
+function loadNflCoaches() { return loadCoachesFile('nfl'); }
+
+/** A sport's curated coaches table (data/reference/<sport>-coaches.csv), or []
+ *  when it has none. Football's is nfl-coaches.csv; hockey's and the rest come
+ *  from Wikipedia's lists by scripts/wiki-coaches.mjs. */
+function loadCoachesFile(sportId) {
+	const path = join(REFERENCE_DIR, `${sportId}-coaches.csv`);
 	if (!existsSync(path)) return [];
 	return parseCsv(readFileSync(path, 'utf8')).map((r) => ({
 		leaderId: r.leaderId,
@@ -884,7 +893,7 @@ function loadNflCoaches() {
 		// into the counted era. Loading `lastSeason` here instead would make a
 		// stated tenure overlap the games it was subtracted from.
 		statedLastSeason: Number(r.statedLastSeason || r.lastSeason),
-		w: Number(r.w || 0), l: Number(r.l || 0), t: Number(r.t || 0),
+		w: Number(r.w || 0), l: Number(r.l || 0), t: Number(r.t || 0), otl: Number(r.otl || 0),
 		playoffW: Number(r.playoffW || 0), playoffL: Number(r.playoffL || 0),
 		// A space-separated season list, counted from games rather than stated.
 		// Empty is the common case and must not become an array holding one NaN.
@@ -906,32 +915,36 @@ function loadNflCoaches() {
  *  with them, which is safe exactly because the eras do not overlap — and that
  *  is asserted in test/leaders.test.js rather than trusted here.
  */
-async function loadNflTenures(client, knownFranchises) {
-	const rows = loadNflCoaches().filter((r) => r.stated);
+async function loadNflTenures(client, knownFranchises) { return loadTenures(client, 'nfl', knownFranchises); }
+
+/** Stated tenures from a sport's curated table: football's before 1999, and
+ *  the whole of hockey's (0020 adds its overtime losses). */
+async function loadTenures(client, sportId, knownFranchises) {
+	const rows = loadCoachesFile(sportId).filter((r) => r.stated);
 	if (!rows.length) {
-		console.log('  tenures      none — data/reference/nfl-coaches.csv is missing or has no counts');
-		console.log('               football before 1999 will be absent from the leaders page');
+		console.log(`  tenures      none — data/reference/${sportId}-coaches.csv is missing or has no counts`);
+		if (sportId === 'nfl') console.log('               football before 1999 will be absent from the leaders page');
 		return;
 	}
 	let wrote = 0, skippedClub = 0;
 	for (const r of rows) {
 		if (!knownFranchises.has(r.franchiseAbbrv)) { skippedClub++; continue; }
 		await client.query(
-			`INSERT INTO leader (sport, id, name, source) VALUES ('nfl',$1,$2,'wikipedia')
-			 ON CONFLICT (sport, id) DO NOTHING`, [r.leaderId, r.name]);
+			`INSERT INTO leader (sport, id, name, source) VALUES ($1,$2,$3,'wikipedia')
+			 ON CONFLICT (sport, id) DO NOTHING`, [sportId, r.leaderId, r.name]);
 		const res = await client.query(
 			`INSERT INTO leader_tenure
-			   (sport, franchise, leader, first_season, last_season, w, l, t, playoff_w, playoff_l, title_seasons, interim, source)
-			 VALUES ('nfl',$1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,'wikipedia')
+			   (sport, franchise, leader, first_season, last_season, w, l, t, otl, playoff_w, playoff_l, title_seasons, interim, source)
+			 VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,'wikipedia')
 			 ON CONFLICT (sport, franchise, leader, first_season) DO UPDATE SET
-			   last_season = EXCLUDED.last_season, w = EXCLUDED.w, l = EXCLUDED.l, t = EXCLUDED.t,
+			   last_season = EXCLUDED.last_season, w = EXCLUDED.w, l = EXCLUDED.l, t = EXCLUDED.t, otl = EXCLUDED.otl,
 			   playoff_w = EXCLUDED.playoff_w, playoff_l = EXCLUDED.playoff_l,
 			   title_seasons = EXCLUDED.title_seasons, interim = EXCLUDED.interim`,
-			[r.franchiseAbbrv, r.leaderId, r.firstSeason, r.statedLastSeason,
-				r.w, r.l, r.t, r.playoffW, r.playoffL, r.titleSeasons, r.interim]);
+			[sportId, r.franchiseAbbrv, r.leaderId, r.firstSeason, r.statedLastSeason,
+				r.w, r.l, r.t, r.otl, r.playoffW, r.playoffL, r.titleSeasons, r.interim]);
 		wrote += res.rowCount;
 	}
-	console.log(`  tenures      ${wrote} stated tenures (NFL before 1999)`);
+	console.log(`  tenures      ${wrote} stated tenures${sportId === 'nfl' ? ' (NFL before 1999)' : ''}`);
 	if (skippedClub) console.log(`  unknown club ${skippedClub} tenures name a franchise with no games`);
 }
 
