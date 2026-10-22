@@ -294,7 +294,9 @@ test('one league on its own names its season once', () => {
 		standings: standingsFor(2025, [LINE]), label: 'NFL', seasons: [2024, 2025],
 		heading: 'Every NFL club', colors: COLORS, clubs: [],
 	})
-	assert.ok(html.includes('<h1>Every NFL club 2025</h1>'))
+	// The heading names the page (Ray, 2026-10-21: league pages in the format of
+	// the rest): "NFL standings 2025" where the server passes the league.
+	assert.ok(html.includes('<h1>Every NFL club standings 2025</h1>'))
 	assert.ok(!html.includes('NFL 2025<'), 'a lone league repeats its own label')
 })
 
@@ -626,4 +628,26 @@ test('the standings nav is named too, so every stepper reads alike', () => {
 		heading: 'Every NFL club', colors: COLORS, clubs: [],
 	})
 	assert.ok(html.includes('<span class="nav-label">Season</span>'), 'the standings nav is not named')
+})
+
+test('a league page drawn by the server has the fixed footer, its own page marked, and no old navigation', async () => {
+	const { siteFooterHtml } = await import('../lib/render.js')
+	const clubs = [
+		{ sport: 'nhl', teamId: 'wild', name: 'Minnesota Wild', href: '/nhl/wild/' },
+		{ sport: 'nfl', teamId: 'packers', name: 'Green Bay Packers', href: '/nfl/packers/' },
+	]
+	const footer = siteFooterHtml({ sport: 'nhl', current: 'standings', clubs, share: { url: 'https://x/nhl/standings', links: [{ href: 'https://x.example/share', icon: 'twitter', label: 'Post on X' }] } })
+	const html = standingsPage({ standings: standingsFor(2025, [LINE]), label: 'NHL', seasons: [2025], heading: 'NHL', colors: COLORS, clubs: [], footer })
+	assert.ok(html.includes('<h1>NHL standings 2025</h1>'))
+	assert.match(html, /<footer class="site-footer">/)
+	assert.match(html, /<a href="\/nhl\/standings" class="footer-nav-link" aria-current="page">/)
+	for (const href of ['/', '/nhl/', '/nhl/schedule', '/nhl/champions', '/nhl/records']) assert.ok(hrefs(html).includes(href), `no ${href}`)
+	assert.ok(html.includes('footer-club-menu'), 'no team menu')
+	assert.ok(html.includes('data-copy="https://x/nhl/standings"'), 'no copy link')
+	assert.ok(!html.includes('class="site-nav league-nav"'), 'the old league nav is still drawn')
+	assert.ok(!html.includes('class="switcher"'), 'the old club switcher is still drawn')
+	assert.match(html, /\.site-footer \{\s*position: sticky;/)
+	assert.match(html, /--accent-rgb: \d+ \d+ \d+;/)
+	// Every sport at once: no league's scores page to link.
+	assert.ok(!siteFooterHtml({ current: 'standings' }).includes('Scores'))
 })
