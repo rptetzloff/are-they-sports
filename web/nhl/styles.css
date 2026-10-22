@@ -3834,9 +3834,6 @@ details:not([open]) > .collapsible-summary::before {
     .coaches-table .coach-photo-cell {
         display: none;
     }
-    .coaches-table thead th:first-child {
-        display: none;
-    }
 }
 
 /* ── Watch modal ──────────────────────────────────────────────── */
