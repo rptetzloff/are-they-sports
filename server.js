@@ -46,14 +46,14 @@ import {
 } from './lib/core.js';
 import {
 	ALL_TIME_COLUMNS, CHAMPION_COLUMNS, championsPage, historyColumns, standingsColumns,
-	NEUTRAL, clubPage, clubSwitcher, noticePage, onThisDayPanel, questionFor, sharePanel, standingsModal, headToHeadPage, historyPage, leadersPage, leagueNav, leagueRecordsPage, leagueSchedulePage, sportTabs, missingSeasonPage, opponentPage, recordsPage, standingsPage,
+	NEUTRAL, siteFooterHtml, clubPage, clubSwitcher, noticePage, onThisDayPanel, questionFor, sharePanel, standingsModal, headToHeadPage, historyPage, leadersPage, leagueNav, leagueRecordsPage, leagueSchedulePage, sportTabs, missingSeasonPage, opponentPage, recordsPage, standingsPage,
 	RECORD_SLUGS, recordCopy, h2hColumns,
 	scheduleHtml, seasonNav, selectorPage, siteNav, sparklineHtml, creditLine,
 } from './lib/render.js';
 import { colorsFor, currentFranchises, displayName, loadHistory, resolver } from './lib/names.js';
 import { hasFrontEnd } from './lib/web.js';
 import { createFront } from './lib/web-routes.js';
-import { SPORTS, loadSports, loadTeams } from './lib/teams.js';
+import { LEAGUE_ABBR, SPORTS, loadSports, loadTeams } from './lib/teams.js';
 import { creditsFor } from './lib/credits.js';
 import { describe, titleOf, withMeta } from './lib/meta.js';
 import { cardSvg, fontsPresent, renderCard } from './lib/card.js';
@@ -833,6 +833,15 @@ function main() {
 		});
 		if (!process.env.ADMIN_PASSWORD) console.log('  admin        ADMIN_PASSWORD is not set: /admin signs nobody in');
 
+		// The fixed footer on the league pages the server draws (render.js
+		// siteFooterHtml), with the team menu's clubs and this page's share links.
+		const footerFor = (req2, url2, { sport = null, current, title }) => siteFooterHtml({
+			sport, current, clubs: frontClubs,
+			share: { url: `${originOf(req2)}${url2.pathname}${url2.search}`, links: shareLinks({ url: `${originOf(req2)}${url2.pathname}${url2.search}`, title }) },
+		});
+		// A league's page is named for its league (NHL), the scope's for the scope.
+		const leagueHeading = (sport) => (sport ? LEAGUE_ABBR[sport] ?? sport.toUpperCase() : scopeHeading(scope, table));
+
 		const server = createServer(async (req, res) => {
 			// Before anything reads `available`, including /healthz and the
 			// selector.
@@ -953,7 +962,7 @@ function main() {
 					heading: scopeHeading(scope, table),
 					// The root is where anyone lands, and the league pages were
 					// reachable only by typing their paths.
-					nav: leagueNav('clubs'),
+					footer: footerFor(req, url, { current: 'clubs', title: scopeHeading(scope, table) }),
 					// Each league's heading opens its page (/nfl/), where it has a front end.
 					leagueHref: (sport) => (hasFrontEnd(sport) ? `/${sport}/` : null),
 				}));
@@ -1019,6 +1028,7 @@ function main() {
 					colors: NEUTRAL,
 					clubs: clubList(),
 					tabs: sportTabs(inScopeSports, leagueRoute.sport, 'champions'),
+					footer: footerFor(req, url, { sport: leagueRoute.sport, current: 'champions', title: `${leagueHeading(leagueRoute.sport)} champions` }),
 					sort: parseSort(url.searchParams, CHAMPION_COLUMNS, null),
 					path: url.pathname,
 					params: url.searchParams,
@@ -1081,12 +1091,12 @@ function main() {
 					season: leagueRoute.season ? Number(leagueRoute.season) : null,
 					label: firstSport.label,
 					more: otherSports,
-					heading: scopeHeading(scope, table),
+					heading: leagueHeading(leagueRoute.sport),
 					colors: NEUTRAL,
 					clubs: clubList(),
 					base: leagueRoute.sport ? `/${leagueRoute.sport}` : '',
 					tabs: sportTabs(inScopeSports, leagueRoute.sport, 'standings'),
-					switcher: clubSwitcher(clubList(), null, ''),
+					footer: footerFor(req, url, { sport: leagueRoute.sport, current: 'standings', title: `${leagueHeading(leagueRoute.sport)} standings` }),
 				}));
 			}
 
@@ -1175,7 +1185,7 @@ function main() {
 				}
 				return html(res, 200, leagueSchedulePage({
 					schedule,
-					heading: scopeHeading(scope, table),
+					heading: leagueHeading(leagueRoute.sport),
 					colors: NEUTRAL,
 					resolve: firstSport.resolve,
 					clubs: clubList(),
@@ -1183,6 +1193,7 @@ function main() {
 					label: firstSport.label,
 					more: otherSports,
 					tabs: sportTabs(inScopeSports, leagueRoute.sport, 'schedule'),
+					footer: footerFor(req, url, { sport: leagueRoute.sport, current: 'schedule', title: `${leagueHeading(leagueRoute.sport)} schedule` }),
 					// The season nav builds its links from this. Left empty, a
 					// sport-qualified page linked back to the unqualified one and
 					// silently dropped the sport on every season change.
@@ -1281,12 +1292,13 @@ function main() {
 					params: url.searchParams,
 					league,
 					resolve: first.resolve,
-					heading: scopeHeading(scope, table),
+					heading: leagueHeading(leagueRoute.sport),
 					colors: NEUTRAL,
 					clubs: clubList(),
 					more: rest,
 					label,
 					tabs: sportTabs(inScopeSports, leagueRoute.sport, 'records'),
+					footer: footerFor(req, url, { sport: leagueRoute.sport, current: 'records', title: `${leagueHeading(leagueRoute.sport)} records` }),
 					// The first BLOCK's namer, not the first club's. Under a
 					// mixed scope those differ, and every block carries its own.
 					resolve: first.resolve,
