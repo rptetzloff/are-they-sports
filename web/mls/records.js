@@ -46,10 +46,13 @@ const pitcherEraEntry = (s) => ({
 	sub: s.player,
 	detailHtml: `${yearLink(s.season)} · ${esc(s.ip)} innings · ${s.gs} starts`,
 });
+// ".938", and "1.000" for a perfect one, which padding the thousandths
+// printed as ".1000".
+const pct3 = (p) => p.toFixed(3).replace(/^0/, '');
 const seasonEntry = (s) => ({
 	main: s.record,
 	subHtml: yearLink(s.season),
-	detailHtml: `.${String(Math.round(s.winPct * 1000)).padStart(3, '0')} ${pctWord}`,
+	detailHtml: `${pct3(s.winPct)} ${pctWord}`,
 });
 
 // Card order pairs related records side by side in the two-column grid.
@@ -60,6 +63,28 @@ const streakEntries = (list) => (list || []).map((s) => ({
 		: `${yearLink(s.startSeason)}–${yearLink(s.endSeason)}`,
 	detailHtml: `${gameLink(s.startSeason, s.startGid, esc(formatDate(s.startDate)))} – ${gameLink(s.endSeason, s.endGid, esc(formatDate(s.endDate)))}`,
 }));
+
+/** Each finished postseason's record, best first: winning percentage, then
+ *  more wins, then the earlier year. A postseason with a series still being
+ *  played is left out, as a season being played is left out of Best Seasons.
+ *  `reached` is how it ended: the title, or the last series and its result. */
+export function bestPlayoffRuns(appearances = [], top = 5) {
+	return appearances
+		.filter((a) => a.series.length && a.series.every((s) => s.result === 'Won' || s.result === 'Lost'))
+		.map((a) => {
+			const w = a.series.reduce((n, s) => n + s.wins, 0);
+			const l = a.series.reduce((n, s) => n + s.losses, 0);
+			const last = a.series.at(-1);
+			const champion = last.round === 'W' && last.result === 'Won';
+			return {
+				season: a.season, wins: w, losses: l, record: `${w}–${l}`,
+				winPct: w + l ? w / (w + l) : 0,
+				reached: champion ? `Won the ${SITE.championship}` : `${last.result} ${last.roundLabel}`,
+			};
+		})
+		.sort((a, b) => b.winPct - a.winPct || b.wins - a.wins || a.season - b.season)
+		.slice(0, top);
+}
 
 const CARDS = [
 	{
@@ -182,6 +207,16 @@ const CARDS = [
 		entries: (d) => d.playoffAppearances.map((p) => ({
 			main: seasonName(p.season),
 			subHtml: p.series.map((s) => gameLink(s.season, s.firstGid, `${esc(s.result)} ${esc(s.roundLabel)} vs ${esc(s.opponent)} (${esc(s.record)})`)).join('<br>'),
+		})),
+		empty: SITE.copy.noPlayoffs,
+	},
+	{
+		slug: 'best-playoff-runs', icon: 'mdi-chart-line-variant', title: 'Best Playoff Runs',
+		note: `${T} postseasons by winning percentage, then wins`,
+		entries: (d) => bestPlayoffRuns(d.playoffAppearances).map((r) => ({
+			main: r.record,
+			subHtml: yearLink(r.season),
+			detailHtml: `${pct3(r.winPct)} · ${esc(r.reached)}`,
 		})),
 		empty: SITE.copy.noPlayoffs,
 	},
