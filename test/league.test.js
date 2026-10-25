@@ -273,3 +273,24 @@ test('the tie count says how many there are, not just how many are shown', () =>
 	assert.equal(l.ties.length, 10)
 	assert.equal(l.tiesTotal, 30)
 })
+
+test('best playoff runs rank postseasons where the playoffs are series, and nowhere else', () => {
+	const hockey = (id, team) => ({ ...club(id, team), sport: 'nhl' })
+	const playoffs = (year, pattern, final = false) => season(year, pattern, { regular_season: '0', playoff: '1', championship: final ? 'X' : '' })
+		.map((g, i) => ({ ...g, date: `${year}-05-${String(i + 1).padStart(2, '0')}`, gid: `${year}-p${i}` }))
+	const pens = [...season(1992, 'WWL'), ...playoffs(1992, 'WWWWL'), ...playoffs(1992, 'WWWW', true)]
+	const wings = [...season(1952, 'WLW'), ...playoffs(1952, 'WWWW'), ...playoffs(1952, 'WWWW', true)]
+	const caps = [...season(1990, 'LLW'), ...playoffs(1990, 'WWLLL')]
+	const l = computeLeague([
+		{ team: hockey('PIT', 'Penguins'), rows: pens },
+		{ team: hockey('DET', 'Red Wings'), rows: wings },
+		{ team: hockey('WSH', 'Capitals'), rows: caps },
+	])
+	// By winning percentage, then wins: 8-0, then 8-1, then 2-3.
+	assert.deepEqual(l.bestPlayoffRuns.map((r) => [r.club, r.season, r.record, r.won]),
+		[['Red Wings', 1952, '8–0', true], ['Penguins', 1992, '8–1', true], ['Capitals', 1990, '2–3', false]])
+
+	// Football's postseason is single games: no card.
+	const gb = [...season(1966, 'WWW'), ...playoffs(1966, 'WW', true)]
+	assert.deepEqual(computeLeague([{ team: club('GB', 'Packers'), rows: gb }]).bestPlayoffRuns, [])
+})

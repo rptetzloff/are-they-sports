@@ -46,7 +46,7 @@ export const SITE = {
 	records: [
 		'best-seasons', 'worst-seasons', 'best-starts', 'worst-starts',
 		'win-streaks', 'losing-streaks', 'lopsided-wins', 'worst-losses',
-		'playoff-appearances', 'world-series-appearances',
+		'playoff-appearances', 'best-playoff-runs', 'world-series-appearances',
 	],
 
 	/** A season's name: the WNBA plays from May to October, so a season is the

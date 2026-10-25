@@ -162,6 +162,7 @@ export const SITE = {
 		'player-rbi-game',
 		'cycles',
 		'playoff-appearances',
+		'best-playoff-runs',
 		'world-series-appearances',
 		'player-error-game',
 		'team-error-game',

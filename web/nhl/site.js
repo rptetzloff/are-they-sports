@@ -60,7 +60,7 @@ export const SITE = {
 	records: [
 		'best-seasons', 'worst-seasons', 'best-starts', 'worst-starts',
 		'win-streaks', 'losing-streaks', 'lopsided-wins', 'worst-losses',
-		'playoff-appearances', 'world-series-appearances', 'ties',
+		'playoff-appearances', 'best-playoff-runs', 'world-series-appearances', 'ties',
 	],
 
 	/** A season's name. Hockey's run across New Year and every source counts
