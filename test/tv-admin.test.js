@@ -5,6 +5,7 @@ import pg from 'pg'
 import {
 	readForm, rateLimiter, passwordMatches, sessionValue, hasSession, sameOrigin, readSubmission,
 	providerIdFor, applyChannel, decideWithin, insertSubmission, submitPage, adminPage, createTvAdmin,
+	readLineup, insertLineupWithin, decideLineupWithin, lineupPage, LINEUP_NEW_ROWS,
 } from '../lib/tv-admin.js'
 
 // Submitting channels, and approving them (Ray, 2026-10-21): anyone submits
@@ -170,4 +171,75 @@ test('a club\'s address answers with its colours and its page to go back to', as
 	assert.equal(status, 200)
 	assert.match(body, /--accent: #ffb612/)
 	assert.match(body, /action="\/nfl\/packers\/tv\/submit"/)
+})
+
+// Ray, 2026-10-26: "the suggest a provider/channel feature needs to have the
+// ability to suggest an entire provider's lineup".
+test('a lineup is the provider and area once, and a channel for each network given', () => {
+	const got = readLineup({ provider: 'amherst', area: 'Portage', ch_1: '11 (WZAW)', ch_3: '400', new_name_0: 'Bally North', new_kind_0: 'regional', new_ch_0: '312', note: 'from the guide' }, TV)
+	assert.equal(got.errors, undefined)
+	// Brewers.TV (id 3) is a club's own, not on everyone's form: its box is ignored.
+	assert.deepEqual(got.value.map((r) => [r.providerId, r.areaName, r.networkId, r.networkName, r.networkKind, r.channel]), [
+		['amherst', 'Portage', 1, null, null, '11 (WZAW)'],
+		['amherst', 'Portage', null, 'Bally North', 'regional', '312'],
+	])
+	assert.ok(got.value.every((r) => r.note === 'from the guide'))
+	assert.deepEqual(readLineup({ provider: 'amherst' }, TV).errors, ['Give at least one channel.'])
+	assert.deepEqual(readLineup({ provider: 'amherst', new_name_0: 'Half' }, TV).errors, ['A network not listed needs both its name and its channel.'])
+	assert.deepEqual(readLineup({ ch_1: '11' }, TV).errors, ['Name the provider.'])
+})
+
+test('the lineup form lists everyone\'s networks, rows for others, and links to one channel', () => {
+	const html = lineupPage(TV, { action: '/nba/bucks/tv/lineup', values: { ch_1: '11 <b>' } })
+	assert.match(html, /name="ch_1" maxlength="60" value="11 &lt;b&gt;"/)
+	assert.ok(!html.includes('name="ch_3"'), 'a club\'s own network is not on everyone\'s form')
+	assert.equal((html.match(/name="new_name_\d"/g) ?? []).length, LINEUP_NEW_ROWS)
+	assert.match(html, /href="\/nba\/bucks\/tv\/submit"/)
+	assert.match(submitPage(TV, { action: '/nba/bucks/tv/submit' }), /href="\/nba\/bucks\/tv\/lineup"/)
+})
+
+test('a lineup waits as one card', () => {
+	const at = new Date().toISOString()
+	const pending = [
+		{ id: 7, batch: 7, created_at: at, provider_id: 'amherst', area_name: 'Portage', network_id: 1, network_display: 'FOX', channel: '11' },
+		{ id: 8, batch: 7, created_at: at, provider_id: 'amherst', area_name: 'Portage', network_id: null, network_name: 'Bally North', network_kind: 'regional', channel: '312' },
+		{ id: 9, batch: null, created_at: at, provider_id: 'directv', network_id: 1, network_display: 'FOX', channel: '11' },
+	]
+	const html = adminPage(TV, { pending, recent: [] })
+	assert.match(html, /Waiting \(2\)/)
+	assert.match(html, /action="\/admin\/lineups\/7"/)
+	assert.match(html, /name="take_8" checked/)
+	assert.match(html, /name="channel_8" maxlength="60" value="312"/)
+	assert.match(html, /action="\/admin\/submissions\/9"/)
+})
+
+test('approving a lineup applies the kept channels and rejects the rest', { skip: !DATABASE_URL && 'no DATABASE_URL — applying is not covered' }, async () => {
+	const c = new pg.Client({ connectionString: DATABASE_URL })
+	await c.connect()
+	try {
+		await c.query('BEGIN')
+		const fox = (await c.query("SELECT id FROM tv_network WHERE key = 'FOX' AND club IS NULL")).rows[0].id
+		const abc = (await c.query("SELECT id FROM tv_network WHERE key = 'ABC' AND club IS NULL")).rows[0].id
+		const base = { providerId: null, providerName: 'Test Lineup Co', providerUrl: null, areaName: 'North', note: null, contact: null }
+		const batch = await insertLineupWithin(c, [
+			{ ...base, networkId: fox, networkName: null, networkKind: null, channel: '11' },
+			{ ...base, networkId: abc, networkName: null, networkKind: null, channel: '7' },
+			{ ...base, networkId: null, networkName: 'Test Sports Lineup', networkKind: 'regional', channel: '312' },
+		], 'h')
+		const ids = (await c.query('SELECT id FROM tv_submission WHERE batch = $1 ORDER BY id', [batch])).rows.map((r) => r.id)
+		assert.equal(ids.length, 3)
+		assert.equal(ids[0], batch, 'the batch is its first channel\'s id')
+		const done = await decideLineupWithin(c, batch, {
+			action: 'approve', providerArea: base,
+			rows: { [ids[0]]: { take: true, channel: '11 / 1011' }, [ids[1]]: { take: false }, [ids[2]]: { take: true } },
+		})
+		assert.deepEqual(done, { action: 'approve', approved: 2, rejected: 1 })
+		const set = (await c.query(`SELECT n.key, ch.channel FROM tv_channel ch JOIN tv_network n ON n.id = ch.network_id
+			WHERE ch.provider_id = 'test_lineup_co' ORDER BY n.key`)).rows
+		assert.deepEqual(set.map((r) => [r.key, r.channel]), [['FOX', '11 / 1011'], ['Test Sports Lineup', '312']])
+		assert.equal(await decideLineupWithin(c, batch, { action: 'reject' }), null, 'decided twice')
+	} finally {
+		await c.query('ROLLBACK').catch(() => {})
+		await c.end()
+	}
 })
