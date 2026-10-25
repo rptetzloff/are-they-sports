@@ -1090,7 +1090,9 @@ markActiveMonth() {
       const upcoming = state === 'next' || state === 'upcoming';
       const tv = upcoming ? this.scheduleBroadcasts(event).map((b) => {
         const num = this.scheduleChannelNumber(b);
-        return `${b.media.shortName}${num ? ` ${num}` : ''}`;
+        // The network's own name where the tables know it: ESPN's 'MyMi' is
+        // MyMilwaukee24.
+        return `${this.resolveChannel(b.media.shortName)?.display_name || b.media.shortName}${num ? ` ${num}` : ''}`;
       }) : [];
       const canWatch = upcoming && !isPastSeason && this.broadcastsFor(event).some((b) => b.media?.shortName);
       const clickable = state === 'win' || state === 'loss' || state === 'tie' || state === 'live' || canWatch;
@@ -1218,7 +1220,7 @@ if ((scheduleBroadcasts.length || canWatch) && !gameIsCompleted) {
  if (isLive || isInProgress) html += `<span class="live-indicator-small"></span>`;
  if (scheduleBroadcasts.length) {
    html += scheduleBroadcasts.map(b => {
-     const name = b.media.shortName;
+     const name = this.resolveChannel(b.media.shortName)?.display_name || b.media.shortName;
      const num = this.scheduleChannelNumber(b);
      return `<span class="game-network">${name}${num ? ` <span class="game-channum">Ch. ${num}</span>` : ''}</span>`;
    }).join('<span class="game-network-sep"> · </span>');
