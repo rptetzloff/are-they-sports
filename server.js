@@ -39,7 +39,7 @@ import { Lru, memo, mergeGames, versionOf } from './lib/derived.js';
 import { chartGeometry, coachEras, historyPoints } from './lib/history.js';
 import { codeTables, franchisesForClub, staleFranchises } from './lib/codes.js';
 import { availability, championships, close, connect, finalRounds, franchisesWithGames, gameCount, gamesFor, gamesSince, health, lastUpdated, lastUpdatedAll, leaderGames, leaderTenures, rawGamesFor, readSummary, simulcastsFor, standingsTitles, tvTables, withClient, writeSummary } from './lib/store.js';
-import { lockKeyFor, nextDelay, refreshLive, withLock } from './lib/live.js';
+import { lockKeyFor, nextDelay, refreshLive, startLiveLoops, withLock } from './lib/live.js';
 import {
 	daysToNextGame, lastLosslessSeason, latestSeason, recordText, seasons, seasonTally, seasonVerdict,
 	seasonWinPct, seriesRecords, streakBanner, verdictText,
@@ -680,46 +680,33 @@ function main() {
 		const liveSports = [...new Set(resolved.map((e) => e.sport))]
 			.filter((id) => adapters[id]?.sources?.live);
 		if (liveEvery > 0 && liveSports.length && dbHealth.ok) {
-			const tick = async () => {
-				for (const id of liveSports) {
-					try {
-						await withClient((client) => withLock(client, lockKeyFor(id), async () => {
-							const r = await refreshLive(client, id, adapters[id]);
-							if (r.written) console.log(`  live         ${id} ${r.season}: ${r.written} rows`);
-							for (const f of r.failed ?? []) console.error(`  live         ${id} ${f}`);
-							return r;
-						}));
-					} catch (e) {
-						// A refresh that fails must not take the server with it.
-						// The pages keep serving whatever the database holds.
-						console.error(`  live         ${id} refresh failed: ${e.message}`);
-					}
+			const tick = async (id) => {
+				try {
+					await withClient((client) => withLock(client, lockKeyFor(id), async () => {
+						const r = await refreshLive(client, id, adapters[id]);
+						if (r.written) console.log(`  live         ${id} ${r.season}: ${r.written} rows`);
+						for (const f of r.failed ?? []) console.error(`  live         ${id} ${f}`);
+						return r;
+					}));
+				} catch (e) {
+					// A refresh that fails must not take the server with it.
+					// The pages keep serving whatever the database holds.
+					console.error(`  live         ${id} refresh failed: ${e.message}`);
 				}
 			};
 			// Self-scheduling rather than a fixed interval, because how often this
 			// is worth doing depends on whether anything is being played. A
 			// season is six months of the year and a game day a few hours of it;
 			// polling every two minutes in February is nine requests to learn
-			// nothing. `liveEvery` is the LIVE rate — the others are derived.
-			let timer = null;
-			const schedule = (ms, why) => {
-				timer = setTimeout(loop, ms);
-				// Never hold the process open: a container should stop when told
-				// to, not wait out the interval.
-				timer.unref();
-				return why;
-			};
-			const loop = async () => {
-				await tick();
-				try {
-					const next = await withClient((client) => nextDelay(client, liveSports[0], { live: liveEvery }));
-					schedule(next.ms, next.why);
-				} catch {
-					schedule(liveEvery, 'could not read the schedule');
-				}
-			};
-			console.log(`  live         refreshing ${liveSports.join(', ')}, ${Math.round(liveEvery / 1000)}s while games are on`);
-			loop();
+			// nothing. `liveEvery` is the LIVE rate — the others are derived. Each
+			// sport on its own schedule (lib/live.js startLiveLoops).
+			startLiveLoops({
+				sports: liveSports,
+				tick,
+				delayFor: (id) => withClient((client) => nextDelay(client, id, { live: liveEvery })),
+				fallbackMs: liveEvery,
+			});
+			console.log(`  live         refreshing ${liveSports.join(', ')}, each ${Math.round(liveEvery / 1000)}s while its games are on`);
 		}
 
 		let refreshedAt = 0;
