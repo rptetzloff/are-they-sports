@@ -95,15 +95,14 @@ test('every page has its own footer link marked, and its own share menu', () => 
 	}
 })
 
-test('the coaches link waits for coaches; the other pages stay', () => {
-	for (const sport of ['mls']) {
+test('every sport links its coaches, and the other pages stay', () => {
+	for (const sport of ['nba', 'nhl', 'wnba', 'mls']) {
 		const html = navFor(read(`web/${sport}/history.html`), sport)
-		assert.ok(!html.includes('href="coaches') && !html.includes('>Coaches<'), sport)
 		assert.ok(html.includes('href="records"') && html.includes('href="vs"') && html.includes('href="history"'), sport)
 	}
 	assert.ok(navFor(read('web/mlb/history.html'), 'mlb').includes('href="managers"'))
-	// Hockey's and basketball's are stated tenures (data/reference/<sport>-coaches.csv).
-	for (const sport of ['nhl', 'nba', 'wnba']) assert.ok(navFor(read(`web/${sport}/history.html`), sport).includes('href="coaches"'), sport)
+	// The four without per-game coaches have stated tenures (data/reference/<sport>-coaches.csv).
+	for (const sport of ['nhl', 'nba', 'wnba', 'mls']) assert.ok(navFor(read(`web/${sport}/history.html`), sport).includes('href="coaches"'), sport)
 })
 
 // --- the routes -------------------------------------------------------------

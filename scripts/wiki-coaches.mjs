@@ -249,7 +249,149 @@ if (SEASON_TABLE) {
 		});
 	}
 }
-for (const r of SEASON_TABLE ? [] : draft) {
+// MLS's lists date each tenure to the day ("July 23, 2019 – October 6, 2024"),
+// and every game since 1996 is here, so a tenure's record is its games
+// between its dates and its seasons are where those games fall: exact, with
+// nothing to fit or share. A term of several spells ("... (interim) ... – ...")
+// is a tenure each. A row the list does not date takes the per-game draft's
+// dates (mls_coaches.csv, 2013 on) where it has the coach.
+const DATED = sport === 'mls';
+if (DATED) {
+	const MONTHS = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+	const iso = (m, d, y) => `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+	// Each end of a spell: a whole date, "present" (null), or a year alone --
+	// Dave Dir's "1996–2000", Lothar Osiander's "1996 – June 10, 1997" -- which
+	// is marked, so the club's other tenures can say where in it the spell
+	// began or ended (below). A year alone stands for the whole of it for now.
+	const datesIn = (text) => [...String(text ?? '').replace(/\[[^\]]*\]/g, '')
+		.matchAll(/\b(january|february|march|april|may|june|july|august|september|october|november|december)\s+(\d{1,2}),?\s+(\d{4})\b|\b(present|current)\b|\b((?:19|20)\d\d)\b/gi)]
+		.map((m, i) => (m[4] ? null
+			: m[5] ? Object.assign(new String(i % 2 ? `${m[5]}-12-31` : `${m[5]}-01-01`), { yearOnly: true })
+			: iso(MONTHS.indexOf(m[1].slice(0, 3).toLowerCase()) + 1, m[2], m[3])));
+	// The drafts' codes for six clubs are not this repo's franchise ids.
+	const CODE = { LAG: 'LA', NYRB: 'RBNY', DCU: 'DC', FCD: 'DAL', NER: 'NE', SJE: 'SJ' };
+	const club = (code) => CODE[code] ?? code;
+	// The per-game draft, less its games with no coach named (Minnesota's and
+	// Nashville's lately, a row a game).
+	const perGame = parseCsv(readFileSync(join(ROOT, 'data', 'sources', 'sportsdata', 'coaches', 'mls_coaches.csv'), 'utf8'))
+		.filter((x) => x.coach.trim()).map((x) => ({ ...x, franchiseName: club(x.franchiseName) }));
+	// Its last date for a club is the last game it saw, not the end of the job:
+	// the club's latest coach runs on to the present.
+	for (const code of new Set(perGame.map((x) => x.franchiseName))) {
+		const last = perGame.filter((x) => x.franchiseName === code).sort((a, b) => b.end_date.localeCompare(a.end_date))[0];
+		last.end_date = null;
+	}
+	for (const x of draft) x.franchiseName = club(x.franchiseName);
+	// Clubs whose list the draft could not read -- it took Real Salt Lake's
+	// captains and Minnesota's and Vancouver's stadiums for coaches -- come from
+	// the per-game draft instead, from 2013.
+	const FROM_PER_GAME = new Set(['RSL', 'MIN', 'VAN']);
+	// Minnesota's from March 2024 are Wikipedia's, below.
+	for (const x of perGame.filter((p) => FROM_PER_GAME.has(p.franchiseName) && p.franchiseName !== 'VAN'
+		&& !(p.franchiseName === 'MIN' && p.start_date >= '2024-03-11'))) {
+		draft.push({ franchiseName: x.franchiseName, coach: x.coach, interim: 'False', source: 'MLS per-game coaches (sportsdata)',
+			raw: '{}', start_date: '', end_date: '', perGame: [x.start_date, x.end_date] });
+	}
+	// And what neither draft has, read from Wikipedia directly (2026-10-26):
+	// Real Salt Lake before 2013 (Jason Kreis's article: he took over from John
+	// Ellinger on May 3, 2007), Vancouver's whole head-coach table, and
+	// Minnesota after the per-game draft stops naming a coach in March 2024
+	// (Cameron Knowles's article: named head coach on 12 January 2026, Eric
+	// Ramsay having left for West Bromwich Albion).
+	const WIKI = 'Wikipedia, read 2026-10-26';
+	for (const [code, coach, since, until, interim] of [
+		['RSL', 'John Ellinger', '2005-01-01', '2007-05-02'],
+		['RSL', 'Jason Kreis', '2007-05-03', '2012-12-31'],
+		['VAN', 'Teitur Thordarson', '2010-09-01', '2011-05-30'],
+		['VAN', 'Tom Soehn', '2011-05-30', '2011-10-25', true],
+		['VAN', 'Martin Rennie', '2011-10-26', '2013-10-29'],
+		['VAN', 'Carl Robinson', '2013-12-16', '2018-09-25'],
+		['VAN', 'Craig Dalrymple', '2018-09-25', '2018-11-07', true],
+		['VAN', 'Marc Dos Santos', '2018-11-07', '2021-08-27'],
+		['VAN', 'Vanni Sartini', '2021-08-27', '2024-11-26'],
+		['VAN', 'Jesper Sørensen', '2025-01-14', null],
+		['MIN', 'Eric Ramsay', '2024-03-11', '2026-01-11'],
+		['MIN', 'Cameron Knowles', '2026-01-12', null],
+	]) {
+		draft.push({ franchiseName: code, coach, interim: interim ? 'True' : 'False', source: WIKI,
+			raw: '{}', start_date: '', end_date: '', perGame: [since, until] });
+	}
+	for (const r of draft) {
+		if (FROM_PER_GAME.has(r.franchiseName) && !r.perGame) continue;
+		const name = r.coach.replace(/\s*\((?:interim|co-coach)[^)]*\)/ig, '').replace(/[*†‡§^#!]+$/u, '').replace(/\s+/g, ' ').trim();
+		let cells = {};
+		try { cells = JSON.parse(r.raw.replace(/\bNaN\b/g, 'null')); } catch { /* the dates below may still be there */ }
+		// The dates in the order they were written, a spell a pair; "present"
+		// closes the last as null.
+		const text = Object.entries(cells).filter(([k]) => /tenure|term|years|dates|start|end|from|^to$/i.test(k)).map(([, v]) => v).join(' – ');
+		let dates = r.perGame ?? datesIn(text);
+		if (!dates.length && r.start_date) {
+			const md = (v) => { const m = String(v).match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/); return m ? iso(m[1], m[2], m[3]) : null; };
+			dates = [md(r.start_date), r.end_date ? md(r.end_date) : null];
+		}
+		if (!dates.length || !dates[0]) {
+			const pg = perGame.filter((x) => x.franchiseName === r.franchiseName && x.coach === name);
+			dates = pg.flatMap((x) => [x.start_date, x.end_date]);
+		}
+		if (!dates.length || !dates[0]) { review.push(`no dates      ${r.franchiseName} · ${name}`); continue; }
+		if (dates.length % 2) dates.push(null);
+		const interim = r.interim === 'True' || /interim/i.test(`${r.coach} ${text}`);
+		for (let i = 0; i < dates.length; i += 2) {
+			const [since, until] = [dates[i], dates[i + 1]];
+			const first = Number(since.slice(0, 4)), last = until ? Number(until.slice(0, 4)) : CURRENT;
+			out.push({
+				group: null, leaderId: slugFor(name), name, nflverseName: '', franchiseAbbrv: r.franchiseName,
+				firstSeason: first, lastSeason: last, statedLastSeason: last,
+				term: termOf(first, until ? last : 'present'),
+				w: 0, l: 0, t: 0, otl: 0, playoffW: 0, playoffL: 0, titleSeasons: '', interim: interim ? 'TRUE' : 'FALSE',
+				basis: 'transcribed', source: r.source, gc: null, single: false, year: first, fixed: true,
+				since: String(since), until: until == null ? null : String(until),
+				sinceYearOnly: Boolean(since.yearOnly), untilYearOnly: Boolean(until?.yearOnly), dated: true,
+			});
+		}
+	}
+	// Within a club, in order, no two tenures hold one day. A spell whose start
+	// is a year alone begins the day after the one before it ended; one that
+	// runs into the next -- Toronto's list still has John Herdman to the
+	// present beside Robin Fraser from 2025 -- ends the day before it starts,
+	// and its term says so.
+	const dayAfter = (d) => new Date(Date.parse(`${d}T00:00:00Z`) + 86400000).toISOString().slice(0, 10);
+	const dayBefore = (d) => new Date(Date.parse(`${d}T00:00:00Z`) - 86400000).toISOString().slice(0, 10);
+	for (const code of new Set(out.map((t) => t.franchiseAbbrv))) {
+		const list = out.filter((t) => t.franchiseAbbrv === code).sort((a, b) => a.since.localeCompare(b.since));
+		for (let i = 1; i < list.length; i++) {
+			const prev = list[i - 1], t = list[i];
+			if (t.sinceYearOnly && prev.until && prev.until >= t.since) t.since = dayAfter(prev.until);
+		}
+		list.sort((a, b) => a.since.localeCompare(b.since));
+		for (let i = 0; i < list.length - 1; i++) {
+			const t = list[i];
+			for (const n of list.slice(i + 1)) {
+				if (n === t || n.since <= t.since) continue;
+				if (t.until != null && n.since > t.until) break;
+				// Wholly inside: a stand-in for a game or two while the coach was
+				// away (Brian Schmetzer for Sigi Schmid, three times). The coach's
+				// tenure runs on, less the stand-in's days.
+				if (n.until != null && (t.until == null || n.until < t.until)) {
+					// The same coach inside his own spell, as two drafts both
+					// have him, is one spell.
+					if (n.name === t.name) n.drop = true;
+					else (t.exclude ??= []).push([n.since, n.until]);
+					continue;
+				}
+				// The same day at both ends is a change after that day's match:
+				// Teitur Thordarson's last was the 1-1 on May 30, 2011.
+				if (t.until === n.since) { n.since = dayAfter(n.since); break; }
+				const wasOpen = t.until == null;
+				t.until = dayBefore(n.since);
+				if (wasOpen || !t.untilYearOnly) t.term = termOf(t.term.split('–')[0], t.until.slice(0, 4));
+				if (wasOpen) review.push(`trimmed       ${code} · ${t.name} to ${t.until}, the day before ${n.name}`);
+				break;
+			}
+		}
+	}
+}
+for (const r of SEASON_TABLE || DATED ? [] : draft) {
 	if (r.parse_ok !== 'True') { review.push(`unparsed      ${r.franchiseName} · ${r.coach}`); continue; }
 	const cells = cellsOf(r.raw, null);
 	if (!cells) { review.push(`bad raw       ${r.franchiseName} · ${r.coach}`); continue; }
@@ -372,7 +514,7 @@ if (process.env.DATABASE_URL) {
 		SELECT f AS franchise, season::int AS season, count(*)::int AS n,
 		       count(*) FILTER (WHERE winner = f)::int AS w,
 		       count(*) FILTER (WHERE winner IS NULL)::int AS t,
-		       count(*) FILTER (WHERE winner IS NOT NULL AND winner <> f AND ending IN ('OT', 'SO') AND season >= 2000)::int AS otl
+		       count(*) FILTER (WHERE winner IS NOT NULL AND winner <> f AND ending IN ('OT', 'SO') AND season >= 2000 AND $1 = 'nhl')::int AS otl
 		  FROM (SELECT season, home AS f, winner, ending FROM game WHERE sport = $1 AND status = 'final' AND round = 'regular'
 		        UNION ALL SELECT season, away, winner, ending FROM game WHERE sport = $1 AND status = 'final' AND round = 'regular') g
 		 GROUP BY f, season`, [sport]);
@@ -385,19 +527,30 @@ if (process.env.DATABASE_URL) {
 	// A by-hand tenure dated within its seasons, counted from those games.
 	for (const t of out.filter((x) => x.since || x.until)) {
 		const span = [sport, t.franchiseAbbrv, t.firstSeason, t.lastSeason, t.since ?? '0001-01-01', t.until ?? '9999-12-31'];
-		const where = `sport = $1 AND status = 'final' AND (home = $2 OR away = $2) AND season BETWEEN $3 AND $4 AND date BETWEEN $5 AND $6
-			AND season IS DISTINCT FROM $7`;
 		span.push(PLAYING);
+		// Less any stand-in's days inside it.
+		const gaps = (t.exclude ?? []).map(([a, b]) => { span.push(a, b); return ` AND NOT (date BETWEEN $${span.length - 1} AND $${span.length})`; }).join('');
+		const where = `sport = $1 AND status = 'final' AND (home = $2 OR away = $2) AND season BETWEEN $3 AND $4 AND date BETWEEN $5 AND $6
+			AND season IS DISTINCT FROM $7${gaps}`;
 		const { rows: [g] } = await c.query(`
 			SELECT count(*) FILTER (WHERE round = 'regular')::int AS n,
 			       count(*) FILTER (WHERE round = 'regular' AND winner = $2)::int AS w,
 			       count(*) FILTER (WHERE round = 'regular' AND winner IS NULL)::int AS t,
-			       count(*) FILTER (WHERE round = 'regular' AND winner <> $2 AND ending IN ('OT', 'SO') AND season >= 2000)::int AS otl,
+			       count(*) FILTER (WHERE round = 'regular' AND winner <> $2 AND ending IN ('OT', 'SO') AND season >= 2000 AND $1 = 'nhl')::int AS otl,
 			       count(*) FILTER (WHERE round <> 'regular' AND winner = $2)::int AS pw,
 			       count(*) FILTER (WHERE round <> 'regular' AND winner <> $2)::int AS pl
 			  FROM game WHERE ${where}`, span);
 		Object.assign(t, { w: g.w, l: g.n - g.w - g.t - g.otl, t: g.t, otl: g.otl, playoffW: g.pw, playoffL: g.pl, basis: 'counted' });
+		// A dated list's tenure takes its seasons from its games: a coach hired
+		// in December starts with the next season. One with no games (hired and
+		// gone before a match) is no tenure here.
+		if (t.dated) {
+			const { rows: [span2] } = await c.query(`SELECT min(season)::int a, max(season)::int b FROM game WHERE ${where}`, span);
+			if (span2.a == null) { t.drop = true; continue; }
+			Object.assign(t, { firstSeason: span2.a, lastSeason: span2.b, statedLastSeason: span2.b });
+		}
 	}
+	for (let i = out.length - 1; i >= 0; i--) if (out[i].drop) out.splice(i, 1);
 	await c.end();
 	// The season being played is in no list's record, so in no count either:
 	// a record is through the last season finished. Who has games in it still
@@ -550,7 +703,8 @@ if (process.env.DATABASE_URL) {
 		for (let s = t.firstSeason; s <= t.lastSeason && alone; s++) {
 			if (mates.some((x) => x.firstSeason <= s && s <= x.lastSeason)) alone = false;
 		}
-		if (!alone) continue;
+		// A dated tenure is already its own games, to the day.
+		if (!alone || t.dated) continue;
 		let w = 0, l = 0, tie = 0, otl = 0, pw = 0, pl = 0, n = 0;
 		for (let s = t.firstSeason; s <= t.lastSeason; s++) {
 			const g = at.get(`${t.franchiseAbbrv}|${s}`);
@@ -623,6 +777,25 @@ if (process.env.DATABASE_URL) {
 
 console.log(`${sport}: ${draft.length} draft rows, ${out.length} tenures read, ${review.length} to review`);
 for (const line of review) console.log(`  ${line}`);
+
+// One spelling a person: the first the drafts gave ("Wílmer Cabrera" and
+// "Wilmer Cabrera" are one id). And one tenure a club, coach and first season,
+// which is leader_tenure's key: Brian Schmetzer stood in for Seattle twice in
+// 2015, a game each, and two rows would lose one at load.
+const nameOf = new Map();
+for (const t of out) if (!nameOf.has(t.leaderId)) nameOf.set(t.leaderId, t.name);
+for (const t of out) t.name = nameOf.get(t.leaderId);
+for (let i = out.length - 1; i >= 0; i--) {
+	const t = out[i];
+	const j = out.findIndex((x, k) => k < i && x.franchiseAbbrv === t.franchiseAbbrv && x.leaderId === t.leaderId && x.firstSeason === t.firstSeason);
+	if (j < 0) continue;
+	const keep = out[j];
+	for (const k of ['w', 'l', 't', 'otl', 'playoffW', 'playoffL']) keep[k] = Number(keep[k] || 0) + Number(t[k] || 0);
+	keep.lastSeason = Math.max(keep.lastSeason, t.lastSeason);
+	keep.statedLastSeason = keep.lastSeason;
+	keep.titleSeasons = [...new Set(`${keep.titleSeasons} ${t.titleSeasons}`.trim().split(/\s+/).filter(Boolean))].join(' ');
+	out.splice(i, 1);
+}
 
 if (write) {
 	if (existsSync(OUT) && !force && outAt < 0) {
