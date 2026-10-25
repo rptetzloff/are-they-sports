@@ -54,6 +54,7 @@ import { colorsFor, currentFranchises, displayName, loadHistory, resolver } from
 import { hasFrontEnd, WEB_DIR } from './lib/web.js';
 import { homePage } from './lib/home.js';
 import { todayGames } from './lib/today.js';
+import { coverageFor, marketPoints } from './lib/coverage.js';
 import { createFront, sharedEspn } from './lib/web-routes.js';
 import { LEAGUE_ABBR, SPORTS, loadSports, loadTeams } from './lib/teams.js';
 import { creditsFor } from './lib/credits.js';
@@ -747,6 +748,8 @@ function main() {
 		// The team menu, from the table as it stands: availability is refreshed
 		// every 30 seconds, and a list taken at boot left a club loaded later out
 		// of every menu until a restart. Read through a getter (`clubs`).
+		// The home page's TV tables (/api/tv), kept a minute.
+		let homeTv = null;
 		const frontClubs = () => table
 			.filter((e) => e.available && clubFor(e) && hasFrontEnd(e.sport))
 			.map((e) => ({ sport: e.sport, teamId: e.teamId, name: clubFor(e).nouns.fullName, href: `${e.base}/` }));
@@ -944,6 +947,27 @@ function main() {
 				res.writeHead(200, { 'content-type': 'text/javascript; charset=utf-8', 'content-length': js.length, 'cache-control': 'no-cache' });
 				return res.end(js);
 			}
+			// The TV tables for the home page's provider choice: every provider and
+			// its areas, every network by all its names, and every channel. A club's
+			// own network (Brewers.TV, MyMilwaukee24) says whose, so the page names
+			// it only for that club's games. Read at most once a minute.
+			if (url.pathname === '/api/tv' && needsSelector(table)) {
+				if (!homeTv || Date.now() - homeTv.at > 60_000) {
+					const tv = await tvTables().catch(() => null);
+					if (tv) {
+						const areas = (id) => tv.areas.filter((a) => a.providerId === id).sort((a, b) => a.position - b.position).map((a) => a.name);
+						homeTv = { at: Date.now(), body: {
+							// Each area's TV market too (tv_area.dma), for the NFL's regional games.
+							providers: tv.providers.map((p) => ({ id: p.id, name: p.displayName, areas: areas(p.id),
+								dmas: tv.areas.filter((a) => a.providerId === p.id).sort((a, b) => a.position - b.position).map((a) => a.dma ?? null) })).sort((a, b) => a.name.localeCompare(b.name)),
+							networks: tv.networks.map((n) => ({ id: n.id, display: n.displayName, kind: n.kind, club: n.club ?? null,
+								names: [...new Set([n.key, n.displayName, ...(n.aliases ?? [])].map((s) => String(s).toLowerCase()))] })),
+							channels: tv.channels.map((c) => ({ provider: c.providerId, network: c.networkId, area: c.area, channel: c.channel })),
+						} };
+					}
+				}
+				return json(res, 200, homeTv?.body ?? { providers: [], networks: [], channels: [] });
+			}
 			if (url.pathname === '/api/today' && needsSelector(table)) {
 				const date = url.searchParams.get('date') ?? '';
 				if (!/^\d{8}$/.test(date)) return json(res, 400, { error: 'date is YYYYMMDD' });
@@ -953,7 +977,11 @@ function main() {
 					const to = { url: `${e.base}/`, key: `${e.sport}/${e.teamId}` };
 					return [[`${e.sport}|${clubFor(e).nouns.fullName.toLowerCase()}`, to], [`${e.sport}|short:${clubFor(e).nouns.team.toLowerCase()}`, to]];
 				}));
-				return json(res, 200, { date, leagues: await todayGames({ sports, date, espn: sharedEspn(), clubs }) });
+				// The viewer's TV market, for which CBS and FOX game its stations carry
+				// (lib/coverage.js), read for every market an area is in.
+				const dma = (url.searchParams.get('dma') ?? '').slice(0, 60) || null;
+				const coverage = dma ? async (season, week) => coverageFor(season, week, { points: marketPoints((await tvTables().catch(() => ({ areas: [] }))).areas) }) : null;
+				return json(res, 200, { date, leagues: await todayGames({ sports, date, espn: sharedEspn(), clubs, dma, coverage }) });
 			}
 
 			if (url.pathname === '/' && needsSelector(table)) {
