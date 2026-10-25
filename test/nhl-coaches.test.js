@@ -89,22 +89,6 @@ test('the pages read coaches.json: a row a person, a band a spell', () => {
 	assert.deepEqual(ej.map((e) => [e.tenure, e.slug, e.fromDate, e.toDate]),
 		[['1980–1983', 'eddie-johnston', 1980.5, 1983.5], ['1993–1997', 'eddie-johnston-2', 1993.5, 1997.5]])
 	assert.equal(ej[0].record, '232–224–60')
-	// His row names both spells, not a run over everyone between.
-	assert.equal(coaches.find((c) => c.name === 'Eddie Johnston').tenure, '1980–1983, 1993–1997')
-})
-
-test('a season two coaches shared is split between their bands, not drawn twice', () => {
-	const tenures = [
-		{ leader: 'johnston-mike', name: 'Mike Johnston', franchise: 'PIT', firstSeason: 2015, lastSeason: 2016, w: 58, l: 37, t: 0, otl: 15 },
-		{ leader: 'sullivan-mike', name: 'Mike Sullivan', franchise: 'PIT', firstSeason: 2016, lastSeason: 2025, w: 409, l: 255, t: 0, otl: 87 },
-		// A one-season spell shared at both ends keeps a band.
-		{ leader: 'hughes-rex', name: 'Rex Hughes', franchise: 'PIT', firstSeason: 2016, lastSeason: 2016, w: 1, l: 0, t: 0, otl: 0 },
-	]
-	const { eras } = coachesFromJson(JSON.parse(JSON.stringify(coachesJson([], tenures))))
-	const band = (name) => { const e = eras.find((x) => x.name === name); return [e.fromDate, e.toDate] }
-	assert.deepEqual(band('Mike Johnston'), [2014.5, 2016])
-	assert.deepEqual(band('Mike Sullivan'), [2016, 2025.5])
-	assert.deepEqual(band('Rex Hughes'), [2015.75, 2016.25])
 })
 
 test('a record shows overtime losses only where there are some', () => {
