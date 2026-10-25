@@ -52,7 +52,7 @@ import {
 } from './lib/render.js';
 import { colorsFor, currentFranchises, displayName, loadHistory, resolver } from './lib/names.js';
 import { hasFrontEnd } from './lib/web.js';
-import { createFront } from './lib/web-routes.js';
+import { createFront, sharedEspn } from './lib/web-routes.js';
 import { LEAGUE_ABBR, SPORTS, loadSports, loadTeams } from './lib/teams.js';
 import { creditsFor } from './lib/credits.js';
 import { describe, titleOf, withMeta } from './lib/meta.js';
@@ -865,6 +865,8 @@ function main() {
 					// wants the same fix.
 					available: available.length,
 					missing: table.filter((e) => !e.available).map((e) => `${e.sport}/${e.code}`),
+					// The shared ESPN cache's size, against its byte budget.
+					espnCache: sharedEspn().stats(),
 				});
 			}
 
