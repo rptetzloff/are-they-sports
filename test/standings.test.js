@@ -343,3 +343,10 @@ test('a points table shows points, and a percentage table percentage and games b
 	assert.deepEqual(standingsColumns(standingsFlags(football)).map((c) => c.label), ['Club', 'W', 'L', 'T', 'Pct', 'GB'])
 	assert.equal(football[0].pts, null)
 })
+
+test('football\'s table has ties whether or not anyone has tied; baseball\'s only when someone has', () => {
+	const untied = computeStandings([entry('Packers', 'NFC', 'North', 'WWL')], { season: 2011 }).groups[0].clubs
+	assert.deepEqual(standingsColumns(standingsFlags(untied)).map((c) => c.label), ['Club', 'W', 'L', 'T', 'Pct', 'GB'])
+	const baseball = untied.map((c) => ({ ...c, sport: 'mlb' }))
+	assert.deepEqual(standingsColumns(standingsFlags(baseball)).map((c) => c.label), ['Club', 'W', 'L', 'Pct', 'GB'])
+})
