@@ -1,0 +1,148 @@
+# WNBA head coaches, from Wikipedia's lists of each club's head coaches (CC BY-SA 4.0).
+#
+# CURATED AND COMMITTED. Seeded by scripts/wiki-coaches.mjs from the draft in
+# data/sources/sportsdata/coaches; corrections belong here, not in the draft.
+# Seasons are numbered as this repo numbers them.
+# w, l, t and otl are the regular season, playoffW and playoffL the playoffs.
+# basis says where the record is from: counted, from this database's games,
+# for a coach who had every game of his seasons; transcribed, the list's own,
+# where a mid-season change shares a season and only the list knows the split.
+# Each tenure's seasons were placed where its games fit the games played
+# (scripts/coaches-check.mjs reports any that do not). titleSeasons are the
+# club's championships, credited to the coach who finished the season.
+leaderId,name,nflverseName,franchiseAbbrv,firstSeason,lastSeason,statedLastSeason,w,l,t,otl,playoffW,playoffL,titleSeasons,interim,basis,source,term
+meadors-marynell,Marynell Meadors,,ATL,2008,2012,2012,73,87,0,0,8,9,,FALSE,transcribed,Atlanta Dream (main article),2008–2012
+williams-fred,Fred Williams,,ATL,2012,2013,2013,24,20,0,0,5,6,,FALSE,transcribed,Atlanta Dream (main article),2012–2013
+cooper-michael,Michael Cooper,,ATL,2014,2017,2017,63,73,0,0,2,3,,FALSE,counted,Atlanta Dream (main article),2014–2017
+collen-nicki,Nicki Collen,,ATL,2018,2020,2020,38,52,0,0,2,3,,FALSE,counted,Atlanta Dream (main article),2018–2020
+petersen-mike,Mike Petersen,,ATL,2021,2021,2021,6,13,0,0,0,0,,FALSE,transcribed,Atlanta Dream (main article),2021
+taylor-darius,Darius Taylor,,ATL,2021,2021,2021,2,11,0,0,0,0,,FALSE,transcribed,Atlanta Dream (main article),2021
+wright-tanisha,Tanisha Wright,,ATL,2022,2024,2024,48,68,0,0,0,4,,FALSE,counted,Atlanta Dream (main article),2022–2024
+smesko-karl,Karl Smesko,,ATL,2025,2026,2026,60,28,0,0,7,3,,FALSE,counted,Atlanta Dream (main article),2025–2026
+cowens-dave,Dave Cowens,,CHI,2006,2006,2006,5,29,0,0,0,0,,FALSE,counted,Chicago Sky (main article),2006
+overton-bo,Bo Overton,,CHI,2007,2007,2007,14,20,0,0,0,0,,FALSE,counted,Chicago Sky (main article),2007
+key-steven,Steven Key,,CHI,2008,2010,2010,42,60,0,0,0,0,,FALSE,counted,Chicago Sky (main article),2008–2010
+chatman-pokey,Pokey Chatman,,CHI,2011,2016,2016,106,98,0,0,7,12,,FALSE,counted,Chicago Sky (main article),2011–2016
+stocks-amber,Amber Stocks,,CHI,2017,2018,2018,25,43,0,0,0,0,,FALSE,counted,Chicago Sky (main article),2017–2018
+wade-james,James Wade,,CHI,2019,2023,2023,81,59,0,0,13,8,2021,FALSE,transcribed,Chicago Sky (main article),2019–2023
+vatansever-emre,Emre Vatansever,,CHI,2023,2023,2023,11,13,0,0,0,2,,FALSE,transcribed,Chicago Sky (main article),2023
+weatherspoon-teresa,Teresa Weatherspoon,,CHI,2024,2024,2024,13,27,0,0,0,0,,FALSE,counted,Chicago Sky (main article),2024
+marsh-tyler,Tyler Marsh,,CHI,2025,2026,2026,26,62,0,0,0,0,,FALSE,counted,Chicago Sky (main article),2025–2026
+peck-carolyn,Carolyn Peck,,CON,1999,2001,2001,44,52,0,0,1,2,,FALSE,counted,Connecticut Sun (main article),1999–2001
+brown-dee,Dee Brown,,CON,2002,2002,2002,16,16,0,0,0,0,,FALSE,counted,Connecticut Sun (main article),2002
+thibault-mike,Mike Thibault,,CON,2003,2012,2012,206,133,0,0,20,18,,FALSE,counted,Connecticut Sun (main article),2003–2012
+donovan-anne,Anne Donovan,,CON,2013,2015,2015,38,64,0,0,0,0,,FALSE,counted,Connecticut Sun (main article),2013–2015
+miller-curt,Curt Miller,,CON,2016,2022,2022,140,86,0,0,16,17,,FALSE,counted,Connecticut Sun (main article),2016–2022
+white-stephanie,Stephanie White,,CON,2023,2024,2024,55,25,0,0,7,7,,FALSE,counted,Connecticut Sun (main article),2023–2024
+meziane-rachid,Rachid Meziane,,CON,2025,2026,2026,22,66,0,0,0,0,,FALSE,counted,Connecticut Sun (main article),2025–2026
+lieberman-nancy,Nancy Lieberman,,DAL,1998,2000,2000,46,48,0,0,0,1,,FALSE,counted,Dallas Wings (main article),1998–2000
+williams-greg,Greg Williams,,DAL,2001,2002,2002,10,32,0,0,0,0,,FALSE,transcribed,Dallas Wings (main article),2001–2002
+laimbeer-bill,Bill Laimbeer,,DAL,2002,2009,2009,137,93,0,0,27,16,2003 2006 2008,FALSE,transcribed,Dallas Wings (main article),2002–2009
+mahorn-rick,Rick Mahorn,,DAL,2009,2009,2009,17,13,0,0,3,2,,FALSE,transcribed,Dallas Wings (main article),2009
+richardson-nolan,Nolan Richardson,,DAL,2010,2011,2011,7,38,0,0,0,0,,FALSE,transcribed,Dallas Wings (main article),2010–2011
+edwards-teresa,Teresa Edwards,,DAL,2011,2011,2011,2,21,0,0,0,0,,FALSE,transcribed,Dallas Wings (main article),2011
+kloppenburg-gary,Gary Kloppenburg,,DAL,2012,2013,2013,20,48,0,0,0,0,,FALSE,counted,Dallas Wings (main article),2012–2013
+williams-fred,Fred Williams,,DAL,2014,2018,2018,71,96,0,0,0,3,,FALSE,transcribed,Dallas Wings (main article),2014–2018
+franklin-mcwilliams-taj,Taj McWilliams-Franklin,,DAL,2018,2018,2018,1,2,0,0,0,1,,FALSE,transcribed,Dallas Wings (main article),2018
+agler-brian,Brian Agler,,DAL,2019,2020,2020,18,38,0,0,0,0,,FALSE,counted,Dallas Wings (main article),2019–2020
+johnson-vickie,Vickie Johnson,,DAL,2021,2022,2022,32,36,0,0,1,3,,FALSE,counted,Dallas Wings (main article),2021–2022
+trammell-latricia,Latricia Trammell,,DAL,2023,2024,2024,31,49,0,0,2,3,,FALSE,counted,Dallas Wings (main article),2023–2024
+koclanes-chris,Chris Koclanes,,DAL,2025,2025,2025,10,34,0,0,0,0,,FALSE,counted,Dallas Wings (main article),2025
+fernandez-jose,Jose Fernandez,,DAL,2026,2026,2026,27,17,0,0,1,2,,FALSE,counted,ESPN (2026 season coaches),2026
+nakase-natalie,Natalie Nakase,,GSV,2025,2026,2026,55,33,0,0,6,4,,FALSE,counted,Golden State Valkyries (main article),2025–2026
+donovan-anne,Anne Donovan,,IND,2000,2000,2000,9,23,0,0,0,0,,FALSE,counted,Indiana Fever (main article),2000
+fortner-nell,Nell Fortner,,IND,2001,2003,2003,42,56,0,0,1,2,,FALSE,counted,Indiana Fever (main article),2001–2003
+winters-brian,Brian Winters,,IND,2004,2007,2007,78,58,0,0,5,7,,FALSE,counted,Indiana Fever (main article),2004–2007
+dunn-lin,Lin Dunn,,IND,2008,2014,2014,135,103,0,0,23,18,2012,FALSE,counted,Indiana Fever (main article),2008–2014
+white-stephanie,Stephanie White,,IND,2015,2016,2016,37,31,0,0,6,6,,FALSE,counted,Indiana Fever (main article),2015–2016
+chatman-pokey,Pokey Chatman,,IND,2017,2019,2019,28,74,0,0,0,0,,FALSE,counted,Indiana Fever (main article),2017–2019
+stanley-marianne,Marianne Stanley,,IND,2020,2022,2022,14,49,0,0,0,0,,FALSE,transcribed,Indiana Fever (main article),2020–2022
+knox-carlos,Carlos Knox,,IND,2022,2022,2022,3,24,0,0,0,0,,FALSE,transcribed,Indiana Fever (main article),2022
+sides-christie,Christie Sides,,IND,2023,2024,2024,33,47,0,0,0,2,,FALSE,counted,Indiana Fever (main article),2023–2024
+white-stephanie,Stephanie White,,IND,2025,2026,2026,52,36,0,0,5,6,,FALSE,counted,Indiana Fever (main article),2025–2026
+sharp-linda,Linda Sharp,,LAS,1997,1997,1997,4,7,0,0,0,0,,FALSE,transcribed,Los Angeles Sparks (main article),1997
+rousseau-julie,Julie Rousseau,,LAS,1997,1998,1998,17,20,0,0,0,0,,FALSE,transcribed,Los Angeles Sparks (main article),1997–1998
+woolridge-orlando,Orlando Woolridge,,LAS,1998,1999,1999,25,17,0,0,2,2,,FALSE,transcribed,Los Angeles Sparks (main article),1998–1999
+cooper-michael,Michael Cooper,,LAS,2000,2004,2004,119,31,0,0,19,7,2001 2002,FALSE,transcribed,Los Angeles Sparks (main article),2000–2004
+thompson-karleen,Karleen Thompson,,LAS,2004,2004,2004,11,3,0,0,1,2,,FALSE,transcribed,Los Angeles Sparks (main article),2004
+bibby-henry,Henry Bibby,,LAS,2005,2005,2005,13,15,0,0,0,0,,FALSE,transcribed,Los Angeles Sparks (main article),2005
+bryant-joe,Joe Bryant,,LAS,2005,2006,2006,29,11,0,0,2,5,,FALSE,transcribed,Los Angeles Sparks (main article),2005–2006
+cooper-michael,Michael Cooper,,LAS,2007,2009,2009,47,54,0,0,6,6,,FALSE,counted,Los Angeles Sparks (main article),2007–2009
+gillom-jennifer,Jennifer Gillom,,LAS,2010,2011,2011,17,27,0,0,0,2,,FALSE,transcribed,Los Angeles Sparks (main article),2010–2011
+bryant-joe,Joe Bryant,,LAS,2011,2011,2011,11,13,0,0,0,0,,FALSE,transcribed,Los Angeles Sparks (main article),2011
+ross-carol,Carol Ross,,LAS,2012,2014,2014,58,32,0,0,3,4,,FALSE,transcribed,Los Angeles Sparks (main article),2012–2014
+toler-penny,Penny Toler,,LAS,2014,2014,2014,6,6,0,0,0,2,,FALSE,transcribed,Los Angeles Sparks (main article),2014
+agler-brian,Brian Agler,,LAS,2015,2018,2018,85,51,0,0,13,9,2016,FALSE,counted,Los Angeles Sparks (main article),2015–2018
+fisher-derek,Derek Fisher,,LAS,2019,2022,2022,54,46,0,0,1,4,,FALSE,transcribed,Los Angeles Sparks (main article),2019–2022
+williams-fred,Fred Williams,,LAS,2022,2022,2022,8,16,0,0,0,0,,FALSE,transcribed,Los Angeles Sparks (main article),2022
+miller-curt,Curt Miller,,LAS,2023,2024,2024,25,55,0,0,0,0,,FALSE,counted,Los Angeles Sparks (main article),2023–2024
+roberts-lynne,Lynne Roberts,,LAS,2025,2025,2025,21,23,0,0,0,0,,FALSE,counted,Los Angeles Sparks (main article),2025
+taylor-denise,Denise Taylor,,LVA,1997,1998,1998,13,34,0,0,0,0,,FALSE,transcribed,Las Vegas Aces (main article),1997–1998
+layden-frank,Frank Layden,,LVA,1998,1999,1999,4,11,0,0,0,0,,FALSE,transcribed,Las Vegas Aces (main article),1998–1999
+williams-fred,Fred Williams,,LVA,1999,2001,2001,36,37,0,0,0,0,,FALSE,transcribed,Las Vegas Aces (main article),1999–2001
+harvey-candi,Candi Harvey,,LVA,2001,2003,2003,40,33,0,0,2,5,,FALSE,transcribed,Las Vegas Aces (main article),2001–2003
+dailey-shell,Shell Dailey,,LVA,2003,2003,2003,6,6,0,0,0,0,,FALSE,transcribed,Las Vegas Aces (main article),2003
+brown-dee,Dee Brown,,LVA,2004,2004,2004,6,18,0,0,0,0,,FALSE,transcribed,Las Vegas Aces (main article),2004
+dailey-shell,Shell Dailey,,LVA,2004,2004,2004,3,7,0,0,0,0,,FALSE,transcribed,Las Vegas Aces (main article),2004
+hughes-dan,Dan Hughes,,LVA,2005,2009,2009,79,91,0,0,7,10,,FALSE,counted,Las Vegas Aces (main article),2005–2009
+brondello-sandy,Sandy Brondello,,LVA,2010,2010,2010,14,20,0,0,0,2,,FALSE,counted,Las Vegas Aces (main article),2010
+hughes-dan,Dan Hughes,,LVA,2011,2016,2016,82,122,0,0,1,6,,FALSE,counted,Las Vegas Aces (main article),2011–2016
+johnson-vickie,Vickie Johnson,,LVA,2017,2017,2017,8,26,0,0,0,0,,FALSE,counted,Las Vegas Aces (main article),2017
+laimbeer-bill,Bill Laimbeer,,LVA,2018,2021,2021,77,44,1,0,7,11,,FALSE,counted,Las Vegas Aces (main article),2018–2021
+hammon-becky,Becky Hammon,,LVA,2022,2026,2026,148,56,0,0,30,13,2022 2023 2025,FALSE,counted,Las Vegas Aces (main article),2022–2026
+agler-brian,Brian Agler,,MIN,1999,2002,2002,48,67,0,0,0,0,,FALSE,transcribed,Minnesota Lynx (main article),1999–2002
+vanderveer-heidi,Heidi VanDerveer,,MIN,2002,2002,2002,4,9,0,0,0,0,,FALSE,transcribed,Minnesota Lynx (main article),2002
+serio-mcconnell-suzie,Suzie McConnell-Serio,,MIN,2003,2006,2006,58,67,0,0,1,4,,FALSE,transcribed,Minnesota Lynx (main article),2003–2006
+jenkins-carolyn,Carolyn Jenkins,,MIN,2006,2006,2006,2,9,0,0,0,0,,FALSE,transcribed,Minnesota Lynx (main article),2006
+zierden-don,Don Zierden,,MIN,2007,2008,2008,26,42,0,0,0,0,,FALSE,counted,Minnesota Lynx (main article),2007–2008
+gillom-jennifer,Jennifer Gillom,,MIN,2009,2009,2009,14,20,0,0,0,0,,FALSE,counted,Minnesota Lynx (main article),2009
+reeve-cheryl,Cheryl Reeve,,MIN,2010,2026,2026,397,201,0,0,52,33,2011 2013 2015 2017,FALSE,counted,Minnesota Lynx (main article),2010–2026
+darsch-nancy,Nancy Darsch,,NYL,1997,1998,1998,35,23,0,0,1,1,,FALSE,counted,New York Liberty (main article),1997–1998
+adubato-richie,Richie Adubato,,NYL,1999,2004,2004,100,78,0,0,14,13,,FALSE,transcribed,New York Liberty (main article),1999–2004
+coyle-pat,Pat Coyle,,NYL,2004,2009,2009,81,90,0,0,6,10,,FALSE,transcribed,New York Liberty (main article),2004–2009
+donovan-anne,Anne Donovan,,NYL,2009,2010,2010,29,22,0,0,2,3,,FALSE,transcribed,New York Liberty (main article),2009–2010
+whisenant-john,John Whisenant,,NYL,2011,2012,2012,34,34,0,0,1,4,,FALSE,counted,New York Liberty (main article),2011–2012
+laimbeer-bill,Bill Laimbeer,,NYL,2013,2017,2017,92,78,0,0,3,5,,FALSE,counted,New York Liberty (main article),2013–2017
+smith-katie,Katie Smith,,NYL,2018,2019,2019,17,51,0,0,0,0,,FALSE,counted,New York Liberty (main article),2018–2019
+hopkins-walt,Walt Hopkins,,NYL,2020,2021,2021,14,40,0,0,0,1,,FALSE,counted,New York Liberty (main article),2020–2021
+brondello-sandy,Sandy Brondello,,NYL,2022,2025,2025,107,53,0,0,16,11,2024,FALSE,counted,New York Liberty (main article),2022–2025
+demarco-chris,Chris DeMarco,,NYL,2026,2026,2026,26,18,0,0,2,3,,FALSE,counted,ESPN (2026 season coaches),2026
+miller-cheryl,Cheryl Miller,,PHX,1997,2000,2000,70,52,0,0,3,6,,FALSE,counted,Phoenix Mercury (main article),1997–2000
+cooper-cynthia,Cynthia Cooper,,PHX,2001,2002,2002,19,23,0,0,0,0,,FALSE,transcribed,Phoenix Mercury (main article),2001–2002
+sharp-linda,Linda Sharp,,PHX,2002,2002,2002,5,17,0,0,0,0,,FALSE,transcribed,Phoenix Mercury (main article),2002
+shumate-john,John Shumate,,PHX,2003,2003,2003,8,26,0,0,0,0,,FALSE,counted,Phoenix Mercury (main article),2003
+graf-carrie,Carrie Graf,,PHX,2004,2005,2005,33,35,0,0,0,0,,FALSE,counted,Phoenix Mercury (main article),2004–2005
+westhead-paul,Paul Westhead,,PHX,2006,2007,2007,41,27,0,0,7,2,2007,FALSE,counted,Phoenix Mercury (main article),2006–2007
+gaines-corey,Corey Gaines,,PHX,2008,2013,2013,90,101,0,0,11,9,2009,FALSE,transcribed,Phoenix Mercury (main article),2008–2013
+pennell-russ,Russ Pennell,,PHX,2013,2013,2013,9,4,0,0,2,3,,FALSE,transcribed,Phoenix Mercury (main article),2013
+brondello-sandy,Sandy Brondello,,PHX,2014,2021,2021,150,108,0,0,24,19,2014,FALSE,counted,Phoenix Mercury (main article),2014–2021
+nygaard-vanessa,Vanessa Nygaard,,PHX,2022,2023,2023,17,31,0,0,0,2,,FALSE,transcribed,Phoenix Mercury (main article),2022–2023
+blue-nikki,Nikki Blue,,PHX,2023,2023,2023,7,21,0,0,0,0,,FALSE,transcribed,Phoenix Mercury (main article),2023
+tibbetts-nate,Nate Tibbetts,,PHX,2024,2026,2026,62,66,0,0,5,8,,FALSE,counted,Phoenix Mercury (main article),2024–2026
+sarama-alex,Alex Sarama,,POR,2026,2026,2026,17,27,0,0,0,0,,FALSE,counted,ESPN (2026 season coaches),2026
+dunn-lin,Lin Dunn,,SEA,2000,2002,2002,33,63,0,0,0,2,,FALSE,counted,Seattle Storm (main article),2000–2002
+donovan-anne,Anne Donovan,,SEA,2003,2007,2007,93,77,0,0,8,8,2004,FALSE,counted,Seattle Storm (main article),2003–2007
+agler-brian,Brian Agler,,SEA,2008,2014,2014,136,102,0,0,11,10,2010,FALSE,counted,Seattle Storm (main article),2008–2014
+boucek-jenny,Jenny Boucek,,SEA,2015,2017,2017,36,58,0,0,0,1,,FALSE,transcribed,Seattle Storm (main article),2015–2017
+kloppenburg-gary,Gary Kloppenburg,,SEA,2017,2017,2017,5,3,0,0,0,1,,FALSE,transcribed,Seattle Storm (main article),2017
+hughes-dan,Dan Hughes,,SEA,2018,2019,2019,44,24,0,0,7,3,2018,FALSE,counted,Seattle Storm (main article),2018–2019
+kloppenburg-gary,Gary Kloppenburg,,SEA,2020,2020,2020,18,4,0,0,6,0,2020,FALSE,counted,Seattle Storm (main article),2020
+hughes-dan,Dan Hughes,,SEA,2021,2021,2021,5,1,0,0,0,0,,FALSE,transcribed,Seattle Storm (main article),2021
+quinn-noelle,Noelle Quinn,,SEA,2021,2025,2025,97,89,0,0,4,8,,FALSE,transcribed,Seattle Storm (main article),2021–2025
+raman-sonia,Sonia Raman,,SEA,2026,2026,2026,8,36,0,0,0,0,,FALSE,counted,ESPN (2026 season coaches),2026
+brondello-sandy,Sandy Brondello,,TOR,2026,2026,2026,11,33,0,0,0,0,,FALSE,counted,ESPN (2026 season coaches),2026
+lewis-jim,Jim Lewis,,WAS,1998,1998,1998,2,16,0,0,0,0,,FALSE,transcribed,Washington Mystics (main article),1998
+parson-cathy,Cathy Parson,,WAS,1998,1998,1998,1,11,0,0,0,0,,FALSE,transcribed,Washington Mystics (main article),1998
+darsch-nancy,Nancy Darsch,,WAS,1999,2000,2000,21,31,0,0,0,0,,FALSE,transcribed,Washington Mystics (main article),1999–2000
+walker-darrell,Darrell Walker,,WAS,2000,2000,2000,5,7,0,0,0,2,,FALSE,transcribed,Washington Mystics (main article),2000
+maher-tom,Tom Maher,,WAS,2001,2001,2001,10,22,0,0,0,0,,FALSE,counted,Washington Mystics (main article),2001
+stanley-marianne,Marianne Stanley,,WAS,2002,2003,2003,26,40,0,0,3,2,,FALSE,counted,Washington Mystics (main article),2002–2003
+adams-michael,Michael Adams,,WAS,2004,2004,2004,17,17,0,0,1,2,,FALSE,counted,Washington Mystics (main article),2004
+adubato-richie,Richie Adubato,,WAS,2005,2007,2007,34,38,0,0,0,2,,FALSE,transcribed,Washington Mystics (main article),2005–2007
+rollins-tree,Tree Rollins,,WAS,2007,2008,2008,24,28,0,0,0,0,,FALSE,transcribed,Washington Mystics (main article),2007–2008
+kenlaw-jessie,Jessie Kenlaw,,WAS,2008,2008,2008,2,10,0,0,0,0,,FALSE,transcribed,Washington Mystics (main article),2008
+plank-julie,Julie Plank,,WAS,2009,2010,2010,38,30,0,0,0,4,,FALSE,counted,Washington Mystics (main article),2009–2010
+lacey-trudi,Trudi Lacey,,WAS,2011,2012,2012,11,57,0,0,0,0,,FALSE,counted,Washington Mystics (main article),2011–2012
+thibault-mike,Mike Thibault,,WAS,2013,2022,2022,172,155,1,0,14,20,2019,FALSE,counted,Washington Mystics (main article),2013–2022
+thibault-eric,Eric Thibault,,WAS,2023,2024,2024,33,47,0,0,0,2,,FALSE,counted,Washington Mystics (main article),2023–2024
+johnson-sydney,Sydney Johnson,,WAS,2025,2026,2026,44,44,0,0,0,2,,FALSE,counted,Washington Mystics (main article),2025–2026

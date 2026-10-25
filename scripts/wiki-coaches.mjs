@@ -164,7 +164,92 @@ const slugFor = (name) => name.toLowerCase().normalize('NFKD').replace(/[̀-ͯ]/
 const draft = parseCsv(readFileSync(DRAFT, 'utf8'));
 const out = [];
 const review = [];
-for (const r of draft) {
+
+// The WNBA's draft is each club's season-by-season table, not a list of its
+// coaches: a row a season, its coach, and its record, with a mid-season change
+// written out with each coach's share -- "D. Taylor (6–13) F. Layden (2–9)".
+// Tenures are the runs of seasons one coach finished or started, and a season
+// two coaches shared gives each the record the table states. A record is
+// exact as written, so nothing is fitted; a run alone in its seasons is still
+// counted from the games below, and the playoffs go to whoever finished.
+const SEASON_TABLE = sport === 'wnba';
+// Abbreviated names no row of the draft spells out in full: the stand-ins and
+// short spells that only ever appear in a shared season's cell.
+const ALIASES = {
+	'S. Mc.-Serio': 'Suzie McConnell-Serio', 'T. McWilliams-Franklin': 'Taj McWilliams-Franklin',
+	'R. Mahorn': 'Rick Mahorn', 'T. Edwards': 'Teresa Edwards', 'L. Sharp': 'Linda Sharp',
+	'J. Rousseau': 'Julie Rousseau', 'K. Thompson': 'Karleen Thompson', 'H. Bibby': 'Henry Bibby',
+	'P. Toler': 'Penny Toler', 'D. Taylor': 'Denise Taylor', 'F. Layden': 'Frank Layden', 'S. Dailey': 'Shell Dailey',
+	'H. VanDerveer': 'Heidi VanDerveer', 'C. Jenkins': 'Carolyn Jenkins', 'J. Lewis': 'Jim Lewis',
+	'C. Parson': 'Cathy Parson', 'N. Darsch': 'Nancy Darsch', 'D. Walker': 'Darrell Walker', 'J. Kenlaw': 'Jessie Kenlaw',
+	'O. Woolridge': 'Orlando Woolridge', 'G. Williams': 'Greg Williams', 'N. Richardson': 'Nolan Richardson',
+	'C. Cooper': 'Cynthia Cooper', 'D. Brown': 'Dee Brown', 'J. Gillom': 'Jennifer Gillom', 'C. Ross': 'Carol Ross',
+	'J. Bryant': 'Joe Bryant', 'M. Cooper': 'Michael Cooper', 'B. Agler': 'Brian Agler', 'P. Coyle': 'Pat Coyle',
+	'A. Donovan': 'Anne Donovan', 'R. Adubato': 'Richie Adubato', 'T. Rollins': 'Tree Rollins', 'B. Laimbeer': 'Bill Laimbeer',
+	'M. Meadors': 'Marynell Meadors', 'F. Williams': 'Fred Williams', 'C. Harvey': 'Candi Harvey',
+};
+// The draft ends with 2025. Each club's coach for 2026, from ESPN's season
+// coaches (sports.core.api.espn.com .../wnba/seasons/2026/teams/{id}/coaches),
+// read 2026-10-26. ESPN names none for Los Angeles, so the Sparks' 2026 has no
+// coach here; one change within the season would not show either.
+const WNBA_2026 = {
+	ATL: 'Karl Smesko', CHI: 'Tyler Marsh', CON: 'Rachid Meziane', DAL: 'Jose Fernandez', GSV: 'Natalie Nakase',
+	IND: 'Stephanie White', LVA: 'Becky Hammon', MIN: 'Cheryl Reeve', NYL: 'Chris DeMarco', PHX: 'Nate Tibbetts',
+	POR: 'Alex Sarama', SEA: 'Sonia Raman', TOR: 'Sandy Brondello', WAS: 'Sydney Johnson',
+};
+if (SEASON_TABLE) {
+	const seasons = [];
+	for (const r of draft) {
+		if (!/^\d{4}$/.test(r.first_year)) { review.push(`unparsed      ${r.franchiseName} · ${r.coach}`); continue; }
+		const cells = JSON.parse(r.raw.replace(/\bNaN\b/g, 'null'));
+		const val = (re) => { const k = Object.keys(cells).find((x) => re.test(x)); return k === undefined ? null : cells[k]; };
+		const w = num(val(/^Regular season W( |$)/)), l = num(val(/^Regular season L( |$)/));
+		const parts = [...r.coach.matchAll(/([^()]+?)\s*\((\d+)\s*[–-]\s*(\d+)\)/g)]
+			.map((m) => ({ name: m[1].trim(), w: Number(m[2]), l: Number(m[3]) }));
+		seasons.push({ club: r.franchiseName, season: Number(r.first_year), source: r.source,
+			coaches: parts.length ? parts : [{ name: r.coach.trim(), w, l }] });
+	}
+	for (const [club, name] of Object.entries(WNBA_2026)) {
+		if (!seasons.some((x) => x.club === club && x.season === 2026)) {
+			seasons.push({ club, season: 2026, source: 'ESPN (2026 season coaches)', coaches: [{ name, w: null, l: null }] });
+		}
+	}
+	// "M. Meadors" is whoever of that initial and surname the draft spells out.
+	const full = [...new Set(seasons.flatMap((x) => x.coaches.map((c) => c.name)))].filter((n) => !/^[A-Z]\.\s?/.test(n));
+	const resolve = (n) => {
+		if (ALIASES[n]) return ALIASES[n];
+		const m = n.match(/^([A-Z])\.\s*(.+)$/);
+		if (!m) return n;
+		const hits = full.filter((x) => x.startsWith(m[1]) && x.endsWith(` ${m[2]}`));
+		if (hits.length === 1) return hits[0];
+		review.push(`initials      ${n} (${hits.length} matches)`);
+		return n;
+	};
+	seasons.sort((a, b) => a.club.localeCompare(b.club) || a.season - b.season);
+	for (const x of seasons) {
+		x.coaches.forEach((c, i) => {
+			const name = resolve(c.name.replace(/[*†‡§^#!]+$/u, '').replace(/\s+/g, ' ').trim());
+			const prev = out.at(-1);
+			// The same coach on from the season before -- the one who finished it,
+			// starting this one -- is the same tenure.
+			const cont = prev && prev.franchiseAbbrv === x.club && prev.name === name && prev.lastSeason === x.season - 1 && i === 0 && prev.finishedLast;
+			const t = cont ? prev : {
+				group: null, leaderId: slugFor(name), name, nflverseName: '', franchiseAbbrv: x.club,
+				firstSeason: x.season, lastSeason: x.season, statedLastSeason: x.season, term: '',
+				w: 0, l: 0, t: 0, otl: 0, playoffW: 0, playoffL: 0, titleSeasons: '', interim: 'FALSE',
+				basis: 'transcribed', source: x.source, gc: null, single: false, year: x.season, fixed: true, finishes: [],
+			};
+			if (!cont) out.push(t);
+			t.lastSeason = x.season; t.statedLastSeason = x.season;
+			t.w += c.w ?? 0; t.l += c.l ?? 0;
+			const finisher = i === x.coaches.length - 1;
+			if (finisher) t.finishes.push(x.season);
+			t.finishedLast = finisher;
+			t.term = t.firstSeason === t.lastSeason ? String(t.firstSeason) : `${t.firstSeason}–${t.lastSeason}`;
+		});
+	}
+}
+for (const r of SEASON_TABLE ? [] : draft) {
 	if (r.parse_ok !== 'True') { review.push(`unparsed      ${r.franchiseName} · ${r.coach}`); continue; }
 	const cells = cellsOf(r.raw, null);
 	if (!cells) { review.push(`bad raw       ${r.franchiseName} · ${r.coach}`); continue; }
@@ -476,6 +561,15 @@ if (process.env.DATABASE_URL) {
 		if (!n) continue;
 		Object.assign(t, { w, l, t: tie, otl, playoffW: pw, playoffL: pl, basis: 'counted' });
 		counted++;
+	}
+	// A season-table tenure that shares a season keeps the table's regular
+	// season and takes the playoffs of the seasons it finished.
+	for (const t of out.filter((x) => x.finishes && x.basis !== 'counted')) {
+		t.playoffW = 0; t.playoffL = 0;
+		for (const yr of t.finishes) {
+			const p = poAt.get(`${t.franchiseAbbrv}|${yr}`);
+			if (p) { t.playoffW += p.w; t.playoffL += p.l; }
+		}
 	}
 	// A shared record: the ranges counted from the games take what they had,
 	// and the rest of the stated whole is the others'. Eddie Johnston's Pittsburgh
