@@ -2764,6 +2764,16 @@ details:not([open]) > .collapsible-summary::before {
     margin: 0 0 0.9rem;
 }
 
+/* A card's list under a heading of its own: Best Playoff Runs, by era. */
+.record-group-title {
+    color: rgb(var(--fg-rgb) / 0.75);
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin: 0 0 0.35rem;
+}
+
 .record-list {
     list-style: none;
     margin: 0 0 1rem;
