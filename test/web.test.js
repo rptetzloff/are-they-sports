@@ -376,3 +376,23 @@ test('assets and club files cannot be read from outside their directories', () =
 	assert.ok(clubFileFor('nfl', 'packers', 'photos.csv'))
 	assert.equal(clubFileFor('nfl', 'packers', '../../../package.json'), null)
 })
+
+test('the ESPN cache shares one fetch per URL and stays inside its byte budget', async () => {
+	const { createEspnCache } = await import('../lib/espn.js')
+	let fetches = 0
+	let clock = 0
+	const fetchImpl = async (url) => { fetches++; return { status: 200, text: async () => url.endsWith('big') ? 'x'.repeat(600) : 'y'.repeat(100) } }
+	const espn = createEspnCache({ fetchImpl, now: () => clock, maxBytes: 1000 })
+	// Two clubs asking for the same scoreboard at once: one fetch.
+	await Promise.all([espn('https://site.api.espn.com/a'), espn('https://site.api.espn.com/a')])
+	assert.equal(fetches, 1)
+	assert.equal((await espn('https://site.api.espn.com/a')).cacheState, 'hit')
+	// Past the budget the oldest goes, not everything.
+	await espn('https://site.api.espn.com/b')
+	await espn('https://site.api.espn.com/big')
+	await espn('https://site.api.espn.com/big2-big')
+	const { entries, bytes } = espn.stats()
+	assert.ok(bytes <= 1000, `${bytes} bytes`)
+	assert.ok(entries >= 1)
+	assert.equal((await espn('https://site.api.espn.com/big2-big')).cacheState, 'hit')
+})
