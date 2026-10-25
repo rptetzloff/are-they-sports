@@ -111,7 +111,15 @@ export function seasonsOf(term) {
 	// However they are separated — "1998–99 2002–05" has only a space.
 	const ranges = [...s.matchAll(/\b(?:1[89]|20)\d\d(?:\s*[–—-]\s*(?:(?:1[89]|20)\d\d|present|current))?/gi)].map((m) => m[0]);
 	if (ranges.length > 1 && !/(january|february|march|april|may|june|july|august|september|october|november|december)/i.test(s)) {
-		const spans = ranges.map((x) => seasonsOf(x)).filter(Boolean);
+		// Ranges that meet are one run: "1952–1953 (as player-coach) 1953–1954"
+		// is Andrew Levane's two seasons, not two tenures.
+		const spans = [];
+		for (const sp of ranges.map((x) => seasonsOf(x)).filter(Boolean)) {
+			const prev = spans.at(-1);
+			if (prev && sp.first <= prev.last + 1) Object.assign(prev, { last: Math.max(prev.last, sp.last), single: false });
+			else spans.push({ ...sp });
+		}
+		if (spans.length === 1) return spans[0];
 		return spans.length ? { ...spans.at(-1), spans } : null;
 	}
 	const years = [...s.matchAll(/\b(1[89]\d\d|20\d\d)\b/g)].map((m) => Number(m[1]));
@@ -153,7 +161,10 @@ for (const r of draft) {
 	const span = seasonsOf(row.term);
 	if (!span) { review.push(`no term       ${r.franchiseName} · ${r.coach} · ${JSON.stringify(row.term)}`); continue; }
 	const interim = r.interim === 'True' || /interim/i.test(r.coach);
-	const name = r.coach.replace(/\s*\((?:interim|co-coach)[^)]*\)/ig, '').replace(/[*†‡§^#!]+$/u, '').replace(/\s+/g, ' ').trim();
+	// Initials closed up, "K. C. Jones" as "K.C. Jones", so one person is one
+	// spelling across clubs' lists.
+	const name = r.coach.replace(/\s*\((?:interim|co-coach)[^)]*\)/ig, '').replace(/[*†‡§^#!]+$/u, '').replace(/\s+/g, ' ').trim()
+		.replace(/\b([A-Z])\.\s+(?=[A-Z]\.)/g, '$1.');
 	if (row.w == null || row.l == null) review.push(`no record     ${r.franchiseName} · ${name} · ${row.term}`);
 	if (span.spans) review.push(`ranges        ${r.franchiseName} · ${name} · ${row.term} (a tenure each, the record shared by games)`);
 	if (span.single) review.push(`one year      ${r.franchiseName} · ${name} · ${row.term} (taken as the season ending ${span.first})`);
@@ -192,6 +203,12 @@ const BY_HAND = {
 		// Utah's list names its general manager, Bill Armstrong.
 		{ name: 'André Tourigny', club: 'UTA', first: 2025, last: CURRENT,
 			note: 'Utah Mammoth (by hand: the list read the general manager)' },
+	],
+	nba: [
+		// Denver's list has Brown's ABA and NBA years as one record; the NBA's
+		// part ends after 53 games of 1978-79 (28-25), to Donnie Walsh.
+		{ name: 'Larry Brown', club: 'DEN', first: 1977, last: 1979, until: '1979-01-31', replaces: true,
+			note: 'List of Denver Nuggets head coaches (by hand: the NBA years of an ABA and NBA tenure)' },
 	],
 }[sport] ?? [];
 for (const h of BY_HAND.filter((x) => x.replaces)) {
@@ -455,6 +472,24 @@ if (process.env.DATABASE_URL) {
 		shareOut(rest, Object.fromEntries(SHARED.map((k) => [k, whole[k] - counts.reduce((a, t) => a + Number(t[k] || 0), 0)])));
 	}
 	console.log(`against the games: ${stretched} terms stretched into a shared season, ${counted} records counted from the games`);
+
+	// The four ABA clubs' lists run back into the ABA, whose games this repo
+	// does not count (lib/limitations.js): a tenure wholly ABA goes, and one
+	// that crosses into 1976-77 starts there. A crossing tenure's record was
+	// counted from the games, which are the NBA's alone; a transcribed one
+	// would carry ABA games, and is reported.
+	const ABA = sport === 'nba' ? { clubs: new Set(['BKN', 'DEN', 'IND', 'SAS']), from: 1977 } : null;
+	if (ABA) {
+		let dropped = 0;
+		for (let i = out.length - 1; i >= 0; i--) {
+			const t = out[i];
+			if (!ABA.clubs.has(t.franchiseAbbrv) || t.firstSeason >= ABA.from) continue;
+			if (t.lastSeason < ABA.from) { out.splice(i, 1); dropped++; continue; }
+			t.firstSeason = ABA.from;
+			if (t.basis !== 'counted') review.push(`aba record    ${t.franchiseAbbrv} · ${t.name} · transcribed across 1976-77, so it holds ABA games`);
+		}
+		console.log(`the ABA: ${dropped} tenures wholly before 1976-77 dropped`);
+	}
 
 	// Championships, from the games' champions: the coach who finished the
 	// season, which in a season shared by a change is the later of them, in
