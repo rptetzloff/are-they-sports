@@ -396,3 +396,25 @@ test('the ESPN cache shares one fetch per URL and stays inside its byte budget',
 	assert.ok(entries >= 1)
 	assert.equal((await espn('https://site.api.espn.com/big2-big')).cacheState, 'hit')
 })
+
+test('a final is held an hour for three days, then a day', () => {
+	const summary = (date) => JSON.stringify({ header: { competitions: [{ date, status: { type: { completed: true, state: 'post' } } }] } })
+	const url = 'https://site.api.espn.com/apis/site/v2/sports/football/nfl/summary?event=1'
+	const now = Date.parse('2026-10-26T12:00:00Z')
+	assert.equal(ttlFor(url, 200, summary('2026-10-25T17:00Z'), now), IDLE_TTL)
+	assert.equal(ttlFor(url, 200, summary('2026-10-01T17:00Z'), now), FINAL_TTL)
+})
+
+test('stale ESPN data stands in only briefly when ESPN fails', async () => {
+	const { createEspnCache } = await import('../lib/espn.js')
+	let clock = 0
+	let up = true
+	const fetchImpl = async () => { if (!up) throw new Error('down'); return { status: 500, text: async () => 'x' } }
+	const espn = createEspnCache({ fetchImpl, now: () => clock })
+	await espn('https://site.api.espn.com/live')
+	up = false
+	clock = TTL + 60_000
+	assert.equal((await espn('https://site.api.espn.com/live')).cacheState, 'stale')
+	clock = TTL + 11 * 60_000
+	assert.equal(await espn('https://site.api.espn.com/live'), null)
+})

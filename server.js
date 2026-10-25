@@ -114,16 +114,17 @@ const json = (res, code, body) => {
  */
 /** Send a PNG.
  *
- *  Cached hard, because a social card for a finished season never changes and
- *  every reader who sees a shared link fetches it. The season being played is
- *  the exception and gets a short cache, so a card does not go on claiming a
- *  record that has moved.
+ *  A finished season's card is cached for a day; the season being played gets
+ *  five minutes, so a card does not go on claiming a record that has moved.
+ *  Not a year and `immutable`, as it was: the URL carries no version, so a
+ *  corrected record or a new card design would have stayed in browsers and at
+ *  Cloudflare's edge for a year with no way to reach it.
  */
-const sendPng = (res, png, { immutable = false } = {}) => {
+const sendPng = (res, png, { settled = false } = {}) => {
 	res.writeHead(200, {
 		'content-type': 'image/png',
 		'content-length': png.length,
-		'cache-control': immutable ? 'public, max-age=31536000, immutable' : 'public, max-age=300',
+		'cache-control': settled ? 'public, max-age=86400' : 'public, max-age=300',
 	});
 	res.end(png);
 };
@@ -1608,7 +1609,7 @@ function main() {
 					});
 					// A finished season never changes; the one being played does.
 					const settled = season && season !== latest?.season;
-					return sendPng(res, await renderCard(svg), { immutable: Boolean(settled) });
+					return sendPng(res, await renderCard(svg), { settled: Boolean(settled) });
 				}
 				if (view.view === 'leaders') {
 					const team = clubFor(entry);
