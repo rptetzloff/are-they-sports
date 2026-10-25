@@ -15,6 +15,9 @@
 import { SITE } from './site.js';
 import { copyText, flashCopied } from './share-core.js';
 import { parseTvLookup, resolveChannel, tvStatus, primaryBroadcast, providerChannel, formatChannelNum, channelNumberFor, parseSimulcasts, broadcastsWithSimulcasts, dayCT, EMPTY_LOOKUP } from './tv-core.js';
+import { coverageOf } from './coverage-core.js';
+
+const escHtml = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
 class TvUi {
 // The state the methods read, as the baseball page's constructor sets it.
@@ -48,7 +51,66 @@ async loadTv() {
         	// broadcasts array directly. The TV logic itself is tv-core.js,
         	// shared with the server's link previews and the calendar feed.
         	broadcastsFor(game) {
-        		return broadcastsWithSimulcasts(game, this.simulcastsByDate);
+        		const all = broadcastsWithSimulcasts(game, this.simulcastsByDate);
+        		// A streaming-only game's over-the-air simulcast is the home
+        		// markets' alone: Wausau has a Packers game on CBS, but not a
+        		// Thursday night one on Green Bay's station. Where the week's
+        		// coverage lists the stations and the viewer's market is not among
+        		// them, the simulcast is not theirs to watch.
+        		const cov = this.regionalOf(game);
+        		if (cov && 'simulcast' in cov && this.selectedDma() && !cov.simulcast) return all.filter((b) => !b._simulcast);
+        		// And where it is the viewer's, the station's network, so their
+        		// area's channel for it is named (Green Bay's NBC, WGBA) without a
+        		// simulcast day entered by hand.
+        		if (cov?.station && !all.some((b) => b._simulcast)) {
+        			return [...all, { media: { shortName: cov.station.net }, type: { shortName: 'TV' }, market: { type: 'Home' }, _simulcast: true, _station: cov.station.call }];
+        		}
+        		return all;
+        	}
+
+        	// The viewer's TV market: their provider's service area's (set in the
+        	// admin), or null when no provider is chosen or the area has none.
+        	selectedDma() {
+        		const p = this.selectedProvider && this.providerMeta?.[this.selectedProvider];
+        		if (!p) return null;
+        		return p.service_area_dmas?.[this.selectedServiceAreaIndex(this.selectedProvider)] || null;
+        	}
+
+        	// The week's coverage maps (api/coverage, from 506sports), fetched
+        	// once a week a page; the note and the schedule redraw when they land.
+        	coverageFor(event) {
+        		const season = event?.season?.year, week = event?.week?.number;
+        		// The regular season only: 506sports maps no playoff game. A schedule's
+        		// event says seasonType.type, a scoreboard's season.type.
+        		if (!season || !week || (event?.seasonType?.type ?? event?.season?.type) !== 2) return null;
+        		const key = `${season}|${week}`;
+        		this._coverage ??= new Map();
+        		if (!this._coverage.has(key)) {
+        			this._coverage.set(key, null);
+        			fetch(`api/coverage?season=${season}&week=${week}`)
+        				.then((r) => (r.ok ? r.json() : null))
+        				.then((c) => {
+        					if (!c || !(c.regional?.length || c.national?.length)) return;
+        					this._coverage.set(key, c);
+        					this.refreshAnswerNote();
+        					this._rerenderSchedule();
+        				})
+        				.catch(() => {});
+        		}
+        		return this._coverage.get(key);
+        	}
+
+        	// What the coverage says of this game for the viewer's market
+        	// (coverage-core.js coverageOf), or null.
+        	regionalOf(event) {
+        		return coverageOf(this.coverageFor(event), event, this.selectedDma());
+        	}
+
+        	// "CBS · regional" or "CBS · not here" for a schedule row.
+        	regionalLabel(event, b) {
+        		const cov = this.regionalOf(event);
+        		if (!cov?.regional || cov.network !== String(b?.media?.shortName || '').toUpperCase()) return null;
+        		return cov.carried === false ? 'not in your area' : cov.carried === null ? 'regional' : null;
         	}
 
         	getTvStatus(game) {
@@ -97,6 +159,10 @@ async loadTv() {
         		if (!b) return '';
         		const ch = this.resolveChannel(b.media.shortName);
         		const network = ch?.display_name || b.media.shortName;
+        		// A regional CBS or FOX game this market's station does not carry:
+        		// say which it carries instead, not a channel the game is not on.
+        		const regional = this.regionalNoteHtml(tvGame, b);
+        		if (regional?.instead) return `<div class="answer-provider-note">${regional.html}</div>`;
         		const num = this.scheduleChannelNumber(b);
         		const live = tvGame.competitions?.[0]?.status?.type?.state === 'in';
         		const gameWord = live ? 'game' : 'next game';
@@ -113,7 +179,21 @@ async loadTv() {
         				</span>
         			</div>`;
         		}
-        		return `<div class="answer-provider-note">${provider.display_name} has the ${gameWord} on ${network}${num ? ` (Ch. ${num})` : ''}</div>`;
+        		return `<div class="answer-provider-note">${provider.display_name} has the ${gameWord} on ${network}${num ? ` (Ch. ${num})` : ''}${regional ? ` · ${regional.html}` : ''}</div>`;
+        	}
+
+        	// What a regional game means for the viewer's market (coverage-core.js),
+        	// as a fragment of the note, or null for a game every station has.
+        	// { instead: true } when this market's station carries another game.
+        	regionalNoteHtml(game, b = this._primaryOf(this.broadcastsFor(game))) {
+        		const cov = this.regionalOf(game);
+        		if (!cov?.regional || cov.network !== String(b?.media?.shortName || '').toUpperCase()) return null;
+        		const map = `<a href="${escHtml(cov.map)}" target="_blank" rel="noopener noreferrer">coverage map</a>`;
+        		const provider = this.selectedProvider && this.providerMeta[this.selectedProvider];
+        		const area = provider?.service_areas?.[this.selectedServiceAreaIndex(this.selectedProvider)] || 'your area';
+        		if (cov.carried === false) return { instead: true, html: `${escHtml(cov.network)} in ${escHtml(area)} has ${escHtml(cov.other)} instead · ${map}` };
+        		if (cov.carried === null) return { instead: false, html: `regional on ${escHtml(cov.network)}: it depends on your area · ${map}` };
+        		return null;
         	}
 
         	// Re-render the note when the provider or service area changes.

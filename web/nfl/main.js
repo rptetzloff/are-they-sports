@@ -691,7 +691,10 @@ markActiveMonth() {
         		const { tvGame, isPastSeason, superBowlName } = this._lastResult || {};
         		if (isPastSeason || superBowlName || !tvGame) return;
         		const where = tvLineOf(tvGame);
-        		const html = this._providerNoteHtml() || (where ? `<div class="answer-provider-note">${esc(where)}</div>` : '');
+        		// A regional CBS or FOX game says so, with that week's coverage map,
+        		// when no provider's market says whether this station has it.
+        		const regional = this.regionalNoteHtml(tvGame);
+        		const html = this._providerNoteHtml() || (where ? `<div class="answer-provider-note">${esc(where)}${regional ? ` · ${regional.html}` : ''}</div>` : '');
         		if (html) answerEl.insertAdjacentHTML('beforeend', html);
         	}
 
@@ -830,8 +833,11 @@ markActiveMonth() {
       // The networks to name, with the selected provider's channel number
       // (tv-ui.js), as the baseball page's rows have them.
       const tvLabels = this.scheduleBroadcasts(event).map(b => {
-        const num = this.scheduleChannelNumber(b);
-        return `${b.media.shortName}${num ? ` ${num}` : ''}`;
+        // A regional game this market's station does not carry has no channel
+        // to give (coverage-core.js); one with no market to check says so.
+        const regional = this.regionalLabel(event, b);
+        const num = regional ? null : this.scheduleChannelNumber(b);
+        return `${b.media.shortName}${num ? ` ${num}` : ''}${regional ? ` (${regional})` : ''}`;
       });
       return {
         key: String(event.id), date, phase: event._seasonType,
@@ -979,8 +985,9 @@ dateDiv.className = 'game-date';
 // The networks, with the selected provider's channel number, as the baseball
 // card has them (tv-ui.js).
 const network = this.scheduleBroadcasts(event).map(b => {
-  const num = this.scheduleChannelNumber(b);
-  return `${esc(b.media.shortName)}${num ? ` <span class="game-channum">Ch. ${esc(num)}</span>` : ''}`;
+  const regional = this.regionalLabel(event, b);
+  const num = regional ? null : this.scheduleChannelNumber(b);
+  return `${esc(b.media.shortName)}${num ? ` <span class="game-channum">Ch. ${esc(num)}</span>` : ''}${regional ? ` <span class="game-channum">${esc(regional)}</span>` : ''}`;
 }).join('<span class="game-network-sep"> · </span>');
 
 if (isLive || isInProgress) {

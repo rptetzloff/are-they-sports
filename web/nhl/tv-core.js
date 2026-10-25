@@ -62,6 +62,8 @@ export function parseTvLookup(channelLookupCsv, providerLookupCsv) {
 			website_url: p.website_url || '',
 			channel_lineup: p.channel_lineup || '',
 			service_areas: (p.service_areas || '').split('|').map((s) => s.trim()).filter(Boolean),
+			// Each area's TV market, by the same position (lib/tv.js), '' where unset.
+			service_area_dmas: (p.service_area_dmas || '').split('|').map((s) => s.trim()),
 			logo_url: (p.logo_url || '').trim(),
 			logo_bg: (p.logo_bg || '').trim(),
 			// ?? p.sponsor: the column's old name — browser-cached CSVs can serve
