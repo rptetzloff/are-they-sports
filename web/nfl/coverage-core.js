@@ -27,9 +27,10 @@ export function matchupIs(matchup, event) {
 /** What the week's coverage says of this game for a market (`dma`, or null
  *  when the viewer has not said where they are):
  *
- *  - { regional, network, carried, other, map } for a regional CBS or FOX
+ *  - { regional, network, carried, other, map, pending } for a regional CBS or FOX
  *    game: `carried` is true or false where the market is known (null where it
- *    is not), and `other` the game its station has instead;
+ *    is not), and `other` the game its station has instead; `pending` while
+ *    the window's map is not posted yet;
  *  - { simulcast, stations } for a national game simulcast over the air in
  *    the home markets: `simulcast` is the market's station, or null;
  *  - null for a national game every station has, or a week with no maps.
@@ -40,6 +41,9 @@ export function coverageOf(coverage, event, dma = null) {
 		if (!(w.games ?? []).some((m) => matchupIs(m, event))) continue;
 		// A window of one game is every station's (CBS's single late game).
 		if (w.games.length < 2) return null;
+		// Its map not posted yet (506sports posts them the Wednesday before):
+		// regional, with no market's game to give, and the week's page to see.
+		if (w.posted === false) return { regional: true, network: w.network, map: coverage.url, carried: null, other: null, pending: true };
 		const mine = dma ? w.byDma?.[dma] : undefined;
 		return {
 			regional: true, network: w.network, map: w.map ?? coverage.url,
