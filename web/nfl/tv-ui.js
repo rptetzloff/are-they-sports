@@ -192,6 +192,7 @@ async loadTv() {
         		const provider = this.selectedProvider && this.providerMeta[this.selectedProvider];
         		const area = provider?.service_areas?.[this.selectedServiceAreaIndex(this.selectedProvider)] || 'your area';
         		if (cov.carried === false) return { instead: true, html: `${escHtml(cov.network)} in ${escHtml(area)} has ${escHtml(cov.other)} instead · ${map}` };
+        		if (cov.pending) return { instead: false, html: `regional on ${escHtml(cov.network)}: which markets get it is posted Wednesday · <a href="${escHtml(cov.map)}" target="_blank" rel="noopener noreferrer">506sports</a>` };
         		if (cov.carried === null) return { instead: false, html: `regional on ${escHtml(cov.network)}: it depends on your area · ${map}` };
         		return null;
         	}

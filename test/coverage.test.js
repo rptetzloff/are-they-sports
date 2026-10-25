@@ -102,3 +102,39 @@ test('a regional game is carried, not carried, or depends on a market not given'
 	assert.equal(coverageOf(coverage, tnf, 'Green Bay').simulcast, 'WGBA/NBC')
 	assert.equal(coverageOf(coverage, tnf, 'Wausau').simulcast, null)
 })
+
+test('a map not posted yet is read once it is, at the same address', async () => {
+	// Before the Wednesday, the page names 2026/08-CBS-E.png and it answers 404.
+	let posted = false
+	const fetchBuffer = async (url) => {
+		const path = url.replace('https://506sports.com/', '')
+		if (path.startsWith('nfl.php')) return Buffer.from(page)
+		if (path.startsWith('nfl/swatches/')) return png(10, 10, () => [158, 229, 158])
+		return posted ? png(1280, 720, () => [158, 229, 158]) : null
+	}
+	const images = new Map()
+	const before = await weekCoverage(2026, 3, { fetchBuffer, images })
+	assert.equal(before.posted, false)
+	assert.ok(before.regional.every((w) => !w.posted && Object.keys(w.byDma).length === 0))
+	posted = true
+	const after = await weekCoverage(2026, 3, { fetchBuffer, images })
+	assert.equal(after.posted, true)
+	assert.ok(after.regional.some((w) => Object.keys(w.byDma).length === Object.keys(DMA_POINTS).length))
+	// And the page says so in between.
+	const colts = event('Indianapolis Colts', 'Minnesota Vikings')
+	const pending = coverageOf({ url: 'u', regional: [{ network: 'CBS', games: ['Indianapolis @ Minnesota', 'Cincinnati @ Baltimore'], byDma: {}, posted: false }], national: [] }, colts, 'Wausau')
+	assert.equal(pending.pending, true)
+	assert.equal(pending.carried, null)
+})
+
+test('a week whose maps are not posted: its windows, no maps, nothing fetched for them', async () => {
+	// 506sports keeps an unposted map inside a comment; it is not a map.
+	const unposted = readFileSync(new URL('./fixtures/506/2026-wk8-unposted.html', import.meta.url), 'utf8')
+	const { regional } = parseWeekPage(unposted)
+	assert.deepEqual(regional.map((r) => [`${r.network} ${r.window}`, r.map]), [['CBS EARLY', null], ['CBS LATE', null], ['FOX SINGLE', null]])
+	assert.ok(regional[0].games.some((g) => g.matchup === 'Baltimore @ Buffalo'))
+	const asked = []
+	const c = await weekCoverage(2026, 8, { fetchBuffer: async (url) => { asked.push(url); return url.includes('nfl.php') ? Buffer.from(unposted) : null } })
+	assert.equal(c.posted, false)
+	assert.deepEqual(asked, ['https://506sports.com/nfl.php?yr=2026&wk=8'])
+})
