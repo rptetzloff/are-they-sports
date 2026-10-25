@@ -50,6 +50,90 @@ export function pitchCall(play) {
 	return 'strike';
 }
 
+// --- Challenges ---
+//
+// Two kinds, both in ESPN's plays. A pitch challenged under the automated
+// ball-strike system (ABS) is a pitch whose type carries the outcome, named
+// by the call after review: "Strike Looking - Overturned" was called a ball
+// and is now a strike; "Ball - Confirmed" was called a ball and stays one.
+// (Checked against the counts that follow: a "Strike 2 Looking -
+// Overturned" is followed by "Strike 3 Swinging" and a strikeout.) ESPN does
+// not say who challenged, but the call does: only the batter's side gains
+// from a strike becoming a ball, and only the fielding side from a ball
+// becoming a strike. A manager's replay challenge is a sentence in the
+// play's text — "Tampa Bay Rays challenged: call on the field was upheld."
+// — and an umpire's own review reads "Umpire review: ... was overturned".
+//
+// Each team has two ABS challenges a game and keeps one that succeeds:
+// across the 2026 postseason's 35 games no team lost more than two in nine
+// innings. Extra innings have their own allowance, which is not counted.
+export const ABS_PER_GAME = 2;
+const ABS_TYPE = /^(Strike Looking|Ball) - (Overturned|Confirmed)$/i;
+// The outcome only; who challenged is found by the teams' own names, since a
+// name can hold a period ("St. Louis Cardinals") as the sentence before it
+// does ("Pratt grounded out to shortstop. Milwaukee Brewers challenged").
+const MANAGER = / challenged(?: \([^)]*\))?: ([^.]*?\bwas (upheld|overturned|confirmed)\b[^.]*)\./;
+const UMPIRE = /Umpire review: ([^.]*?\bwas (upheld|overturned|confirmed)\b[^.]*)\./i;
+
+/** The game's challenges, in order, and where each team stands: ABS
+ *  challenges won and lost, and how many are left while the game is in its
+ *  first nine innings (null after); manager challenges won and lost.
+ *  `teams` as liveDetail builds them, with `name`, the team's full name. */
+export function gameChallenges(plays, teams, names = new Map()) {
+	const side = (homeAway) => teams.find((t) => t.homeAway === homeAway) || null;
+	const list = [];
+	let inning = 0;
+	for (const p of plays || []) {
+		inning = Math.max(inning, num(p.period?.number) || 0);
+		const label = inningLabel(p.period);
+		const abs = (p.type?.text || '').match(ABS_TYPE);
+		if (abs && p.summaryType === 'P') {
+			const call = /^strike/i.test(abs[1]) ? 'strike' : 'ball';
+			const overturned = /overturned/i.test(abs[2]);
+			// The batter's side challenges a strike call, the fielders a ball.
+			const called = overturned ? (call === 'strike' ? 'ball' : 'strike') : call;
+			const batting = side(p.period?.type === 'Bottom' ? 'home' : 'away');
+			const fielding = side(p.period?.type === 'Bottom' ? 'away' : 'home');
+			const batterId = (p.participants || []).find((x) => x.type === 'batter')?.athlete?.id;
+			list.push({
+				kind: 'abs', inning: label, extra: (num(p.period?.number) || 0) > 9,
+				team: (called === 'strike' ? batting : fielding)?.abbr || '',
+				called, call, won: overturned,
+				batter: batterId != null ? names.get(String(batterId))?.short || '' : '',
+			});
+			continue;
+		}
+		const text = p.text || '';
+		const m = text.match(MANAGER);
+		if (m) {
+			const before = text.slice(0, m.index);
+			const who = teams.find((t) => (t.name && before.endsWith(t.name)) || (t.short && before.endsWith(t.short)));
+			list.push({ kind: 'manager', inning: label, team: who?.abbr || '', won: m[2].toLowerCase() === 'overturned', text: `${who?.name || 'A manager'} challenged: ${m[1]}.` });
+			continue;
+		}
+		const u = text.match(UMPIRE);
+		if (u) list.push({ kind: 'umpire', inning: label, team: '', won: null, overturned: u[2].toLowerCase() === 'overturned', text: `Umpire review: ${u[1]}.` });
+	}
+	const tally = teams.map((t) => {
+		const abs = list.filter((c) => c.kind === 'abs' && c.team === t.abbr);
+		const regulationLost = abs.filter((c) => !c.won && !c.extra).length;
+		const mgr = list.filter((c) => c.kind === 'manager' && c.team === t.abbr);
+		return {
+			team: t.abbr, homeAway: t.homeAway,
+			absWon: abs.filter((c) => c.won).length, absLost: abs.filter((c) => !c.won).length,
+			absLeft: inning > 9 ? null : Math.max(0, ABS_PER_GAME - regulationLost),
+			managerWon: mgr.filter((c) => c.won).length, managerLost: mgr.filter((c) => !c.won).length,
+		};
+	});
+	return { list, teams: tally };
+}
+
+/** A pitch challenged under ABS: 'overturned', 'upheld', or null. */
+export function pitchChallenge(play) {
+	const m = (play.type?.text || '').match(ABS_TYPE);
+	return m ? (/overturned/i.test(m[2]) ? 'overturned' : 'upheld') : null;
+}
+
 // Plays worth a line in the play log: results, scoring plays, pitching
 // changes, and the untagged events between pitches (a stolen base, a wild
 // pitch). Pitches ('P'), at-bat starts ('A') and inning markers ('I', and
@@ -184,11 +268,21 @@ export function liveDetail(summary, { recent = 2 } = {}) {
 					x: num(p.pitchCoordinate?.x), y: num(p.pitchCoordinate?.y),
 					call: pitchCall(p),
 					result: pitchResult(p),
+					// Challenged under ABS: 'overturned' or 'upheld'.
+					challenge: pitchChallenge(p),
 				}));
 		}
 	}
 
 	const lastHit = lastBallInPlay(plays, names, teams);
+
+	// Full names, for finding a manager's challenge ("Tampa Bay Rays
+	// challenged"); not sent on, so `teams` stays as it was.
+	const named = (comp.competitors || []).map((c) => ({
+		abbr: c.team?.abbreviation || '', homeAway: c.homeAway,
+		name: c.team?.displayName || '', short: c.team?.shortDisplayName || '',
+	}));
+	const challenges = gameChallenges(plays, named, names);
 
 	const log = plays.filter(logged).slice(-recent).reverse().map((p) => ({
 		inning: inningLabel(p.period),
@@ -205,7 +299,7 @@ export function liveDetail(summary, { recent = 2 } = {}) {
 			balls: atBatOver ? null : num(sit.balls), strikes: atBatOver ? null : num(sit.strikes), outs: num(sit.outs),
 			onFirst: Boolean(sit.onFirst), onSecond: Boolean(sit.onSecond), onThird: Boolean(sit.onThird),
 		},
-		pitchers, batter, pitches, atBatOver, lastHit, log,
+		pitchers, batter, pitches, atBatOver, lastHit, log, challenges,
 	};
 }
 
@@ -368,7 +462,9 @@ export function liveDetailHtml(d) {
 	}
 
 	if (d.pitches.length) {
-		const list = d.pitches.map((p) => `<li class="zone-${p.call}"><span class="live-pitch-n">${p.n}</span> ${esc(p.type || 'Pitch')}${p.mph ? ` <span class="live-mph">${p.mph}</span>` : ''} <span class="live-call">${esc(p.result || CALL_LABEL[p.call] || '')}</span></li>`).join('');
+		const list = d.pitches.map((p) => `<li class="zone-${p.call}"><span class="live-pitch-n">${p.n}</span> ${esc(p.type || 'Pitch')}${p.mph ? ` <span class="live-mph">${p.mph}</span>` : ''} <span class="live-call">${esc(p.result || CALL_LABEL[p.call] || '')}</span>`
+			+ (p.challenge ? ` <span class="live-chal live-chal-${p.challenge}" title="Challenged: ${p.challenge}">${p.challenge === 'overturned' ? 'Overturned' : 'Upheld'}</span>` : '')
+			+ `</li>`).join('');
 		parts.push(`<div class="live-atbat">${pitchZoneSvg(d.pitches, d.batter?.bats)}<ol class="live-pitches" aria-label="${d.atBatOver ? 'Last at-bat' : 'This at-bat'}, pitch by pitch">${list}</ol></div>`);
 	}
 
@@ -388,10 +484,47 @@ export function liveDetailHtml(d) {
 		parts.push(`<div class="live-row live-other"><span class="live-role">${esc(p.team)} pitcher</span> <strong>${esc(p.short || p.name)}</strong> <span class="live-stats">${esc(pitcherLine(p))}</span></div>`);
 	}
 
+	const chal = challengesHtml(d.challenges);
+	if (chal) parts.push(chal);
+
 	if (d.log.length) {
 		parts.push(`<ol class="live-log" aria-label="Recent plays">${d.log.map((l) => `<li${l.scoring ? ' class="live-scoring"' : ''}><span class="live-inning">${esc(l.inning)}</span> ${esc(l.text)}</li>`).join('')}</ol>`);
 	}
 	return parts.length ? `<div class="live-detail">${parts.join('')}</div>` : '';
+}
+
+/** One challenge as a sentence: "TB challenged a called strike on Mesa Jr.:
+ *  upheld", "MIL challenged a play: overturned", or the umpire's review. */
+export function challengeText(c) {
+	if (c.kind === 'abs') {
+		const outcome = c.won ? `overturned, now a ${c.call}` : 'upheld';
+		return `${c.team} challenged a called ${c.called}${c.batter ? ` on ${c.batter}` : ''}: ${outcome}`;
+	}
+	if (c.kind === 'manager') return `${c.team || 'A manager'} challenged a play: ${c.won ? 'overturned' : 'upheld'}`;
+	return c.text;
+}
+
+/** The challenges block: each team's ABS challenges left as pips (two to a
+ *  game, kept when one succeeds), and the latest three challenges of any
+ *  kind, newest first. Away team first, as the scoreboard reads. '' before
+ *  the game has teams. */
+export function challengesHtml(ch, { latest = 3 } = {}) {
+	if (!ch?.teams?.length) return '';
+	const order = [...ch.teams].sort((a, b) => (a.homeAway === 'away' ? -1 : b.homeAway === 'away' ? 1 : 0));
+	const team = (t) => {
+		const record = `${t.absWon} won, ${t.absLost} lost`;
+		const left = t.absLeft === null
+			? `<span class="live-stats">${t.absWon}-${t.absLost}</span>`
+			: `<span class="chal-pips" aria-hidden="true">${Array.from({ length: ABS_PER_GAME }, (_, i) => `<span class="chal-pip${i < t.absLeft ? ' on' : ''}"></span>`).join('')}</span>`;
+		const label = t.absLeft === null ? `${t.team}: ${record}` : `${t.team}: ${t.absLeft} left, ${record}`;
+		return `<span class="chal-team" role="img" aria-label="${esc(label)}"><span class="live-team">${esc(t.team)}</span> ${left}</span>`;
+	};
+	const rows = [`<div class="live-row"><span class="live-role">ABS challenges</span> ${order.map(team).join(' ')}</div>`];
+	for (const c of ch.list.slice(-latest).reverse()) {
+		const good = c.kind === 'umpire' ? c.overturned : c.won;
+		rows.push(`<div class="live-note chal-item${good ? ' chal-won' : ''}"><span class="live-inning">${esc(c.inning)}</span> ${esc(challengeText(c))}</div>`);
+	}
+	return `<div class="live-challenges">${rows.join('')}</div>`;
 }
 
 /** "Probables: Drohan (MIL) · Glasnow (LAD) 0-0, 1.93", or '' when unknown. */

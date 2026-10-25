@@ -1319,6 +1319,12 @@ manifest gets the one for its sport at its own root — `/` in a single-club
 scope, `/nfl/packers` under `SCOPE=all` — and `lib/web-routes.js` answers
 everything that page asks its server for.
 
+Since then `web/mlb/live-core.js` and its styles have taken the site's
+challenges (AreTheBrewersOnTV fda901f, its #118, 2026-10-25): each team's ABS
+challenges left, the latest pitch, manager and umpire challenges, and a tag on a
+challenged pitch. The file is that commit's, unchanged, as the 4441d89 one was;
+`test/mlb-challenges.test.js` is the site's test pointed here.
+
 **Every path in `web/` is relative, and `<base>` says relative to what.** The
 sites fetched `/data/...` and `/api/...` because each owned its domain's root.
 The first version kept that and served the page only to single-club scopes,
