@@ -742,7 +742,10 @@ function main() {
 		// Every club a front page can change to, for the footer's team changer.
 		// Only clubs that have a front page, so the menu never leads somewhere
 		// that looks different.
-		const frontClubs = table
+		// The team menu, from the table as it stands: availability is refreshed
+		// every 30 seconds, and a list taken at boot left a club loaded later out
+		// of every menu until a restart. Read through a getter (`clubs`).
+		const frontClubs = () => table
 			.filter((e) => e.available && clubFor(e) && hasFrontEnd(e.sport))
 			.map((e) => ({ sport: e.sport, teamId: e.teamId, name: clubFor(e).nouns.fullName, href: `${e.base}/` }));
 		const frontFor = (entry) => {
@@ -754,7 +757,7 @@ function main() {
 					team: clubFor(entry),
 					franchise: entry.franchise,
 					base: entry.base,
-					clubs: frontClubs,
+					get clubs() { return frontClubs(); },
 					adapter: adapters[entry.sport],
 					namer: namers[entry.sport],
 					history: loadHistory(entry.sport),
@@ -792,7 +795,7 @@ function main() {
 					team: clubFor(entry),
 					franchise: entry.franchise,
 					base: `/${sport}`,
-					clubs: frontClubs,
+					get clubs() { return frontClubs(); },
 					adapter: adapters[sport],
 					namer: namers[sport],
 					history: loadHistory(sport),
@@ -824,7 +827,7 @@ function main() {
 		// The fixed footer on the league pages the server draws (render.js
 		// siteFooterHtml), with the team menu's clubs and this page's share links.
 		const footerFor = (req2, url2, { sport = null, current, title }) => siteFooterHtml({
-			sport, current, clubs: frontClubs,
+			sport, current, get clubs() { return frontClubs(); },
 			share: { url: `${originOf(req2)}${url2.pathname}${url2.search}`, links: shareLinks({ url: `${originOf(req2)}${url2.pathname}${url2.search}`, title }) },
 		});
 		// A league's page is named for its league (NHL), the scope's for the scope.
