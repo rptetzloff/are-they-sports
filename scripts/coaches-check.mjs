@@ -29,10 +29,11 @@ await c.end();
 
 const played = new Map();
 // The season being played is left out: a list written before it began cannot
-// have its games, and a coach named for it has none to state yet.
-const playing = Number(process.env.PLAYING ?? ({ nhl: 2027, nba: 2027, wnba: 2026, mls: 2026 }[sport] ?? 0));
+// have its games, and a coach named for it has none to state yet. The summer
+// leagues' 2026 regular seasons are over, and wiki-coaches.mjs counts them.
+const playing = Number(process.env.PLAYING ?? ({ nhl: 2027, nba: 2027 }[sport] ?? 0));
 for (const g of games) {
-	if (Number(g.season) >= playing) continue;
+	if (playing && Number(g.season) >= playing) continue;
 	if (!played.has(g.franchise)) played.set(g.franchise, new Map());
 	played.get(g.franchise).set(Number(g.season), g);
 }
