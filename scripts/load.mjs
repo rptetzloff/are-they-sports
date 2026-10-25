@@ -918,7 +918,7 @@ function loadCoachesFile(sportId) {
 async function loadNflTenures(client, knownFranchises) { return loadTenures(client, 'nfl', knownFranchises); }
 
 /** Stated tenures from a sport's curated table: football's before 1999, and
- *  the whole of hockey's (0020 adds its overtime losses). */
+ *  the whole of hockey's and basketball's (0020 adds overtime losses). */
 async function loadTenures(client, sportId, knownFranchises) {
 	const rows = loadCoachesFile(sportId).filter((r) => r.stated);
 	if (!rows.length) {
@@ -926,6 +926,11 @@ async function loadTenures(client, sportId, knownFranchises) {
 		if (sportId === 'nfl') console.log('               football before 1999 will be absent from the leaders page');
 		return;
 	}
+	// The file is the whole of a sport's stated tenures, so it replaces them:
+	// upserting alone left a tenure whose first season a correction moved
+	// standing beside its replacement (Alex Delvecchio's two Detroit terms,
+	// once joined, were three rows).
+	await client.query(`DELETE FROM leader_tenure WHERE sport = $1 AND source = 'wikipedia'`, [sportId]);
 	let wrote = 0, skippedClub = 0;
 	for (const r of rows) {
 		if (!knownFranchises.has(r.franchiseAbbrv)) { skippedClub++; continue; }

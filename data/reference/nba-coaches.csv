@@ -1,0 +1,666 @@
+# NBA head coaches, from Wikipedia's lists of each club's head coaches (CC BY-SA 4.0).
+#
+# CURATED AND COMMITTED. Seeded by scripts/wiki-coaches.mjs from the draft in
+# data/sources/sportsdata/coaches; corrections belong here, not in the draft.
+# Seasons are numbered as this repo numbers them (the year a season ends).
+# w, l, t and otl are the regular season, playoffW and playoffL the playoffs.
+# basis says where the record is from: counted, from this database's games,
+# for a coach who had every game of his seasons; transcribed, the list's own,
+# where a mid-season change shares a season and only the list knows the split.
+# Each tenure's seasons were placed where its games fit the games played
+# (scripts/coaches-check.mjs reports any that do not). titleSeasons are the
+# club's championships, credited to the coach who finished the season.
+leaderId,name,nflverseName,franchiseAbbrv,firstSeason,lastSeason,statedLastSeason,w,l,t,otl,playoffW,playoffL,titleSeasons,interim,basis,source
+potter-roger,Roger Potter,,ATL,1950,1950,1950,1,6,0,0,0,0,,FALSE,transcribed,List of Atlanta Hawks head coaches
+auerbach-red,Red Auerbach,,ATL,1950,1950,1950,28,29,0,0,1,2,,FALSE,transcribed,List of Atlanta Hawks head coaches
+macmillan-dave,Dave MacMillan,,ATL,1951,1951,1951,9,14,0,0,0,0,,FALSE,transcribed,List of Atlanta Hawks head coaches
+logan-johnny,Johnny Logan,,ATL,1951,1951,1951,2,1,0,0,0,0,,FALSE,transcribed,List of Atlanta Hawks head coaches
+todorovich-mike,Mike Todorovich,,ATL,1951,1951,1951,14,28,0,0,0,0,,FALSE,transcribed,List of Atlanta Hawks head coaches
+moore-doxie,Doxie Moore,,ATL,1952,1952,1952,17,49,0,0,0,0,,FALSE,counted,List of Atlanta Hawks head coaches
+levane-andrew,Andrew Levane,,ATL,1953,1954,1954,38,79,0,0,0,0,,FALSE,transcribed,List of Atlanta Hawks head coaches
+holzman-red,Red Holzman,,ATL,1954,1955,1955,36,62,0,0,0,0,,FALSE,transcribed,List of Atlanta Hawks head coaches
+holzman-red,Red Holzman,,ATL,1956,1957,1957,47,58,0,0,4,5,,FALSE,transcribed,List of Atlanta Hawks head coaches
+martin-slater,Slater Martin,,ATL,1957,1957,1957,5,3,0,0,0,0,,FALSE,transcribed,List of Atlanta Hawks head coaches
+hannum-alex,Alex Hannum,,ATL,1957,1958,1958,56,47,0,0,16,7,1958,FALSE,transcribed,List of Atlanta Hawks head coaches
+phillip-andy,Andy Phillip,,ATL,1959,1959,1959,6,4,0,0,0,0,,FALSE,transcribed,List of Atlanta Hawks head coaches
+macauley-ed,Ed Macauley,,ATL,1959,1960,1960,89,48,0,0,9,11,,FALSE,transcribed,List of Atlanta Hawks head coaches
+seymour-paul,Paul Seymour,,ATL,1961,1962,1962,56,37,0,0,5,7,,FALSE,transcribed,List of Atlanta Hawks head coaches
+levane-andrew,Andrew Levane,,ATL,1962,1962,1962,20,40,0,0,0,0,,FALSE,transcribed,List of Atlanta Hawks head coaches
+pettit-bob,Bob Pettit,,ATL,1962,1962,1962,4,2,0,0,0,0,,FALSE,transcribed,List of Atlanta Hawks head coaches
+gallatin-harry,Harry Gallatin,,ATL,1963,1965,1965,111,82,0,0,12,11,,FALSE,transcribed,List of Atlanta Hawks head coaches
+guerin-richie,Richie Guerin,,ATL,1965,1968,1968,159,131,0,0,14,15,,FALSE,transcribed,List of Atlanta Hawks head coaches
+guerin-richie,Richie Guerin,,ATL,1969,1972,1972,168,160,0,0,12,19,,FALSE,counted,List of Atlanta Hawks head coaches
+fitzsimmons-cotton,Cotton Fitzsimmons,,ATL,1973,1976,1976,140,180,0,0,2,4,,FALSE,transcribed,List of Atlanta Hawks head coaches
+tormohlen-bumper,Bumper Tormohlen,,ATL,1976,1976,1976,1,7,0,0,0,0,,FALSE,transcribed,List of Atlanta Hawks head coaches
+brown-hubie,Hubie Brown,,ATL,1977,1981,1981,199,208,0,0,6,10,,FALSE,transcribed,List of Atlanta Hawks head coaches
+fratello-mike,Mike Fratello,,ATL,1981,1981,1981,0,3,0,0,0,0,,FALSE,transcribed,List of Atlanta Hawks head coaches
+loughery-kevin,Kevin Loughery,,ATL,1982,1983,1983,85,79,0,0,1,4,,FALSE,counted,List of Atlanta Hawks head coaches
+fratello-mike,Mike Fratello,,ATL,1984,1990,1990,324,250,0,0,18,22,,FALSE,counted,List of Atlanta Hawks head coaches
+weiss-bob,Bob Weiss,,ATL,1991,1993,1993,124,122,0,0,2,6,,FALSE,counted,List of Atlanta Hawks head coaches
+wilkens-lenny,Lenny Wilkens,,ATL,1994,2000,2000,310,232,0,0,17,30,,FALSE,counted,List of Atlanta Hawks head coaches
+kruger-lon,Lon Kruger,,ATL,2001,2003,2003,69,122,0,0,0,0,,FALSE,transcribed,List of Atlanta Hawks head coaches
+stotts-terry,Terry Stotts,,ATL,2003,2004,2004,52,85,0,0,0,0,,FALSE,transcribed,List of Atlanta Hawks head coaches
+woodson-mike,Mike Woodson,,ATL,2005,2010,2010,206,286,0,0,11,18,,FALSE,counted,List of Atlanta Hawks head coaches
+drew-larry,Larry Drew,,ATL,2011,2013,2013,128,102,0,0,10,14,,FALSE,counted,List of Atlanta Hawks head coaches
+budenholzer-mike,Mike Budenholzer,,ATL,2014,2018,2018,213,197,0,0,17,22,,FALSE,counted,List of Atlanta Hawks head coaches
+pierce-lloyd,Lloyd Pierce,,ATL,2019,2021,2021,63,120,0,0,0,0,,FALSE,transcribed,List of Atlanta Hawks head coaches
+mcmillan-nate,Nate McMillan,,ATL,2021,2023,2023,99,80,0,0,11,12,,FALSE,transcribed,List of Atlanta Hawks head coaches
+prunty-joe,Joe Prunty,,ATL,2023,2023,2023,2,0,0,0,0,0,,FALSE,transcribed,List of Atlanta Hawks head coaches
+snyder-quin,Quin Snyder,,ATL,2023,2027,2027,132,135,0,0,2,4,,FALSE,transcribed,List of Atlanta Hawks head coaches
+russell-john,John Russell,,BOS,1947,1948,1948,42,66,0,0,1,2,,FALSE,counted,List of Boston Celtics head coaches
+julian-alvin,Alvin Julian,,BOS,1949,1950,1950,47,81,0,0,0,0,,FALSE,counted,List of Boston Celtics head coaches
+auerbach-red,Red Auerbach,,BOS,1951,1966,1966,795,397,0,0,90,58,1957 1959 1960 1961 1962 1963 1964 1965 1966,FALSE,counted,List of Boston Celtics head coaches
+russell-bill,Bill Russell,,BOS,1967,1969,1969,162,83,0,0,28,18,1968 1969,FALSE,counted,List of Boston Celtics head coaches
+heinsohn-tom,Tom Heinsohn,,BOS,1970,1979,1979,427,263,0,0,47,33,1974 1976,FALSE,transcribed,List of Boston Celtics head coaches
+sanders-tom,Tom Sanders,,BOS,1978,1978,1978,23,39,0,0,0,0,,FALSE,transcribed,List of Boston Celtics head coaches
+cowens-dave,Dave Cowens,,BOS,1979,1979,1979,27,41,0,0,0,0,,FALSE,transcribed,List of Boston Celtics head coaches
+fitch-bill,Bill Fitch,,BOS,1980,1983,1983,242,86,0,0,26,19,1981,FALSE,counted,List of Boston Celtics head coaches
+jones-c-k,K.C. Jones,,BOS,1984,1988,1988,308,102,0,0,65,37,1984 1986,FALSE,counted,List of Boston Celtics head coaches
+rodgers-jimmy,Jimmy Rodgers,,BOS,1989,1990,1990,94,70,0,0,2,6,,FALSE,counted,List of Boston Celtics head coaches
+ford-chris,Chris Ford,,BOS,1991,1995,1995,222,188,0,0,13,16,,FALSE,counted,List of Boston Celtics head coaches
+carr-l-m,M.L. Carr,,BOS,1996,1997,1997,48,116,0,0,0,0,,FALSE,counted,List of Boston Celtics head coaches
+pitino-rick,Rick Pitino,,BOS,1998,2001,2001,102,146,0,0,0,0,,FALSE,transcribed,List of Boston Celtics head coaches
+brien-o-jim,Jim O'Brien,,BOS,2001,2004,2004,139,119,0,0,13,13,,FALSE,transcribed,List of Boston Celtics head coaches
+carroll-john,John Carroll,,BOS,2004,2004,2004,14,22,0,0,0,4,,FALSE,transcribed,List of Boston Celtics head coaches
+rivers-doc,Doc Rivers,,BOS,2005,2013,2013,416,305,0,0,59,47,2008,FALSE,counted,List of Boston Celtics head coaches
+stevens-brad,Brad Stevens,,BOS,2014,2021,2021,354,282,0,0,38,40,,FALSE,counted,List of Boston Celtics head coaches
+udoka-ime,Ime Udoka,,BOS,2022,2022,2022,51,31,0,0,14,10,,FALSE,counted,List of Boston Celtics head coaches
+mazzulla-joe,Joe Mazzulla,,BOS,2023,2027,2027,238,90,0,0,36,21,2024,FALSE,counted,List of Boston Celtics head coaches
+loughery-kevin,Kevin Loughery,,BKN,1977,1977,1977,22,60,0,0,0,0,,FALSE,counted,List of Brooklyn Nets head coaches
+loughery-kevin,Kevin Loughery,,BKN,1978,1981,1981,107,174,0,0,0,2,,FALSE,transcribed,List of Brooklyn Nets head coaches
+mackinnon-bob,Bob MacKinnon,,BKN,1981,1981,1981,12,35,0,0,0,0,,FALSE,transcribed,List of Brooklyn Nets head coaches
+brown-larry,Larry Brown,,BKN,1982,1983,1983,91,67,0,0,0,2,,FALSE,transcribed,List of Brooklyn Nets head coaches
+blair-bill,Bill Blair,,BKN,1983,1983,1983,2,4,0,0,0,2,,FALSE,transcribed,List of Brooklyn Nets head coaches
+albeck-stan,Stan Albeck,,BKN,1984,1985,1985,87,77,0,0,5,9,,FALSE,counted,List of Brooklyn Nets head coaches
+wohl-dave,Dave Wohl,,BKN,1986,1988,1988,65,114,0,0,0,3,,FALSE,transcribed,List of Brooklyn Nets head coaches
+mackinnon-bob,Bob MacKinnon,,BKN,1988,1988,1988,10,29,0,0,0,0,,FALSE,transcribed,List of Brooklyn Nets head coaches
+reed-willis,Willis Reed,,BKN,1988,1989,1989,33,77,0,0,0,0,,FALSE,transcribed,List of Brooklyn Nets head coaches
+fitch-bill,Bill Fitch,,BKN,1990,1992,1992,83,163,0,0,1,3,,FALSE,counted,List of Brooklyn Nets head coaches
+daly-chuck,Chuck Daly,,BKN,1993,1994,1994,88,76,0,0,3,6,,FALSE,counted,List of Brooklyn Nets head coaches
+beard-butch,Butch Beard,,BKN,1995,1996,1996,60,104,0,0,0,0,,FALSE,counted,List of Brooklyn Nets head coaches
+calipari-john,John Calipari,,BKN,1997,1999,1999,72,112,0,0,0,3,,FALSE,transcribed,List of Brooklyn Nets head coaches
+casey-don,Don Casey,,BKN,1999,2000,2000,44,68,0,0,0,0,,FALSE,transcribed,List of Brooklyn Nets head coaches
+scott-byron,Byron Scott,,BKN,2001,2004,2004,149,139,0,0,25,15,,FALSE,transcribed,List of Brooklyn Nets head coaches
+frank-lawrence,Lawrence Frank,,BKN,2004,2010,2010,225,241,0,0,18,20,,FALSE,transcribed,List of Brooklyn Nets head coaches
+barrise-tom,Tom Barrise,,BKN,2009,2009,2009,0,2,0,0,0,0,,FALSE,transcribed,List of Brooklyn Nets head coaches
+vandeweghe-kiki,Kiki Vandeweghe,,BKN,2010,2010,2010,12,52,0,0,0,0,,FALSE,transcribed,List of Brooklyn Nets head coaches
+johnson-avery,Avery Johnson,,BKN,2011,2012,2012,46,102,0,0,0,0,,FALSE,counted,List of Brooklyn Nets head coaches
+johnson-avery,Avery Johnson,,BKN,2013,2013,2013,14,14,0,0,0,0,,FALSE,transcribed,List of Brooklyn Nets head coaches
+carlesimo-j-p,P.J. Carlesimo,,BKN,2013,2013,2013,35,19,0,0,3,4,,FALSE,transcribed,List of Brooklyn Nets head coaches
+kidd-jason,Jason Kidd,,BKN,2014,2014,2014,44,38,0,0,5,7,,FALSE,counted,List of Brooklyn Nets head coaches
+hollins-lionel,Lionel Hollins,,BKN,2015,2016,2016,48,71,0,0,2,4,,FALSE,transcribed,List of Brooklyn Nets head coaches
+brown-tony,Tony Brown,,BKN,2016,2016,2016,11,34,0,0,0,0,,FALSE,transcribed,List of Brooklyn Nets head coaches
+atkinson-kenny,Kenny Atkinson,,BKN,2017,2020,2020,118,190,0,0,1,4,,FALSE,transcribed,List of Brooklyn Nets head coaches
+vaughn-jacque,Jacque Vaughn,,BKN,2020,2020,2020,7,3,0,0,0,4,,FALSE,transcribed,List of Brooklyn Nets head coaches
+nash-steve,Steve Nash,,BKN,2021,2023,2023,94,67,0,0,7,9,,FALSE,transcribed,List of Brooklyn Nets head coaches
+vaughn-jacque,Jacque Vaughn,,BKN,2023,2024,2024,64,65,0,0,0,4,,FALSE,transcribed,List of Brooklyn Nets head coaches
+ollie-kevin,Kevin Ollie,,BKN,2024,2024,2024,11,17,0,0,0,0,,FALSE,transcribed,List of Brooklyn Nets head coaches
+fernandez-jordi,Jordi Fernández,,BKN,2025,2027,2027,46,118,0,0,0,0,,FALSE,counted,List of Brooklyn Nets head coaches
+harter-dick,Dick Harter,,CHA,1989,1990,1990,28,94,0,0,0,0,,FALSE,transcribed,List of Charlotte Hornets head coaches
+littles-gene,Gene Littles,,CHA,1990,1991,1991,37,87,0,0,0,0,,FALSE,transcribed,List of Charlotte Hornets head coaches
+bristow-allan,Allan Bristow,,CHA,1992,1996,1996,207,203,0,0,5,8,,FALSE,counted,List of Charlotte Hornets head coaches
+cowens-dave,Dave Cowens,,CHA,1997,1999,1999,109,70,0,0,4,8,,FALSE,transcribed,List of Charlotte Hornets head coaches
+silas-paul,Paul Silas,,CHA,1999,2002,2002,161,120,0,0,11,12,,FALSE,transcribed,List of Charlotte Hornets head coaches
+bickerstaff-bernie,Bernie Bickerstaff,,CHA,2005,2007,2007,77,169,0,0,0,0,,FALSE,counted,List of Charlotte Hornets head coaches
+vincent-sam,Sam Vincent,,CHA,2008,2008,2008,32,50,0,0,0,0,,FALSE,counted,List of Charlotte Hornets head coaches
+brown-larry,Larry Brown,,CHA,2009,2011,2011,88,104,0,0,0,4,,FALSE,transcribed,List of Charlotte Hornets head coaches
+silas-paul,Paul Silas,,CHA,2011,2012,2012,32,88,0,0,0,0,,FALSE,transcribed,List of Charlotte Hornets head coaches
+dunlap-mike,Mike Dunlap,,CHA,2013,2013,2013,21,61,0,0,0,0,,FALSE,counted,List of Charlotte Hornets head coaches
+clifford-steve,Steve Clifford,,CHA,2014,2014,2014,43,39,0,0,0,4,,FALSE,counted,List of Charlotte Hornets head coaches
+clifford-steve,Steve Clifford,,CHA,2015,2018,2018,153,175,0,0,3,4,,FALSE,counted,List of Charlotte Hornets head coaches
+borrego-james,James Borrego,,CHA,2019,2022,2022,138,163,0,0,0,0,,FALSE,counted,List of Charlotte Hornets head coaches
+clifford-steve,Steve Clifford,,CHA,2023,2024,2024,48,116,0,0,0,0,,FALSE,counted,List of Charlotte Hornets head coaches
+lee-charles,Charles Lee,,CHA,2025,2027,2027,63,101,0,0,0,0,,FALSE,counted,List of Charlotte Hornets head coaches
+kerr-johnny,Johnny Kerr,,CHI,1967,1968,1968,62,101,0,0,1,7,,FALSE,counted,List of Chicago Bulls head coaches
+motta-dick,Dick Motta,,CHI,1969,1976,1976,356,300,0,0,18,29,,FALSE,counted,List of Chicago Bulls head coaches
+badger-ed,Ed Badger,,CHI,1977,1978,1978,84,80,0,0,1,2,,FALSE,counted,List of Chicago Bulls head coaches
+costello-larry,Larry Costello,,CHI,1979,1979,1979,20,36,0,0,0,0,,FALSE,transcribed,List of Chicago Bulls head coaches
+robertson-scotty,Scotty Robertson,,CHI,1979,1979,1979,11,15,0,0,0,0,,FALSE,transcribed,List of Chicago Bulls head coaches
+sloan-jerry,Jerry Sloan,,CHI,1980,1982,1982,94,121,0,0,2,4,,FALSE,transcribed,List of Chicago Bulls head coaches
+johnson-phil,Phil Johnson,,CHI,1982,1982,1982,0,1,0,0,0,0,,FALSE,transcribed,List of Chicago Bulls head coaches
+thorn-rod,Rod Thorn,,CHI,1982,1982,1982,15,15,0,0,0,0,,FALSE,transcribed,List of Chicago Bulls head coaches
+westhead-paul,Paul Westhead,,CHI,1983,1983,1983,28,54,0,0,0,0,,FALSE,counted,List of Chicago Bulls head coaches
+loughery-kevin,Kevin Loughery,,CHI,1984,1985,1985,65,99,0,0,1,3,,FALSE,counted,List of Chicago Bulls head coaches
+albeck-stan,Stan Albeck,,CHI,1986,1986,1986,30,52,0,0,0,3,,FALSE,counted,List of Chicago Bulls head coaches
+collins-doug,Doug Collins,,CHI,1987,1989,1989,137,109,0,0,13,17,,FALSE,counted,List of Chicago Bulls head coaches
+jackson-phil,Phil Jackson,,CHI,1990,1998,1998,545,193,0,0,111,41,1991 1992 1993 1996 1997 1998,FALSE,counted,List of Chicago Bulls head coaches
+floyd-tim,Tim Floyd,,CHI,1999,2002,2002,49,190,0,0,0,0,,FALSE,transcribed,List of Chicago Bulls head coaches
+berry-bill,Bill Berry,,CHI,2001,2001,2001,0,2,0,0,0,0,,FALSE,transcribed,List of Chicago Bulls head coaches
+cartwright-bill,Bill Cartwright,,CHI,2002,2004,2004,51,100,0,0,0,0,,FALSE,transcribed,List of Chicago Bulls head coaches
+myers-pete,Pete Myers,,CHI,2003,2003,2003,0,2,0,0,0,0,,FALSE,transcribed,List of Chicago Bulls head coaches
+skiles-scott,Scott Skiles,,CHI,2004,2008,2008,165,172,0,0,10,12,,FALSE,transcribed,List of Chicago Bulls head coaches
+myers-pete,Pete Myers,,CHI,2007,2007,2007,0,1,0,0,0,0,,FALSE,transcribed,List of Chicago Bulls head coaches
+boylan-jim,Jim Boylan,,CHI,2008,2008,2008,24,32,0,0,0,0,,FALSE,transcribed,List of Chicago Bulls head coaches
+negro-del-vinny,Vinny Del Negro,,CHI,2009,2010,2010,82,82,0,0,4,8,,FALSE,counted,List of Chicago Bulls head coaches
+thibodeau-tom,Tom Thibodeau,,CHI,2011,2015,2015,255,139,0,0,23,28,,FALSE,counted,List of Chicago Bulls head coaches
+hoiberg-fred,Fred Hoiberg,,CHI,2016,2019,2019,115,155,0,0,2,4,,FALSE,transcribed,List of Chicago Bulls head coaches
+boylen-jim,Jim Boylen,,CHI,2019,2020,2020,39,84,0,0,0,0,,FALSE,transcribed,List of Chicago Bulls head coaches
+donovan-billy,Billy Donovan,,CHI,2021,2026,2026,226,256,0,0,1,4,,FALSE,counted,List of Chicago Bulls head coaches
+splitter-tiago,Tiago Splitter,,CHI,2027,2027,2027,,,0,0,0,0,,FALSE,transcribed,List of Chicago Bulls head coaches
+fitch-bill,Bill Fitch,,CLE,1971,1979,1979,304,434,0,0,7,11,,FALSE,counted,List of Cleveland Cavaliers head coaches
+albeck-stan,Stan Albeck,,CLE,1980,1980,1980,37,45,0,0,0,0,,FALSE,counted,List of Cleveland Cavaliers head coaches
+musselman-bill,Bill Musselman,,CLE,1981,1982,1982,25,46,0,0,0,0,,FALSE,transcribed,List of Cleveland Cavaliers head coaches
+delaney-don,Don Delaney,,CLE,1981,1981,1981,7,19,0,0,0,0,,FALSE,transcribed,List of Cleveland Cavaliers head coaches
+kloppenburg-bob,Bob Kloppenburg,,CLE,1981,1981,1981,0,3,0,0,0,0,,FALSE,transcribed,List of Cleveland Cavaliers head coaches
+daly-chuck,Chuck Daly,,CLE,1982,1982,1982,9,32,0,0,0,0,,FALSE,transcribed,List of Cleveland Cavaliers head coaches
+musselman-bill,Bill Musselman,,CLE,1982,1982,1982,2,21,0,0,0,0,,FALSE,transcribed,List of Cleveland Cavaliers head coaches
+nissalke-tom,Tom Nissalke,,CLE,1983,1984,1984,51,113,0,0,0,0,,FALSE,counted,List of Cleveland Cavaliers head coaches
+karl-george,George Karl,,CLE,1985,1986,1986,61,88,0,0,1,3,,FALSE,transcribed,List of Cleveland Cavaliers head coaches
+littles-gene,Gene Littles,,CLE,1986,1986,1986,4,11,0,0,0,0,,FALSE,transcribed,List of Cleveland Cavaliers head coaches
+wilkens-lenny,Lenny Wilkens,,CLE,1987,1993,1993,316,258,0,0,18,23,,FALSE,counted,List of Cleveland Cavaliers head coaches
+fratello-mike,Mike Fratello,,CLE,1994,1999,1999,248,212,0,0,2,12,,FALSE,counted,List of Cleveland Cavaliers head coaches
+wittman-randy,Randy Wittman,,CLE,2000,2001,2001,62,102,0,0,0,0,,FALSE,counted,List of Cleveland Cavaliers head coaches
+ii-lucas-john,John Lucas II,,CLE,2002,2003,2003,37,87,0,0,0,0,,FALSE,transcribed,List of Cleveland Cavaliers head coaches
+smart-keith,Keith Smart,,CLE,2003,2003,2003,9,31,0,0,0,0,,FALSE,transcribed,List of Cleveland Cavaliers head coaches
+silas-paul,Paul Silas,,CLE,2004,2005,2005,69,77,0,0,0,0,,FALSE,transcribed,List of Cleveland Cavaliers head coaches
+malone-brendan,Brendan Malone,,CLE,2005,2005,2005,8,10,0,0,0,0,,FALSE,transcribed,List of Cleveland Cavaliers head coaches
+brown-mike,Mike Brown,,CLE,2006,2010,2010,272,138,0,0,42,29,,FALSE,counted,List of Cleveland Cavaliers head coaches
+scott-byron,Byron Scott,,CLE,2011,2013,2013,64,166,0,0,0,0,,FALSE,counted,List of Cleveland Cavaliers head coaches
+brown-mike,Mike Brown,,CLE,2014,2014,2014,33,49,0,0,0,0,,FALSE,counted,List of Cleveland Cavaliers head coaches
+blatt-david,David Blatt,,CLE,2015,2016,2016,83,40,0,0,14,6,,FALSE,transcribed,List of Cleveland Cavaliers head coaches
+lue-tyronn,Tyronn Lue,,CLE,2016,2019,2019,128,83,0,0,41,20,2016,FALSE,transcribed,List of Cleveland Cavaliers head coaches
+drew-larry,Larry Drew,,CLE,2019,2019,2019,19,57,0,0,0,0,,FALSE,transcribed,List of Cleveland Cavaliers head coaches
+beilein-john,John Beilein,,CLE,2020,2020,2020,14,40,0,0,0,0,,FALSE,transcribed,List of Cleveland Cavaliers head coaches
+bickerstaff-b-j,J.B. Bickerstaff,,CLE,2020,2024,2024,170,159,0,0,6,11,,FALSE,transcribed,List of Cleveland Cavaliers head coaches
+atkinson-kenny,Kenny Atkinson,,CLE,2025,2027,2027,116,48,0,0,13,14,,FALSE,counted,List of Cleveland Cavaliers head coaches
+motta-dick,Dick Motta,,DAL,1981,1987,1987,267,307,0,0,11,17,,FALSE,counted,List of Dallas Mavericks head coaches
+macleod-john,John MacLeod,,DAL,1988,1990,1990,96,79,0,0,10,7,,FALSE,transcribed,List of Dallas Mavericks head coaches
+adubato-richie,Richie Adubato,,DAL,1990,1993,1993,94,170,0,0,0,3,,FALSE,transcribed,List of Dallas Mavericks head coaches
+heard-gar,Gar Heard,,DAL,1993,1993,1993,9,44,0,0,0,0,,FALSE,transcribed,List of Dallas Mavericks head coaches
+buckner-quinn,Quinn Buckner,,DAL,1994,1994,1994,13,69,0,0,0,0,,FALSE,counted,List of Dallas Mavericks head coaches
+motta-dick,Dick Motta,,DAL,1995,1996,1996,62,102,0,0,0,0,,FALSE,counted,List of Dallas Mavericks head coaches
+cleamons-jim,Jim Cleamons,,DAL,1997,1998,1998,28,70,0,0,0,0,,FALSE,transcribed,List of Dallas Mavericks head coaches
+nelson-don,Don Nelson,,DAL,1998,2005,2005,339,251,0,0,19,24,,FALSE,transcribed,List of Dallas Mavericks head coaches
+johnson-avery,Avery Johnson,,DAL,2005,2008,2008,194,70,0,0,23,24,,FALSE,transcribed,List of Dallas Mavericks head coaches
+carlisle-rick,Rick Carlisle,,DAL,2009,2021,2021,555,478,0,0,33,38,2011,FALSE,counted,List of Dallas Mavericks head coaches
+kidd-jason,Jason Kidd,,DAL,2022,2026,2026,205,205,0,0,22,18,,FALSE,counted,List of Dallas Mavericks head coaches
+may-dusty,Dusty May,,DAL,2027,2027,2027,,,0,0,0,0,,FALSE,transcribed,List of Dallas Mavericks head coaches
+walsh-donnie,Donnie Walsh,,DEN,1979,1981,1981,60,82,0,0,1,2,,FALSE,transcribed,List of Denver Nuggets head coaches
+moe-doug,Doug Moe,,DEN,1981,1990,1990,432,357,0,0,24,37,,FALSE,transcribed,List of Denver Nuggets head coaches
+westhead-paul,Paul Westhead,,DEN,1991,1992,1992,44,120,0,0,0,0,,FALSE,counted,List of Denver Nuggets head coaches
+issel-dan,Dan Issel,,DEN,1993,1995,1995,96,102,0,0,6,6,,FALSE,transcribed,List of Denver Nuggets head coaches
+littles-gene,Gene Littles,,DEN,1995,1995,1995,3,13,0,0,0,0,,FALSE,transcribed,List of Denver Nuggets head coaches
+bickerstaff-bernie,Bernie Bickerstaff,,DEN,1995,1997,1997,59,68,0,0,0,3,,FALSE,transcribed,List of Denver Nuggets head coaches
+motta-dick,Dick Motta,,DEN,1997,1997,1997,17,52,0,0,0,0,,FALSE,transcribed,List of Denver Nuggets head coaches
+hanzlik-bill,Bill Hanzlik,,DEN,1998,1998,1998,11,71,0,0,0,0,,FALSE,counted,List of Denver Nuggets head coaches
+antoni-d-mike,Mike D'Antoni,,DEN,1999,1999,1999,14,36,0,0,0,0,,FALSE,counted,List of Denver Nuggets head coaches
+issel-dan,Dan Issel,,DEN,2000,2002,2002,84,106,0,0,0,0,,FALSE,transcribed,List of Denver Nuggets head coaches
+evans-mike,Mike Evans,,DEN,2002,2002,2002,18,38,0,0,0,0,,FALSE,transcribed,List of Denver Nuggets head coaches
+bzdelik-jeff,Jeff Bzdelik,,DEN,2003,2005,2005,73,119,0,0,1,4,,FALSE,transcribed,List of Denver Nuggets head coaches
+cooper-michael,Michael Cooper,,DEN,2004,2004,2004,4,10,0,0,0,0,,FALSE,transcribed,List of Denver Nuggets head coaches
+karl-george,George Karl,,DEN,2005,2013,2013,423,257,0,0,21,38,,FALSE,transcribed,List of Denver Nuggets head coaches
+shaw-brian,Brian Shaw,,DEN,2014,2015,2015,56,85,0,0,0,0,,FALSE,transcribed,List of Denver Nuggets head coaches
+hunt-melvin,Melvin Hunt,,DEN,2015,2015,2015,10,13,0,0,0,0,,FALSE,transcribed,List of Denver Nuggets head coaches
+malone-michael,Michael Malone,,DEN,2016,2025,2025,471,327,0,0,44,36,2023,FALSE,transcribed,List of Denver Nuggets head coaches
+adelman-david,David Adelman,,DEN,2025,2027,2027,57,28,0,0,7,7,,FALSE,transcribed,List of Denver Nuggets head coaches
+bennett-carl,Carl Bennett,,DET,1949,1949,1949,0,6,0,0,0,0,,FALSE,transcribed,List of Detroit Pistons head coaches
+armstrong-curly,Curly Armstrong,,DET,1949,1949,1949,22,32,0,0,0,0,,FALSE,transcribed,List of Detroit Pistons head coaches
+mendenhall-murray,Murray Mendenhall,,DET,1950,1951,1951,72,64,0,0,4,4,,FALSE,counted,List of Detroit Pistons head coaches
+birch-paul,Paul Birch,,DET,1952,1954,1954,105,102,0,0,4,10,,FALSE,counted,List of Detroit Pistons head coaches
+eckman-charley,Charley Eckman,,DET,1955,1957,1957,114,102,0,0,10,14,,FALSE,counted,List of Detroit Pistons head coaches
+eckman-charley,Charley Eckman,,DET,1958,1958,1958,9,16,0,0,0,0,,FALSE,transcribed,List of Detroit Pistons head coaches
+rocha-red,Red Rocha,,DET,1958,1960,1960,65,88,0,0,4,6,,FALSE,transcribed,List of Detroit Pistons head coaches
+mcguire-dick,Dick McGuire,,DET,1960,1963,1963,122,158,0,0,8,13,,FALSE,transcribed,List of Detroit Pistons head coaches
+wolf-charles,Charles Wolf,,DET,1964,1965,1965,25,66,0,0,0,0,,FALSE,transcribed,List of Detroit Pistons head coaches
+debusschere-dave,Dave DeBusschere,,DET,1965,1967,1967,79,143,0,0,0,0,,FALSE,transcribed,List of Detroit Pistons head coaches
+butcher-donnis,Donnis Butcher,,DET,1967,1969,1969,52,60,0,0,2,4,,FALSE,transcribed,List of Detroit Pistons head coaches
+seymour-paul,Paul Seymour,,DET,1969,1969,1969,22,38,0,0,0,0,,FALSE,transcribed,List of Detroit Pistons head coaches
+kolff-breda-van-butch,Butch van Breda Kolff,,DET,1969,1972,1972,82,92,0,0,0,0,,FALSE,transcribed,List of Detroit Pistons head coaches
+dischinger-terry,Terry Dischinger,,DET,1971,1971,1971,0,2,0,0,0,0,,FALSE,transcribed,List of Detroit Pistons head coaches
+lloyd-earl,Earl Lloyd,,DET,1972,1973,1973,22,55,0,0,0,0,,FALSE,transcribed,List of Detroit Pistons head coaches
+scott-ray,Ray Scott,,DET,1973,1976,1976,147,134,0,0,4,6,,FALSE,transcribed,List of Detroit Pistons head coaches
+brown-herb,Herb Brown,,DET,1976,1978,1978,72,74,0,0,5,7,,FALSE,transcribed,List of Detroit Pistons head coaches
+kauffman-bob,Bob Kauffman,,DET,1978,1978,1978,29,29,0,0,0,0,,FALSE,transcribed,List of Detroit Pistons head coaches
+vitale-dick,Dick Vitale,,DET,1979,1980,1980,34,60,0,0,0,0,,FALSE,transcribed,List of Detroit Pistons head coaches
+adubato-richie,Richie Adubato,,DET,1980,1980,1980,12,58,0,0,0,0,,FALSE,transcribed,List of Detroit Pistons head coaches
+robertson-scotty,Scotty Robertson,,DET,1981,1983,1983,97,149,0,0,0,0,,FALSE,counted,List of Detroit Pistons head coaches
+daly-chuck,Chuck Daly,,DET,1984,1992,1992,467,271,0,0,71,42,1989 1990,FALSE,counted,List of Detroit Pistons head coaches
+rothstein-ron,Ron Rothstein,,DET,1993,1993,1993,40,42,0,0,0,0,,FALSE,counted,List of Detroit Pistons head coaches
+chaney-don,Don Chaney,,DET,1994,1995,1995,48,116,0,0,0,0,,FALSE,counted,List of Detroit Pistons head coaches
+collins-doug,Doug Collins,,DET,1996,1998,1998,121,88,0,0,2,6,,FALSE,transcribed,List of Detroit Pistons head coaches
+gentry-alvin,Alvin Gentry,,DET,1998,2000,2000,73,72,0,0,2,3,,FALSE,transcribed,List of Detroit Pistons head coaches
+irvine-george,George Irvine,,DET,2000,2001,2001,46,60,0,0,0,3,,FALSE,transcribed,List of Detroit Pistons head coaches
+carlisle-rick,Rick Carlisle,,DET,2002,2003,2003,100,64,0,0,12,15,,FALSE,counted,List of Detroit Pistons head coaches
+brown-larry,Larry Brown,,DET,2004,2005,2005,108,56,0,0,31,17,2004,FALSE,counted,List of Detroit Pistons head coaches
+saunders-flip,Flip Saunders,,DET,2006,2008,2008,176,70,0,0,30,21,,FALSE,counted,List of Detroit Pistons head coaches
+curry-michael,Michael Curry,,DET,2009,2009,2009,39,43,0,0,0,4,,FALSE,counted,List of Detroit Pistons head coaches
+kuester-john,John Kuester,,DET,2010,2011,2011,57,107,0,0,0,0,,FALSE,counted,List of Detroit Pistons head coaches
+frank-lawrence,Lawrence Frank,,DET,2012,2013,2013,54,94,0,0,0,0,,FALSE,counted,List of Detroit Pistons head coaches
+cheeks-maurice,Maurice Cheeks,,DET,2014,2014,2014,21,29,0,0,0,0,,FALSE,transcribed,List of Detroit Pistons head coaches
+loyer-john,John Loyer,,DET,2014,2014,2014,8,24,0,0,0,0,,FALSE,transcribed,List of Detroit Pistons head coaches
+gundy-van-stan,Stan Van Gundy,,DET,2015,2018,2018,152,176,0,0,0,4,,FALSE,counted,List of Detroit Pistons head coaches
+casey-dwane,Dwane Casey,,DET,2019,2023,2023,121,263,0,0,0,4,,FALSE,counted,List of Detroit Pistons head coaches
+williams-monty,Monty Williams,,DET,2024,2024,2024,14,68,0,0,0,0,,FALSE,counted,List of Detroit Pistons head coaches
+bickerstaff-b-j,J.B. Bickerstaff,,DET,2025,2027,2027,104,60,0,0,9,11,,FALSE,counted,List of Detroit Pistons head coaches
+gottlieb-eddie,Eddie Gottlieb,,GSW,1947,1955,1955,263,318,0,0,15,17,1947,FALSE,counted,List of Golden State Warriors head coaches
+senesky-george,George Senesky,,GSW,1956,1958,1958,119,97,0,0,10,10,1956,FALSE,counted,List of Golden State Warriors head coaches
+cervi-al,Al Cervi,,GSW,1959,1959,1959,32,40,0,0,0,0,,FALSE,counted,List of Golden State Warriors head coaches
+johnston-neil,Neil Johnston,,GSW,1960,1961,1961,95,59,0,0,4,8,,FALSE,counted,List of Golden State Warriors head coaches
+mcguire-frank,Frank McGuire,,GSW,1962,1962,1962,49,31,0,0,6,6,,FALSE,counted,List of Golden State Warriors head coaches
+feerick-bob,Bob Feerick,,GSW,1963,1963,1963,31,49,0,0,0,0,,FALSE,counted,List of Golden State Warriors head coaches
+hannum-alex,Alex Hannum,,GSW,1964,1966,1966,100,140,0,0,5,7,,FALSE,counted,List of Golden State Warriors head coaches
+sharman-bill,Bill Sharman,,GSW,1967,1968,1968,87,76,0,0,13,12,,FALSE,counted,List of Golden State Warriors head coaches
+lee-george,George Lee,,GSW,1969,1970,1970,63,71,0,0,2,4,,FALSE,transcribed,List of Golden State Warriors head coaches
+attles-al,Al Attles,,GSW,1970,1971,1971,49,63,0,0,1,4,,FALSE,transcribed,List of Golden State Warriors head coaches
+attles-al,Al Attles,,GSW,1972,1980,1980,394,323,0,0,29,27,1975,FALSE,transcribed,List of Golden State Warriors head coaches
+bach-johnny,Johnny Bach,,GSW,1980,1980,1980,6,15,0,0,0,0,,FALSE,transcribed,List of Golden State Warriors head coaches
+attles-al,Al Attles,,GSW,1981,1983,1983,114,132,0,0,0,0,,FALSE,counted,List of Golden State Warriors head coaches
+bach-johnny,Johnny Bach,,GSW,1984,1986,1986,89,157,0,0,0,0,,FALSE,counted,List of Golden State Warriors head coaches
+karl-george,George Karl,,GSW,1987,1988,1988,58,88,0,0,4,6,,FALSE,transcribed,List of Golden State Warriors head coaches
+gregory-ed,Ed Gregory,,GSW,1988,1988,1988,4,14,0,0,0,0,,FALSE,transcribed,List of Golden State Warriors head coaches
+nelson-don,Don Nelson,,GSW,1989,1995,1995,277,260,0,0,9,15,,FALSE,transcribed,List of Golden State Warriors head coaches
+lanier-bob,Bob Lanier,,GSW,1995,1995,1995,12,25,0,0,0,0,,FALSE,transcribed,List of Golden State Warriors head coaches
+adelman-rick,Rick Adelman,,GSW,1996,1997,1997,66,98,0,0,0,0,,FALSE,counted,List of Golden State Warriors head coaches
+carlesimo-j-p,P.J. Carlesimo,,GSW,1998,2000,2000,46,113,0,0,0,0,,FALSE,transcribed,List of Golden State Warriors head coaches
+jean-st-garry,Garry St. Jean,,GSW,2000,2000,2000,13,42,0,0,0,0,,FALSE,transcribed,List of Golden State Warriors head coaches
+cowens-dave,Dave Cowens,,GSW,2001,2002,2002,25,80,0,0,0,0,,FALSE,transcribed,List of Golden State Warriors head coaches
+winters-brian,Brian Winters,,GSW,2002,2002,2002,13,46,0,0,0,0,,FALSE,transcribed,List of Golden State Warriors head coaches
+musselman-eric,Eric Musselman,,GSW,2003,2004,2004,75,89,0,0,0,0,,FALSE,counted,List of Golden State Warriors head coaches
+montgomery-mike,Mike Montgomery,,GSW,2005,2006,2006,68,96,0,0,0,0,,FALSE,counted,List of Golden State Warriors head coaches
+nelson-don,Don Nelson,,GSW,2007,2010,2010,145,183,0,0,5,6,,FALSE,counted,List of Golden State Warriors head coaches
+smart-keith,Keith Smart,,GSW,2011,2011,2011,36,46,0,0,0,0,,FALSE,counted,List of Golden State Warriors head coaches
+jackson-mark,Mark Jackson,,GSW,2012,2014,2014,121,109,0,0,9,10,,FALSE,counted,List of Golden State Warriors head coaches
+kerr-steve,Steve Kerr,,GSW,2015,2027,2027,604,353,0,0,104,48,2017 2018 2022 2015,FALSE,counted,List of Golden State Warriors head coaches
+winters-brian,Brian Winters,,MEM,1996,1997,1997,23,102,0,0,0,0,,FALSE,transcribed,List of Memphis Grizzlies head coaches
+jackson-stu,Stu Jackson,,MEM,1997,1997,1997,6,33,0,0,0,0,,FALSE,transcribed,List of Memphis Grizzlies head coaches
+hill-brian,Brian Hill,,MEM,1998,2000,2000,31,123,0,0,0,0,,FALSE,transcribed,List of Memphis Grizzlies head coaches
+hollins-lionel,Lionel Hollins,,MEM,2000,2000,2000,18,42,0,0,0,0,,FALSE,transcribed,List of Memphis Grizzlies head coaches
+lowe-sidney,Sidney Lowe,,MEM,2001,2001,2001,23,59,0,0,0,0,,FALSE,counted,List of Memphis Grizzlies head coaches
+lowe-sidney,Sidney Lowe,,MEM,2002,2003,2003,23,67,0,0,0,0,,FALSE,transcribed,List of Memphis Grizzlies head coaches
+brown-hubie,Hubie Brown,,MEM,2003,2005,2005,83,85,0,0,0,4,,FALSE,transcribed,List of Memphis Grizzlies head coaches
+hollins-lionel,Lionel Hollins,,MEM,2004,2004,2004,0,4,0,0,0,0,,FALSE,transcribed,List of Memphis Grizzlies head coaches
+fratello-mike,Mike Fratello,,MEM,2005,2007,2007,95,83,0,0,0,8,,FALSE,transcribed,List of Memphis Grizzlies head coaches
+barone-tony,Tony Barone,,MEM,2007,2007,2007,16,36,0,0,0,0,,FALSE,transcribed,List of Memphis Grizzlies head coaches
+iavaroni-marc,Marc Iavaroni,,MEM,2008,2009,2009,33,90,0,0,0,0,,FALSE,transcribed,List of Memphis Grizzlies head coaches
+davis-johnny,Johnny Davis,,MEM,2009,2009,2009,0,2,0,0,0,0,,FALSE,transcribed,List of Memphis Grizzlies head coaches
+hollins-lionel,Lionel Hollins,,MEM,2009,2013,2013,196,155,0,0,18,17,,FALSE,transcribed,List of Memphis Grizzlies head coaches
+joerger-dave,Dave Joerger,,MEM,2014,2016,2016,147,99,0,0,9,13,,FALSE,counted,List of Memphis Grizzlies head coaches
+fizdale-david,David Fizdale,,MEM,2017,2018,2018,50,51,0,0,2,4,,FALSE,transcribed,List of Memphis Grizzlies head coaches
+bickerstaff-b-j,J.B. Bickerstaff,,MEM,2018,2019,2019,48,97,0,0,0,0,,FALSE,transcribed,List of Memphis Grizzlies head coaches
+jenkins-taylor,Taylor Jenkins,,MEM,2020,2025,2025,250,214,0,0,9,14,,FALSE,transcribed,List of Memphis Grizzlies head coaches
+iisalo-tuomas,Tuomas Iisalo,,MEM,2025,2027,2027,29,61,0,0,0,4,,FALSE,transcribed,List of Memphis Grizzlies head coaches
+robertson-scotty,Scotty Robertson,,UTA,1975,1975,1975,1,14,0,0,0,0,,FALSE,transcribed,List of New Orleans Jazz head coaches
+baylor-elgin,Elgin Baylor,,UTA,1975,1975,1975,0,1,0,0,0,0,,FALSE,transcribed,List of New Orleans Jazz head coaches
+kolff-breda-van-butch,Butch van Breda Kolff,,UTA,1975,1977,1977,74,100,0,0,0,0,,FALSE,transcribed,List of New Orleans Jazz head coaches
+baylor-elgin,Elgin Baylor,,UTA,1977,1979,1979,86,134,0,0,0,0,,FALSE,transcribed,List of New Orleans Jazz head coaches
+nissalke-tom,Tom Nissalke,,UTA,1979,1982,1982,60,124,0,0,0,0,,FALSE,transcribed,List of New Orleans Jazz head coaches
+layden-frank,Frank Layden,,UTA,1982,1989,1989,277,294,0,0,18,23,,FALSE,transcribed,List of New Orleans Jazz head coaches
+sloan-jerry,Jerry Sloan,,UTA,1989,2011,2011,1127,682,0,0,96,100,,FALSE,transcribed,List of New Orleans Jazz head coaches
+corbin-tyrone,Tyrone Corbin,,UTA,2011,2014,2014,112,146,0,0,0,4,,FALSE,transcribed,List of New Orleans Jazz head coaches
+snyder-quin,Quin Snyder,,UTA,2015,2022,2022,372,264,0,0,21,30,,FALSE,counted,List of New Orleans Jazz head coaches
+hardy-will,Will Hardy,,UTA,2023,2027,2027,107,221,0,0,0,0,,FALSE,counted,List of New Orleans Jazz head coaches
+pollard-jim,Jim Pollard,,WAS,1962,1962,1962,18,62,0,0,0,0,,FALSE,counted,List of Washington Wizards head coaches
+mcmahon-jack,Jack McMahon,,WAS,1963,1963,1963,12,26,0,0,0,0,,FALSE,transcribed,List of Washington Wizards head coaches
+leonard-bobby,Bobby Leonard,,WAS,1963,1964,1964,44,78,0,0,0,0,,FALSE,transcribed,List of Washington Wizards head coaches
+jeannette-buddy,Buddy Jeannette,,WAS,1965,1965,1965,37,43,0,0,5,5,,FALSE,counted,List of Washington Wizards head coaches
+seymour-paul,Paul Seymour,,WAS,1966,1967,1967,38,42,0,0,0,3,,FALSE,transcribed,List of Washington Wizards head coaches
+farmer-mike,Mike Farmer,,WAS,1966,1966,1966,1,8,0,0,0,0,,TRUE,transcribed,List of Washington Wizards head coaches
+jeannette-buddy,Buddy Jeannette,,WAS,1966,1966,1966,3,13,0,0,0,0,,TRUE,transcribed,List of Washington Wizards head coaches
+shue-gene,Gene Shue,,WAS,1967,1973,1973,291,257,0,0,14,26,,FALSE,transcribed,List of Washington Wizards head coaches
+jones-c-k,K.C. Jones,,WAS,1974,1976,1976,155,91,0,0,14,17,,FALSE,counted,List of Washington Wizards head coaches
+motta-dick,Dick Motta,,WAS,1977,1980,1980,185,143,0,0,27,24,1978,FALSE,counted,List of Washington Wizards head coaches
+shue-gene,Gene Shue,,WAS,1981,1986,1986,231,248,0,0,5,10,,FALSE,transcribed,List of Washington Wizards head coaches
+loughery-kevin,Kevin Loughery,,WAS,1986,1988,1988,57,65,0,0,2,6,,FALSE,transcribed,List of Washington Wizards head coaches
+unseld-wes,Wes Unseld,,WAS,1988,1995,1995,202,345,0,0,2,3,,FALSE,transcribed,List of Washington Wizards head coaches
+lynam-jim,Jim Lynam,,WAS,1995,1997,1997,82,128,0,0,0,0,,FALSE,transcribed,List of Washington Wizards head coaches
+staak-bob,Bob Staak,,WAS,1997,1997,1997,0,1,0,0,0,0,,TRUE,transcribed,List of Washington Wizards head coaches
+bickerstaff-bernie,Bernie Bickerstaff,,WAS,1997,1999,1999,77,72,0,0,0,3,,FALSE,transcribed,List of Washington Wizards head coaches
+brovelli-jim,Jim Brovelli,,WAS,1999,1999,1999,5,13,0,0,0,0,,TRUE,transcribed,List of Washington Wizards head coaches
+heard-gar,Gar Heard,,WAS,2000,2000,2000,14,30,0,0,0,0,,FALSE,transcribed,List of Washington Wizards head coaches
+walker-darrell,Darrell Walker,,WAS,2000,2000,2000,15,23,0,0,0,0,,TRUE,transcribed,List of Washington Wizards head coaches
+hamilton-leonard,Leonard Hamilton,,WAS,2001,2001,2001,19,63,0,0,0,0,,FALSE,counted,List of Washington Wizards head coaches
+collins-doug,Doug Collins,,WAS,2002,2003,2003,74,90,0,0,0,0,,FALSE,counted,List of Washington Wizards head coaches
+jordan-eddie,Eddie Jordan,,WAS,2004,2009,2009,197,224,0,0,8,18,,FALSE,transcribed,List of Washington Wizards head coaches
+tapscott-ed,Ed Tapscott,,WAS,2009,2009,2009,18,53,0,0,0,0,,TRUE,transcribed,List of Washington Wizards head coaches
+saunders-flip,Flip Saunders,,WAS,2010,2012,2012,51,130,0,0,0,0,,FALSE,transcribed,List of Washington Wizards head coaches
+wittman-randy,Randy Wittman,,WAS,2012,2016,2016,178,199,0,0,12,9,,FALSE,transcribed,List of Washington Wizards head coaches
+brooks-scott,Scott Brooks,,WAS,2017,2021,2021,183,207,0,0,10,14,,FALSE,counted,List of Washington Wizards head coaches
+jr-unseld-wes,Wes Unseld Jr.,,WAS,2022,2024,2024,77,130,0,0,0,0,,FALSE,transcribed,List of Washington Wizards head coaches
+keefe-brian,Brian Keefe,,WAS,2024,2027,2027,43,160,0,0,0,0,,FALSE,transcribed,List of Washington Wizards head coaches
+mcmahon-jack,Jack McMahon,,HOU,1968,1970,1970,61,129,0,0,2,4,,FALSE,transcribed,List of Houston Rockets head coaches
+hannum-alex,Alex Hannum,,HOU,1970,1971,1971,58,80,0,0,0,0,,FALSE,transcribed,List of Houston Rockets head coaches
+winter-tex,Tex Winter,,HOU,1972,1973,1973,51,78,0,0,0,0,,FALSE,transcribed,List of Houston Rockets head coaches
+egan-johnny,Johnny Egan,,HOU,1973,1976,1976,129,152,0,0,3,5,,FALSE,transcribed,List of Houston Rockets head coaches
+nissalke-tom,Tom Nissalke,,HOU,1977,1979,1979,124,122,0,0,6,8,,FALSE,counted,List of Houston Rockets head coaches
+harris-del,Del Harris,,HOU,1980,1983,1983,141,187,0,0,15,16,,FALSE,counted,List of Houston Rockets head coaches
+fitch-bill,Bill Fitch,,HOU,1984,1988,1988,216,194,0,0,21,18,,FALSE,counted,List of Houston Rockets head coaches
+chaney-don,Don Chaney,,HOU,1989,1992,1992,164,134,0,0,2,9,,FALSE,transcribed,List of Houston Rockets head coaches
+tomjanovich-rudy,Rudy Tomjanovich,,HOU,1992,2003,2003,503,397,0,0,51,39,1994 1995,FALSE,transcribed,List of Houston Rockets head coaches
+gundy-van-jeff,Jeff Van Gundy,,HOU,2004,2007,2007,182,146,0,0,7,12,,FALSE,counted,List of Houston Rockets head coaches
+adelman-rick,Rick Adelman,,HOU,2008,2011,2011,193,135,0,0,9,10,,FALSE,counted,List of Houston Rockets head coaches
+mchale-kevin,Kevin McHale,,HOU,2012,2016,2016,193,130,0,0,13,16,,FALSE,transcribed,List of Houston Rockets head coaches
+bickerstaff-b-j,J.B. Bickerstaff,,HOU,2016,2016,2016,37,34,0,0,1,4,,FALSE,transcribed,List of Houston Rockets head coaches
+antoni-d-mike,Mike D'Antoni,,HOU,2017,2020,2020,217,101,0,0,28,23,,FALSE,counted,List of Houston Rockets head coaches
+silas-stephen,Stephen Silas,,HOU,2021,2023,2023,59,177,0,0,0,0,,FALSE,counted,List of Houston Rockets head coaches
+udoka-ime,Ime Udoka,,HOU,2024,2027,2027,145,101,0,0,5,8,,FALSE,counted,List of Houston Rockets head coaches
+leonard-bobby,Bobby Leonard,,IND,1977,1980,1980,142,186,0,0,0,0,,FALSE,counted,List of Indiana Pacers head coaches
+mckinney-jack,Jack McKinney,,IND,1981,1984,1984,125,203,0,0,0,2,,FALSE,counted,List of Indiana Pacers head coaches
+irvine-george,George Irvine,,IND,1985,1986,1986,48,116,0,0,0,0,,FALSE,counted,List of Indiana Pacers head coaches
+ramsay-jack,Jack Ramsay,,IND,1987,1989,1989,79,92,0,0,1,3,,FALSE,transcribed,List of Indiana Pacers head coaches
+daniels-mel,Mel Daniels,,IND,1988,1988,1988,0,2,0,0,0,0,,FALSE,transcribed,List of Indiana Pacers head coaches
+irvine-george,George Irvine,,IND,1989,1989,1989,6,14,0,0,0,0,,FALSE,transcribed,List of Indiana Pacers head coaches
+versace-dick,Dick Versace,,IND,1989,1991,1991,73,87,0,0,0,3,,FALSE,transcribed,List of Indiana Pacers head coaches
+hill-bob,Bob Hill,,IND,1991,1993,1993,113,108,0,0,3,9,,FALSE,transcribed,List of Indiana Pacers head coaches
+brown-larry,Larry Brown,,IND,1994,1997,1997,190,138,0,0,22,16,,FALSE,counted,List of Indiana Pacers head coaches
+bird-larry,Larry Bird,,IND,1998,2000,2000,147,67,0,0,32,20,,FALSE,counted,List of Indiana Pacers head coaches
+thomas-isiah,Isiah Thomas,,IND,2001,2003,2003,131,115,0,0,5,10,,FALSE,counted,List of Indiana Pacers head coaches
+carlisle-rick,Rick Carlisle,,IND,2004,2007,2007,181,147,0,0,18,17,,FALSE,counted,List of Indiana Pacers head coaches
+brien-o-jim,Jim O'Brien,,IND,2008,2011,2011,121,169,0,0,0,0,,FALSE,transcribed,List of Indiana Pacers head coaches
+vogel-frank,Frank Vogel,,IND,2011,2016,2016,250,181,0,0,30,29,,FALSE,transcribed,List of Indiana Pacers head coaches
+mcmillan-nate,Nate McMillan,,IND,2017,2020,2020,183,136,0,0,3,16,,FALSE,counted,List of Indiana Pacers head coaches
+bjorkgren-nate,Nate Bjorkgren,,IND,2021,2021,2021,34,38,0,0,0,0,,FALSE,counted,List of Indiana Pacers head coaches
+carlisle-rick,Rick Carlisle,,IND,2022,2027,2027,176,234,0,0,23,17,,FALSE,counted,List of Indiana Pacers head coaches
+schayes-dolph,Dolph Schayes,,LAC,1971,1972,1972,22,61,0,0,0,0,,FALSE,transcribed,List of Los Angeles Clippers head coaches
+mccarthy-johnny,Johnny McCarthy,,LAC,1972,1972,1972,22,59,0,0,0,0,,FALSE,transcribed,List of Los Angeles Clippers head coaches
+ramsay-jack,Jack Ramsay,,LAC,1973,1976,1976,158,170,0,0,9,13,,FALSE,counted,List of Los Angeles Clippers head coaches
+locke-tates,Tates Locke,,LAC,1977,1977,1977,16,30,0,0,0,0,,FALSE,transcribed,List of Los Angeles Clippers head coaches
+mackinnon-bob,Bob MacKinnon,,LAC,1977,1977,1977,3,4,0,0,0,0,,FALSE,transcribed,List of Los Angeles Clippers head coaches
+mullaney-joe,Joe Mullaney,,LAC,1977,1977,1977,11,18,0,0,0,0,,FALSE,transcribed,List of Los Angeles Clippers head coaches
+fitzsimmons-cotton,Cotton Fitzsimmons,,LAC,1978,1978,1978,27,55,0,0,0,0,,FALSE,counted,List of Los Angeles Clippers head coaches
+shue-gene,Gene Shue,,LAC,1979,1980,1980,78,86,0,0,0,0,,FALSE,counted,List of Los Angeles Clippers head coaches
+silas-paul,Paul Silas,,LAC,1981,1983,1983,78,168,0,0,0,0,,FALSE,counted,List of Los Angeles Clippers head coaches
+lynam-jim,Jim Lynam,,LAC,1984,1984,1984,30,52,0,0,0,0,,FALSE,counted,List of Los Angeles Clippers head coaches
+lynam-jim,Jim Lynam,,LAC,1985,1985,1985,22,39,0,0,0,0,,FALSE,transcribed,List of Los Angeles Clippers head coaches
+chaney-don,Don Chaney,,LAC,1985,1987,1987,53,132,0,0,0,0,,FALSE,transcribed,List of Los Angeles Clippers head coaches
+shue-gene,Gene Shue,,LAC,1988,1989,1989,27,93,0,0,0,0,,FALSE,transcribed,List of Los Angeles Clippers head coaches
+casey-don,Don Casey,,LAC,1989,1990,1990,41,85,0,0,0,0,,FALSE,transcribed,List of Los Angeles Clippers head coaches
+schuler-mike,Mike Schuler,,LAC,1991,1992,1992,52,75,0,0,0,0,,FALSE,transcribed,List of Los Angeles Clippers head coaches
+calvin-mack,Mack Calvin,,LAC,1992,1992,1992,1,1,0,0,0,0,,FALSE,transcribed,List of Los Angeles Clippers head coaches
+brown-larry,Larry Brown,,LAC,1992,1993,1993,64,53,0,0,4,6,,FALSE,transcribed,List of Los Angeles Clippers head coaches
+weiss-bob,Bob Weiss,,LAC,1994,1994,1994,27,55,0,0,0,0,,FALSE,counted,List of Los Angeles Clippers head coaches
+fitch-bill,Bill Fitch,,LAC,1995,1998,1998,99,229,0,0,0,3,,FALSE,counted,List of Los Angeles Clippers head coaches
+ford-chris,Chris Ford,,LAC,1999,2000,2000,20,75,0,0,0,0,,FALSE,transcribed,List of Los Angeles Clippers head coaches
+todd-jim,Jim Todd,,LAC,2000,2000,2000,4,33,0,0,0,0,,FALSE,transcribed,List of Los Angeles Clippers head coaches
+gentry-alvin,Alvin Gentry,,LAC,2001,2003,2003,89,133,0,0,0,0,,FALSE,transcribed,List of Los Angeles Clippers head coaches
+johnson-dennis,Dennis Johnson,,LAC,2003,2003,2003,8,16,0,0,0,0,,FALSE,transcribed,List of Los Angeles Clippers head coaches
+sr-dunleavy-mike,"Mike Dunleavy, Sr.",,LAC,2004,2010,2010,215,326,0,0,7,5,,FALSE,transcribed,List of Los Angeles Clippers head coaches
+hughes-kim,Kim Hughes,,LAC,2010,2010,2010,8,25,0,0,0,0,,FALSE,transcribed,List of Los Angeles Clippers head coaches
+negro-del-vinny,Vinny Del Negro,,LAC,2011,2013,2013,128,102,0,0,6,11,,FALSE,counted,List of Los Angeles Clippers head coaches
+rivers-doc,Doc Rivers,,LAC,2014,2020,2020,356,208,0,0,27,32,,FALSE,counted,List of Los Angeles Clippers head coaches
+lue-tyronn,Tyronn Lue,,LAC,2021,2027,2027,276,206,0,0,16,21,,FALSE,counted,List of Los Angeles Clippers head coaches
+kundla-john,John Kundla,,LAL,1949,1958,1958,390,263,0,0,54,28,1949 1950 1952 1953 1954,FALSE,transcribed,List of Los Angeles Lakers head coaches
+mikan-george,George Mikan,,LAL,1958,1958,1958,9,30,0,0,0,0,,FALSE,transcribed,List of Los Angeles Lakers head coaches
+kundla-john,John Kundla,,LAL,1959,1959,1959,33,39,0,0,6,7,,FALSE,counted,List of Los Angeles Lakers head coaches
+castellani-john,John Castellani,,LAL,1960,1960,1960,11,25,0,0,0,0,,FALSE,transcribed,List of Los Angeles Lakers head coaches
+pollard-jim,Jim Pollard,,LAL,1960,1960,1960,14,25,0,0,5,4,,FALSE,transcribed,List of Los Angeles Lakers head coaches
+schaus-fred,Fred Schaus,,LAL,1961,1967,1967,315,245,0,0,33,38,,FALSE,counted,List of Los Angeles Lakers head coaches
+kolff-breda-van-butch,Butch van Breda Kolff,,LAL,1968,1969,1969,107,57,0,0,21,12,,FALSE,counted,List of Los Angeles Lakers head coaches
+mullaney-joe,Joe Mullaney,,LAL,1970,1971,1971,94,70,0,0,16,14,,FALSE,counted,List of Los Angeles Lakers head coaches
+sharman-bill,Bill Sharman,,LAL,1972,1976,1976,246,164,0,0,22,15,1972,FALSE,counted,List of Los Angeles Lakers head coaches
+west-jerry,Jerry West,,LAL,1977,1979,1979,145,101,0,0,8,14,,FALSE,counted,List of Los Angeles Lakers head coaches
+mckinney-jack,Jack McKinney,,LAL,1980,1980,1980,10,4,0,0,0,0,,FALSE,transcribed,List of Los Angeles Lakers head coaches
+westhead-paul,Paul Westhead,,LAL,1980,1982,1982,111,50,0,0,13,6,1980,FALSE,transcribed,List of Los Angeles Lakers head coaches
+riley-pat,Pat Riley,,LAL,1982,1990,1990,533,194,0,0,102,47,1982 1985 1987 1988,FALSE,transcribed,List of Los Angeles Lakers head coaches
+dunleavy-mike,Mike Dunleavy,,LAL,1991,1992,1992,101,63,0,0,13,10,,FALSE,counted,List of Los Angeles Lakers head coaches
+pfund-randy,Randy Pfund,,LAL,1993,1994,1994,66,80,0,0,2,3,,FALSE,transcribed,List of Los Angeles Lakers head coaches
+bertka-bill,Bill Bertka,,LAL,1994,1994,1994,1,1,0,0,0,0,,FALSE,transcribed,List of Los Angeles Lakers head coaches
+johnson-magic,Magic Johnson,,LAL,1994,1994,1994,5,11,0,0,0,0,,FALSE,transcribed,List of Los Angeles Lakers head coaches
+harris-del,Del Harris,,LAL,1995,1999,1999,224,116,0,0,17,19,,FALSE,transcribed,List of Los Angeles Lakers head coaches
+bertka-bill,Bill Bertka,,LAL,1999,1999,1999,1,0,0,0,0,0,,FALSE,transcribed,List of Los Angeles Lakers head coaches
+rambis-kurt,Kurt Rambis,,LAL,1999,1999,1999,24,13,0,0,3,5,,FALSE,transcribed,List of Los Angeles Lakers head coaches
+jackson-phil,Phil Jackson,,LAL,2000,2004,2004,287,123,0,0,64,28,2000 2001 2002,FALSE,counted,List of Los Angeles Lakers head coaches
+tomjanovich-rudy,Rudy Tomjanovich,,LAL,2005,2005,2005,24,19,0,0,0,0,,FALSE,transcribed,List of Los Angeles Lakers head coaches
+hamblen-frank,Frank Hamblen,,LAL,2005,2005,2005,10,29,0,0,0,0,,FALSE,transcribed,List of Los Angeles Lakers head coaches
+jackson-phil,Phil Jackson,,LAL,2006,2011,2011,323,169,0,0,54,35,2009 2010,FALSE,counted,List of Los Angeles Lakers head coaches
+brown-mike,Mike Brown,,LAL,2012,2013,2013,42,29,0,0,5,7,,FALSE,transcribed,List of Los Angeles Lakers head coaches
+bickerstaff-bernie,Bernie Bickerstaff,,LAL,2012,2012,2012,4,1,0,0,0,0,,FALSE,transcribed,List of Los Angeles Lakers head coaches
+antoni-d-mike,Mike D'Antoni,,LAL,2013,2014,2014,67,87,0,0,0,4,,FALSE,transcribed,List of Los Angeles Lakers head coaches
+scott-byron,Byron Scott,,LAL,2015,2016,2016,38,126,0,0,0,0,,FALSE,counted,List of Los Angeles Lakers head coaches
+walton-luke,Luke Walton,,LAL,2017,2019,2019,98,148,0,0,0,0,,FALSE,counted,List of Los Angeles Lakers head coaches
+vogel-frank,Frank Vogel,,LAL,2020,2022,2022,127,98,0,0,18,9,2020,FALSE,counted,List of Los Angeles Lakers head coaches
+ham-darvin,Darvin Ham,,LAL,2023,2024,2024,90,74,0,0,9,12,,FALSE,counted,List of Los Angeles Lakers head coaches
+redick-jj,JJ Redick,,LAL,2025,2027,2027,103,61,0,0,5,10,,FALSE,counted,List of Los Angeles Lakers head coaches
+rothstein-ron,Ron Rothstein,,MIA,1989,1991,1991,57,189,0,0,0,0,,FALSE,counted,List of Miami Heat head coaches
+loughery-kevin,Kevin Loughery,,MIA,1992,1995,1995,133,159,0,0,2,6,,FALSE,transcribed,List of Miami Heat head coaches
+gentry-alvin,Alvin Gentry,,MIA,1995,1995,1995,15,21,0,0,0,0,,FALSE,transcribed,List of Miami Heat head coaches
+riley-pat,Pat Riley,,MIA,1996,2003,2003,354,270,0,0,18,25,,FALSE,counted,List of Miami Heat head coaches
+gundy-van-stan,Stan Van Gundy,,MIA,2004,2006,2006,112,73,0,0,17,11,,FALSE,transcribed,List of Miami Heat head coaches
+riley-pat,Pat Riley,,MIA,2006,2008,2008,100,125,0,0,16,11,2006,FALSE,transcribed,List of Miami Heat head coaches
+spoelstra-erik,Erik Spoelstra,,MIA,2009,2027,2027,830,611,0,0,110,83,2012 2013,FALSE,counted,List of Miami Heat head coaches
+costello-larry,Larry Costello,,MIL,1969,1977,1977,410,264,0,0,37,23,1971,FALSE,transcribed,List of Milwaukee Bucks head coaches
+nelson-don,Don Nelson,,MIL,1977,1987,1987,540,344,0,0,42,46,,FALSE,transcribed,List of Milwaukee Bucks head coaches
+harris-del,Del Harris,,MIL,1988,1992,1992,191,154,0,0,6,15,,FALSE,transcribed,List of Milwaukee Bucks head coaches
+hamblen-frank,Frank Hamblen,,MIL,1992,1992,1992,23,42,0,0,0,0,,FALSE,transcribed,List of Milwaukee Bucks head coaches
+dunleavy-mike,Mike Dunleavy,,MIL,1993,1996,1996,107,221,0,0,0,0,,FALSE,counted,List of Milwaukee Bucks head coaches
+ford-chris,Chris Ford,,MIL,1997,1998,1998,69,95,0,0,0,0,,FALSE,counted,List of Milwaukee Bucks head coaches
+karl-george,George Karl,,MIL,1999,2003,2003,205,173,0,0,14,18,,FALSE,counted,List of Milwaukee Bucks head coaches
+porter-terry,Terry Porter,,MIL,2004,2005,2005,71,93,0,0,1,4,,FALSE,counted,List of Milwaukee Bucks head coaches
+stotts-terry,Terry Stotts,,MIL,2006,2007,2007,63,83,0,0,1,4,,FALSE,transcribed,List of Milwaukee Bucks head coaches
+krystkowiak-larry,Larry Krystkowiak,,MIL,2007,2008,2008,31,69,0,0,0,0,,FALSE,transcribed,List of Milwaukee Bucks head coaches
+skiles-scott,Scott Skiles,,MIL,2009,2013,2013,162,182,0,0,3,4,,FALSE,transcribed,List of Milwaukee Bucks head coaches
+boylan-jim,Jim Boylan,,MIL,2013,2013,2013,22,28,0,0,0,4,,FALSE,transcribed,List of Milwaukee Bucks head coaches
+drew-larry,Larry Drew,,MIL,2014,2014,2014,15,67,0,0,0,0,,FALSE,counted,List of Milwaukee Bucks head coaches
+kidd-jason,Jason Kidd,,MIL,2015,2018,2018,139,152,0,0,4,8,,FALSE,transcribed,List of Milwaukee Bucks head coaches
+prunty-joe,Joe Prunty,,MIL,2018,2018,2018,21,16,0,0,3,4,,FALSE,transcribed,List of Milwaukee Bucks head coaches
+budenholzer-mike,Mike Budenholzer,,MIL,2019,2023,2023,271,120,0,0,39,26,2021,FALSE,counted,List of Milwaukee Bucks head coaches
+griffin-adrian,Adrian Griffin,,MIL,2024,2024,2024,30,13,0,0,0,0,,FALSE,transcribed,List of Milwaukee Bucks head coaches
+prunty-joe,Joe Prunty,,MIL,2024,2024,2024,2,1,0,0,0,0,,FALSE,transcribed,List of Milwaukee Bucks head coaches
+rivers-doc,Doc Rivers,,MIL,2024,2026,2026,97,103,0,0,1,4,,FALSE,transcribed,List of Milwaukee Bucks head coaches
+jenkins-taylor,Taylor Jenkins,,MIL,2027,2027,2027,,,0,0,0,0,,FALSE,transcribed,List of Milwaukee Bucks head coaches
+musselman-bill,Bill Musselman,,MIN,1990,1991,1991,51,113,0,0,0,0,,FALSE,counted,List of Minnesota Timberwolves head coaches
+rodgers-jimmy,Jimmy Rodgers,,MIN,1992,1993,1993,21,90,0,0,0,0,,FALSE,transcribed,List of Minnesota Timberwolves head coaches
+lowe-sidney,Sidney Lowe,,MIN,1993,1994,1994,33,102,0,0,0,0,,FALSE,transcribed,List of Minnesota Timberwolves head coaches
+blair-bill,Bill Blair,,MIN,1995,1996,1996,27,75,0,0,0,0,,FALSE,transcribed,List of Minnesota Timberwolves head coaches
+saunders-flip,Flip Saunders,,MIN,1996,2005,2005,411,326,0,0,17,30,,FALSE,transcribed,List of Minnesota Timberwolves head coaches
+mchale-kevin,Kevin McHale,,MIN,2005,2005,2005,19,12,0,0,0,0,,FALSE,transcribed,List of Minnesota Timberwolves head coaches
+casey-dwane,Dwane Casey,,MIN,2006,2007,2007,53,69,0,0,0,0,,FALSE,transcribed,List of Minnesota Timberwolves head coaches
+wittman-randy,Randy Wittman,,MIN,2007,2009,2009,38,105,0,0,0,0,,FALSE,transcribed,List of Minnesota Timberwolves head coaches
+mchale-kevin,Kevin McHale,,MIN,2009,2009,2009,20,43,0,0,0,0,,FALSE,transcribed,List of Minnesota Timberwolves head coaches
+rambis-kurt,Kurt Rambis,,MIN,2010,2011,2011,32,132,0,0,0,0,,FALSE,counted,List of Minnesota Timberwolves head coaches
+adelman-rick,Rick Adelman,,MIN,2012,2014,2014,97,133,0,0,0,0,,FALSE,counted,List of Minnesota Timberwolves head coaches
+saunders-flip,Flip Saunders,,MIN,2015,2015,2015,16,66,0,0,0,0,,FALSE,counted,List of Minnesota Timberwolves head coaches
+mitchell-sam,Sam Mitchell,,MIN,2016,2016,2016,29,53,0,0,0,0,,FALSE,counted,List of Minnesota Timberwolves head coaches
+thibodeau-tom,Tom Thibodeau,,MIN,2017,2019,2019,97,107,0,0,1,4,,FALSE,transcribed,List of Minnesota Timberwolves head coaches
+saunders-ryan,Ryan Saunders,,MIN,2019,2021,2021,43,94,0,0,0,0,,FALSE,transcribed,List of Minnesota Timberwolves head coaches
+finch-chris,Chris Finch,,MIN,2021,2027,2027,258,193,0,0,27,27,,FALSE,transcribed,List of Minnesota Timberwolves head coaches
+silas-paul,Paul Silas,,NOP,2003,2003,2003,47,35,0,0,2,4,,FALSE,counted,List of New Orleans Pelicans head coaches
+floyd-tim,Tim Floyd,,NOP,2004,2004,2004,41,41,0,0,3,4,,FALSE,counted,List of New Orleans Pelicans head coaches
+scott-byron,Byron Scott,,NOP,2005,2010,2010,203,216,0,0,8,9,,FALSE,transcribed,List of New Orleans Pelicans head coaches
+bower-jeff,Jeff Bower,,NOP,2010,2010,2010,34,39,0,0,0,0,,FALSE,transcribed,List of New Orleans Pelicans head coaches
+williams-monty,Monty Williams,,NOP,2011,2013,2013,94,136,0,0,2,4,,FALSE,counted,List of New Orleans Pelicans head coaches
+williams-monty,Monty Williams,,NOP,2014,2015,2015,79,85,0,0,0,4,,FALSE,counted,List of New Orleans Pelicans head coaches
+gentry-alvin,Alvin Gentry,,NOP,2016,2020,2020,175,225,0,0,5,4,,FALSE,counted,List of New Orleans Pelicans head coaches
+gundy-van-stan,Stan Van Gundy,,NOP,2021,2021,2021,31,41,0,0,0,0,,FALSE,counted,List of New Orleans Pelicans head coaches
+green-willie,Willie Green,,NOP,2022,2026,2026,150,190,0,0,2,8,,FALSE,transcribed,List of New Orleans Pelicans head coaches
+borrego-james,James Borrego,,NOP,2026,2026,2026,24,46,0,0,0,0,,FALSE,transcribed,List of New Orleans Pelicans head coaches
+mosley-jamahl,Jamahl Mosley,,NOP,2027,2027,2027,,,0,0,0,0,,FALSE,transcribed,List of New Orleans Pelicans head coaches
+cohalan-neil,Neil Cohalan,,NYK,1947,1947,1947,33,27,0,0,2,3,,FALSE,counted,List of New York Knicks head coaches
+lapchick-joe,Joe Lapchick,,NYK,1948,1956,1956,326,247,0,0,30,30,,FALSE,transcribed,List of New York Knicks head coaches
+boryla-vince,Vince Boryla,,NYK,1956,1958,1958,80,85,0,0,0,0,,FALSE,transcribed,List of New York Knicks head coaches
+levane-andrew,Andrew Levane,,NYK,1959,1960,1960,48,51,0,0,0,2,,FALSE,transcribed,List of New York Knicks head coaches
+braun-carl,Carl Braun,,NYK,1960,1961,1961,40,87,0,0,0,0,,FALSE,transcribed,List of New York Knicks head coaches
+donovan-eddie,Eddie Donovan,,NYK,1962,1966,1966,84,194,0,0,0,0,,FALSE,transcribed,List of New York Knicks head coaches
+gallatin-harry,Harry Gallatin,,NYK,1965,1965,1965,25,38,0,0,0,0,,FALSE,transcribed,List of New York Knicks head coaches
+mcguire-dick,Dick McGuire,,NYK,1966,1968,1968,75,102,0,0,1,3,,FALSE,transcribed,List of New York Knicks head coaches
+holzman-red,Red Holzman,,NYK,1968,1977,1977,466,317,0,0,54,41,1970 1973,FALSE,transcribed,List of New York Knicks head coaches
+reed-willis,Willis Reed,,NYK,1978,1979,1979,49,47,0,0,2,4,,FALSE,transcribed,List of New York Knicks head coaches
+holzman-red,Red Holzman,,NYK,1979,1982,1982,147,167,0,0,0,2,,FALSE,transcribed,List of New York Knicks head coaches
+brown-hubie,Hubie Brown,,NYK,1983,1987,1987,142,202,0,0,8,10,,FALSE,transcribed,List of New York Knicks head coaches
+hill-bob,Bob Hill,,NYK,1987,1987,1987,20,46,0,0,0,0,,FALSE,transcribed,List of New York Knicks head coaches
+pitino-rick,Rick Pitino,,NYK,1988,1989,1989,90,74,0,0,6,7,,FALSE,counted,List of New York Knicks head coaches
+jackson-stu,Stu Jackson,,NYK,1990,1991,1991,52,45,0,0,4,6,,FALSE,transcribed,List of New York Knicks head coaches
+macleod-john,John MacLeod,,NYK,1991,1991,1991,32,35,0,0,0,3,,FALSE,transcribed,List of New York Knicks head coaches
+riley-pat,Pat Riley,,NYK,1992,1995,1995,223,105,0,0,35,28,,FALSE,counted,List of New York Knicks head coaches
+nelson-don,Don Nelson,,NYK,1996,1996,1996,34,25,0,0,0,0,,FALSE,transcribed,List of New York Knicks head coaches
+gundy-van-jeff,Jeff Van Gundy,,NYK,1996,2002,2002,248,172,0,0,37,32,,FALSE,transcribed,List of New York Knicks head coaches
+chaney-don,Don Chaney,,NYK,2002,2004,2004,72,112,0,0,0,0,,FALSE,transcribed,List of New York Knicks head coaches
+williams-herb,Herb Williams,,NYK,2004,2004,2004,1,0,0,0,0,0,,FALSE,transcribed,List of New York Knicks head coaches
+wilkens-lenny,Lenny Wilkens,,NYK,2004,2005,2005,40,41,0,0,0,4,,FALSE,transcribed,List of New York Knicks head coaches
+williams-herb,Herb Williams,,NYK,2005,2005,2005,16,27,0,0,0,0,,FALSE,transcribed,List of New York Knicks head coaches
+brown-larry,Larry Brown,,NYK,2006,2006,2006,23,59,0,0,0,0,,FALSE,counted,List of New York Knicks head coaches
+thomas-isiah,Isiah Thomas,,NYK,2007,2008,2008,56,108,0,0,0,0,,FALSE,counted,List of New York Knicks head coaches
+antoni-d-mike,Mike D'Antoni,,NYK,2009,2012,2012,121,167,0,0,0,4,,FALSE,transcribed,List of New York Knicks head coaches
+woodson-mike,Mike Woodson,,NYK,2012,2014,2014,109,79,0,0,7,10,,FALSE,transcribed,List of New York Knicks head coaches
+fisher-derek,Derek Fisher,,NYK,2015,2016,2016,40,96,0,0,0,0,,FALSE,transcribed,List of New York Knicks head coaches
+rambis-kurt,Kurt Rambis,,NYK,2016,2016,2016,9,19,0,0,0,0,,FALSE,transcribed,List of New York Knicks head coaches
+hornacek-jeff,Jeff Hornacek,,NYK,2017,2018,2018,60,104,0,0,0,0,,FALSE,counted,List of New York Knicks head coaches
+fizdale-david,David Fizdale,,NYK,2019,2020,2020,21,83,0,0,0,0,,FALSE,transcribed,List of New York Knicks head coaches
+miller-mike,Mike Miller,,NYK,2020,2020,2020,17,27,0,0,0,0,,FALSE,transcribed,List of New York Knicks head coaches
+thibodeau-tom,Tom Thibodeau,,NYK,2021,2025,2025,226,174,0,0,24,23,,FALSE,counted,List of New York Knicks head coaches
+brown-mike,Mike Brown,,NYK,2026,2027,2027,53,29,0,0,16,3,2026,FALSE,counted,List of New York Knicks head coaches
+bianchi-al,Al Bianchi,,OKC,1968,1969,1969,53,111,0,0,0,0,,FALSE,counted,List of Oklahoma City Thunder head coaches
+wilkens-lenny,Lenny Wilkens,,OKC,1970,1972,1972,121,125,0,0,0,0,,FALSE,counted,List of Oklahoma City Thunder head coaches
+nissalke-tom,Tom Nissalke,,OKC,1973,1973,1973,13,32,0,0,0,0,,FALSE,transcribed,List of Oklahoma City Thunder head coaches
+buckwalter-bucky,Bucky Buckwalter,,OKC,1973,1973,1973,13,24,0,0,0,0,,FALSE,transcribed,List of Oklahoma City Thunder head coaches
+russell-bill,Bill Russell,,OKC,1974,1977,1977,162,166,0,0,6,9,,FALSE,counted,List of Oklahoma City Thunder head coaches
+hopkins-bob,Bob Hopkins,,OKC,1978,1978,1978,5,17,0,0,0,0,,FALSE,transcribed,List of Oklahoma City Thunder head coaches
+wilkens-lenny,Lenny Wilkens,,OKC,1978,1985,1985,357,277,0,0,37,32,1979,FALSE,transcribed,List of Oklahoma City Thunder head coaches
+bickerstaff-bernie,Bernie Bickerstaff,,OKC,1986,1990,1990,202,208,0,0,12,15,,FALSE,counted,List of Oklahoma City Thunder head coaches
+jones-c-k,K.C. Jones,,OKC,1991,1992,1992,59,59,0,0,2,3,,FALSE,transcribed,List of Oklahoma City Thunder head coaches
+kloppenburg-bob,Bob Kloppenburg,,OKC,1992,1992,1992,2,2,0,0,0,0,,FALSE,transcribed,List of Oklahoma City Thunder head coaches
+karl-george,George Karl,,OKC,1992,1998,1998,384,150,0,0,40,40,,FALSE,transcribed,List of Oklahoma City Thunder head coaches
+westphal-paul,Paul Westphal,,OKC,1999,2001,2001,76,71,0,0,2,3,,FALSE,transcribed,List of Oklahoma City Thunder head coaches
+mcmillan-nate,Nate McMillan,,OKC,2001,2005,2005,212,183,0,0,8,8,,FALSE,transcribed,List of Oklahoma City Thunder head coaches
+weiss-bob,Bob Weiss,,OKC,2006,2006,2006,13,17,0,0,0,0,,FALSE,transcribed,List of Oklahoma City Thunder head coaches
+hill-bob,Bob Hill,,OKC,2006,2007,2007,53,81,0,0,0,0,,FALSE,transcribed,List of Oklahoma City Thunder head coaches
+carlesimo-j-p,P.J. Carlesimo,,OKC,2008,2008,2008,20,62,0,0,0,0,,FALSE,counted,List of Oklahoma City Thunder head coaches
+carlesimo-j-p,P.J. Carlesimo,,OKC,2009,2009,2009,1,12,0,0,0,0,,FALSE,transcribed,List of Oklahoma City Thunder head coaches
+brooks-scott,Scott Brooks,,OKC,2009,2015,2015,338,207,0,0,39,34,,FALSE,transcribed,List of Oklahoma City Thunder head coaches
+donovan-billy,Billy Donovan,,OKC,2016,2020,2020,243,157,0,0,18,23,,FALSE,counted,List of Oklahoma City Thunder head coaches
+daigneault-mark,Mark Daigneault,,OKC,2021,2027,2027,275,207,0,0,33,15,2025,FALSE,counted,List of Oklahoma City Thunder head coaches
+guokas-matt,Matt Guokas,,ORL,1990,1993,1993,111,217,0,0,0,0,,FALSE,counted,List of Orlando Magic head coaches
+hill-brian,Brian Hill,,ORL,1994,1997,1997,191,104,0,0,18,18,,FALSE,transcribed,List of Orlando Magic head coaches
+adubato-richie,Richie Adubato,,ORL,1997,1997,1997,21,12,0,0,2,3,,FALSE,transcribed,List of Orlando Magic head coaches
+daly-chuck,Chuck Daly,,ORL,1998,1999,1999,74,58,0,0,1,3,,FALSE,counted,List of Orlando Magic head coaches
+rivers-doc,Doc Rivers,,ORL,2000,2004,2004,171,168,0,0,5,10,,FALSE,transcribed,List of Orlando Magic head coaches
+davis-johnny,Johnny Davis,,ORL,2004,2005,2005,51,84,0,0,0,0,,FALSE,transcribed,List of Orlando Magic head coaches
+jent-chris,Chris Jent,,ORL,2005,2005,2005,5,13,0,0,0,0,,FALSE,transcribed,List of Orlando Magic head coaches
+hill-brian,Brian Hill,,ORL,2006,2007,2007,76,88,0,0,0,4,,FALSE,counted,List of Orlando Magic head coaches
+gundy-van-stan,Stan Van Gundy,,ORL,2008,2012,2012,259,135,0,0,31,28,,FALSE,counted,List of Orlando Magic head coaches
+vaughn-jacque,Jacque Vaughn,,ORL,2013,2015,2015,58,158,0,0,0,0,,FALSE,transcribed,List of Orlando Magic head coaches
+borrego-james,James Borrego,,ORL,2015,2015,2015,10,20,0,0,0,0,,FALSE,transcribed,List of Orlando Magic head coaches
+skiles-scott,Scott Skiles,,ORL,2016,2016,2016,35,47,0,0,0,0,,FALSE,counted,List of Orlando Magic head coaches
+vogel-frank,Frank Vogel,,ORL,2017,2018,2018,54,110,0,0,0,0,,FALSE,counted,List of Orlando Magic head coaches
+clifford-steve,Steve Clifford,,ORL,2019,2021,2021,96,131,0,0,2,8,,FALSE,counted,List of Orlando Magic head coaches
+mosley-jamahl,Jamahl Mosley,,ORL,2022,2026,2026,189,221,0,0,7,12,,FALSE,counted,List of Orlando Magic head coaches
+sweeney-sean,Sean Sweeney,,ORL,2027,2027,2027,,,0,0,0,0,,FALSE,transcribed,List of Orlando Magic head coaches
+cervi-al,Al Cervi,,PHI,1950,1957,1957,294,201,0,0,34,26,1955,FALSE,transcribed,List of Philadelphia 76ers head coaches
+seymour-paul,Paul Seymour,,PHI,1957,1960,1960,155,124,0,0,9,11,,FALSE,transcribed,List of Philadelphia 76ers head coaches
+hannum-alex,Alex Hannum,,PHI,1961,1963,1963,127,112,0,0,8,10,,FALSE,counted,List of Philadelphia 76ers head coaches
+schayes-dolph,Dolph Schayes,,PHI,1964,1966,1966,129,111,0,0,9,12,,FALSE,counted,List of Philadelphia 76ers head coaches
+hannum-alex,Alex Hannum,,PHI,1967,1968,1968,130,33,0,0,18,10,1967,FALSE,counted,List of Philadelphia 76ers head coaches
+ramsay-jack,Jack Ramsay,,PHI,1969,1972,1972,174,154,0,0,5,12,,FALSE,counted,List of Philadelphia 76ers head coaches
+rubin-roy,Roy Rubin,,PHI,1973,1973,1973,4,47,0,0,0,0,,FALSE,transcribed,List of Philadelphia 76ers head coaches
+loughery-kevin,Kevin Loughery,,PHI,1973,1973,1973,5,26,0,0,0,0,,FALSE,transcribed,List of Philadelphia 76ers head coaches
+shue-gene,Gene Shue,,PHI,1974,1978,1978,157,177,0,0,11,11,,FALSE,transcribed,List of Philadelphia 76ers head coaches
+cunningham-billy,Billy Cunningham,,PHI,1978,1985,1985,454,196,0,0,66,39,1983,FALSE,transcribed,List of Philadelphia 76ers head coaches
+guokas-matt,Matt Guokas,,PHI,1986,1988,1988,119,88,0,0,8,9,,FALSE,transcribed,List of Philadelphia 76ers head coaches
+lynam-jim,Jim Lynam,,PHI,1988,1992,1992,194,173,0,0,8,13,,FALSE,transcribed,List of Philadelphia 76ers head coaches
+moe-doug,Doug Moe,,PHI,1993,1993,1993,19,37,0,0,0,0,,FALSE,transcribed,List of Philadelphia 76ers head coaches
+carter-fred,Fred Carter,,PHI,1993,1994,1994,32,76,0,0,0,0,,FALSE,transcribed,List of Philadelphia 76ers head coaches
+lucas-john,John Lucas,,PHI,1995,1996,1996,42,122,0,0,0,0,,FALSE,counted,List of Philadelphia 76ers head coaches
+davis-johnny,Johnny Davis,,PHI,1997,1997,1997,22,60,0,0,0,0,,FALSE,counted,List of Philadelphia 76ers head coaches
+brown-larry,Larry Brown,,PHI,1998,2003,2003,255,205,0,0,28,30,,FALSE,counted,List of Philadelphia 76ers head coaches
+ayers-randy,Randy Ayers,,PHI,2004,2004,2004,21,31,0,0,0,0,,FALSE,transcribed,List of Philadelphia 76ers head coaches
+ford-chris,Chris Ford,,PHI,2004,2004,2004,12,18,0,0,0,0,,FALSE,transcribed,List of Philadelphia 76ers head coaches
+brien-o-jim,Jim O'Brien,,PHI,2005,2005,2005,43,39,0,0,1,4,,FALSE,counted,List of Philadelphia 76ers head coaches
+cheeks-maurice,Maurice Cheeks,,PHI,2006,2009,2009,122,146,0,0,2,4,,FALSE,transcribed,List of Philadelphia 76ers head coaches
+dileo-tony,Tony DiLeo,,PHI,2009,2009,2009,32,27,0,0,2,4,,FALSE,transcribed,List of Philadelphia 76ers head coaches
+jordan-eddie,Eddie Jordan,,PHI,2010,2010,2010,27,55,0,0,0,0,,FALSE,counted,List of Philadelphia 76ers head coaches
+collins-doug,Doug Collins,,PHI,2011,2013,2013,110,120,0,0,8,10,,FALSE,counted,List of Philadelphia 76ers head coaches
+brown-brett,Brett Brown,,PHI,2014,2020,2020,221,344,0,0,12,14,,FALSE,counted,List of Philadelphia 76ers head coaches
+rivers-doc,Doc Rivers,,PHI,2021,2023,2023,154,82,0,0,20,15,,FALSE,counted,List of Philadelphia 76ers head coaches
+nurse-nick,Nick Nurse,,PHI,2024,2027,2027,116,130,0,0,6,11,,FALSE,counted,List of Philadelphia 76ers head coaches
+kerr-johnny,Johnny Kerr,,PHX,1969,1970,1970,31,89,0,0,0,0,,FALSE,transcribed,List of Phoenix Suns head coaches
+colangelo-jerry,Jerry Colangelo,,PHX,1970,1970,1970,24,20,0,0,3,4,,FALSE,transcribed,List of Phoenix Suns head coaches
+fitzsimmons-cotton,Cotton Fitzsimmons,,PHX,1971,1972,1972,97,67,0,0,0,0,,FALSE,counted,List of Phoenix Suns head coaches
+kolff-breda-van-butch,Butch van Breda Kolff,,PHX,1973,1973,1973,3,4,0,0,0,0,,FALSE,transcribed,List of Phoenix Suns head coaches
+colangelo-jerry,Jerry Colangelo,,PHX,1973,1973,1973,35,40,0,0,0,0,,FALSE,transcribed,List of Phoenix Suns head coaches
+macleod-john,John MacLeod,,PHX,1974,1987,1987,579,543,0,0,37,44,,FALSE,transcribed,List of Phoenix Suns head coaches
+arsdale-van-dick,Dick Van Arsdale,,PHX,1987,1987,1987,14,12,0,0,0,0,,FALSE,transcribed,List of Phoenix Suns head coaches
+wetzel-john,John Wetzel,,PHX,1988,1988,1988,28,54,0,0,0,0,,FALSE,counted,List of Phoenix Suns head coaches
+fitzsimmons-cotton,Cotton Fitzsimmons,,PHX,1989,1992,1992,217,111,0,0,21,19,,FALSE,counted,List of Phoenix Suns head coaches
+westphal-paul,Paul Westphal,,PHX,1993,1997,1997,191,88,0,0,25,19,,FALSE,transcribed,List of Phoenix Suns head coaches
+fitzsimmons-cotton,Cotton Fitzsimmons,,PHX,1996,1996,1996,27,30,0,0,1,3,,FALSE,transcribed,List of Phoenix Suns head coaches
+ainge-danny,Danny Ainge,,PHX,1997,2000,2000,136,90,0,0,3,9,,FALSE,transcribed,List of Phoenix Suns head coaches
+skiles-scott,Scott Skiles,,PHX,2000,2002,2002,116,79,0,0,5,8,,FALSE,transcribed,List of Phoenix Suns head coaches
+johnson-frank,Frank Johnson,,PHX,2002,2004,2004,63,71,0,0,2,4,,FALSE,transcribed,List of Phoenix Suns head coaches
+antoni-d-mike,Mike D'Antoni,,PHX,2004,2008,2008,253,136,0,0,26,25,,FALSE,transcribed,List of Phoenix Suns head coaches
+porter-terry,Terry Porter,,PHX,2009,2009,2009,28,23,0,0,0,0,,FALSE,transcribed,List of Phoenix Suns head coaches
+gentry-alvin,Alvin Gentry,,PHX,2009,2013,2013,158,144,0,0,10,6,,FALSE,transcribed,List of Phoenix Suns head coaches
+hunter-lindsey,Lindsey Hunter,,PHX,2013,2013,2013,12,29,0,0,0,0,,FALSE,transcribed,List of Phoenix Suns head coaches
+hornacek-jeff,Jeff Hornacek,,PHX,2014,2016,2016,101,112,0,0,0,0,,FALSE,transcribed,List of Phoenix Suns head coaches
+watson-earl,Earl Watson,,PHX,2016,2018,2018,33,85,0,0,0,0,,FALSE,transcribed,List of Phoenix Suns head coaches
+triano-jay,Jay Triano,,PHX,2018,2018,2018,21,58,0,0,0,0,,FALSE,transcribed,List of Phoenix Suns head coaches
+kokoskov-igor,Igor Kokoškov,,PHX,2019,2019,2019,19,63,0,0,0,0,,FALSE,counted,List of Phoenix Suns head coaches
+williams-monty,Monty Williams,,PHX,2020,2023,2023,194,115,0,0,27,19,,FALSE,counted,List of Phoenix Suns head coaches
+vogel-frank,Frank Vogel,,PHX,2024,2024,2024,49,33,0,0,0,4,,FALSE,counted,List of Phoenix Suns head coaches
+budenholzer-mike,Mike Budenholzer,,PHX,2025,2025,2025,36,46,0,0,0,0,,FALSE,counted,List of Phoenix Suns head coaches
+ott-jordan,Jordan Ott,,PHX,2026,2027,2027,45,37,0,0,0,4,,FALSE,counted,List of Phoenix Suns head coaches
+todd-rolland,Rolland Todd,,POR,1971,1972,1972,41,97,0,0,0,0,,FALSE,transcribed,List of Portland Trail Blazers head coaches
+inman-stu,Stu Inman,,POR,1972,1972,1972,6,20,0,0,0,0,,FALSE,transcribed,List of Portland Trail Blazers head coaches
+mccloskey-jack,Jack McCloskey,,POR,1973,1974,1974,48,116,0,0,0,0,,FALSE,counted,List of Portland Trail Blazers head coaches
+wilkens-lenny,Lenny Wilkens,,POR,1975,1976,1976,75,89,0,0,0,0,,FALSE,counted,List of Portland Trail Blazers head coaches
+ramsay-jack,Jack Ramsay,,POR,1977,1986,1986,453,367,0,0,29,30,1977,FALSE,counted,List of Portland Trail Blazers head coaches
+schuler-mike,Mike Schuler,,POR,1987,1989,1989,127,84,0,0,2,6,,FALSE,transcribed,List of Portland Trail Blazers head coaches
+adelman-rick,Rick Adelman,,POR,1989,1994,1994,291,154,0,0,36,33,,FALSE,transcribed,List of Portland Trail Blazers head coaches
+carlesimo-j-p,P.J. Carlesimo,,POR,1995,1997,1997,137,109,0,0,3,9,,FALSE,counted,List of Portland Trail Blazers head coaches
+dunleavy-mike,Mike Dunleavy,,POR,1998,2001,2001,190,106,0,0,18,18,,FALSE,counted,List of Portland Trail Blazers head coaches
+cheeks-maurice,Maurice Cheeks,,POR,2002,2005,2005,162,139,0,0,3,7,,FALSE,transcribed,List of Portland Trail Blazers head coaches
+pritchard-kevin,Kevin Pritchard,,POR,2005,2005,2005,5,22,0,0,0,0,,FALSE,transcribed,List of Portland Trail Blazers head coaches
+mcmillan-nate,Nate McMillan,,POR,2006,2012,2012,266,269,0,0,6,12,,FALSE,transcribed,List of Portland Trail Blazers head coaches
+canales-kaleb,Kaleb Canales,,POR,2012,2012,2012,8,15,0,0,0,0,,FALSE,transcribed,List of Portland Trail Blazers head coaches
+stotts-terry,Terry Stotts,,POR,2013,2021,2021,402,318,0,0,22,40,,FALSE,counted,List of Portland Trail Blazers head coaches
+billups-chauncey,Chauncey Billups,,POR,2022,2025,2025,117,211,0,0,0,0,,FALSE,counted,List of Portland Trail Blazers head coaches
+splitter-tiago,Tiago Splitter,,POR,2026,2026,2026,42,40,0,0,1,4,,FALSE,counted,List of Portland Trail Blazers head coaches
+nori-micah,Micah Nori,,POR,2027,2027,2027,,,0,0,0,0,,FALSE,transcribed,List of Portland Trail Blazers head coaches
+harrison-les,Les Harrison,,SAC,1949,1956,1956,296,181,0,0,19,19,1951,FALSE,transcribed,List of Sacramento Kings head coaches
+wanzer-bobby,Bobby Wanzer,,SAC,1956,1959,1959,98,126,0,0,0,2,,FALSE,transcribed,List of Sacramento Kings head coaches
+marshall-tom,Tom Marshall,,SAC,1959,1960,1960,35,94,0,0,0,0,,FALSE,transcribed,List of Sacramento Kings head coaches
+wolf-charles,Charles Wolf,,SAC,1961,1963,1963,118,121,0,0,7,9,,FALSE,counted,List of Sacramento Kings head coaches
+mcmahon-jack,Jack McMahon,,SAC,1964,1967,1967,187,134,0,0,8,15,,FALSE,counted,List of Sacramento Kings head coaches
+jucker-ed,Ed Jucker,,SAC,1968,1969,1969,80,84,0,0,0,0,,FALSE,counted,List of Sacramento Kings head coaches
+cousy-bob,Bob Cousy,,SAC,1970,1974,1974,141,209,0,0,0,0,,FALSE,transcribed,List of Sacramento Kings head coaches
+young-draff,Draff Young,,SAC,1973,1973,1973,0,3,0,0,0,0,,FALSE,transcribed,List of Sacramento Kings head coaches
+johnson-phil,Phil Johnson,,SAC,1974,1978,1978,155,185,0,0,2,4,,FALSE,transcribed,List of Sacramento Kings head coaches
+staverman-larry,Larry Staverman,,SAC,1978,1978,1978,18,27,0,0,0,0,,FALSE,transcribed,List of Sacramento Kings head coaches
+fitzsimmons-cotton,Cotton Fitzsimmons,,SAC,1979,1984,1984,248,244,0,0,9,17,,FALSE,counted,List of Sacramento Kings head coaches
+mckinney-jack,Jack McKinney,,SAC,1985,1985,1985,1,8,0,0,0,0,,FALSE,transcribed,List of Sacramento Kings head coaches
+johnson-phil,Phil Johnson,,SAC,1985,1988,1988,81,120,0,0,0,3,,FALSE,transcribed,List of Sacramento Kings head coaches
+reynolds-jerry,Jerry Reynolds,,SAC,1987,1987,1987,22,38,0,0,0,0,,FALSE,transcribed,List of Sacramento Kings head coaches
+russell-bill,Bill Russell,,SAC,1988,1988,1988,17,41,0,0,0,0,,FALSE,transcribed,List of Sacramento Kings head coaches
+reynolds-jerry,Jerry Reynolds,,SAC,1989,1990,1990,34,76,0,0,0,0,,FALSE,transcribed,List of Sacramento Kings head coaches
+motta-dick,Dick Motta,,SAC,1990,1992,1992,48,113,0,0,0,0,,FALSE,transcribed,List of Sacramento Kings head coaches
+hughes-rex,Rex Hughes,,SAC,1992,1992,1992,22,35,0,0,0,0,,FALSE,transcribed,List of Sacramento Kings head coaches
+jean-st-garry,Garry St. Jean,,SAC,1993,1997,1997,159,236,0,0,1,3,,FALSE,transcribed,List of Sacramento Kings head coaches
+jordan-eddie,Eddie Jordan,,SAC,1997,1998,1998,33,64,0,0,0,0,,FALSE,transcribed,List of Sacramento Kings head coaches
+adelman-rick,Rick Adelman,,SAC,1999,2006,2006,395,229,0,0,34,35,,FALSE,counted,List of Sacramento Kings head coaches
+musselman-eric,Eric Musselman,,SAC,2007,2007,2007,33,49,0,0,0,0,,FALSE,counted,List of Sacramento Kings head coaches
+theus-reggie,Reggie Theus,,SAC,2008,2009,2009,44,62,0,0,0,0,,FALSE,transcribed,List of Sacramento Kings head coaches
+natt-kenny,Kenny Natt,,SAC,2009,2009,2009,11,47,0,0,0,0,,FALSE,transcribed,List of Sacramento Kings head coaches
+westphal-paul,Paul Westphal,,SAC,2010,2012,2012,51,120,0,0,0,0,,FALSE,transcribed,List of Sacramento Kings head coaches
+smart-keith,Keith Smart,,SAC,2012,2013,2013,48,93,0,0,0,0,,FALSE,transcribed,List of Sacramento Kings head coaches
+malone-michael,Michael Malone,,SAC,2014,2015,2015,39,67,0,0,0,0,,FALSE,transcribed,List of Sacramento Kings head coaches
+corbin-tyrone,Tyrone Corbin,,SAC,2015,2015,2015,7,21,0,0,0,0,,FALSE,transcribed,List of Sacramento Kings head coaches
+karl-george,George Karl,,SAC,2015,2016,2016,44,68,0,0,0,0,,FALSE,transcribed,List of Sacramento Kings head coaches
+joerger-dave,Dave Joerger,,SAC,2017,2019,2019,98,148,0,0,0,0,,FALSE,counted,List of Sacramento Kings head coaches
+walton-luke,Luke Walton,,SAC,2020,2022,2022,68,93,0,0,0,0,,FALSE,transcribed,List of Sacramento Kings head coaches
+gentry-alvin,Alvin Gentry,,SAC,2022,2022,2022,24,41,0,0,0,0,,FALSE,transcribed,List of Sacramento Kings head coaches
+brown-mike,Mike Brown,,SAC,2023,2025,2025,107,88,0,0,3,4,,FALSE,transcribed,List of Sacramento Kings head coaches
+christie-doug,Doug Christie,,SAC,2025,2027,2027,49,84,0,0,0,0,,FALSE,transcribed,List of Sacramento Kings head coaches
+moe-doug,Doug Moe,,SAS,1977,1980,1980,177,135,0,0,9,13,,FALSE,transcribed,List of San Antonio Spurs head coaches
+bass-bob,Bob Bass,,SAS,1980,1980,1980,8,8,0,0,1,2,,FALSE,transcribed,List of San Antonio Spurs head coaches
+albeck-stan,Stan Albeck,,SAS,1981,1983,1983,153,93,0,0,13,14,,FALSE,counted,List of San Antonio Spurs head coaches
+mchone-morris,Morris McHone,,SAS,1984,1984,1984,11,20,0,0,0,0,,FALSE,transcribed,List of San Antonio Spurs head coaches
+bass-bob,Bob Bass,,SAS,1984,1984,1984,26,25,0,0,0,0,,FALSE,transcribed,List of San Antonio Spurs head coaches
+fitzsimmons-cotton,Cotton Fitzsimmons,,SAS,1985,1986,1986,76,88,0,0,2,6,,FALSE,counted,List of San Antonio Spurs head coaches
+weiss-bob,Bob Weiss,,SAS,1987,1988,1988,59,105,0,0,0,3,,FALSE,counted,List of San Antonio Spurs head coaches
+brown-larry,Larry Brown,,SAS,1989,1993,1993,153,131,0,0,7,7,,FALSE,transcribed,List of San Antonio Spurs head coaches
+bass-bob,Bob Bass,,SAS,1992,1992,1992,26,18,0,0,0,3,,FALSE,transcribed,List of San Antonio Spurs head coaches
+tarkanian-jerry,Jerry Tarkanian,,SAS,1992,1992,1992,9,11,0,0,0,0,,FALSE,transcribed,List of San Antonio Spurs head coaches
+hughes-rex,Rex Hughes,,SAS,1992,1992,1992,1,0,0,0,0,0,,FALSE,transcribed,List of San Antonio Spurs head coaches
+ii-lucas-john,John Lucas II,,SAS,1993,1994,1994,94,49,0,0,6,8,,FALSE,transcribed,List of San Antonio Spurs head coaches
+hill-bob,Bob Hill,,SAS,1995,1997,1997,124,58,0,0,14,11,,FALSE,transcribed,List of San Antonio Spurs head coaches
+popovich-gregg,Gregg Popovich,,SAS,1997,2025,2025,1390,824,0,0,170,114,1999 2003 2005 2007 2014,FALSE,transcribed,List of San Antonio Spurs head coaches
+johnson-mitch,Mitch Johnson,,SAS,2025,2027,2027,94,65,0,0,13,10,,FALSE,transcribed,List of San Antonio Spurs head coaches
+malone-brendan,Brendan Malone,,TOR,1996,1996,1996,21,61,0,0,0,0,,FALSE,counted,List of Toronto Raptors head coaches
+walker-darrell,Darrell Walker,,TOR,1997,1998,1998,41,90,0,0,0,0,,FALSE,transcribed,List of Toronto Raptors head coaches
+carter-butch,Butch Carter,,TOR,1998,2000,2000,73,92,0,0,0,3,,FALSE,transcribed,List of Toronto Raptors head coaches
+wilkens-lenny,Lenny Wilkens,,TOR,2001,2003,2003,113,133,0,0,8,9,,FALSE,counted,List of Toronto Raptors head coaches
+neill-o-kevin,Kevin O'Neill,,TOR,2004,2004,2004,33,49,0,0,0,0,,FALSE,counted,List of Toronto Raptors head coaches
+mitchell-sam,Sam Mitchell,,TOR,2005,2009,2009,156,189,0,0,3,8,,FALSE,transcribed,List of Toronto Raptors head coaches
+triano-jay,Jay Triano,,TOR,2009,2011,2011,87,142,0,0,0,0,,FALSE,transcribed,List of Toronto Raptors head coaches
+casey-dwane,Dwane Casey,,TOR,2012,2018,2018,320,238,0,0,21,30,,FALSE,counted,List of Toronto Raptors head coaches
+nurse-nick,Nick Nurse,,TOR,2019,2023,2023,227,163,0,0,25,16,2019,FALSE,counted,List of Toronto Raptors head coaches
+rajakovic-darko,Darko Rajaković,,TOR,2024,2027,2027,101,145,0,0,3,4,,FALSE,counted,List of Toronto Raptors head coaches
+brown-larry,Larry Brown,,DEN,1977,1979,1979,126,91,0,0,8,11,,FALSE,counted,List of Denver Nuggets head coaches (by hand: the NBA years of an ABA and NBA tenure)

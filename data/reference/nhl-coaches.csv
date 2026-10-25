@@ -205,11 +205,10 @@ abel-sid,Sid Abel,,DET,1969,1970,1970,33,33,13,0,3,4,,FALSE,transcribed,List of 
 gadsby-bill,Bill Gadsby,,DET,1968,1969,1969,35,31,12,0,0,0,,FALSE,transcribed,List of Detroit Red Wings head coaches
 harkness-ned,Ned Harkness,,DET,1971,1971,1971,12,22,4,0,0,0,,FALSE,transcribed,List of Detroit Red Wings head coaches
 barkley-doug,Doug Barkley,,DET,1971,1971,1971,10,23,5,0,0,0,,FALSE,transcribed,List of Detroit Red Wings head coaches
-barkley-doug,Doug Barkley,,DET,1975,1976,1976,10,23,6,0,0,0,,FALSE,transcribed,List of Detroit Red Wings head coaches
+barkley-doug,Doug Barkley,,DET,1976,1976,1976,10,23,6,0,0,0,,FALSE,transcribed,List of Detroit Red Wings head coaches
 wilson-johnny,Johnny Wilson,,DET,1971,1973,1973,67,56,22,0,0,0,,FALSE,transcribed,List of Detroit Red Wings head coaches
 garvin-ted,Ted Garvin,,DET,1974,1974,1974,2,8,1,0,0,0,,FALSE,transcribed,List of Detroit Red Wings head coaches
-delvecchio-alex,Alex Delvecchio,,DET,1973,1975,1975,41,65,16,0,0,0,,FALSE,transcribed,List of Detroit Red Wings head coaches
-delvecchio-alex,Alex Delvecchio,,DET,1976,1977,1977,41,66,16,0,0,0,,FALSE,transcribed,List of Detroit Red Wings head coaches
+delvecchio-alex,Alex Delvecchio,,DET,1973,1977,1977,82,131,32,0,0,0,,FALSE,transcribed,List of Detroit Red Wings head coaches
 wilson-larry,Larry Wilson,,DET,1977,1977,1977,3,29,4,0,0,0,,FALSE,transcribed,List of Detroit Red Wings head coaches
 kromm-bobby,Bobby Kromm,,DET,1978,1980,1980,79,111,41,0,3,4,,FALSE,transcribed,List of Detroit Red Wings head coaches
 lindsay-ted,Ted Lindsay,,DET,1980,1981,1981,5,21,3,0,0,0,,FALSE,transcribed,List of Detroit Red Wings head coaches
@@ -297,7 +296,7 @@ stevens-john,John Stevens,,LAK,2018,2019,2019,49,37,9,0,0,4,,FALSE,transcribed,L
 desjardins-willie,Willie Desjardins,,LAK,2019,2019,2019,27,34,8,0,0,0,,FALSE,transcribed,List of Los Angeles Kings head coaches
 mclellan-todd,Todd McLellan,,LAK,2020,2024,2024,164,130,44,0,5,8,,FALSE,transcribed,List of Los Angeles Kings head coaches
 hiller-jim,Jim Hiller,,LAK,2024,2026,2026,93,58,24,0,3,8,,FALSE,transcribed,List of Los Angeles Kings head coaches
-smith-j-d,D. J. Smith,,LAK,2026,2026,2026,11,6,6,0,0,4,,FALSE,transcribed,List of Los Angeles Kings head coaches
+smith-j-d,D.J. Smith,,LAK,2026,2026,2026,11,6,6,0,0,4,,FALSE,transcribed,List of Los Angeles Kings head coaches
 laviolette-peter,Peter Laviolette,,LAK,2027,2027,2027,,,0,0,0,0,,FALSE,transcribed,List of Los Angeles Kings head coaches
 lemaire-jacques,Jacques Lemaire,,MIN,2001,2009,2009,293,255,55,53,11,18,,FALSE,counted,List of Minnesota Wild head coaches
 richards-todd,Todd Richards,,MIN,2010,2011,2011,77,71,0,16,0,0,,FALSE,counted,List of Minnesota Wild head coaches
@@ -457,7 +456,7 @@ maclean-paul,Paul MacLean,,OTT,2012,2015,2015,114,90,35,0,8,9,,FALSE,transcribed
 cameron-dave,Dave Cameron,,OTT,2015,2016,2016,70,50,17,0,2,4,,FALSE,transcribed,List of Ottawa Senators head coaches
 boucher-guy,Guy Boucher,,OTT,2017,2019,2019,94,108,26,0,11,8,,FALSE,transcribed,List of Ottawa Senators head coaches
 crawford-marc,Marc Crawford,,OTT,2019,2019,2019,7,10,1,0,0,0,,FALSE,transcribed,List of Ottawa Senators head coaches
-smith-j-d,D. J. Smith,,OTT,2020,2024,2024,131,154,32,0,0,0,,FALSE,transcribed,List of Ottawa Senators head coaches
+smith-j-d,D.J. Smith,,OTT,2020,2024,2024,131,154,32,0,0,0,,FALSE,transcribed,List of Ottawa Senators head coaches
 martin-jacques,Jacques Martin,,OTT,2024,2024,2024,26,26,4,0,0,0,,FALSE,transcribed,List of Ottawa Senators head coaches
 green-travis,Travis Green,,OTT,2025,2027,2027,89,57,0,18,2,8,,FALSE,counted,List of Ottawa Senators head coaches
 allen-keith,Keith Allen,,PHI,1967,1969,1969,51,67,32,0,3,8,,FALSE,counted,List of Philadelphia Flyers head coaches
