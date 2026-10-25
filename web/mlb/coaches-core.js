@@ -330,6 +330,17 @@ export const recOtl = (w, l, t, otl) => (otl > 0 ? `${w}–${l}–${t}–${otl}`
  *  the shape computeCoachesFromData gives; `eras` one a spell in charge, for
  *  the history chart's bands, carrying its person's record for the tooltip. */
 export function coachesFromJson({ coaches = [], eras = [] } = {}) {
+	// A person's spells, joined where they meet, so the tenure column says
+	// "1980–1983, 1993–1997" for Eddie Johnston rather than a run of 1980 to
+	// 1997 straight over the eight coaches between.
+	const spellsOf = new Map();
+	for (const e of [...eras].sort((a, b) => a.from - b.from)) {
+		const list = spellsOf.get(e.leader) ?? [];
+		const prev = list.at(-1);
+		if (prev && e.from <= prev.to + 1) prev.to = Math.max(prev.to, e.to);
+		else list.push({ from: e.from, to: e.to });
+		spellsOf.set(e.leader, list);
+	}
 	const rows = coaches.map((l) => {
 		const otl = l.otl ?? 0;
 		const games = l.w + l.l + l.t + otl;
@@ -339,7 +350,10 @@ export function coachesFromJson({ coaches = [], eras = [] } = {}) {
 			interim: Boolean(l.interim),
 			image: null, imagePage: null,
 			firstSeason: l.firstSeason, lastSeason: l.lastSeason,
-			tenure: tenureOf(l.firstSeason, l.lastSeason),
+			// A stand-in has no spells (eras are the coaches who held the job),
+			// so his first to last season.
+			tenure: (spellsOf.get(l.leader) ?? [{ from: l.firstSeason, to: l.lastSeason }])
+				.map((s) => tenureOf(s.from, s.to)).join(', '),
 			games,
 			wins: l.w, losses: l.l, ties: l.t, otl,
 			record: recOtl(l.w, l.l, l.t, otl),
@@ -357,9 +371,16 @@ export function coachesFromJson({ coaches = [], eras = [] } = {}) {
 		const n = (seen.get(base) || 0) + 1;
 		seen.set(base, n);
 		// Seasons, not dates: the chart takes either, and a stated tenure has
-		// only its seasons. Half a season either side, so a one-season spell is
-		// a band and not a line.
-		return { ...person, slug: n > 1 ? `${base}-${n}` : base, fromDate: e.from - 0.5, toDate: e.to + 0.5,
+		// only its seasons. A spell runs from the start of its first season to
+		// the end of its last, except that a season shared with another coach,
+		// changed in mid-season, is split between them at its middle rather
+		// than drawn twice. A one-season spell shared at both ends keeps half a
+		// season, so it is a band and not a line.
+		const shared = (s, self) => eras.some((o) => o !== self && o.leader !== self.leader && o.from <= s && s <= o.to);
+		let from = shared(e.from, e) ? e.from : e.from - 0.5;
+		let to = shared(e.to, e) ? e.to : e.to + 0.5;
+		if (to - from < 0.5) { from = e.from - 0.25; to = e.to + 0.25; }
+		return { ...person, slug: n > 1 ? `${base}-${n}` : base, fromDate: from, toDate: to,
 			tenure: tenureOf(e.from, e.to) };
 	});
 	return { coaches: rows, eras: spells };
