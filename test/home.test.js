@@ -69,3 +69,26 @@ test('the page has a section a league, my teams, and every club to find and pin'
 	// Its own list class: the site's .games has a height of its own and scrolls.
 	assert.ok(!/class="games"/.test(html))
 })
+
+test('with a market, an NFL game says whether its station carries it', async () => {
+	const nfl = (away, home, network) => ({
+		id: away, date: '2026-10-25T17:00Z', season: { year: 2026, type: 2 }, week: { number: 7 },
+		competitions: [{ status: { type: { state: 'post' } }, broadcasts: [{ names: [network] }], competitors: [
+			{ homeAway: 'away', team: { displayName: away } }, { homeAway: 'home', team: { displayName: home } }] }],
+	})
+	const espn = async () => ({ status: 200, body: JSON.stringify({ events: [
+		nfl('San Francisco 49ers', 'Atlanta Falcons', 'Fox'), nfl('Tampa Bay Buccaneers', 'Carolina Panthers', 'Fox')] }) })
+	const asked = []
+	const coverage = async (season, week) => {
+		asked.push(`${season}|${week}`)
+		return { url: 'u', national: [], regional: [{ network: 'FOX', window: 'EARLY', map: 'm', posted: true,
+			games: ['San Francisco @ Atlanta', 'Tampa Bay @ Carolina'], byDma: { Wausau: 'San Francisco @ Atlanta' } }] }
+	}
+	const [league] = await todayGames({ sports: ['nfl'], date: '20261025', espn, dma: 'Wausau', coverage })
+	assert.deepEqual(asked, ['2026|7'], 'the week\'s maps read once')
+	assert.deepEqual(league.games.map((g) => g.coverage?.carried), [true, false])
+	assert.equal(league.games[1].coverage.other, 'San Francisco @ Atlanta')
+	// Without a market, nothing is read and nothing is said.
+	const [plain] = await todayGames({ sports: ['nfl'], date: '20261025', espn, coverage })
+	assert.ok(plain.games.every((g) => !g.coverage))
+})
