@@ -1,0 +1,289 @@
+# MLS head coaches, from Wikipedia's lists of each club's head coaches (CC BY-SA 4.0).
+#
+# CURATED AND COMMITTED. Seeded by scripts/wiki-coaches.mjs from the draft in
+# data/sources/sportsdata/coaches; corrections belong here, not in the draft.
+# Seasons are numbered as this repo numbers them.
+# w, l, t and otl are the regular season, playoffW and playoffL the playoffs.
+# basis says where the record is from: counted, from this database's games,
+# for a coach who had every game of his seasons; transcribed, the list's own,
+# where a mid-season change shares a season and only the list knows the split.
+# Each tenure's seasons were placed where its games fit the games played
+# (scripts/coaches-check.mjs reports any that do not). titleSeasons are the
+# club's championships, credited to the coach who finished the season.
+leaderId,name,nflverseName,franchiseAbbrv,firstSeason,lastSeason,statedLastSeason,w,l,t,otl,playoffW,playoffL,titleSeasons,interim,basis,source,term
+wolff-josh,Josh Wolff,,ATX,2021,2024,2024,45,60,30,0,2,1,,FALSE,counted,Austin FC (main article),2019–2024
+arnaud-davy,Davy Arnaud,,ATX,2024,2024,2024,1,0,0,0,0,0,,TRUE,counted,Austin FC (main article),2024
+estevez-nico,Nico Estévez,,ATX,2025,2026,2026,16,19,13,0,0,2,,FALSE,counted,Austin FC (main article),2024–2026
+arnaud-davy,Davy Arnaud,,ATX,2026,2026,2026,4,7,5,0,0,0,,TRUE,counted,Austin FC (main article),2026–present
+ramirez-angel-miguel,Miguel Ángel Ramírez,,CLT,2022,2022,2022,5,8,1,0,0,0,,FALSE,counted,Charlotte FC (main article),2021–2022
+lattanzio-christian,Christian Lattanzio,,CLT,2022,2022,2022,8,10,2,0,0,0,,TRUE,counted,Charlotte FC (main article),2022
+lattanzio-christian,Christian Lattanzio,,CLT,2023,2023,2023,10,11,13,0,0,1,,FALSE,counted,Charlotte FC (main article),2022–2023
+smith-dean,Dean Smith,,CLT,2024,2026,2026,46,33,19,0,2,4,,FALSE,counted,Charlotte FC (main article),2023–present
+martino-tata-gerardo,"Gerardo ""Tata"" Martino",,ATL,2017,2018,2018,36,16,16,0,4,2,2018,FALSE,counted,Atlanta United FC (main article),2016–2018
+boer-de-frank,Frank de Boer,,ATL,2019,2020,2020,20,15,4,0,2,1,,FALSE,counted,Atlanta United FC (main article),2018–2020
+glass-stephen,Stephen Glass,,ATL,2020,2020,2020,4,10,4,0,0,0,,TRUE,counted,Atlanta United FC (main article),2020
+heinze-gabriel,Gabriel Heinze,,ATL,2021,2021,2021,2,4,7,0,0,0,,FALSE,counted,Atlanta United FC (main article),2020–2021
+valentino-rob,Rob Valentino,,ATL,2021,2021,2021,1,2,2,0,0,0,,TRUE,counted,Atlanta United FC (main article),2021
+pineda-gonzalo,Gonzalo Pineda,,ATL,2021,2024,2024,37,34,29,0,1,3,,FALSE,counted,Atlanta United FC (main article),2021–2024
+valentino-rob,Rob Valentino,,ATL,2024,2024,2024,6,6,6,0,3,2,,TRUE,counted,Atlanta United FC (main article),2024
+deila-ronny,Ronny Deila,,ATL,2025,2025,2025,5,16,13,0,0,0,,FALSE,counted,Atlanta United FC (main article),2024–2025
+martino-tata-geraldo,"Geraldo ""Tata"" Martino",,ATL,2026,2026,2026,8,16,6,0,0,0,,FALSE,counted,Atlanta United FC (main article),2025–present
+bradley-bob,Bob Bradley,,CHI,1998,2002,2002,82,54,15,0,13,9,1998,FALSE,counted,Chicago Fire FC (main article),1997–2002
+sarachan-dave,Dave Sarachan,,CHI,2003,2007,2007,55,50,31,0,5,3,,FALSE,counted,Chicago Fire FC (main article),2002–2007
+osorio-carlos-juan,Juan Carlos Osorio,,CHI,2007,2007,2007,6,4,8,0,1,1,,FALSE,counted,Chicago Fire FC (main article),2007
+hamlett-denis,Denis Hamlett,,CHI,2008,2009,2009,24,17,19,0,2,3,,FALSE,counted,Chicago Fire FC (main article),2008–2009
+cobos-los-de-carlos,Carlos de los Cobos,,CHI,2010,2011,2011,10,16,15,0,0,0,,FALSE,counted,Chicago Fire FC (main article),2010–2011
+klopas-frank,Frank Klopas,,CHI,2011,2011,2011,8,5,10,0,0,0,,TRUE,counted,Chicago Fire FC (main article),2011
+klopas-frank,Frank Klopas,,CHI,2012,2013,2013,31,24,13,0,0,1,,FALSE,counted,Chicago Fire FC (main article),2011–2013
+yallop-frank,Frank Yallop,,CHI,2014,2015,2015,13,26,24,0,0,0,,FALSE,counted,Chicago Fire FC (main article),2013–2015
+bliss-brian,Brian Bliss,,CHI,2015,2015,2015,1,4,0,0,0,0,,TRUE,counted,Chicago Fire FC (main article),2015
+paunovic-veljko,Veljko Paunović,,CHI,2016,2019,2019,41,58,37,0,0,1,,FALSE,counted,Chicago Fire FC (main article),2015–2019
+wicky-raphael,Raphaël Wicky,,CHI,2020,2021,2021,12,25,14,0,0,0,,FALSE,counted,Chicago Fire FC (main article),2019–2021
+klopas-frank,Frank Klopas,,CHI,2021,2021,2021,2,3,1,0,0,0,,TRUE,counted,Chicago Fire FC (main article),2021
+hendrickson-ezra,Ezra Hendrickson,,CHI,2022,2023,2023,12,18,14,0,0,0,,FALSE,counted,Chicago Fire FC (main article),2021–2023
+klopas-frank,Frank Klopas,,CHI,2023,2023,2023,8,11,5,0,0,0,,TRUE,counted,Chicago Fire FC (main article),2023
+klopas-frank,Frank Klopas,,CHI,2024,2024,2024,7,18,9,0,0,0,,FALSE,counted,Chicago Fire FC (main article),2023–2024
+berhalter-gregg,Gregg Berhalter,,CHI,2025,2026,2026,29,21,14,0,1,2,,FALSE,counted,Chicago Fire FC (main article),2024–present
+koch-alan,Alan Koch,,CIN,2019,2019,2019,2,7,2,0,0,0,,FALSE,counted,FC Cincinnati (main article),2017–2019
+damet-yoann,Yoann Damet,,CIN,2019,2019,2019,3,10,0,0,0,0,,TRUE,counted,FC Cincinnati (main article),2019
+jans-ron,Ron Jans,,CIN,2019,2019,2019,1,5,4,0,0,0,,FALSE,counted,FC Cincinnati (main article),2019–2020
+damet-yoann,Yoann Damet,,CIN,2020,2020,2020,0,2,0,0,0,0,,TRUE,counted,FC Cincinnati (main article),2020
+stam-jaap,Jaap Stam,,CIN,2020,2021,2021,8,26,12,0,0,0,,FALSE,counted,FC Cincinnati (main article),2020–2021
+marshall-tyrone,Tyrone Marshall,,CIN,2021,2021,2021,0,9,0,0,0,0,,TRUE,counted,FC Cincinnati (main article),2021
+noonan-pat,Pat Noonan,,CIN,2022,2026,2026,79,45,41,0,7,6,,FALSE,counted,FC Cincinnati (main article),2021–present
+houghton-bob,Bob Houghton,,COL,1996,1996,1996,11,20,0,0,0,0,,FALSE,counted,Colorado Rapids (main article),1996
+wegerle-roy,Roy Wegerle,,COL,1996,1996,1996,0,1,0,0,0,0,,TRUE,counted,Colorado Rapids (main article),1996
+myernick-glenn,Glenn Myernick,,COL,1997,2000,2000,63,61,4,0,4,7,,FALSE,counted,Colorado Rapids (main article),1996–2000
+hankinson-tim,Tim Hankinson,,COL,2001,2004,2004,39,45,30,0,3,5,,FALSE,counted,Colorado Rapids (main article),2000–2004
+clavijo-fernando,Fernando Clavijo,,COL,2005,2008,2008,40,49,25,0,2,3,,FALSE,counted,Colorado Rapids (main article),2004–2008
+smith-gary,Gary Smith,,COL,2009,2011,2011,34,27,33,0,4,3,2010,FALSE,counted,Colorado Rapids (main article),2008–2011
+pareja-oscar,Óscar Pareja,,COL,2012,2013,2013,25,30,13,0,0,1,,FALSE,counted,Colorado Rapids (main article),2012–2014
+mastroeni-pablo,Pablo Mastroeni,,COL,2014,2017,2017,36,49,39,0,1,3,,FALSE,counted,Colorado Rapids (main article),2014–2017
+cooke-steve,Steve Cooke,,COL,2017,2017,2017,3,7,2,0,0,0,,TRUE,counted,Colorado Rapids (main article),2017
+hudson-anthony,Anthony Hudson,,COL,2018,2019,2019,8,26,9,0,0,0,,FALSE,counted,Colorado Rapids (main article),2017–2019
+casey-conor,Conor Casey,,COL,2019,2019,2019,7,7,4,0,0,0,,TRUE,counted,Colorado Rapids (main article),2019
+fraser-robin,Robin Fraser,,COL,2019,2023,2023,44,41,34,0,0,2,,FALSE,counted,Colorado Rapids (main article),2019–2023
+little-chris,Chris Little,,COL,2023,2023,2023,2,4,2,0,0,0,,TRUE,counted,Colorado Rapids (main article),2023
+armas-chris,Chris Armas,,COL,2024,2025,2025,26,29,13,0,0,2,,FALSE,counted,Colorado Rapids (main article),2023–2025
+wells-matt,Matt Wells,,COL,2026,2026,2026,11,13,6,0,0,0,,FALSE,counted,Colorado Rapids (main article),2025–present
+liekoski-timo,Timo Liekoski,,CLB,1996,1996,1996,6,16,0,0,0,0,,FALSE,counted,List of Columbus Crew SC head coaches,1995–1996
+fitzgerald-tom,Tom Fitzgerald,,CLB,1996,2001,2001,70,67,7,0,9,8,,FALSE,counted,List of Columbus Crew SC head coaches,1996–2001
+andrulis-greg,Greg Andrulis,,CLB,2001,2005,2005,49,43,33,0,2,4,,FALSE,counted,List of Columbus Crew SC head coaches,2001–2005
+warzycha-robert,Robert Warzycha,,CLB,2005,2005,2005,7,6,2,0,0,0,,TRUE,counted,List of Columbus Crew SC head coaches,2005
+schmid-sigi,Sigi Schmid,,CLB,2006,2008,2008,34,33,25,0,3,0,2008,FALSE,counted,List of Columbus Crew SC head coaches,2005–2008
+warzycha-robert,Robert Warzycha,,CLB,2009,2013,2013,63,53,38,0,1,4,,FALSE,counted,List of Columbus Crew SC head coaches,2008–2013
+bliss-brian,Brian Bliss,,CLB,2013,2013,2013,4,4,0,0,0,0,,TRUE,counted,List of Columbus Crew SC head coaches,2013
+berhalter-gregg,Gregg Berhalter,,CLB,2014,2018,2018,66,58,46,0,6,8,,FALSE,counted,List of Columbus Crew SC head coaches,2013–2018
+porter-caleb,Caleb Porter,,CLB,2019,2022,2022,45,43,37,0,4,0,2020,FALSE,counted,List of Columbus Crew SC head coaches,2019–2022
+nancy-wilfried,Wilfried Nancy,,CLB,2023,2025,2025,49,23,30,0,6,5,2023,FALSE,counted,List of Columbus Crew SC head coaches,2022–2025
+rydstrom-henrik,Henrik Rydström,,CLB,2026,2026,2026,3,7,4,0,0,0,,FALSE,counted,List of Columbus Crew SC head coaches,2025–2026
+courtois-laurent,Laurent Courtois,,CLB,2026,2026,2026,7,8,1,0,0,0,,TRUE,counted,List of Columbus Crew SC head coaches,2026–present
+dir-dave,Dave Dir,,DAL,1996,2000,2000,81,75,4,0,6,11,,FALSE,counted,FC Dallas (main article),1996–2000
+jeffries-mike,Mike Jeffries,,DAL,2001,2003,2003,26,36,16,0,1,4,,FALSE,counted,FC Dallas (main article),2001–2003
+clarke-colin,Colin Clarke,,DAL,2003,2003,2003,2,3,1,0,0,0,,TRUE,counted,FC Dallas (main article),2003
+clarke-colin,Colin Clarke,,DAL,2004,2006,2006,39,36,19,0,1,2,,TRUE,counted,FC Dallas (main article),2003–2006
+morrow-steve,Steve Morrow,,DAL,2007,2008,2008,15,15,8,0,1,1,,TRUE,counted,FC Dallas (main article),2006–2008
+ferruzzi-marco,Marco Ferruzzi,,DAL,2008,2008,2008,2,2,1,0,0,0,,TRUE,counted,FC Dallas (main article),2008
+ferruzzi-marco,Marco Ferruzzi,,DAL,2021,2021,2021,1,4,3,0,0,0,,TRUE,counted,FC Dallas (main article),2021
+hyndman-schellas,Schellas Hyndman,,DAL,2008,2013,2013,61,58,58,0,2,2,,FALSE,counted,FC Dallas (main article),2008–2013
+pareja-oscar,Óscar Pareja,,DAL,2014,2018,2018,78,49,43,0,3,4,,FALSE,counted,FC Dallas (main article),2014–2018
+gonzalez-luchi,Luchi Gonzalez,,DAL,2019,2021,2021,28,29,25,0,1,2,,FALSE,counted,FC Dallas (main article),2018–2021
+estevez-nico,Nico Estévez,,DAL,2022,2024,2024,28,27,29,0,2,3,,FALSE,counted,FC Dallas (main article),2021–2024
+luccin-peter,Peter Luccin,,DAL,2024,2024,2024,8,7,3,0,0,0,,TRUE,counted,FC Dallas (main article),2024
+quill-eric,Eric Quill,,DAL,2025,2026,2026,25,19,20,0,0,2,,FALSE,counted,FC Dallas (main article),2024–present
+kinnear-dominic,Dominic Kinnear,,HOU,2006,2014,2014,112,90,86,0,15,8,2006 2007,FALSE,counted,Houston Dynamo FC (main article),2005–2014
+coyle-owen,Owen Coyle,,HOU,2015,2016,2016,14,21,11,0,0,0,,FALSE,counted,Houston Dynamo FC (main article),2014–2016
+barrett-wade,Wade Barrett,,HOU,2016,2016,2016,4,7,11,0,0,0,,TRUE,counted,Houston Dynamo FC (main article),2016
+cabrera-wilmer,Wilmer Cabrera,,HOU,2017,2019,2019,32,39,22,0,2,2,,FALSE,counted,Houston Dynamo FC (main article),2016–2019
+arnaud-davy,Davy Arnaud,,HOU,2019,2019,2019,3,5,1,0,0,0,,TRUE,counted,Houston Dynamo FC (main article),2019
+ramos-tab,Tab Ramos,,HOU,2020,2021,2021,10,26,21,0,0,0,,FALSE,counted,Houston Dynamo FC (main article),2019–2021
+nagamura-paulo,Paulo Nagamura,,HOU,2022,2022,2022,8,16,5,0,0,0,,FALSE,counted,Houston Dynamo FC (main article),2022
+bundy-kenny,Kenny Bundy,,HOU,2022,2022,2022,2,2,1,0,0,0,,TRUE,counted,Houston Dynamo FC (main article),2022
+olsen-ben,Ben Olsen,,HOU,2023,2026,2026,51,45,36,0,3,4,,FALSE,counted,Houston Dynamo FC (main article),2022–present
+newman-ron,Ron Newman,,SKC,1996,1999,1999,50,50,0,0,2,5,,FALSE,counted,Sporting Kansas City (main article),1995–1999
+fogarty-ken,Ken Fogarty,,SKC,1999,1999,1999,0,3,0,0,0,0,,TRUE,counted,Sporting Kansas City (main article),1999
+gansler-bob,Bob Gansler,,SKC,1999,2006,2006,86,85,51,0,9,8,2000,FALSE,counted,Sporting Kansas City (main article),1999–2006
+bliss-brian,Brian Bliss,,SKC,2006,2006,2006,4,4,6,0,0,0,,TRUE,counted,Sporting Kansas City (main article),2006
+onalfo-curt,Curt Onalfo,,SKC,2007,2009,2009,27,29,22,0,1,2,,FALSE,counted,Sporting Kansas City (main article),2006–2009
+vermes-peter,Peter Vermes,,SKC,2009,2009,2009,3,6,3,0,0,0,,TRUE,counted,Sporting Kansas City (main article),2009
+vermes-peter,Peter Vermes,,SKC,2010,2025,2025,200,179,120,0,12,11,2013,TRUE,counted,Sporting Kansas City (main article),2009–2025
+zavagnin-kerry,Kerry Zavagnin,,SKC,2025,2025,2025,7,15,6,0,0,0,,TRUE,counted,Sporting Kansas City (main article),2025
+wicky-raphael,Raphaël Wicky,,SKC,2026,2026,2026,6,20,4,0,0,0,,FALSE,counted,Sporting Kansas City (main article),2026–present
+osiander-lothar,Lothar Osiander,,LA,1996,1997,1997,22,22,0,0,4,2,,FALSE,counted,Los Angeles Galaxy (main article),1996–1997
+zambrano-octavio,Octavio Zambrano,,LA,1997,1999,1999,39,18,0,0,2,4,,FALSE,counted,Los Angeles Galaxy (main article),1997–1999
+schmid-sigi,Sigi Schmid,,LA,1999,2004,2004,80,53,32,0,16,7,2002,FALSE,counted,Los Angeles Galaxy (main article),1999–2004
+sampson-steve,Steve Sampson,,LA,2004,2006,2006,17,24,10,0,4,2,2005,FALSE,counted,Los Angeles Galaxy (main article),2004–2006
+yallop-frank,Frank Yallop,,LA,2006,2007,2007,18,21,12,0,0,0,,FALSE,counted,Los Angeles Galaxy (main article),2006–2007
+gullit-ruud,Ruud Gullit,,LA,2008,2008,2008,6,8,5,0,0,0,,FALSE,counted,Los Angeles Galaxy (main article),2007–2008
+jones-cobi,Cobi Jones,,LA,2008,2008,2008,0,0,1,0,0,0,,TRUE,counted,Los Angeles Galaxy (main article),2008
+arena-bruce,Bruce Arena,,LA,2008,2016,2016,125,70,79,0,18,8,2011 2012 2014,FALSE,counted,Los Angeles Galaxy (main article),2008–2016
+onalfo-curt,Curt Onalfo,,LA,2017,2017,2017,6,10,4,0,0,0,,FALSE,counted,Los Angeles Galaxy (main article),2016–2017
+schmid-sigi,Sigi Schmid,,LA,2017,2018,2018,12,18,12,0,0,0,,FALSE,counted,Los Angeles Galaxy (main article),2017–2018
+kinnear-dominic,Dominic Kinnear,,LA,2018,2018,2018,3,2,1,0,0,0,,TRUE,counted,Los Angeles Galaxy (main article),2018
+schelotto-barros-guillermo,Guillermo Barros Schelotto,,LA,2019,2020,2020,21,26,6,0,1,1,,FALSE,counted,Los Angeles Galaxy (main article),2019–2020
+kinnear-dominic,Dominic Kinnear,,LA,2020,2020,2020,1,1,1,0,0,0,,TRUE,counted,Los Angeles Galaxy (main article),2020
+vanney-greg,Greg Vanney,,LA,2021,2026,2026,71,75,55,0,6,1,2024,FALSE,counted,Los Angeles Galaxy (main article),2021–present
+heath-adrian,Adrian Heath,,ORL,2015,2016,2016,16,18,16,0,0,0,,FALSE,counted,Orlando City SC (main article),2010–2016
+murphy-bobby,Bobby Murphy,,ORL,2016,2016,2016,0,1,3,0,0,0,,TRUE,counted,Orlando City SC (main article),2016
+kreis-jason,Jason Kreis,,ORL,2016,2018,2018,21,29,13,0,0,0,,FALSE,counted,Orlando City SC (main article),2016–2018
+murphy-bobby,Bobby Murphy,,ORL,2018,2018,2018,0,2,0,0,0,0,,TRUE,counted,Orlando City SC (main article),2018
+connor-o-james,James O'Connor,,ORL,2018,2019,2019,11,27,13,0,0,0,,FALSE,counted,Orlando City SC (main article),2018–2019
+pareja-oscar,Óscar Pareja,,ORL,2020,2026,2026,85,58,53,0,6,7,,FALSE,counted,Orlando City SC (main article),2019–2026
+perelman-martin,Martín Perelman,,ORL,2026,2026,2026,12,10,5,0,0,0,,TRUE,counted,Orlando City SC (main article),2026–present
+spencer-john,John Spencer,,POR,2011,2012,2012,16,22,13,0,0,0,,FALSE,counted,Portland Timbers (main article),2010–2012
+wilkinson-gavin,Gavin Wilkinson,,POR,2012,2012,2012,3,8,6,0,0,0,,TRUE,counted,Portland Timbers (main article),2012
+porter-caleb,Caleb Porter,,POR,2013,2017,2017,68,50,52,0,6,3,2015,FALSE,counted,Portland Timbers (main article),2013–2017
+savarese-giovanni,Giovanni Savarese,,POR,2018,2023,2023,74,62,47,0,6,5,,FALSE,counted,Portland Timbers (main article),2017–2023
+joseph-miles,Miles Joseph,,POR,2023,2023,2023,5,3,2,0,0,0,,TRUE,counted,Portland Timbers (main article),2023
+neville-phil,Phil Neville,,POR,2024,2026,2026,27,31,24,0,2,3,,FALSE,counted,Portland Timbers (main article),2023–2026
+cassidy-jack,Jack Cassidy,,POR,2026,2026,2026,1,0,0,0,0,0,,TRUE,counted,Portland Timbers (main article),2026
+cifuentes-marti,Martí Cifuentes,,POR,2026,2026,2026,4,6,5,0,0,0,,FALSE,counted,Portland Timbers (main article),2026–present
+calloway-laurie,Laurie Calloway,,SJ,1996,1997,1997,20,27,0,0,1,2,,FALSE,counted,San Jose Quakes (main article),1995–1997
+quinn-brian,Brian Quinn,,SJ,1997,1999,1999,35,41,0,0,0,0,,FALSE,counted,San Jose Quakes (main article),1997–1999
+espinoza-jorge,Jorge Espinoza,,SJ,1999,1999,1999,2,0,0,0,0,0,,FALSE,counted,San Jose Quakes (main article),1999
+osiander-lothar,Lothar Osiander,,SJ,1999,2000,2000,9,18,8,0,0,0,,FALSE,counted,San Jose Quakes (main article),1999–2001
+yallop-frank,Frank Yallop,,SJ,2001,2003,2003,41,25,18,0,8,4,2001 2003,FALSE,counted,San Jose Quakes (main article),2001–2003
+kinnear-dominic,Dominic Kinnear,,SJ,2004,2005,2005,27,14,21,0,1,2,,FALSE,counted,San Jose Quakes (main article),2004–2005
+yallop-frank,Frank Yallop,,SJ,2008,2013,2013,58,61,54,0,2,3,,FALSE,counted,San Jose Quakes (main article),2007–2013
+watson-mark,Mark Watson,,SJ,2013,2013,2013,11,5,3,0,0,0,,TRUE,counted,San Jose Quakes (main article),2013
+watson-mark,Mark Watson,,SJ,2014,2014,2014,6,15,11,0,0,0,,TRUE,counted,San Jose Quakes (main article),2013–2014
+russell-ian,Ian Russell,,SJ,2014,2014,2014,0,1,1,0,0,0,,TRUE,counted,San Jose Quakes (main article),2014
+kinnear-dominic,Dominic Kinnear,,SJ,2014,2017,2017,27,32,28,0,0,0,,FALSE,counted,San Jose Quakes (main article),2014–2017
+leitch-chris,Chris Leitch,,SJ,2017,2017,2017,7,8,2,0,0,0,,FALSE,counted,San Jose Quakes (main article),2017
+stahre-mikael,Mikael Stahre,,SJ,2018,2018,2018,4,16,8,0,0,0,,FALSE,counted,San Jose Quakes (main article),2017–2018
+ralston-steve,Steve Ralston,,SJ,2018,2018,2018,0,5,1,0,0,0,,TRUE,counted,San Jose Quakes (main article),2018
+almeyda-matias,Matías Almeyda,,SJ,2019,2022,2022,31,42,25,0,0,1,,FALSE,counted,San Jose Quakes (main article),2018–2022
+covelo-alex,Alex Covelo,,SJ,2022,2022,2022,8,11,8,0,0,0,,TRUE,counted,San Jose Quakes (main article),2022–2023
+gonzalez-luchi,Luchi Gonzalez,,SJ,2023,2024,2024,13,24,16,0,0,1,,FALSE,counted,San Jose Quakes (main article),2023–2024
+russell-ian,Ian Russell,,SJ,2024,2024,2024,3,11,1,0,0,0,,TRUE,counted,San Jose Quakes (main article),2024
+arena-bruce,Bruce Arena,,SJ,2025,2026,2026,24,23,17,0,0,0,,FALSE,counted,San Jose Quakes (main article),2024–present
+carnell-bradley,Bradley Carnell,,STL,2023,2024,2024,20,19,15,0,0,2,,FALSE,counted,St. Louis City SC (main article),2022–2024
+hackworth-john,John Hackworth,,STL,2024,2024,2024,5,6,3,0,0,0,,TRUE,counted,St. Louis City SC (main article),2024
+mellberg-olof,Olof Mellberg,,STL,2025,2025,2025,2,8,5,0,0,0,,FALSE,counted,St. Louis City SC (main article),2024–2025
+critchley-david,David Critchley,,STL,2025,2025,2025,6,10,3,0,0,0,,TRUE,counted,St. Louis City SC (main article),2025
+damet-yoann,Yoann Damet,,STL,2026,2026,2026,14,7,9,0,0,0,,FALSE,counted,St. Louis City SC (main article),2025–present
+johnston-mo,Mo Johnston,,TOR,2007,2007,2007,6,17,7,0,0,0,,FALSE,counted,Toronto FC (main article),2006–2008
+carver-john,John Carver,,TOR,2008,2009,2009,11,15,10,0,0,0,,FALSE,counted,Toronto FC (main article),2008–2009
+cummins-chris,Chris Cummins,,TOR,2009,2009,2009,7,9,7,0,0,0,,TRUE,counted,Toronto FC (main article),2009
+preki,Preki,,TOR,2010,2010,2010,7,10,7,0,0,0,,FALSE,counted,Toronto FC (main article),2009–2010
+dasovic-nick,Nick Dasovic,,TOR,2010,2010,2010,2,3,1,0,0,0,,TRUE,counted,Toronto FC (main article),2010–2011
+winter-aron,Aron Winter,,TOR,2011,2012,2012,7,22,15,0,0,0,,FALSE,counted,Toronto FC (main article),2011–2012
+mariner-paul,Paul Mariner,,TOR,2012,2012,2012,4,12,8,0,0,0,,FALSE,counted,Toronto FC (main article),2012–2013
+nelsen-ryan,Ryan Nelsen,,TOR,2013,2014,2014,15,26,17,0,0,0,,FALSE,counted,Toronto FC (main article),2013–2014
+vanney-greg,Greg Vanney,,TOR,2014,2020,2020,87,68,48,0,10,6,2017,FALSE,counted,Toronto FC (main article),2014–2020
+armas-chris,Chris Armas,,TOR,2021,2021,2021,1,8,2,0,0,0,,FALSE,counted,Toronto FC (main article),2021
+perez-javier,Javier Pérez,,TOR,2021,2021,2021,5,10,8,0,0,0,,FALSE,counted,Toronto FC (main article),2021
+bradley-bob,Bob Bradley,,TOR,2022,2023,2023,12,25,17,0,0,0,,FALSE,counted,Toronto FC (main article),2021–2023
+dunfield-terry,Terry Dunfield,,TOR,2023,2023,2023,1,12,0,0,0,0,,TRUE,counted,Toronto FC (main article),2023
+herdman-john,John Herdman,,TOR,2023,2024,2024,11,20,4,0,0,0,,FALSE,counted,Toronto FC (main article),2023–2025
+fraser-robin,Robin Fraser,,TOR,2025,2026,2026,14,24,26,0,0,0,,FALSE,counted,Toronto FC (main article),2025–present
+arena-bruce,Bruce Arena,,DC,1996,1998,1998,61,35,0,0,14,3,1996 1997,FALSE,counted,List of D.C. United head coaches,1996–1998
+rongen-thomas,Thomas Rongen,,DC,1999,2001,2001,37,39,8,0,5,1,1999,FALSE,counted,List of D.C. United head coaches,1998–2001
+hudson-ray,Ray Hudson,,DC,2002,2003,2003,19,25,14,0,0,2,,FALSE,counted,List of D.C. United head coaches,2002–2003
+nowak-piotr,Piotr Nowak,,DC,2004,2006,2006,42,27,25,0,5,2,2004,FALSE,counted,List of D.C. United head coaches,2004–2006
+soehn-tom,Tom Soehn,,DC,2007,2009,2009,36,30,24,0,0,1,,FALSE,counted,List of D.C. United head coaches,2006–2009
+onalfo-curt,Curt Onalfo,,DC,2010,2010,2010,3,12,3,0,0,0,,FALSE,counted,List of D.C. United head coaches,2010
+olsen-ben,Ben Olsen,,DC,2011,2020,2020,110,129,83,0,3,7,,TRUE,counted,List of D.C. United head coaches,2010–2020
+ashton-chad,Chad Ashton,,DC,2020,2020,2020,3,3,1,0,0,0,,TRUE,counted,List of D.C. United head coaches,2020
+losada-hernan,Hernán Losada,,DC,2021,2022,2022,16,19,5,0,0,0,,FALSE,counted,List of D.C. United head coaches,2021–2022
+ashton-chad,Chad Ashton,,DC,2022,2022,2022,3,6,2,0,0,0,,TRUE,counted,List of D.C. United head coaches,2022
+rooney-wayne,Wayne Rooney,,DC,2022,2023,2023,12,25,14,0,0,0,,FALSE,counted,List of D.C. United head coaches,2022–2023
+lesesne-troy,Troy Lesesne,,DC,2024,2025,2025,14,24,17,0,0,0,,FALSE,counted,List of D.C. United head coaches,2024–2025
+flanagan-kevin,Kevin Flanagan,,DC,2025,2025,2025,0,5,1,0,0,0,,TRUE,counted,List of D.C. United head coaches,2025
+weiler-rene,René Weiler,,DC,2025,2026,2026,8,13,15,0,0,0,,FALSE,counted,List of D.C. United head coaches,2025–present
+marsch-jesse,Jesse Marsch,,MTL,2012,2012,2012,12,16,6,0,0,0,,FALSE,counted,List of CF Montréal head coaches,2011–2012
+schallibaum-marco,Marco Schällibaum,,MTL,2013,2013,2013,14,13,7,0,0,1,,FALSE,counted,List of CF Montréal head coaches,2013
+klopas-frank,Frank Klopas,,MTL,2014,2015,2015,14,28,14,0,0,0,,FALSE,counted,List of CF Montréal head coaches,2013–2015
+biello-mauro,Mauro Biello,,MTL,2015,2017,2017,29,31,20,0,6,2,,FALSE,counted,List of CF Montréal head coaches,2015–2017
+garde-remi,Rémi Garde,,MTL,2018,2019,2019,24,29,8,0,0,0,,FALSE,counted,List of CF Montréal head coaches,2017–2019
+cabrera-wilmer,Wilmer Cabrera,,MTL,2019,2019,2019,2,4,1,0,0,0,,FALSE,counted,List of CF Montréal head coaches,2019
+henry-thierry,Thierry Henry,,MTL,2020,2020,2020,8,13,2,0,0,1,,FALSE,counted,List of CF Montréal head coaches,2019–2021
+nancy-wilfried,Wilfried Nancy,,MTL,2021,2022,2022,32,21,15,0,1,1,,FALSE,counted,List of CF Montréal head coaches,2021–2022
+losada-hernan,Hernán Losada,,MTL,2023,2023,2023,12,17,5,0,0,0,,FALSE,counted,List of CF Montréal head coaches,2022–2023
+courtois-laurent,Laurent Courtois,,MTL,2024,2025,2025,11,17,11,0,0,1,,FALSE,counted,List of CF Montréal head coaches,2024–2025
+donadel-marco,Marco Donadel,,MTL,2025,2026,2026,12,31,16,0,0,0,,FALSE,counted,List of CF Montréal head coaches,2025–2026
+stapleton-frank,Frank Stapleton,,NE,1996,1996,1996,15,17,0,0,0,0,,FALSE,counted,List of New England Revolution managers,1996
+rongen-thomas,Thomas Rongen,,NE,1997,1998,1998,23,35,0,0,0,2,,FALSE,counted,List of New England Revolution managers,1996–1998
+zenga-walter,Walter Zenga,,NE,1998,1999,1999,13,22,0,0,0,0,,FALSE,counted,List of New England Revolution managers,1998–1999
+nicol-steve,Steve Nicol,,NE,1999,1999,1999,2,1,0,0,0,0,,FALSE,counted,List of New England Revolution managers,1999
+clavijo-fernando,Fernando Clavijo,,NE,2000,2002,2002,22,31,13,0,1,2,,FALSE,counted,List of New England Revolution managers,1999–2002
+nicol-steve,Steve Nicol,,NE,2002,2011,2011,110,108,81,0,12,11,,FALSE,counted,List of New England Revolution managers,2002–2011
+heaps-jay,Jay Heaps,,NE,2012,2017,2017,75,81,43,0,4,3,,FALSE,counted,List of New England Revolution managers,2011–2017
+soehn-tom,Tom Soehn,,NE,2017,2017,2017,3,1,1,0,0,0,,FALSE,counted,List of New England Revolution managers,2017
+friedel-brad,Brad Friedel,,NE,2018,2019,2019,12,21,13,0,0,0,,FALSE,counted,List of New England Revolution managers,2017–2019
+lapper-mike,Mike Lapper,,NE,2019,2019,2019,1,0,0,0,0,0,,FALSE,counted,List of New England Revolution managers,2019
+arena-bruce,Bruce Arena,,NE,2019,2023,2023,60,31,44,0,3,3,,FALSE,counted,List of New England Revolution managers,2019–2023
+williams-richie,Richie Williams,,NE,2023,2023,2023,1,1,2,0,0,0,,FALSE,counted,List of New England Revolution managers,2023
+peay-clint,Clint Peay,,NE,2023,2023,2023,2,4,1,0,0,2,,FALSE,counted,List of New England Revolution managers,2023
+porter-caleb,Caleb Porter,,NE,2024,2025,2025,17,35,12,0,0,0,,FALSE,counted,List of New England Revolution managers,2023–2025
+moreira-pablo,Pablo Moreira,,NE,2025,2025,2025,1,2,1,0,0,0,,FALSE,counted,List of New England Revolution managers,2025
+mitrovic-marko,Marko Mitrović,,NE,2026,2026,2026,16,10,4,0,0,0,,FALSE,counted,List of New England Revolution managers,2025–present
+nowak-peter,Peter Nowak,,PHI,2010,2012,2012,21,30,24,0,0,2,,FALSE,counted,List of Philadelphia Union managers,2009–2012
+hackworth-john,John Hackworth,,PHI,2012,2014,2014,23,30,20,0,0,0,,FALSE,counted,List of Philadelphia Union managers,2012–2014
+curtin-jim,Jim Curtin,,PHI,2014,2024,2024,141,116,90,0,7,7,,FALSE,counted,List of Philadelphia Union managers,2014–2024
+carnell-bradley,Bradley Carnell,,PHI,2025,2026,2026,21,18,10,0,2,1,,FALSE,counted,List of Philadelphia Union managers,2025–2026
+richter-ryan,Ryan Richter,,PHI,2026,2026,2026,12,0,3,0,0,0,,FALSE,counted,List of Philadelphia Union managers,2026–present
+schmid-sigi,Sigi Schmid,,SEA,2009,2016,2016,113,78,56,0,7,9,,FALSE,counted,List of Seattle Sounders FC managers,2008–2016
+schmetzer-brian,Brian Schmetzer,,SEA,2009,2009,2009,1,0,0,0,0,0,,FALSE,counted,List of Seattle Sounders FC managers,2009
+schmetzer-brian,Brian Schmetzer,,SEA,2015,2015,2015,1,1,0,0,0,0,,FALSE,counted,List of Seattle Sounders FC managers,2015
+schmetzer-brian,Brian Schmetzer,,SEA,2016,2026,2026,152,99,87,0,22,10,2016 2019,FALSE,counted,List of Seattle Sounders FC managers,2016–present
+smith-gary,Gary Smith,,NSH,2020,2024,2024,55,48,56,0,3,5,,FALSE,counted,Nashville SC (main article) [list],2017–2024
+callaghan-j-b,B.J. Callaghan,,NSH,2025,2026,2026,36,15,13,0,1,2,,FALSE,counted,Nashville SC (main article) [list],2024–present
+varas-mikey,Mikey Varas,,SD,2025,2026,2026,26,21,16,0,3,2,,FALSE,counted,"San Diego FC (main article) [staff table: current coach only, no dates]",2025–present
+bradley-bob,Bob Bradley,,LAFC,2018,2021,2021,58,34,32,0,1,3,,FALSE,counted,Los Angeles Football Club (main article),2017–2021
+cherundolo-steve,Steve Cherundolo,,LAFC,2022,2025,2025,71,35,30,0,11,4,2022,FALSE,counted,Los Angeles Football Club (main article),2022–2025
+santos-dos-marc,Marc Dos Santos,,LAFC,2026,2026,2026,12,9,10,0,0,0,,FALSE,counted,Los Angeles Football Club (main article),2025–present
+alonso-diego,Diego Alonso,,MIA,2020,2020,2020,7,13,3,0,0,1,,FALSE,counted,Inter Miami CF (main article),2019–2021
+neville-phil,Phil Neville,,MIA,2021,2023,2023,31,41,11,0,0,1,,FALSE,counted,Inter Miami CF (main article),2021–2023
+morales-javier,Javier Morales,,MIA,2023,2023,2023,0,3,3,0,0,0,,TRUE,counted,Inter Miami CF (main article),2023
+martino-gerardo,Gerardo Martino,,MIA,2023,2024,2024,26,9,12,0,1,2,,FALSE,counted,Inter Miami CF (main article),2023–2024
+mascherano-javier,Javier Mascherano,,MIA,2025,2026,2026,22,8,11,0,5,1,2025,FALSE,counted,Inter Miami CF (main article),2024–2026
+hoyos-guillermo,Guillermo Hoyos,,MIA,2026,2026,2026,12,4,7,0,0,0,,TRUE,counted,Inter Miami CF (main article),2026–present
+kreis-jason,Jason Kreis,,NYC,2015,2015,2015,10,17,7,0,0,0,,FALSE,counted,New York City FC (main article),2013–2015
+vieira-patrick,Patrick Vieira,,NYC,2016,2018,2018,39,22,22,0,1,3,,FALSE,counted,New York City FC (main article),2016–2018
+torrent-domenec,Domènec Torrent,,NYC,2018,2019,2019,26,13,14,0,1,3,,FALSE,counted,New York City FC (main article),2018–2019
+deila-ronny,Ronny Deila,,NYC,2020,2022,2022,34,22,14,0,4,1,2021,FALSE,counted,New York City FC (main article),2020–2022
+cushing-nick,Nick Cushing,,NYC,2022,2024,2024,31,31,27,0,4,3,,FALSE,counted,New York City FC (main article),2022–2024
+jansen-pascal,Pascal Jansen,,NYC,2025,2026,2026,25,24,15,0,3,2,,FALSE,counted,New York City FC (main article),2024–present
+firmani-eddie,Eddie Firmani,,RBNY,1996,1996,1996,3,5,0,0,0,0,,FALSE,counted,New York Red Bulls (main article),1996
+queiroz-carlos,Carlos Queiroz,,RBNY,1996,1996,1996,12,12,0,0,1,2,,FALSE,counted,New York Red Bulls (main article),1996
+parreira-alberto-carlos,Carlos Alberto Parreira,,RBNY,1997,1997,1997,13,19,0,0,0,0,,FALSE,counted,New York Red Bulls (main article),1996–1997
+mondelo-alfonso,Alfonso Mondelo,,RBNY,1998,1998,1998,14,17,0,0,0,0,,FALSE,counted,New York Red Bulls (main article),1998
+milutinovic-bora,Bora Milutinović,,RBNY,1998,1999,1999,8,25,0,0,0,2,,FALSE,counted,New York Red Bulls (main article),1998–1999
+zambrano-octavio,Octavio Zambrano,,RBNY,2000,2002,2002,41,37,8,0,4,3,,FALSE,counted,New York Red Bulls (main article),1999–2002
+bradley-bob,Bob Bradley,,RBNY,2003,2005,2005,32,31,26,0,0,3,,FALSE,counted,New York Red Bulls (main article),2002–2005
+johnston-mo,Mo Johnston,,RBNY,2005,2006,2006,4,3,8,0,1,1,,FALSE,counted,New York Red Bulls (main article),2005–2006
+interim-williams-richie,Richie Williams interim,,RBNY,2006,2006,2006,1,3,1,0,0,0,,TRUE,counted,New York Red Bulls (main article),2006
+arena-bruce,Bruce Arena,,RBNY,2006,2007,2007,18,16,11,0,0,2,,FALSE,counted,New York Red Bulls (main article),2006–2007
+osorio-carlos-juan,Juan Carlos Osorio,,RBNY,2008,2009,2009,12,27,13,0,2,1,,FALSE,counted,New York Red Bulls (main article),2007–2009
+interim-williams-richie,Richie Williams interim,,RBNY,2009,2009,2009,3,3,2,0,0,0,,TRUE,counted,New York Red Bulls (main article),2009–2010
+backe-hans,Hans Backe,,RBNY,2010,2012,2012,41,26,31,0,2,4,,FALSE,counted,New York Red Bulls (main article),2010–2012
+petke-mike,Mike Petke,,RBNY,2013,2014,2014,30,19,19,0,2,3,,FALSE,counted,New York Red Bulls (main article),2013–2015
+marsch-jesse,Jesse Marsch,,RBNY,2015,2018,2018,58,35,25,0,5,4,,FALSE,counted,New York Red Bulls (main article),2015–2018
+armas-chris,Chris Armas,,RBNY,2018,2020,2020,29,21,11,0,2,3,,FALSE,counted,New York Red Bulls (main article),2018–2020
+interim-carnell-bradley,Bradley Carnell interim,,RBNY,2020,2020,2020,3,3,0,0,0,0,,TRUE,counted,New York Red Bulls (main article),2020
+struber-gerhard,Gerhard Struber,,RBNY,2020,2023,2023,32,29,26,0,0,3,,FALSE,counted,New York Red Bulls (main article),2020–2023
+lesesne-troy,Troy Lesesne,,RBNY,2023,2023,2023,10,9,4,0,1,2,,FALSE,counted,New York Red Bulls (main article),2023
+schwarz-sandro,Sandro Schwarz,,RBNY,2024,2025,2025,23,24,21,0,4,1,,FALSE,counted,New York Red Bulls (main article),2023–2025
+bradley-michael,Michael Bradley,,RBNY,2026,2026,2026,10,14,6,0,0,0,,FALSE,counted,New York Red Bulls (main article),2025–present
+heath-adrian,Adrian Heath,,MIN,2017,2023,2023,81,90,51,0,2,4,,FALSE,counted,MLS per-game coaches (sportsdata),2017–2023
+mcauley-sean,Sean McAuley,,MIN,2023,2023,2023,0,1,0,0,0,0,,FALSE,counted,MLS per-game coaches (sportsdata),2023
+knowles-cameron,Cameron Knowles,,MIN,2024,2024,2024,1,0,1,0,0,0,,FALSE,counted,MLS per-game coaches (sportsdata),2024
+kreis-jason,Jason Kreis,,RSL,2013,2013,2013,15,10,8,0,3,2,,FALSE,counted,MLS per-game coaches (sportsdata),2013
+cassar-jeff,Jeff Cassar,,RSL,2014,2017,2017,37,37,30,0,0,2,,FALSE,counted,MLS per-game coaches (sportsdata),2014–2017
+shore-daryl,Daryl Shore,,RSL,2017,2017,2017,0,0,1,0,0,0,,FALSE,counted,MLS per-game coaches (sportsdata),2017
+petke-mike,Mike Petke,,RSL,2017,2019,2019,38,34,15,0,1,1,,FALSE,counted,MLS per-game coaches (sportsdata),2017–2019
+juarez-freddy,Freddy Juarez,,RSL,2019,2021,2021,17,22,14,0,1,1,,FALSE,counted,MLS per-game coaches (sportsdata),2019–2021
+mastroeni-pablo,Pablo Mastroeni,,RSL,2021,2026,2026,70,66,41,0,3,7,,FALSE,counted,MLS per-game coaches (sportsdata),2021–present
+ellinger-john,John Ellinger,,RSL,2005,2007,2007,15,37,16,0,0,0,,FALSE,counted,"Wikipedia, read 2026-10-26",2005–2007
+kreis-jason,Jason Kreis,,RSL,2007,2012,2012,74,61,49,0,6,5,2009,FALSE,counted,"Wikipedia, read 2026-10-26",2007–2012
+thordarson-teitur,Teitur Thordarson,,VAN,2011,2011,2011,1,5,6,0,0,0,,FALSE,counted,"Wikipedia, read 2026-10-26",2010–2011
+soehn-tom,Tom Soehn,,VAN,2011,2011,2011,5,13,4,0,0,0,,TRUE,counted,"Wikipedia, read 2026-10-26",2011
+rennie-martin,Martin Rennie,,VAN,2012,2013,2013,24,25,19,0,0,1,,FALSE,counted,"Wikipedia, read 2026-10-26",2011–2013
+robinson-carl,Carl Robinson,,VAN,2014,2018,2018,63,57,45,0,0,3,,FALSE,counted,"Wikipedia, read 2026-10-26",2013–2018
+dalrymple-craig,Craig Dalrymple,,VAN,2018,2018,2018,2,2,1,0,0,0,,TRUE,counted,"Wikipedia, read 2026-10-26",2018
+santos-dos-marc,Marc Dos Santos,,VAN,2019,2021,2021,22,37,18,0,0,0,,FALSE,counted,"Wikipedia, read 2026-10-26",2018–2021
+sartini-vanni,Vanni Sartini,,VAN,2021,2024,2024,44,40,32,0,2,5,,FALSE,counted,"Wikipedia, read 2026-10-26",2021–2024
+rensen-s-jesper,Jesper Sørensen,,VAN,2025,2026,2026,34,14,16,0,4,1,,FALSE,counted,"Wikipedia, read 2026-10-26",2025–present
+ramsay-eric,Eric Ramsay,,MIN,2024,2025,2025,29,20,16,0,4,3,,FALSE,counted,"Wikipedia, read 2026-10-26",2024–2026
+knowles-cameron,Cameron Knowles,,MIN,2026,2026,2026,8,12,10,0,0,0,,FALSE,counted,"Wikipedia, read 2026-10-26",2026–present
