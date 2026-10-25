@@ -27,7 +27,7 @@
  */
 
 import { createServer } from 'node:http';
-import { readdirSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { filterGames, opponentDetail, computeHeadToHead } from './lib/headtohead.js';
@@ -51,7 +51,9 @@ import {
 	scheduleHtml, seasonNav, selectorPage, siteNav, sparklineHtml, creditLine,
 } from './lib/render.js';
 import { colorsFor, currentFranchises, displayName, loadHistory, resolver } from './lib/names.js';
-import { hasFrontEnd } from './lib/web.js';
+import { hasFrontEnd, WEB_DIR } from './lib/web.js';
+import { homePage } from './lib/home.js';
+import { todayGames } from './lib/today.js';
 import { createFront, sharedEspn } from './lib/web-routes.js';
 import { LEAGUE_ABBR, SPORTS, loadSports, loadTeams } from './lib/teams.js';
 import { creditsFor } from './lib/credits.js';
@@ -935,6 +937,25 @@ function main() {
 				leaderPlural: clubFor(e)?.nouns.leaderPlural ?? null,
 			}));
 
+			// The home page's script, and its games: every league's for a day,
+			// through the shared ESPN cache (lib/today.js).
+			if (url.pathname === '/home.js' && needsSelector(table)) {
+				const js = readFileSync(join(WEB_DIR, 'home', 'home.js'));
+				res.writeHead(200, { 'content-type': 'text/javascript; charset=utf-8', 'content-length': js.length, 'cache-control': 'no-cache' });
+				return res.end(js);
+			}
+			if (url.pathname === '/api/today' && needsSelector(table)) {
+				const date = url.searchParams.get('date') ?? '';
+				if (!/^\d{8}$/.test(date)) return json(res, 400, { error: 'date is YYYYMMDD' });
+				const sports = [...new Set(table.map((e) => e.sport))];
+				// Each team's page here, by its full name in its sport, as ESPN names it.
+				const clubs = new Map(table.filter((e) => e.available && clubFor(e)).flatMap((e) => {
+					const to = { url: `${e.base}/`, key: `${e.sport}/${e.teamId}` };
+					return [[`${e.sport}|${clubFor(e).nouns.fullName.toLowerCase()}`, to], [`${e.sport}|short:${clubFor(e).nouns.team.toLowerCase()}`, to]];
+				}));
+				return json(res, 200, { date, leagues: await todayGames({ sports, date, espn: sharedEspn(), clubs }) });
+			}
+
 			if (url.pathname === '/' && needsSelector(table)) {
 				const clubs = table.map((e) => ({
 					team: e.teamId, sport: e.sport, code: e.code,
@@ -947,6 +968,23 @@ function main() {
 					url: e.available ? `${origin}${e.base}` : null,
 				}));
 				if (wantsJson(url)) return json(res, 200, { scope: process.env.SCOPE, clubs });
+				// Every league's games for the day, the visitor's teams first, and
+				// every club to find (lib/home.js). The club list it replaced is
+				// its Find your team.
+				if (!url.searchParams.has('clubs')) {
+					const sports = [...new Set(table.map((e) => e.sport))];
+					return html(res, 200, homePage({
+						colors: NEUTRAL,
+						leagues: sports.map((s) => ({ sport: s, label: LEAGUE_ABBR[s] ?? s.toUpperCase(), href: hasFrontEnd(s) ? `/${s}/` : null })),
+						clubs: table.map((e) => ({
+							sport: e.sport, key: `${e.sport}/${e.teamId}`, available: e.available,
+							name: clubFor(e)?.nouns.fullName ?? namers[e.sport](e.code).name,
+							url: e.available ? `${e.base}/` : null,
+						})),
+						credits: creditLine(scopeCredits),
+						footer: footerFor(req, url, { current: 'clubs', title: 'Are They On TV?' }),
+					}));
+				}
 				return html(res, 200, selectorPage({
 					credits: scopeCredits,
 					scope: process.env.SCOPE,
