@@ -350,13 +350,18 @@ export function coachesFromJson({ coaches = [], eras = [] } = {}) {
 			interim: Boolean(l.interim),
 			image: null, imagePage: null,
 			firstSeason: l.firstSeason, lastSeason: l.lastSeason,
-			// A stand-in has no spells (eras are the coaches who held the job),
-			// so his first to last season.
-			tenure: (spellsOf.get(l.leader) ?? [{ from: l.firstSeason, to: l.lastSeason }])
-				.map((s) => tenureOf(s.from, s.to)).join(', '),
+			// The lists' own terms where there are some ("2024–2026" for Doc
+			// Rivers, hired that January, where his seasons run from 2023-24).
+			// Otherwise the spells, and a stand-in, who has none (eras are the
+			// coaches who held the job), his first to last season.
+			tenure: l.terms?.length ? l.terms.join(', ')
+				: (spellsOf.get(l.leader) ?? [{ from: l.firstSeason, to: l.lastSeason }])
+					.map((s) => tenureOf(s.from, s.to)).join(', '),
 			games,
 			wins: l.w, losses: l.l, ties: l.t, otl,
-			record: recOtl(l.w, l.l, l.t, otl),
+			// Hired for the season being played, with none finished yet: no record
+			// rather than a 0-0 that reads as one.
+			record: games ? recOtl(l.w, l.l, l.t, otl) : '—',
 			winPct: games ? (l.w + l.t / 2) / games : 0,
 			playoffGames,
 			playoffRecord: playoffGames ? rec(l.playoffW ?? 0, l.playoffL ?? 0, 0) : null,
@@ -381,7 +386,7 @@ export function coachesFromJson({ coaches = [], eras = [] } = {}) {
 		let to = shared(e.to, e) ? e.to : e.to + 0.5;
 		if (to - from < 0.5) { from = e.from - 0.25; to = e.to + 0.25; }
 		return { ...person, slug: n > 1 ? `${base}-${n}` : base, fromDate: from, toDate: to,
-			tenure: tenureOf(e.from, e.to) };
+			tenure: e.term ?? tenureOf(e.from, e.to) };
 	});
 	return { coaches: rows, eras: spells };
 }

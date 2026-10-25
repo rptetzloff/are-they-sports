@@ -112,3 +112,22 @@ test('a record shows overtime losses only where there are some', () => {
 	assert.equal(recOtl(10, 5, 2, 0), '10–5–2')
 	assert.equal(recOtl(10, 5, 0, 3), '10–5–0–3')
 })
+
+test('the tenure column is the lists\' own terms, and a new hire has no record yet', () => {
+	// Doc Rivers was hired in January 2024: his seasons run from 2023-24, his
+	// term from 2024. Taylor Jenkins was hired for the season being played.
+	const tenures = [
+		{ leader: 'griffin-adrian', name: 'Adrian Griffin', franchise: 'MIL', firstSeason: 2024, lastSeason: 2024, w: 30, l: 13, t: 0, otl: 0, term: '2023–2024' },
+		{ leader: 'rivers-doc', name: 'Doc Rivers', franchise: 'MIL', firstSeason: 2024, lastSeason: 2026, w: 97, l: 103, t: 0, otl: 0, term: '2024–2026' },
+		{ leader: 'prunty-joe', name: 'Joe Prunty', franchise: 'MIL', firstSeason: 2018, lastSeason: 2018, w: 21, l: 16, t: 0, otl: 0, term: '2018' },
+		{ leader: 'prunty-joe', name: 'Joe Prunty', franchise: 'MIL', firstSeason: 2024, lastSeason: 2024, w: 2, l: 1, t: 0, otl: 0, term: '2024' },
+		{ leader: 'jenkins-taylor', name: 'Taylor Jenkins', franchise: 'MIL', firstSeason: 2027, lastSeason: 2027, w: 0, l: 0, t: 0, otl: 0, term: '2026–present' },
+	]
+	const { coaches, eras } = coachesFromJson(JSON.parse(JSON.stringify(coachesJson([], tenures))))
+	const by = new Map(coaches.map((c) => [c.name, c]))
+	assert.equal(by.get('Doc Rivers').tenure, '2024–2026')
+	assert.equal(by.get('Joe Prunty').tenure, '2018, 2024')
+	assert.equal(by.get('Taylor Jenkins').tenure, '2026–present')
+	assert.equal(by.get('Taylor Jenkins').record, '—')
+	assert.equal(eras.find((e) => e.name === 'Doc Rivers').tenure, '2024–2026')
+})

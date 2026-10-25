@@ -902,6 +902,8 @@ function loadCoachesFile(sportId) {
 			: [],
 		interim: String(r.interim).toUpperCase() === 'TRUE',
 		basis: r.basis ?? '',
+		// As the list writes it ("2024–2026"); football's file has none (0021).
+		term: r.term ?? '',
 		// Blank counts mean the record is not known — a co-head-coach year, or a
 		// mid-season change this data cannot split. Those must never become a
 		// stated tenure of nought and nought, which renders as a real 0-0.
@@ -939,14 +941,14 @@ async function loadTenures(client, sportId, knownFranchises) {
 			 ON CONFLICT (sport, id) DO NOTHING`, [sportId, r.leaderId, r.name]);
 		const res = await client.query(
 			`INSERT INTO leader_tenure
-			   (sport, franchise, leader, first_season, last_season, w, l, t, otl, playoff_w, playoff_l, title_seasons, interim, source)
-			 VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,'wikipedia')
+			   (sport, franchise, leader, first_season, last_season, w, l, t, otl, playoff_w, playoff_l, title_seasons, interim, term, source)
+			 VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,'wikipedia')
 			 ON CONFLICT (sport, franchise, leader, first_season) DO UPDATE SET
 			   last_season = EXCLUDED.last_season, w = EXCLUDED.w, l = EXCLUDED.l, t = EXCLUDED.t, otl = EXCLUDED.otl,
 			   playoff_w = EXCLUDED.playoff_w, playoff_l = EXCLUDED.playoff_l,
-			   title_seasons = EXCLUDED.title_seasons, interim = EXCLUDED.interim`,
+			   title_seasons = EXCLUDED.title_seasons, interim = EXCLUDED.interim, term = EXCLUDED.term`,
 			[sportId, r.franchiseAbbrv, r.leaderId, r.firstSeason, r.statedLastSeason,
-				r.w, r.l, r.t, r.otl, r.playoffW, r.playoffL, r.titleSeasons, r.interim]);
+				r.w, r.l, r.t, r.otl, r.playoffW, r.playoffL, r.titleSeasons, r.interim, r.term]);
 		wrote += res.rowCount;
 	}
 	console.log(`  tenures      ${wrote} stated tenures${sportId === 'nfl' ? ' (NFL before 1999)' : ''}`);
