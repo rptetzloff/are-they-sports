@@ -64,13 +64,24 @@ const streakEntries = (list) => (list || []).map((s) => ({
 	detailHtml: `${gameLink(s.startSeason, s.startGid, esc(formatDate(s.startDate)))} – ${gameLink(s.endSeason, s.endGid, esc(formatDate(s.endDate)))}`,
 }));
 
+/** Whether a season is in a playoff era, and the era's years for its heading. */
+const inEra = (season, era) => (era.from == null || season >= era.from) && (era.to == null || season <= era.to);
+const eraYears = (era) => (era.from == null ? `to ${era.to}` : era.to == null ? `${era.from} on` : `${era.from}–${era.to}`);
+
 /** Each finished postseason's record, best first: winning percentage, then
- *  more wins, then the earlier year. A postseason with a series still being
- *  played is left out, as a season being played is left out of Best Seasons.
+ *  more wins, then the earlier year. A postseason is over when the club was
+ *  knocked out or won the title; one still going is left out, as a season
+ *  being played is left out of Best Seasons. Every series decided is not
+ *  enough: the Brewers' 2026 was 7-1 and "Won LCS" with the World Series
+ *  still to play.
  *  `reached` is how it ended: the title, or the last series and its result. */
 export function bestPlayoffRuns(appearances = [], top = 5) {
+	const over = (a) => {
+		const last = a.series.at(-1);
+		return Boolean(last) && (last.result === 'Lost' || (last.round === 'W' && last.result === 'Won'));
+	};
 	return appearances
-		.filter((a) => a.series.length && a.series.every((s) => s.result === 'Won' || s.result === 'Lost'))
+		.filter(over)
 		.map((a) => {
 			const w = a.series.reduce((n, s) => n + s.wins, 0);
 			const l = a.series.reduce((n, s) => n + s.losses, 0);
@@ -212,11 +223,16 @@ const CARDS = [
 	},
 	{
 		slug: 'best-playoff-runs', icon: 'mdi-chart-line-variant', title: 'Best Playoff Runs',
-		note: `${T} postseasons by winning percentage, then wins`,
-		entries: (d) => bestPlayoffRuns(d.playoffAppearances).map((r) => ({
-			main: r.record,
-			subHtml: yearLink(r.season),
-			detailHtml: `${pct3(r.winPct)} · ${esc(r.reached)}`,
+		note: `${T} postseasons by winning percentage, then wins${SITE.playoffEras ? ', in each era' : ''}`,
+		// One list a playoff era where the sport has them (SITE.playoffEras),
+		// one list where it does not.
+		groups: (d) => (SITE.playoffEras ?? [{}]).map((era) => ({
+			label: era.label ? `${era.label} · ${eraYears(era)}` : null,
+			entries: bestPlayoffRuns(d.playoffAppearances.filter((a) => inEra(a.season, era))).map((r) => ({
+				main: r.record,
+				subHtml: yearLink(r.season),
+				detailHtml: `${pct3(r.winPct)} · ${esc(r.reached)}`,
+			})),
 		})),
 		empty: SITE.copy.noPlayoffs,
 	},
@@ -287,11 +303,20 @@ function shareRowHtml(slug) {
 	return `<div class="record-share" data-slug="${slug}">${shareButtonsHtml('share-btn record-share-btn')}</div>`;
 }
 
+function listHtml(card, entries) {
+	return `<ol class="record-list">${entries.map((e, i) => entryHtml(e, i, card.highlightTop !== false)).join('')}</ol>`;
+}
+
 function cardHtml(card, data) {
-	const entries = card.entries(data);
-	const body = entries.length
-		? `<ol class="record-list">${entries.map((e, i) => entryHtml(e, i, card.highlightTop !== false)).join('')}</ol>`
-		: `<p class="record-empty">${esc(card.empty || 'Nothing here yet.')}</p>`;
+	// A card of several lists (Best Playoff Runs, by era) has a heading over
+	// each; an era the club has nothing in is left out.
+	const groups = card.groups ? card.groups(data).filter((g) => g.entries.length) : null;
+	const entries = groups ? groups.flatMap((g) => g.entries) : card.entries(data);
+	const body = !entries.length
+		? `<p class="record-empty">${esc(card.empty || 'Nothing here yet.')}</p>`
+		: groups
+			? groups.map((g) => `${g.label ? `<h3 class="record-group-title">${esc(g.label)}</h3>` : ''}${listHtml(card, g.entries)}`).join('')
+			: listHtml(card, entries);
 	return `<section class="record-card" id="card-${card.slug}">
 		<h2 class="record-card-title"><i class="mdi ${card.icon}"></i> ${esc(card.title)}</h2>
 		<p class="record-note">${esc(card.note)}</p>

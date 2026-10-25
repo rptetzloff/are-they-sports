@@ -280,17 +280,38 @@ test('best playoff runs rank postseasons where the playoffs are series, and nowh
 		.map((g, i) => ({ ...g, date: `${year}-05-${String(i + 1).padStart(2, '0')}`, gid: `${year}-p${i}` }))
 	const pens = [...season(1992, 'WWL'), ...playoffs(1992, 'WWWWL'), ...playoffs(1992, 'WWWW', true)]
 	const wings = [...season(1952, 'WLW'), ...playoffs(1952, 'WWWW'), ...playoffs(1952, 'WWWW', true)]
-	const caps = [...season(1990, 'LLW'), ...playoffs(1990, 'WWLLL')]
+	const caps = [...season(1992, 'LLW'), ...playoffs(1992, 'WWLLL')]
+	// 2027 has a club unbeaten through two rounds and no champion yet: not over.
+	const bruins = [...season(2027, 'WWW'), ...playoffs(2027, 'WWWWWWWW')]
 	const l = computeLeague([
 		{ team: hockey('PIT', 'Penguins'), rows: pens },
 		{ team: hockey('DET', 'Red Wings'), rows: wings },
 		{ team: hockey('WSH', 'Capitals'), rows: caps },
+		{ team: hockey('BOS', 'Bruins'), rows: bruins },
 	])
 	// By winning percentage, then wins: 8-0, then 8-1, then 2-3.
-	assert.deepEqual(l.bestPlayoffRuns.map((r) => [r.club, r.season, r.record, r.won]),
-		[['Red Wings', 1952, '8–0', true], ['Penguins', 1992, '8–1', true], ['Capitals', 1990, '2–3', false]])
+	assert.equal(l.bestPlayoffRuns.length, 1, 'hockey has one list, no eras')
+	assert.equal(l.bestPlayoffRuns[0].label, null)
+	assert.deepEqual(l.bestPlayoffRuns[0].runs.map((r) => [r.club, r.season, r.record, r.won]),
+		[['Red Wings', 1952, '8–0', true], ['Penguins', 1992, '8–1', true], ['Capitals', 1992, '2–3', false]])
 
 	// Football's postseason is single games: no card.
 	const gb = [...season(1966, 'WWW'), ...playoffs(1966, 'WW', true)]
 	assert.deepEqual(computeLeague([{ team: club('GB', 'Packers'), rows: gb }]).bestPlayoffRuns, [])
+})
+
+test('baseball ranks its playoff runs within each era', () => {
+	const ball = (id, team) => ({ ...club(id, team), sport: 'mlb' })
+	const post = (year, pattern, final = false) => season(year, pattern, { regular_season: '0', playoff: '1', championship: final ? 'X' : '' })
+		.map((g, i) => ({ ...g, date: `${year}-10-${String(i + 1).padStart(2, '0')}`, gid: `${year}-p${i}` }))
+	const nyy = [...season(1927, 'WW'), ...post(1927, 'WWWW', true), ...season(1999, 'WW'), ...post(1999, 'WWWWWWWLWWWW', true)]
+	const cin = [...season(1976, 'WW'), ...post(1976, 'WWWWWWW', true)]
+	const l = computeLeague([{ team: ball('NYA', 'Yankees'), rows: nyy }, { team: ball('CIN', 'Reds'), rows: cin }])
+	// A 4-0 sweep no longer outranks an 11-1 run through three rounds: each
+	// era is its own list, and an era nobody played in has none.
+	assert.deepEqual(l.bestPlayoffRuns.map((e) => [e.label, e.runs.map((r) => `${r.club} ${r.season} ${r.record}`)]), [
+		['World Series only', ['Yankees 1927 4–0']],
+		['LCS era', ['Reds 1976 7–0']],
+		['Wild-card era', ['Yankees 1999 11–1']],
+	])
 })

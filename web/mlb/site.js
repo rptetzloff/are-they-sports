@@ -60,6 +60,13 @@ export const SITE = {
 	scoreAgainstLabel: 'Runs Allowed',
 	/** The trophy. */
 	championship: 'World Series',
+	// Best Playoff Runs ranks each era apart: a 4-0 World Series and an 11-1
+	// run through three rounds are not the same thing to have done.
+	playoffEras: [
+		{ label: 'World Series only', to: 1968 },
+		{ label: 'LCS era', from: 1969, to: 1994 },
+		{ label: 'Wild-card era', from: 1995 },
+	],
 	/** What the person in charge is called — and the whole reason this site has
 	 *  managers.html where the other has coaches.html. Same concept, same
 	 *  computation, different noun. */
