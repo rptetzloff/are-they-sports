@@ -4,7 +4,7 @@ import mlb, { liveGameRow, numberEvents } from '../sports/mlb.js'
 import nfl from '../sports/nfl.js'
 import { codeTable } from '../lib/codes.js'
 import { readFileSync } from 'node:fs'
-import { SQL_UPSERT_LIVE, lockKeyFor, refreshLive } from '../lib/live.js'
+import { SQL_UPSERT_LIVE, lockKeyFor, refreshLive, startLiveLoops } from '../lib/live.js'
 
 // The live feed. Retrosheet publishes annually, so between March and the World
 // Series the authoritative source has nothing for the season being played and a
@@ -303,4 +303,32 @@ test('a leap February does not shift the season', () => {
 	// The month lengths are computed, so a leap year is worth one assertion.
 	assert.equal(mlb.sources.live.daysOf(2024).length, 275)
 	assert.equal(mlb.sources.live.daysOf(2024).filter((d) => d.slice(4, 6) === '03').length, 31)
+})
+
+test('each sport refreshes on its own schedule, not the first sport\'s', async () => {
+	// Baseball idle in November, football live: football must come round every
+	// minute. One loop timed by the first sport made it every six hours.
+	const pending = []
+	const timers = { setTimeout: (fn, ms) => { const h = { fn, ms }; pending.push(h); return h }, clearTimeout: () => {} }
+	const ticks = []
+	const delays = { mlb: 6 * 3600_000, nfl: 60_000 }
+	const stop = startLiveLoops({
+		sports: ['mlb', 'nfl'],
+		tick: async (id) => { ticks.push(id) },
+		delayFor: async (id) => ({ ms: delays[id] }),
+		fallbackMs: 60_000,
+		timers,
+	})
+	await new Promise((r) => setImmediate(r))
+	assert.deepEqual(ticks.sort(), ['mlb', 'nfl'])
+	assert.deepEqual(pending.map((h) => h.ms).sort((a, b) => a - b), [60_000, 6 * 3600_000])
+	stop()
+})
+
+test('a schedule that cannot be read falls back to the live rate', async () => {
+	const pending = []
+	const timers = { setTimeout: (fn, ms) => { pending.push(ms); return {} }, clearTimeout: () => {} }
+	startLiveLoops({ sports: ['nhl'], tick: async () => {}, delayFor: async () => { throw new Error('no db') }, fallbackMs: 60_000, timers })
+	await new Promise((r) => setImmediate(r))
+	assert.deepEqual(pending, [60_000])
 })
