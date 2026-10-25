@@ -210,3 +210,31 @@ test('football\'s pages are served where the server-rendered ones were', async (
 	assert.deepEqual(json.coaches.map((c) => [c.name, c.w]), [['Curly Lambeau', 209]])
 	assert.deepEqual(json.eras.map((e) => [e.from, e.to]), [[1921, 1949]])
 })
+
+test('a club\'s page learns of its first channel without a restart', async (t) => {
+	// The TV flag was fixed when the page was first built, so a club built
+	// before its first channel was approved had no provider choice until a
+	// restart. It is read a request at a time now, from tables cached a minute.
+	t.mock.timers.enable({ apis: ['Date'], now: Date.parse('2026-10-26T12:00:00Z') })
+	const teams = await loadTeams()
+	const team = teams.find((x) => x.sport === 'mlb' && x.id === 'brewers')
+	const adapters = await loadSports()
+	let providers = []
+	const f = await createFront({
+		team, franchise: team.franchise ?? team.sourceIds?.[0], adapter: adapters.mlb, namer: resolver('mlb'),
+		history: loadHistory('mlb'), currentCodes: new Set(), palette: null, base: '/mlb/brewers',
+		store: { rawGamesFor: async () => [], standingsTitles: async () => [], finalRounds: async () => new Map(),
+			leaderGames: async () => [], leaderTenures: async () => [],
+			tvTables: async () => ({ providers, areas: [], networks: [], channels: [] }) },
+		creditHtml: '', origin: () => 'http://x',
+	})
+	const page = async () => {
+		let body = ''
+		await f({ headers: {} }, { writeHead() {}, end() {} }, '/', new URL('http://x/'), (r, b) => { body = b })
+		return body
+	}
+	assert.match(await page(), /"tv":false/)
+	providers = [{ id: 'amherst' }]
+	t.mock.timers.tick(61_000)
+	assert.match(await page(), /"tv":true/)
+})
