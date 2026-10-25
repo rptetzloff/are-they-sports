@@ -1754,6 +1754,64 @@ details:not([open]) > .collapsible-summary::before {
     margin-top: 0.1rem;
 }
 
+/* Challenges (live-core.js challengesHtml): each team's ABS challenges
+   left as pips, then the latest challenges. */
+.live-challenges {
+    margin-top: 0.4rem;
+    padding-top: 0.35rem;
+    border-top: 1px solid rgb(var(--fg-rgb) / 0.12);
+}
+
+.chal-team {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    margin-right: 0.6rem;
+    white-space: nowrap;
+}
+
+.chal-pips {
+    display: inline-flex;
+    gap: 0.2rem;
+}
+
+.chal-pip {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    border: 1.5px solid rgb(var(--fg-rgb) / 0.45);
+    box-sizing: border-box;
+}
+
+.chal-pip.on {
+    background: var(--accent);
+    border-color: var(--accent);
+}
+
+.chal-item {
+    font-style: normal;
+}
+
+.chal-item.chal-won {
+    color: rgb(var(--fg-rgb) / 0.85);
+}
+
+.live-chal {
+    font-size: 0.72em;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    padding: 0 0.3rem;
+    border-radius: 3px;
+    border: 1px solid rgb(var(--fg-rgb) / 0.35);
+    color: rgb(var(--fg-rgb) / 0.75);
+}
+
+.live-chal-overturned {
+    border-color: var(--accent);
+    color: var(--accent-text);
+}
+
 .live-atbat {
     display: flex;
     gap: 0.6rem;
