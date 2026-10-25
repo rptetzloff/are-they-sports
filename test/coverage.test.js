@@ -138,3 +138,44 @@ test('a week whose maps are not posted: its windows, no maps, nothing fetched fo
 	assert.equal(c.posted, false)
 	assert.deepEqual(asked, ['https://506sports.com/nfl.php?yr=2026&wk=8'])
 })
+
+test('a market placed in the admin is read beside the calibrated ones', async () => {
+	const { marketPoints } = await import('../lib/coverage.js')
+	const points = marketPoints([
+		{ dma: 'Menominee', mapX: 812, mapY: 168 },
+		{ dma: 'Wausau', mapX: 771, mapY: 183 },
+		{ dma: 'Nowhere', mapX: null, mapY: null },
+	])
+	assert.deepEqual(points.Menominee, [812, 168])
+	// A placed point for a calibrated name wins: whoever placed it knew.
+	assert.deepEqual(points.Wausau, [771, 183])
+	assert.equal(points.Nowhere, undefined)
+	assert.deepEqual(points.Duluth, DMA_POINTS.Duluth)
+	// And the week's maps are read at it.
+	const fetchBuffer = async (url) => {
+		const path = url.replace('https://506sports.com/', '')
+		if (path.startsWith('nfl.php')) return Buffer.from(page)
+		if (path.startsWith('nfl/swatches/')) return png(10, 10, () => [158, 229, 158])
+		return png(1280, 720, () => [158, 229, 158])
+	}
+	const c = await weekCoverage(2026, 3, { fetchBuffer, points })
+	assert.ok(c.regional.every((w) => 'Menominee' in w.byDma))
+})
+
+test('the admin places a market on a posted map', async () => {
+	const { listingsBody } = await import('../lib/tv-listings.js')
+	const tv = {
+		providers: [{ id: 'p', displayName: 'P', alternateNames: [] }],
+		areas: [{ providerId: 'p', position: 0, name: 'North', dma: 'Menominee', mapX: 640, mapY: 360 },
+			{ providerId: 'p', position: 1, name: 'South', dma: null, mapX: null, mapY: null }],
+		networks: [], channels: [],
+	}
+	const html = listingsBody(tv, { mapUrl: 'https://506sports.com/2026/07-CBS-V2.png' })
+	assert.match(html, /name="dma_0" list="tvl-markets" value="Menominee"/)
+	assert.match(html, /name="mapx_0" value="640"/)
+	assert.match(html, /left:50\.00%;top:50\.00%/)
+	assert.match(html, /<img src="https:\/\/506sports\.com\/2026\/07-CBS-V2\.png"/)
+	// An unplaced area offers the map, its pin hidden.
+	assert.match(html, /name="mapx_1" value=""/)
+	assert.match(html, /<datalist id="tvl-markets">.*Wausau/s)
+})
