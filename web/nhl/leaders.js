@@ -22,7 +22,9 @@ const pct = (p) => (p >= 1 ? '1.000' : p.toFixed(3).replace(/^0/, ''));
 
 const MANAGER_COLUMNS = [
 	{ key: 'name',    label: cap(SITE.leaderNoun) },
-	{ key: 'firstSeason', label: 'Tenure', title: 'Tenure', num: true, sortKey: (c) => c.firstSeason, defaultDir: -1 },
+	// Two coaches who started in one season (a mid-season change) sort by
+	// which finished later, so Doc Rivers comes before Adrian Griffin.
+	{ key: 'firstSeason', label: 'Tenure', title: 'Tenure', num: true, sortKey: (c) => c.firstSeason + (c.lastSeason ?? c.firstSeason) / 10000, defaultDir: -1 },
 	{ key: 'record',  label: 'Record',  title: 'Win-Loss-Tie', num: true, sortKey: (c) => c.winPct, defaultDir: -1 },
 	{ key: 'winPct',  label: 'Win %',   title: 'Winning percentage', num: true, defaultDir: -1 },
 	{ key: 'playoffRecord', label: 'Playoffs', title: 'Playoff record', num: true, sortKey: (c) => c.playoffGames, defaultDir: -1 },
@@ -36,7 +38,7 @@ function rowHtml(c) {
 		<td>${esc(c.name)}${c.interim ? '<span class="coach-interim" title="Interim">*</span>' : ''}</td>
 		<td class="h2h-num"><a href="${c.firstSeason}">${esc(c.tenure)}</a></td>
 		<td class="h2h-num">${esc(c.record)}</td>
-		<td class="h2h-num">${pct(c.winPct)}</td>
+		<td class="h2h-num">${c.games === 0 ? '—' : pct(c.winPct)}</td>
 		<td class="h2h-num">${c.playoffRecord ? esc(c.playoffRecord) : '—'}</td>
 		<td class="h2h-num">${c.titles || '—'}</td>
 	</tr>`;

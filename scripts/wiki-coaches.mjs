@@ -116,8 +116,10 @@ export function seasonsOf(term) {
 		const spans = [];
 		for (const sp of ranges.map((x) => seasonsOf(x)).filter(Boolean)) {
 			const prev = spans.at(-1);
-			if (prev && sp.first <= prev.last + 1) Object.assign(prev, { last: Math.max(prev.last, sp.last), single: false });
-			else spans.push({ ...sp });
+			if (prev && sp.first <= prev.last + 1) {
+				Object.assign(prev, { last: Math.max(prev.last, sp.last), single: false,
+					term: termOf(prev.term.split('–')[0], sp.term.split('–').at(-1)) });
+			} else spans.push({ ...sp });
 		}
 		if (spans.length === 1) return spans[0];
 		return spans.length ? { ...spans.at(-1), spans } : null;
@@ -136,15 +138,24 @@ export function seasonsOf(term) {
 		const last = present ? CURRENT : seasonOfDate(dates.at(-1));
 		// Hired in the summer for the season after: the first is the next one.
 		const firstSeason = ENDS_IN_NEXT_YEAR && dates[0].month >= 5 && dates[0].month < 9 ? dates[0].year + 1 : first;
-		return { first: firstSeason, last: Math.max(last, firstSeason) };
+		return { first: firstSeason, last: Math.max(last, firstSeason),
+			term: termOf(dates[0].year, present ? 'present' : dates.at(-1).year) };
 	}
 	const a = years[0];
 	const b = present ? (ENDS_IN_NEXT_YEAR ? CURRENT - 1 : CURRENT) : years.at(-1);
-	if (!ENDS_IN_NEXT_YEAR) return { first: a, last: b };
+	// The list's own years, which is how anyone else writes the tenure: Doc
+	// Rivers was hired in January 2024, and the season he joined began in 2023.
+	const written = termOf(a, present ? 'present' : years.at(-1));
+	if (!ENDS_IN_NEXT_YEAR) return { first: a, last: b, term: written };
 	// One year alone, or the same year twice, is a season inside it; which one,
 	// the neighbouring tenures say (below).
-	if ((years.length === 1 || a === b) && !present) return { first: a, last: a, single: true };
-	return { first: a + 1, last: present ? CURRENT : b };
+	if ((years.length === 1 || a === b) && !present) return { first: a, last: a, single: true, term: written };
+	return { first: a + 1, last: present ? CURRENT : b, term: written };
+}
+
+/** A term as written: "2024–2026", "1999", "2026–present". */
+function termOf(from, to) {
+	return String(from) === String(to) ? String(from) : `${from}–${to}`;
 }
 
 const slugFor = (name) => name.toLowerCase().normalize('NFKD').replace(/[̀-ͯ]/g, '')
@@ -170,11 +181,15 @@ for (const r of draft) {
 	if (span.single) review.push(`one year      ${r.franchiseName} · ${name} · ${row.term} (taken as the season ending ${span.first})`);
 	// A term of several ranges is a tenure each, sharing the record (shared
 	// out by games below); `group` keeps them together until then.
+	// Hired for the season being played: no record yet, which is 0-0 through
+	// last season rather than a record the list forgot. Taylor Jenkins is the
+	// Bucks' coach, and leaving him out made Doc Rivers look like the current one.
+	const newHire = (row.w == null || row.l == null) && PLAYING != null && span.first >= PLAYING;
 	for (const sp of span.spans ?? [span]) out.push({
 		group: span.spans ? `${r.franchiseName}|${name}|${row.term}` : null,
 		leaderId: slugFor(name), name, nflverseName: '', franchiseAbbrv: r.franchiseName,
-		firstSeason: sp.first, lastSeason: sp.last, statedLastSeason: sp.last,
-		w: row.w ?? '', l: row.l ?? '', t: (row.t ?? 0) + (sport === 'nhl' ? 0 : 0), otl: row.otl ?? 0,
+		firstSeason: sp.first, lastSeason: sp.last, statedLastSeason: sp.last, term: sp.term ?? '',
+		w: newHire ? 0 : row.w ?? '', l: newHire ? 0 : row.l ?? '', t: row.t ?? 0, otl: row.otl ?? 0,
 		playoffW: row.playoffW, playoffL: row.playoffL, titleSeasons: '', interim: interim ? 'TRUE' : 'FALSE',
 		basis: 'transcribed', source: r.source, gc: row.gc, single: Boolean(sp.single), year: sp.first,
 	});
@@ -191,24 +206,24 @@ const BY_HAND = {
 		// the other 35, Bowman's: the season's 39-26-15 less Roberts' 21-16-8, out
 		// in four. Not dated: no split of the games' order gives both records.
 		{ name: 'Scotty Bowman', club: 'BUF', first: 1982, last: 1982, w: 18, l: 10, t: 7, otl: 0, playoffW: 1, playoffL: 3,
-			note: 'List of Buffalo Sabres head coaches (by hand: the rest of 1981-82, which the list leaves out)' },
+			term: '1981–1982', note: 'List of Buffalo Sabres head coaches (by hand: the rest of 1981-82, which the list leaves out)' },
 		// Montreal's list stops St. Louis's record two seasons ago; he took over
 		// from Dominique Ducharme after 45 games of 2021-22.
 		{ name: 'Martin St. Louis', club: 'MTL', first: 2022, last: CURRENT, since: '2022-02-09', replaces: true,
-			note: 'List of Montreal Canadiens head coaches (by hand: the list\'s record was two seasons old)' },
+			term: '2022–present', note: 'List of Montreal Canadiens head coaches (by hand: the list\'s record was two seasons old)' },
 		// Anaheim's list gives Carlyle's third stint 164 games; it was 220, to
 		// Bob Murray's 26 of 2018-19 (the list's 14-11-1, which the games agree with).
 		{ name: 'Randy Carlyle', club: 'ANA', first: 2017, last: 2019, until: '2019-02-10', replaces: true,
-			note: 'List of Anaheim Ducks head coaches (by hand: the list\'s record was 56 games short)' },
+			term: '2016–2019', note: 'List of Anaheim Ducks head coaches (by hand: the list\'s record was 56 games short)' },
 		// Utah's list names its general manager, Bill Armstrong.
 		{ name: 'André Tourigny', club: 'UTA', first: 2025, last: CURRENT,
-			note: 'Utah Mammoth (by hand: the list read the general manager)' },
+			term: '2024–present', note: 'Utah Mammoth (by hand: the list read the general manager)' },
 	],
 	nba: [
 		// Denver's list has Brown's ABA and NBA years as one record; the NBA's
 		// part ends after 53 games of 1978-79 (28-25), to Donnie Walsh.
 		{ name: 'Larry Brown', club: 'DEN', first: 1977, last: 1979, until: '1979-01-31', replaces: true,
-			note: 'List of Denver Nuggets head coaches (by hand: the NBA years of an ABA and NBA tenure)' },
+			term: '1976–1979', note: 'List of Denver Nuggets head coaches (by hand: the NBA years of an ABA and NBA tenure)' },
 	],
 }[sport] ?? [];
 for (const h of BY_HAND.filter((x) => x.replaces)) {
@@ -218,7 +233,7 @@ for (const h of BY_HAND.filter((x) => x.replaces)) {
 for (const h of BY_HAND) {
 	out.push({
 		group: null, leaderId: slugFor(h.name), name: h.name, nflverseName: '', franchiseAbbrv: h.club,
-		firstSeason: h.first, lastSeason: h.last, statedLastSeason: h.last,
+		firstSeason: h.first, lastSeason: h.last, statedLastSeason: h.last, term: h.term ?? '',
 		w: h.w ?? 0, l: h.l ?? 0, t: h.t ?? 0, otl: h.otl ?? 0, playoffW: h.playoffW ?? 0, playoffL: h.playoffL ?? 0,
 		titleSeasons: '', interim: 'FALSE', basis: 'transcribed', source: h.note,
 		gc: h.w == null ? null : h.w + h.l + h.t + h.otl, single: false, year: h.first, fixed: true,
@@ -486,6 +501,9 @@ if (process.env.DATABASE_URL) {
 			if (!ABA.clubs.has(t.franchiseAbbrv) || t.firstSeason >= ABA.from) continue;
 			if (t.lastSeason < ABA.from) { out.splice(i, 1); dropped++; continue; }
 			t.firstSeason = ABA.from;
+			// The term starts with the NBA, too: Bobby Leonard's 1968-1980 is
+			// 1976-1980 here.
+			if (t.term) t.term = termOf(ABA.from - 1, t.term.split('–').at(-1));
 			if (t.basis !== 'counted') review.push(`aba record    ${t.franchiseAbbrv} · ${t.name} · transcribed across 1976-77, so it holds ABA games`);
 		}
 		console.log(`the ABA: ${dropped} tenures wholly before 1976-77 dropped`);
@@ -518,7 +536,7 @@ if (write) {
 		process.exit(1);
 	}
 	const head = ['leaderId', 'name', 'nflverseName', 'franchiseAbbrv', 'firstSeason', 'lastSeason', 'statedLastSeason',
-		'w', 'l', 't', 'otl', 'playoffW', 'playoffL', 'titleSeasons', 'interim', 'basis', 'source'];
+		'w', 'l', 't', 'otl', 'playoffW', 'playoffL', 'titleSeasons', 'interim', 'basis', 'source', 'term'];
 	const cell = (v) => (/[",\n]/.test(String(v)) ? `"${String(v).replace(/"/g, '""')}"` : String(v));
 	const text = [
 		`# ${sport.toUpperCase()} head coaches, from Wikipedia's lists of each club's head coaches (CC BY-SA 4.0).`,
