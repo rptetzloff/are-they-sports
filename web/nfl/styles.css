@@ -2355,11 +2355,11 @@ th.sorted-desc::after {
     margin-left: 0.15rem;
 }
 
+/* The Packers site's table had a photo column, hidden on a phone with its
+   header (th:first-child). This one has none, and hiding the first header hid
+   "#" and slid every heading a column left of its figures. */
 @media (max-width: 600px) {
     .coaches-table .coach-photo-cell {
-        display: none;
-    }
-    .coaches-table thead th:first-child {
         display: none;
     }
 }
