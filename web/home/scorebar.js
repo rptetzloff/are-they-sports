@@ -62,8 +62,7 @@ if (bar) {
 		const won = g.state === 'post' && t.winner ? ' won' : '';
 		const me = t.key && mine.has(t.key) ? ' me' : '';
 		const rank = t.rank ? `<small class="sb-rk">${t.rank}</small>` : '';
-		return `<span class="sb-t${won}${me}">${t.logo ? `<img src="${esc(t.logo)}" alt="" loading="lazy">` : '<span></span>'}`
-			+ `<span>${rank}${esc(t.abbr || t.short)}</span><b>${g.state === 'pre' ? '' : esc(t.score ?? '')}</b></span>`;
+		return `<span class="sb-t${won}${me}"><span>${rank}${esc(t.abbr || t.short)}</span><b>${g.state === 'pre' ? '' : esc(t.score ?? '')}</b></span>`;
 	}
 	function chip(g, mine) {
 		const own = keysOf(g).some((k) => mine.has(k));
