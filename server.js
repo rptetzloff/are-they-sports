@@ -851,14 +851,17 @@ function main() {
 			// header becomes canonical, which for a share card means a staging
 			// deploy telling every reader that it IS the site.
 			//
-			// And the strip of the day's scores along the top (lib/scorebar.js),
-			// where there is more than one club: the page's league's games, or
-			// every league's on the home page, this club's first.
+			// And the strip of scores along the top (lib/scorebar.js), where there
+			// is more than one club: every league's, the page's own first, this
+			// club's games first in it.
 			const html = (res2, code, body, meta = {}) => {
 				if (code === 200 && needsSelector(table)) {
 					const sports = scorebarSports(url.pathname, [...new Set(table.map((e) => e.sport))]);
-					const here = sports.length === 1 ? matchRoute(url.pathname, table)?.entry : null;
-					body = withScorebar(body, { sports, club: here ? `${here.sport}/${here.teamId}` : null });
+					const here = matchRoute(url.pathname, table)?.entry;
+					body = withScorebar(body, {
+						leagues: sports.map((s) => ({ sport: s, label: LEAGUE_ABBR[s] ?? s.toUpperCase() })),
+						club: here ? `${here.sport}/${here.teamId}` : null,
+					});
 				}
 				return sendHtml(res2, code, body, { url: `${origin}${url.pathname}`, ...meta });
 			};
@@ -953,8 +956,9 @@ function main() {
 
 			// The home page's script, and its games: every league's for a day,
 			// through the shared ESPN cache (lib/today.js).
-			// The scores strip's too (lib/scorebar.js), which every page loads.
-			if ((url.pathname === '/home.js' || url.pathname === '/scorebar.js') && needsSelector(table)) {
+			// The scores strip's too (lib/scorebar.js), which every page loads, and
+			// the visitor's choice of leagues both read.
+			if (['/home.js', '/scorebar.js', '/leagues-pref.js'].includes(url.pathname) && needsSelector(table)) {
 				const js = readFileSync(join(WEB_DIR, 'home', url.pathname.slice(1)));
 				res.writeHead(200, { 'content-type': 'text/javascript; charset=utf-8', 'content-length': js.length, 'cache-control': 'no-cache' });
 				return res.end(js);
@@ -983,8 +987,8 @@ function main() {
 			if (url.pathname === '/api/today' && needsSelector(table)) {
 				const date = url.searchParams.get('date') ?? '';
 				if (!/^\d{8}$/.test(date)) return json(res, 400, { error: 'date is YYYYMMDD' });
-				// Every league in the scope, or those of them asked for (`sports=nba`,
-				// the scores strip on a league's pages).
+				// Every league in the scope, or those of them asked for (`sports=nba`).
+				// `nfl=week`: the NFL's whole week rather than the day, for the strip.
 				const inScope = [...new Set(table.map((e) => e.sport))];
 				const asked = (url.searchParams.get('sports') ?? '').split(',').filter((s) => inScope.includes(s));
 				const sports = asked.length ? asked : inScope;
@@ -997,7 +1001,7 @@ function main() {
 				// (lib/coverage.js), read for every market an area is in.
 				const dma = (url.searchParams.get('dma') ?? '').slice(0, 60) || null;
 				const coverage = dma ? async (season, week) => coverageFor(season, week, { points: marketPoints((await tvTables().catch(() => ({ areas: [] }))).areas) }) : null;
-				return json(res, 200, { date, leagues: await todayGames({ sports, date, espn: sharedEspn(), clubs, dma, coverage }) });
+				return json(res, 200, { date, leagues: await todayGames({ sports, date, espn: sharedEspn(), clubs, dma, coverage, nflWeek: url.searchParams.get('nfl') === 'week' }) });
 			}
 
 			if (url.pathname === '/' && needsSelector(table)) {

@@ -3,6 +3,8 @@
 // Drawn by lib/home.js; this fills it, moves it by day, and refreshes it every
 // half minute while a game is live, every five minutes otherwise.
 
+import { readLeagues, ordered, onLeagues } from './leagues-pref.js';
+
 const PINS = 'ats.pins';
 const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const sports = JSON.parse(document.getElementById('leagues').dataset.leagues);
@@ -135,11 +137,17 @@ function draw() {
 			: !games.length ? 'no games' : `${games.length} game${games.length === 1 ? '' : 's'}${n ? ` · ${n} live` : ''}`;
 		sec.querySelector('.day-games').innerHTML = games.map((g) => row(g)).join('');
 	}
-	// The leagues with games first, then the rest, each in the scope's order.
+	// The visitor's leagues (leagues-pref.js, chosen in the scores strip): the
+	// hidden ones gone, and in their order where they have set one. Otherwise
+	// the leagues with games first, live before not, then the rest, each in the
+	// scope's order.
 	const box = document.getElementById('leagues');
+	const p = readLeagues();
+	for (const el of box.children) el.hidden = p.hidden.includes(el.dataset.sport);
+	const theirs = ordered(sports, p);
 	const rank = (s) => { const l = leagues.find((x) => x.sport === s); return l?.games.length ? (l.games.some((g) => g.state === 'in') ? 0 : 1) : 2; };
-	[...box.children].sort((a, b) => rank(a.dataset.sport) - rank(b.dataset.sport) || sports.indexOf(a.dataset.sport) - sports.indexOf(b.dataset.sport))
-		.forEach((el) => box.appendChild(el));
+	const by = p.order.length ? (a, b) => theirs.indexOf(a) - theirs.indexOf(b) : (a, b) => rank(a) - rank(b) || sports.indexOf(a) - sports.indexOf(b);
+	[...box.children].sort((a, b) => by(a.dataset.sport, b.dataset.sport)).forEach((el) => box.appendChild(el));
 	drawMine();
 	return live;
 }
@@ -208,5 +216,6 @@ document.getElementById('find').addEventListener('input', (e) => {
 	}
 });
 
+onLeagues(draw);
 syncPins();
 load();
