@@ -140,6 +140,8 @@ export const team = {
 	nouns: {
 		team: ${q(c.full)},
 		fullName: ${q(c.full)},
+		// The school alone, where a table is narrow (a phone's standings).
+		school: ${q(c.school)},
 	},
 
 	/** ESPN's id for the programme, which its schedules are asked by. */

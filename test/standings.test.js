@@ -373,10 +373,26 @@ test('college football ranks a conference by its conference games, A to Z, indep
 	// An independent has no conference games, and no games back.
 	const nd = s.groups[2].clubs[0]
 	assert.deepEqual([nd.conf, nd.gb], [null, null])
-	// The table shows the conference record where there is one, and ties only where someone tied.
-	assert.deepEqual(standingsColumns(standingsFlags(american)).map((c) => c.label), ['Club', 'Conf', 'W', 'L', 'Pct', 'GB'])
+	// College football's table, as its standings are read (Ray, 2026-10-26):
+	// conference and overall records, points either way, the streak.
+	assert.deepEqual(standingsColumns(standingsFlags(american)).map((c) => c.label), ['Team', 'Conf', 'Overall', 'PF', 'PA', 'Strk'])
+	// An independent has no conference column.
 	assert.equal(standingsFlags(s.groups[2].clubs).conf, false)
+	assert.deepEqual(standingsColumns(standingsFlags(s.groups[2].clubs)).map((c) => c.label), ['Team', 'Overall', 'PF', 'PA', 'Strk'])
 	// Every other sport is as it was.
 	const nfl = computeStandings([club('ARMY', 'AFC', [['UNT', 'LOSS']]), club('UNT', 'AFC', [['ARMY', 'WIN']])], { season: 2026 })
 	assert.equal(nfl.groups[0].clubs[0].conf, null)
+})
+
+test('a club\'s streak is its newest games back, whatever order they arrive in', () => {
+	const club = (dates) => ({
+		franchise: 'UTSA', conference: 'American Conference', team: { nouns: { team: 'UTSA Roadrunners', school: 'UTSA' }, id: 'utsa', sport: 'ncaaf' },
+		rows: dates.map(([date, result]) => ({ season: '2026', date, regular_season: '1', result, Opponent: 'X', scoreFor: '1', scoreAgainst: '0' })),
+	})
+	// Out of order on purpose: the newest three are wins, the one before a loss.
+	const [line] = computeStandings([club([['2026-10-24', 'WIN'], ['2026-09-05', 'LOSS'], ['2026-10-10', 'WIN'], ['2026-10-17', 'WIN']])], { season: 2026 }).groups[0].clubs
+	assert.deepEqual(line.streak, { text: 'W3', value: 3 })
+	assert.equal(line.school, 'UTSA', 'the school, for the table to name')
+	const [losing] = computeStandings([club([['2026-10-24', 'LOSS'], ['2026-10-17', 'LOSS'], ['2026-10-10', 'WIN']])], { season: 2026 }).groups[0].clubs
+	assert.deepEqual(losing.streak, { text: 'L2', value: -2 })
 })

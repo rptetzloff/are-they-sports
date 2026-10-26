@@ -9,6 +9,8 @@ export const team = {
 	nouns: {
 		team: 'Wake Forest Demon Deacons',
 		fullName: 'Wake Forest Demon Deacons',
+		// The school alone, where a table is narrow (a phone's standings).
+		school: 'Wake Forest',
 	},
 
 	/** ESPN's id for the programme, which its schedules are asked by. */

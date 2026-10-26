@@ -9,6 +9,8 @@ export const team = {
 	nouns: {
 		team: 'Central Michigan Chippewas',
 		fullName: 'Central Michigan Chippewas',
+		// The school alone, where a table is narrow (a phone's standings).
+		school: 'Central Michigan',
 	},
 
 	/** ESPN's id for the programme, which its schedules are asked by. */

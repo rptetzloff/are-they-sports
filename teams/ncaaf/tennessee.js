@@ -9,6 +9,8 @@ export const team = {
 	nouns: {
 		team: 'Tennessee Volunteers',
 		fullName: 'Tennessee Volunteers',
+		// The school alone, where a table is narrow (a phone's standings).
+		school: 'Tennessee',
 	},
 
 	/** ESPN's id for the programme, which its schedules are asked by. */
