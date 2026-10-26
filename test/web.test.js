@@ -420,3 +420,12 @@ test('stale ESPN data stands in only briefly when ESPN fails', async () => {
 	clock = TTL + 11 * 60_000
 	assert.equal(await espn('https://site.api.espn.com/live'), null)
 })
+
+test('the footer is a tab bar up to 1000px in every stylesheet, where its full labels would wrap', () => {
+	// Measured on 2026-10-25: from 641px the full labels took two rows on every
+	// page until about 1,000px.
+	for (const f of ['mlb', 'nfl', 'nba', 'nhl', 'wnba', 'mls', 'ncaaf'].map((s) => `web/${s}/styles.css`).concat('lib/style.js')) {
+		const css = readFileSync(join(dirname(fileURLToPath(import.meta.url)), '..', f), 'utf8')
+		assert.match(css, /@media \(max-width: 1000px\) \{\s*\.footer-nav \{\s*gap: 0\.05rem;/, f)
+	}
+})

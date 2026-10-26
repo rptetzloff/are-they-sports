@@ -350,3 +350,33 @@ test('football\'s table has ties whether or not anyone has tied; baseball\'s onl
 	const baseball = untied.map((c) => ({ ...c, sport: 'mlb' }))
 	assert.deepEqual(standingsColumns(standingsFlags(baseball)).map((c) => c.label), ['Club', 'W', 'L', 'Pct', 'GB'])
 })
+
+test('college football ranks a conference by its conference games, A to Z, independents last', () => {
+	// Ray, 2026-10-25: standings by conference record. North Texas 3-0 in the
+	// conference is above Army 4-1, whichever has the better overall record.
+	const club = (franchise, conference, games) => ({
+		franchise, conference, team: { nouns: { team: franchise }, id: franchise.toLowerCase(), sport: 'ncaaf' },
+		rows: games.map(([opp, result]) => ({ season: '2026', regular_season: '1', result, Opponent: opp, scoreFor: '1', scoreAgainst: '0' })),
+	})
+	const s = computeStandings([
+		club('ARMY', 'American Conference', [['UNT', 'LOSS'], ['RICE', 'WIN'], ['TEM', 'WIN'], ['TUL', 'WIN'], ['NAVY', 'WIN'], ['ND', 'WIN'], ['X', 'WIN']]),
+		club('UNT', 'American Conference', [['ARMY', 'WIN'], ['RICE', 'WIN'], ['TEM', 'WIN'], ['X', 'LOSS'], ['Y', 'LOSS']]),
+		club('ND', 'FBS Independents', [['ARMY', 'LOSS'], ['X', 'WIN']]),
+		club('ALA', 'Southeastern Conference', [['X', 'WIN']]),
+	], { season: 2026, byConference: true })
+	assert.deepEqual(s.groups.map((g) => g.conference), ['American Conference', 'Southeastern Conference', 'FBS Independents'])
+	const american = s.groups[0].clubs
+	assert.deepEqual(american.map((c) => c.club), ['UNT', 'ARMY'])
+	// Only games against the conference's own count: Army's other wins do not.
+	assert.deepEqual([american[0].conf.record, american[1].conf.record], ['1–0', '0–1'])
+	assert.deepEqual([american[0].gb, american[1].gb], [0, 1])
+	// An independent has no conference games, and no games back.
+	const nd = s.groups[2].clubs[0]
+	assert.deepEqual([nd.conf, nd.gb], [null, null])
+	// The table shows the conference record where there is one, and ties only where someone tied.
+	assert.deepEqual(standingsColumns(standingsFlags(american)).map((c) => c.label), ['Club', 'Conf', 'W', 'L', 'Pct', 'GB'])
+	assert.equal(standingsFlags(s.groups[2].clubs).conf, false)
+	// Every other sport is as it was.
+	const nfl = computeStandings([club('ARMY', 'AFC', [['UNT', 'LOSS']]), club('UNT', 'AFC', [['ARMY', 'WIN']])], { season: 2026 })
+	assert.equal(nfl.groups[0].clubs[0].conf, null)
+})
