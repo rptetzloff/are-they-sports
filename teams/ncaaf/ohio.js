@@ -9,6 +9,8 @@ export const team = {
 	nouns: {
 		team: 'Ohio Bobcats',
 		fullName: 'Ohio Bobcats',
+		// The school alone, where a table is narrow (a phone's standings).
+		school: 'Ohio',
 	},
 
 	/** ESPN's id for the programme, which its schedules are asked by. */

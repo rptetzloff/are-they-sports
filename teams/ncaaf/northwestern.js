@@ -9,6 +9,8 @@ export const team = {
 	nouns: {
 		team: 'Northwestern Wildcats',
 		fullName: 'Northwestern Wildcats',
+		// The school alone, where a table is narrow (a phone's standings).
+		school: 'Northwestern',
 	},
 
 	/** ESPN's id for the programme, which its schedules are asked by. */
