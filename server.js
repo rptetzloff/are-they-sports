@@ -54,7 +54,7 @@ import { colorsFor, currentFranchises, displayName, loadHistory, resolver } from
 import { hasFrontEnd, WEB_DIR } from './lib/web.js';
 import { homePage } from './lib/home.js';
 import { todayGames } from './lib/today.js';
-import { scorebarSports, withScorebar } from './lib/scorebar.js';
+import { scorebarFor, withScorebar } from './lib/scorebar.js';
 import { coverageFor, marketPoints } from './lib/coverage.js';
 import { createFront, sharedEspn } from './lib/web-routes.js';
 import { LEAGUE_ABBR, SPORTS, loadSports, loadTeams } from './lib/teams.js';
@@ -856,11 +856,12 @@ function main() {
 			// club's games first in it.
 			const html = (res2, code, body, meta = {}) => {
 				if (code === 200 && needsSelector(table)) {
-					const sports = scorebarSports(url.pathname, [...new Set(table.map((e) => e.sport))]);
+					const { sports, lead } = scorebarFor(url.pathname, [...new Set(table.map((e) => e.sport))]);
 					const here = matchRoute(url.pathname, table)?.entry;
 					body = withScorebar(body, {
 						leagues: sports.map((s) => ({ sport: s, label: LEAGUE_ABBR[s] ?? s.toUpperCase() })),
 						club: here ? `${here.sport}/${here.teamId}` : null,
+						lead,
 					});
 				}
 				return sendHtml(res2, code, body, { url: `${origin}${url.pathname}`, ...meta });
@@ -994,7 +995,7 @@ function main() {
 				const sports = asked.length ? asked : inScope;
 				// Each team's page here, by its full name in its sport, as ESPN names it.
 				const clubs = new Map(table.filter((e) => e.available && clubFor(e)).flatMap((e) => {
-					const to = { url: `${e.base}/`, key: `${e.sport}/${e.teamId}` };
+					const to = { url: `${e.base}/`, key: `${e.sport}/${e.teamId}`, conference: e.conference ?? null, division: e.division ?? null };
 					return [[`${e.sport}|${clubFor(e).nouns.fullName.toLowerCase()}`, to], [`${e.sport}|short:${clubFor(e).nouns.team.toLowerCase()}`, to]];
 				}));
 				// The viewer's TV market, for which CBS and FOX game its stations carry
