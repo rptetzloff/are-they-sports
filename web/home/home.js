@@ -217,5 +217,8 @@ document.getElementById('find').addEventListener('input', (e) => {
 });
 
 onLeagues(draw);
+// A team starred in the footer's Team menu (lib/web.js) is pinned here too.
+window.addEventListener('ats-pins', () => { pins = new Set(readPins()); syncPins(); draw(); });
+window.addEventListener('storage', (e) => { if (e.key === PINS) { pins = new Set(readPins()); syncPins(); draw(); } });
 syncPins();
 load();
