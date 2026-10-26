@@ -213,7 +213,7 @@ test('a league page answers for its page, files, ESPN and bracket, and leaves th
 
 test('every sport\'s front end carries the same league page', () => {
 	for (const f of ['league.html', 'league.js', 'league-core.js', 'league.css']) {
-		const copies = ['mlb', 'nfl', 'nba', 'nhl', 'wnba', 'mls'].map((s) => read(`web/${s}/${f}`))
+		const copies = ['mlb', 'nfl', 'nba', 'nhl', 'wnba', 'mls', 'ncaaf'].map((s) => read(`web/${s}/${f}`))
 		assert.equal(new Set(copies).size, 1, `${f} has drifted between sports`)
 	}
 })

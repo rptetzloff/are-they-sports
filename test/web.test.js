@@ -52,6 +52,8 @@ BRAND.nba = BRAND.mlb
 BRAND.nhl = BRAND.mlb
 BRAND.wnba = BRAND.mlb
 BRAND.mls = BRAND.mlb
+// College football's is the NFL's.
+BRAND.ncaaf = BRAND.nfl
 
 test('another club loses every brand colour and keeps every other one', () => {
 	const cubs = { base: '#0e3386', accent: '#cc3433' }

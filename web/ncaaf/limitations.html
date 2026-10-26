@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Limitations</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css">
+    <!-- The saved theme, applied before the page paints (theme.js). -->
+    <script>try{var t=localStorage.getItem('theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .limitations-list { max-width: 46rem; margin: 0 auto 1rem; padding-left: 1.25rem; line-height: 1.55; text-align: left; }
+        .limitations-list li { margin-bottom: 0.6rem; }
+    </style>
+</head>
+<body>
+    <!-- What the data does not cover, for this sport and every sport. The list
+         is the server's (lib/limitations.js), and so is the footer: the page
+         it was opened from, a club's or a league's. -->
+    <div class="container records-container">
+        <a href="./" class="records-back"><i class="mdi mdi-arrow-left"></i> Home</a>
+        <h1 class="records-title">Data Limitations</h1>
+        <p class="records-subtitle">What the records here do not cover, and why</p>
+        <!-- limitations -->
+    </div>
+
+    <!-- footer -->
+
+    <!-- The footer's Share menu, filled as the other pages fill theirs. -->
+    <script type="module">
+        import * as share from './share-core.js';
+        const menu = document.getElementById('footer-share');
+        if (menu) {
+            menu.innerHTML = share.labeledShareButtonsHtml
+                ? share.labeledShareButtonsHtml('footer-share-item')
+                : share.shareButtonsHtml('footer-share-item', { labels: true });
+            share.wireShareRow(menu, document.title, location.href, { labels: true });
+            share.wireShareDropdown();
+        }
+    </script>
+    <script src="theme.js" defer></script>
+    <script src="license-modal.js" defer></script>
+</body>
+</html>

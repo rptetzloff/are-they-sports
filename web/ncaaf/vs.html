@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Head-to-Head</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css">
+    <!-- The saved theme, applied before the page paints (theme.js). -->
+    <script>try{var t=localStorage.getItem('theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container records-container">
+        <a href="./" class="records-back"><i class="mdi mdi-arrow-left"></i> Home</a>
+        <h1 class="records-title">Head-to-Head</h1>
+        <p id="h2h-subtitle" class="records-subtitle"></p>
+        <div id="h2h-focus"></div>
+        <div class="h2h-controls">
+            <input id="h2h-filter" class="h2h-filter" type="search" placeholder="Filter opponents..." aria-label="Filter opponents">
+            <select id="h2h-venue" class="h2h-select" aria-label="Venue">
+                <option value="all">All venues</option>
+                <option value="HOME">Home</option>
+                <option value="AWAY">Away</option>
+            </select>
+            <select id="h2h-type" class="h2h-select" aria-label="Game type">
+                <option value="all">All games</option>
+                <option value="regular">Regular season</option>
+                <option value="playoffs">Playoffs</option>
+            </select>
+            <label class="h2h-check"><input type="checkbox" id="h2h-current"> Current franchises only</label>
+        </div>
+        <p id="h2h-count" class="h2h-count"></p>
+        <div id="h2h-table-wrap" class="h2h-table-wrap">
+            <div class="loading">Loading opponents...</div>
+        </div>
+    </div>
+
+    <footer class="site-footer">
+        <nav class="footer-nav" aria-label="Site">
+            <a href="./" class="footer-nav-link"><i class="mdi mdi-home-outline"></i><span class="footer-nav-label">Home</span></a>
+            <a href="records.html" class="footer-nav-link"><i class="mdi mdi-trophy-outline"></i><span class="footer-nav-label">Records</span></a>
+            <a href="stadiums" class="footer-nav-link"><i class="mdi mdi-stadium"></i><span class="footer-nav-label">Stadiums</span></a>
+            <a href="splits" class="footer-nav-link"><i class="mdi mdi-call-split"></i><span class="footer-nav-label">Splits</span></a>
+            <a href="stats" class="footer-nav-link"><i class="mdi mdi-table-large"></i><span class="footer-nav-label">Stats</span></a>
+            <a href="vs.html" class="footer-nav-link" aria-current="page"><i class="mdi mdi-sword-cross"></i><span class="footer-nav-label footer-label-full">Head-to-Head</span><span class="footer-nav-label footer-label-short">H2H</span></a>
+            <a href="history.html" class="footer-nav-link"><i class="mdi mdi-chart-line"></i><span class="footer-nav-label">History</span></a>
+            <a href="coaches.html" class="footer-nav-link"><i class="mdi mdi-whistle-outline"></i><span class="footer-nav-label">Coaches</span></a>
+            <div class="footer-share-wrap">
+                <button id="footer-share-trigger" class="footer-nav-link footer-share-trigger" type="button" aria-haspopup="true" aria-expanded="false">
+                    <i class="mdi mdi-share-variant"></i><span class="footer-nav-label">Share</span> <i class="mdi mdi-chevron-down footer-share-caret"></i>
+                </button>
+                <div class="footer-share" id="footer-share" role="menu" hidden></div>
+            </div>
+            <a href="https://github.com/rptetzloff/AreThePackersUndefeated" target="_blank" rel="noopener noreferrer" class="footer-nav-link footer-github"><i class="mdi mdi-github"></i><span class="footer-nav-label">GitHub</span></a>
+        </nav>
+    </footer>
+
+    <script src="vs.js" type="module"></script>
+    <script src="theme.js" defer></script>
+    <script src="license-modal.js" defer></script>
+</body>
+</html>
