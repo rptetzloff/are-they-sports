@@ -614,8 +614,10 @@ test('leaders in the database', { skip: !DATABASE_URL && 'no DATABASE_URL — th
 		// The claim db/migrations/0006 makes in prose, asserted instead. A stated
 		// tenure reaching 1999 would be added to a counted record covering the
 		// same seasons, and the coach would be paid twice for them.
+		// Football's alone: every other league's stated tenures run to the
+		// present, because no game of theirs names its coach to count.
 		const bad = await loaded(
-			'SELECT leader, franchise, last_season FROM leader_tenure WHERE last_season >= 1999')
+			"SELECT leader, franchise, last_season FROM leader_tenure WHERE sport = 'nfl' AND last_season >= 1999")
 		assert.deepEqual(bad, [])
 	})
 

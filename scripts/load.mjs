@@ -974,23 +974,26 @@ async function loadTenures(client, sportId, knownFranchises) {
 	// upserting alone left a tenure whose first season a correction moved
 	// standing beside its replacement (Alex Delvecchio's two Detroit terms,
 	// once joined, were three rows).
-	await client.query(`DELETE FROM leader_tenure WHERE sport = $1 AND source = 'wikipedia'`, [sportId]);
+	// Wikipedia's lists for every league but college football, whose coaches
+	// are CollegeFootballData's (scripts/ncaaf-coaches.mjs).
+	const source = sportId === 'ncaaf' ? 'cfbd' : 'wikipedia';
+	await client.query('DELETE FROM leader_tenure WHERE sport = $1 AND source = $2', [sportId, source]);
 	let wrote = 0, skippedClub = 0;
 	for (const r of rows) {
 		if (!knownFranchises.has(r.franchiseAbbrv)) { skippedClub++; continue; }
 		await client.query(
-			`INSERT INTO leader (sport, id, name, source) VALUES ($1,$2,$3,'wikipedia')
-			 ON CONFLICT (sport, id) DO NOTHING`, [sportId, r.leaderId, r.name]);
+			`INSERT INTO leader (sport, id, name, source) VALUES ($1,$2,$3,$4)
+			 ON CONFLICT (sport, id) DO NOTHING`, [sportId, r.leaderId, r.name, source]);
 		const res = await client.query(
 			`INSERT INTO leader_tenure
 			   (sport, franchise, leader, first_season, last_season, w, l, t, otl, playoff_w, playoff_l, title_seasons, interim, term, source)
-			 VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,'wikipedia')
+			 VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
 			 ON CONFLICT (sport, franchise, leader, first_season) DO UPDATE SET
 			   last_season = EXCLUDED.last_season, w = EXCLUDED.w, l = EXCLUDED.l, t = EXCLUDED.t, otl = EXCLUDED.otl,
 			   playoff_w = EXCLUDED.playoff_w, playoff_l = EXCLUDED.playoff_l,
 			   title_seasons = EXCLUDED.title_seasons, interim = EXCLUDED.interim, term = EXCLUDED.term`,
 			[sportId, r.franchiseAbbrv, r.leaderId, r.firstSeason, r.statedLastSeason,
-				r.w, r.l, r.t, r.otl, r.playoffW, r.playoffL, r.titleSeasons, r.interim, r.term]);
+				r.w, r.l, r.t, r.otl, r.playoffW, r.playoffL, r.titleSeasons, r.interim, r.term, source]);
 		wrote += res.rowCount;
 	}
 	console.log(`  tenures      ${wrote} stated tenures${sportId === 'nfl' ? ' (NFL before 1999)' : ''}`);
