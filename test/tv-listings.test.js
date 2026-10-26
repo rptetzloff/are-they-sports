@@ -103,3 +103,23 @@ test('saving, adding and deleting change the tables and log each change', { skip
 		await c.end()
 	}
 })
+
+test('networks and providers are listed A to Z by name, whatever the case', () => {
+	// Ray, 2026-10-25: in the order they were added, nothing could be found.
+	const tv = {
+		...TV,
+		providers: [{ id: 'ntec', displayName: 'ntec', alternateNames: [] }, ...TV.providers],
+		networks: [{ id: 7, key: 'Peacock', club: null, displayName: 'Peacock', kind: 'streaming', aliases: [] },
+			{ id: 8, key: 'abc', club: null, displayName: 'abc', kind: 'broadcast', aliases: [] }, ...TV.networks],
+	}
+	const html = listingsBody(tv)
+	const order = (re) => [...html.matchAll(re)].map((m) => m[1])
+	// The Networks section's forms.
+	const section = html.slice(html.indexOf('id="networks"'), html.indexOf('Add a network'))
+	assert.deepEqual([...section.matchAll(/name="display_name" value="([^"]*)"/g)].map((m) => m[1]), ['abc', 'Brewers.TV', 'FOX', 'Peacock'])
+	// Each provider's grid, by its network rows.
+	const amherst = html.slice(html.indexOf('id="p-amherst"'), html.indexOf('id="p-directv"'))
+	assert.deepEqual([...amherst.matchAll(/<tr(?: class="empty")?><td>([^<]+)/g)].map((m) => m[1].trim()), ['abc', 'Brewers.TV', 'FOX', 'Peacock'])
+	// The providers.
+	assert.deepEqual(order(/id="p-([a-z]+)"/g), ['amherst', 'directv', 'ntec'])
+})
