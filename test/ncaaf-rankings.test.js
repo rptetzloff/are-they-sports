@@ -86,9 +86,11 @@ test('a programme\'s page asks where it is ranked this week, and says nothing un
 	const espnStub = async (url) => (url.endsWith('/rankings') ? { status: 200, body: JSON.stringify(espn) } : null)
 	const front = (id, code) => createFront({
 		league: false, team: teams.find((t) => t.sport === 'ncaaf' && t.id === id), franchise: code, adapter: adapters.ncaaf,
-		namer: resolver('ncaaf'), history: loadHistory('ncaaf'), currentCodes: new Set(), palette: null, base: `/ncaaf/${id}`, clubs: [],
+		namer: resolver('ncaaf'), history: loadHistory('ncaaf'), currentCodes: new Set(), palette: null, base: `/ncaaf/${id}`,
 		store: { rawGamesFor: async () => [], standingsTitles: async () => [], finalRounds: async () => new Map() },
 		creditHtml: '', origin: () => 'http://x', espn: espnStub,
+		clubs: [{ sport: 'ncaaf', teamId: 'ohiostate', name: 'Ohio State Buckeyes', href: '/ncaaf/ohiostate/' }],
+		polls: async () => [{ label: 'Preseason', ranks: new Map([['194', 1]]) }, { label: 'Week 2', ranks: new Map([['2390', 1]]) }],
 	})
 	const ask = async (id, code) => {
 		let body = ''
@@ -99,7 +101,13 @@ test('a programme\'s page asks where it is ranked this week, and says nothing un
 	}
 	const osu = await ask('ohiostate', 'OSU')
 	assert.equal(osu.handled, true)
-	assert.deepEqual(osu.json, { week: 'Week 9', ranks: [{ poll: 'AP', rank: 2 }] })
+	assert.deepEqual([osu.json.week, osu.json.ranks], ['Week 9', [{ poll: 'AP', rank: 2 }]])
+	// Its AP rank each week of the season, unranked as null.
+	assert.deepEqual(osu.json.weeks, [{ week: 'Preseason', rank: 1 }, { week: 'Week 2', rank: null }])
+	// This week's Top 25, each programme with a page here linked.
+	assert.equal(osu.json.top.poll, 'AP Top 25')
+	assert.deepEqual(osu.json.top.ranks[1], { rank: 2, id: '194', name: 'Ohio State Buckeyes', record: '6-1', href: '/ncaaf/ohiostate/' })
+	assert.equal(osu.json.top.ranks[0].href, null, 'no page here, no link')
 	const wis = await ask('wisconsin', 'WIS')
 	assert.deepEqual(wis.json.ranks, [], 'unranked: no line on the page')
 	// The page draws it under the record, linked to the polls.
