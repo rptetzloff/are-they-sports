@@ -75,12 +75,21 @@ for (const key of ['abbr', 'slug']) {
 // Each programme's first season, from CollegeFootballData's games where the
 // load has fetched them (data/sources/cfbd); 1869 for any it has not.
 const firstSeason = new Map();
+// And every other team a club has played, by the latest name it went by: the
+// pages name an opponent that is no club from data/reference/ncaaf-opponents.csv
+// (lib/names.js), as the load names its franchise.
+const clubIds = new Set(clubs.map((c) => c.id));
+const opponents = new Map();
 const cache = join(ROOT, 'data', 'sources', 'cfbd');
 if (existsSync(cache)) {
 	for (const f of readdirSync(cache).filter((n) => /^games-\d{4}\.json$/.test(n)).sort()) {
 		const year = Number(f.slice(6, 10));
 		for (const g of JSON.parse(readFileSync(join(cache, f), 'utf8'))) {
 			for (const id of [g.homeId, g.awayId]) if (id != null && !firstSeason.has(String(id))) firstSeason.set(String(id), year);
+			const home = String(g.homeId), away = String(g.awayId);
+			if (!clubIds.has(home) && !clubIds.has(away)) continue;
+			if (!clubIds.has(home) && g.homeTeam) opponents.set(home, g.homeTeam);
+			if (!clubIds.has(away) && g.awayTeam) opponents.set(away, g.awayTeam);
 		}
 	}
 }
@@ -105,6 +114,16 @@ writeFileSync(join(ref, 'ncaaf-divisions.csv'), [
 	'code,conference,division',
 	...clubs.map((c) => [c.abbr, c.conference, ''].map(csv).join(',')),
 ].join('\n') + '\n');
+
+if (opponents.size) {
+	writeFileSync(join(ref, 'ncaaf-opponents.csv'), [
+		'# Every team an FBS programme has played that is no FBS programme today, by',
+		'# ESPN\'s team id and the latest name CollegeFootballData gives it',
+		'# (scripts/ncaaf-reference.mjs, from the seasons the load keeps; do not edit).',
+		'id,name',
+		...[...opponents].sort((a, b) => a[1].localeCompare(b[1])).map(([id, name]) => [id, name].map(csv).join(',')),
+	].join('\n') + '\n');
+}
 
 const dir = join(ROOT, 'teams', 'ncaaf');
 mkdirSync(dir, { recursive: true });
