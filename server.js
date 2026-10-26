@@ -45,7 +45,7 @@ import {
 	seasonWinPct, seriesRecords, streakBanner, verdictText,
 } from './lib/core.js';
 import {
-	ALL_TIME_COLUMNS, CHAMPION_COLUMNS, championsPage, historyColumns, standingsColumns,
+	ALL_TIME_COLUMNS, CHAMPION_COLUMNS, championsPage, rankingsPage, parseRankings, historyColumns, standingsColumns,
 	NEUTRAL, siteFooterHtml, clubPage, clubSwitcher, noticePage, onThisDayPanel, questionFor, sharePanel, standingsModal, headToHeadPage, historyPage, leadersPage, leagueNav, leagueRecordsPage, leagueSchedulePage, sportTabs, missingSeasonPage, opponentPage, recordsPage, standingsPage,
 	RECORD_SLUGS, recordCopy, h2hColumns,
 	scheduleHtml, seasonNav, selectorPage, siteNav, sparklineHtml, creditLine,
@@ -1067,7 +1067,7 @@ function main() {
 				// The fourth segment is the schedule's period — `w3`, `d2026-08-29`,
 				// the period's own key. Only the schedule takes one; /records/2011
 				// and /standings/2011 are whole seasons by definition.
-				const m = url.pathname.match(/^(?:\/([a-z0-9]+))?\/(records|schedule|standings|champions)(?:\/(\d{4})(?:\/([wd][\w-]+))?)?$/);
+				const m = url.pathname.match(/^(?:\/([a-z0-9]+))?\/(records|schedule|standings|champions|rankings)(?:\/(\d{4})(?:\/([wd][\w-]+))?)?$/);
 				if (!m) return null;
 				const [, sport, view, season, period] = m;
 				if (period && view !== 'schedule') return null;
@@ -1075,8 +1075,28 @@ function main() {
 				// Neither of these is about one season: a record book and a list
 				// of champions are both the whole history by definition.
 				if ((view === 'records' || view === 'champions') && season) return null;
+				// Polls are college football's, and this week's.
+				if (view === 'rankings' && (sport !== 'ncaaf' || season)) return null;
 				return { sport: sport ?? null, view, season: season ?? null, period: period ?? null };
 			})();
+
+			// College football's polls this week, from ESPN through the shared
+			// cache (lib/render.js rankingsPage), each team linked to its page here.
+			if (leagueRoute?.view === 'rankings' && needsSelector(table)) {
+				const got = await sharedEspn()(`https://site.api.espn.com/apis/site/v2/sports/football/college-football/rankings`);
+				let polls = [];
+				try { if (got?.status === 200) polls = parseRankings(JSON.parse(got.body)); } catch { /* unreadable: none */ }
+				if (wantsJson(url)) return json(res, got?.status === 200 ? 200 : 502, { polls });
+				const urlOf = new Map(table.filter((e) => e.sport === 'ncaaf' && e.available && clubFor(e))
+					.map((e) => [String(clubFor(e).site?.espnSlug ?? ''), `${e.base}/`]));
+				return html(res, 200, rankingsPage({
+					polls,
+					heading: 'NCAAF rankings',
+					colors: NEUTRAL,
+					clubUrl: (id) => urlOf.get(String(id)) ?? null,
+					footer: footerFor(req, url, { sport: 'ncaaf', current: 'rankings', title: 'NCAAF rankings' }),
+				}));
+			}
 
 			// Every champion the league has had. The only page that reads the
 			// championship table directly — the club record book and the history

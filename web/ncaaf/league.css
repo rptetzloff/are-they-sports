@@ -33,6 +33,12 @@
     font-weight: 700;
 }
 
+.league-rank {
+    font-size: 0.75em;
+    opacity: 0.7;
+    font-variant-numeric: tabular-nums;
+}
+
 .league-name a {
     color: inherit;
 }

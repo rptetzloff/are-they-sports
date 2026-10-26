@@ -119,6 +119,9 @@ export function gameOf(event) {
 			abbr: c.team?.abbreviation ?? '',
 			name: c.team?.displayName ?? c.team?.name ?? '',
 			short: c.team?.shortDisplayName ?? c.team?.name ?? '',
+			// Its place in the poll, where the league has one (college football;
+			// ESPN says 99 for unranked).
+			rank: c.curatedRank?.current >= 1 && c.curatedRank.current <= 25 ? c.curatedRank.current : null,
 			score: scoreOf(c),
 			pens: c.shootoutScore ?? null,
 			winner: c.winner === true,
@@ -192,7 +195,7 @@ export function gameRowsHtml(games, { selected = null, weekly = false, timeZone 
 		return `<div class="sched-row sched-${state} sched-click league-row${g.id === selected ? ' league-row-on' : ''}" data-key="${esc(g.id)}" role="button" tabindex="0"`
 			+ ` aria-label="${esc(`${g.away.name} at ${g.home.name}`)}"${g.id === selected ? ' aria-current="true"' : ''}>`
 			+ `<span class="sched-date">${esc(when)}</span>`
-			+ `<span class="sched-opp"><span class="${won(g.away).trim()}">${esc(g.away.short)}</span> ${g.neutral ? 'vs' : '@'} <span class="${won(g.home).trim()}">${esc(g.home.short)}</span></span>`
+			+ `<span class="sched-opp"><span class="${won(g.away).trim()}">${ranked(g.away)}</span> ${g.neutral ? 'vs' : '@'} <span class="${won(g.home).trim()}">${ranked(g.home)}</span></span>`
 			+ `<span class="sched-out">${state === 'live' ? '<span class="live-indicator-small"></span>' : ''}${esc(out)}</span>`
 			+ `<span class="sched-tv" title="${esc(g.tv.join(', '))}">${esc(g.tv.join(' · '))}</span>`
 			+ '</div>';
@@ -211,7 +214,7 @@ export function gameCardHtml(g, { clubHref = () => null, timeZone, extraHtml = '
 		const name = href ? `<a href="${esc(href)}">${esc(t.name)}</a>` : esc(t.name);
 		const lead = g.state !== 'pre' && t.score != null;
 		return `<div class="league-team${g.final && t.winner ? ' league-won' : ''}">`
-			+ `<span class="league-name">${name}${t.record ? ` <span class="league-record">${esc(t.record)}</span>` : ''}</span>`
+			+ `<span class="league-name">${t.rank ? `<span class="league-rank">${t.rank}</span> ` : ''}${name}${t.record ? ` <span class="league-record">${esc(t.record)}</span>` : ''}</span>`
 			+ (lead ? `<span class="league-score">${esc(t.score)}${t.pens != null ? ` <span class="league-record">(${esc(t.pens)})</span>` : ''}</span>` : '')
 			+ '</div>';
 	};
@@ -268,6 +271,9 @@ export function refreshMs(games, now = Date.now()) {
 }
 
 // --- football's postseason ----------------------------------------------------
+
+/** A side's short name with its place in the poll, where it has one. */
+const ranked = (t) => `${t.rank ? `<span class="league-rank">${t.rank}</span> ` : ''}${esc(t.short)}`;
 
 /** Football's playoffs as rounds of single games, AFC above NFC, from the
  *  postseason weeks' scoreboards. The bracket the baseball family draws is a
