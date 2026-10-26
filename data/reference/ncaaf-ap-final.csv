@@ -1,0 +1,1932 @@
+# Each finished season's final AP poll, 1936 on: its last poll, after the bowls
+# from the 1960s and before them in the earliest seasons. Teams are ESPN's ids.
+# Made by scripts/ncaaf-champions.mjs from CollegeFootballData.com; do not edit by hand.
+season,team,school,rank
+1936,135,Minnesota,1
+1936,99,LSU,2
+1936,221,Pittsburgh,3
+1936,333,Alabama,4
+1936,264,Washington,5
+1936,1000003,Santa Clara,6
+1936,77,Northwestern,7
+1936,87,Notre Dame,8
+1936,158,Nebraska,9
+1936,219,Pennsylvania,10
+1936,150,Duke,11
+1936,43,Yale,12
+1936,159,Dartmouth,13
+1936,2184,Duquesne,14
+1936,2230,Fordham,15
+1936,2628,TCU,16
+1936,2633,Tennessee,17
+1936,8,Arkansas,18
+1936,2426,Navy,18
+1936,1000039,Marquette,20
+1937,221,Pittsburgh,1
+1937,25,California,2
+1937,2230,Fordham,3
+1937,333,Alabama,4
+1937,135,Minnesota,5
+1937,222,Villanova,6
+1937,159,Dartmouth,7
+1937,99,LSU,8
+1937,87,Notre Dame,9
+1937,1000003,Santa Clara,9
+1937,158,Nebraska,11
+1937,43,Yale,12
+1937,194,Ohio State,13
+1937,8,Arkansas,14
+1937,107,Holy Cross,14
+1937,2628,TCU,16
+1937,38,Colorado,17
+1937,242,Rice,18
+1937,153,North Carolina,19
+1937,150,Duke,20
+1938,2628,TCU,1
+1938,2633,Tennessee,2
+1938,150,Duke,3
+1938,201,Oklahoma,4
+1938,87,Notre Dame,5
+1938,2102,Carnegie Mellon,6
+1938,30,USC,7
+1938,221,Pittsburgh,8
+1938,107,Holy Cross,9
+1938,135,Minnesota,10
+1938,2641,Texas Tech,11
+1938,172,Cornell,12
+1938,333,Alabama,13
+1938,25,California,14
+1938,2230,Fordham,15
+1938,130,Michigan,16
+1938,77,Northwestern,17
+1938,222,Villanova,18
+1938,2655,Tulane,19
+1938,159,Dartmouth,20
+1939,245,Texas A&M,1
+1939,2633,Tennessee,2
+1939,30,USC,3
+1939,172,Cornell,4
+1939,2655,Tulane,5
+1939,142,Missouri,6
+1939,26,UCLA,7
+1939,150,Duke,8
+1939,2294,Iowa,9
+1939,2184,Duquesne,10
+1939,103,Boston College,11
+1939,228,Clemson,12
+1939,87,Notre Dame,13
+1939,1000003,Santa Clara,14
+1939,194,Ohio State,15
+1939,59,Georgia Tech,16
+1939,2230,Fordham,17
+1939,158,Nebraska,18
+1939,201,Oklahoma,19
+1939,130,Michigan,20
+1940,135,Minnesota,1
+1940,24,Stanford,2
+1940,130,Michigan,3
+1940,2633,Tennessee,4
+1940,103,Boston College,5
+1940,245,Texas A&M,6
+1940,158,Nebraska,7
+1940,77,Northwestern,8
+1940,344,Mississippi State,9
+1940,264,Washington,10
+1940,1000003,Santa Clara,11
+1940,2230,Fordham,12
+1940,46,Georgetown,13
+1940,219,Pennsylvania,14
+1940,172,Cornell,15
+1940,2567,SMU,16
+1940,2810,Hardin Simmons,17
+1940,150,Duke,18
+1940,322,Lafayette,19
+1941,135,Minnesota,1
+1941,150,Duke,2
+1941,87,Notre Dame,3
+1941,251,Texas,4
+1941,130,Michigan,5
+1941,2230,Fordham,6
+1941,142,Missouri,7
+1941,2184,Duquesne,8
+1941,245,Texas A&M,9
+1941,2426,Navy,10
+1941,77,Northwestern,11
+1941,204,Oregon State,12
+1941,194,Ohio State,13
+1941,61,Georgia,14
+1941,219,Pennsylvania,15
+1941,344,Mississippi State,16
+1941,145,Ole Miss,17
+1941,2633,Tennessee,18
+1941,265,Washington State,19
+1941,333,Alabama,20
+1942,194,Ohio State,1
+1942,61,Georgia,2
+1942,275,Wisconsin,3
+1942,202,Tulsa,4
+1942,59,Georgia Tech,5
+1942,87,Notre Dame,6
+1942,2633,Tennessee,7
+1942,103,Boston College,8
+1942,130,Michigan,9
+1942,333,Alabama,10
+1942,251,Texas,11
+1942,24,Stanford,12
+1942,26,UCLA,13
+1942,2729,William & Mary,14
+1942,1000003,Santa Clara,15
+1942,2,Auburn,16
+1942,265,Washington State,17
+1942,344,Mississippi State,18
+1942,107,Holy Cross,19
+1942,135,Minnesota,19
+1942,213,Penn State,19
+1943,87,Notre Dame,1
+1943,1000000,Iowa Pre-Flight,2
+1943,130,Michigan,3
+1943,2426,Navy,4
+1943,2509,Purdue,5
+1943,1000028,Great Lakes Navy,6
+1943,150,Duke,7
+1943,1000018,Del Monte Pre-Flight,8
+1943,77,Northwestern,9
+1943,1000037,March Field,10
+1943,349,Army,11
+1943,264,Washington,12
+1943,59,Georgia Tech,13
+1943,251,Texas,14
+1943,202,Tulsa,15
+1943,159,Dartmouth,16
+1943,1000808,Bainbridge NTS,17
+1943,2144,Colorado College,18
+1943,1000044,Pacific,19
+1943,219,Pennsylvania,20
+1944,349,Army,1
+1944,194,Ohio State,2
+1944,1000048,Randolph Field,3
+1944,2426,Navy,4
+1944,1000808,Bainbridge NTS,5
+1944,1000000,Iowa Pre-Flight,6
+1944,30,USC,7
+1944,130,Michigan,8
+1944,87,Notre Dame,9
+1944,1000037,March Field,10
+1944,150,Duke,11
+1944,2633,Tennessee,12
+1944,59,Georgia Tech,13
+1944,1000042,Norman Naval Air Station,13
+1944,356,Illinois,15
+1944,1000828,El Toro Marines,16
+1944,1000028,Great Lakes Navy,17
+1944,1000827,Fort Pierce,18
+1944,1000065,Saint Mary's (CA) Pre-Flight,19
+1944,1000053,Second Air Force,20
+1945,349,Army,1
+1945,333,Alabama,2
+1945,2426,Navy,3
+1945,84,Indiana,4
+1945,197,Oklahoma State,5
+1945,130,Michigan,6
+1945,1000051,Saint Mary's (CA),7
+1945,219,Pennsylvania,8
+1945,87,Notre Dame,9
+1945,251,Texas,10
+1945,30,USC,11
+1945,194,Ohio State,12
+1945,150,Duke,13
+1945,2633,Tennessee,14
+1945,99,LSU,15
+1945,107,Holy Cross,16
+1945,202,Tulsa,17
+1945,61,Georgia,18
+1945,154,Wake Forest,19
+1945,171,Columbia,20
+1946,87,Notre Dame,1
+1946,349,Army,2
+1946,61,Georgia,3
+1946,26,UCLA,4
+1946,356,Illinois,5
+1946,130,Michigan,6
+1946,2633,Tennessee,7
+1946,99,LSU,8
+1946,153,North Carolina,9
+1946,242,Rice,10
+1946,59,Georgia Tech,11
+1946,43,Yale,12
+1946,219,Pennsylvania,13
+1946,201,Oklahoma,14
+1946,251,Texas,15
+1946,8,Arkansas,16
+1946,202,Tulsa,17
+1946,152,NC State,18
+1946,48,Delaware,19
+1946,84,Indiana,20
+1947,87,Notre Dame,1
+1947,130,Michigan,2
+1947,2567,SMU,3
+1947,213,Penn State,4
+1947,251,Texas,5
+1947,333,Alabama,6
+1947,219,Pennsylvania,7
+1947,30,USC,8
+1947,153,North Carolina,9
+1947,59,Georgia Tech,10
+1947,349,Army,11
+1947,2305,Kansas,12
+1947,145,Ole Miss,13
+1947,2729,William & Mary,14
+1947,25,California,15
+1947,201,Oklahoma,16
+1947,152,NC State,17
+1947,242,Rice,18
+1947,150,Duke,19
+1947,171,Columbia,20
+1948,130,Michigan,1
+1948,87,Notre Dame,2
+1948,153,North Carolina,3
+1948,25,California,4
+1948,201,Oklahoma,5
+1948,349,Army,6
+1948,77,Northwestern,7
+1948,61,Georgia,8
+1948,2483,Oregon,9
+1948,2567,SMU,10
+1948,228,Clemson,11
+1948,238,Vanderbilt,12
+1948,2655,Tulane,13
+1948,127,Michigan State,14
+1948,145,Ole Miss,15
+1948,135,Minnesota,16
+1948,2729,William & Mary,17
+1948,213,Penn State,18
+1948,172,Cornell,19
+1948,154,Wake Forest,20
+1949,87,Notre Dame,1
+1949,201,Oklahoma,2
+1949,25,California,3
+1949,349,Army,4
+1949,242,Rice,5
+1949,194,Ohio State,6
+1949,130,Michigan,7
+1949,135,Minnesota,8
+1949,99,LSU,9
+1949,1000044,Pacific,10
+1949,96,Kentucky,11
+1949,172,Cornell,12
+1949,222,Villanova,13
+1949,120,Maryland,14
+1949,1000003,Santa Clara,15
+1949,153,North Carolina,16
+1949,2633,Tennessee,17
+1949,163,Princeton,18
+1949,127,Michigan State,19
+1949,239,Baylor,20
+1949,142,Missouri,20
+1950,201,Oklahoma,1
+1950,349,Army,2
+1950,251,Texas,3
+1950,2633,Tennessee,4
+1950,25,California,5
+1950,163,Princeton,6
+1950,96,Kentucky,7
+1950,127,Michigan State,8
+1950,130,Michigan,9
+1950,228,Clemson,10
+1950,264,Washington,11
+1950,2751,Wyoming,12
+1950,356,Illinois,13
+1950,194,Ohio State,14
+1950,2390,Miami,15
+1950,333,Alabama,16
+1950,158,Nebraska,17
+1950,202,Tulsa,18
+1950,2688,Washington and Lee,18
+1950,2655,Tulane,20
+1951,2633,Tennessee,1
+1951,127,Michigan State,2
+1951,120,Maryland,3
+1951,356,Illinois,4
+1951,59,Georgia Tech,5
+1951,163,Princeton,6
+1951,24,Stanford,7
+1951,275,Wisconsin,8
+1951,239,Baylor,9
+1951,201,Oklahoma,10
+1951,2628,TCU,11
+1951,25,California,12
+1951,258,Virginia,13
+1951,1000004,San Francisco,14
+1951,96,Kentucky,15
+1951,1000010,Boston University,16
+1951,26,UCLA,17
+1951,265,Washington State,18
+1951,228,Clemson,19
+1951,107,Holy Cross,19
+1952,127,Michigan State,1
+1952,59,Georgia Tech,2
+1952,87,Notre Dame,3
+1952,201,Oklahoma,4
+1952,30,USC,5
+1952,26,UCLA,6
+1952,145,Ole Miss,7
+1952,2633,Tennessee,8
+1952,333,Alabama,9
+1952,251,Texas,10
+1952,275,Wisconsin,11
+1952,202,Tulsa,12
+1952,120,Maryland,13
+1952,183,Syracuse,14
+1952,57,Florida,15
+1952,150,Duke,16
+1952,194,Ohio State,17
+1952,2509,Purdue,18
+1952,163,Princeton,19
+1952,96,Kentucky,20
+1953,120,Maryland,1
+1953,87,Notre Dame,2
+1953,127,Michigan State,3
+1953,201,Oklahoma,4
+1953,26,UCLA,5
+1953,242,Rice,6
+1953,356,Illinois,7
+1953,59,Georgia Tech,8
+1953,2294,Iowa,9
+1953,277,West Virginia,10
+1953,251,Texas,11
+1953,2641,Texas Tech,12
+1953,333,Alabama,13
+1953,349,Army,14
+1953,275,Wisconsin,15
+1953,96,Kentucky,16
+1953,2,Auburn,17
+1953,150,Duke,18
+1953,24,Stanford,19
+1953,130,Michigan,20
+1954,194,Ohio State,1
+1954,26,UCLA,2
+1954,201,Oklahoma,3
+1954,87,Notre Dame,4
+1954,2426,Navy,5
+1954,145,Ole Miss,6
+1954,349,Army,7
+1954,120,Maryland,8
+1954,275,Wisconsin,9
+1954,8,Arkansas,10
+1954,2390,Miami,11
+1954,277,West Virginia,12
+1954,2,Auburn,13
+1954,150,Duke,14
+1954,130,Michigan,15
+1954,259,Virginia Tech,16
+1954,30,USC,17
+1954,239,Baylor,18
+1954,242,Rice,19
+1954,213,Penn State,20
+1955,201,Oklahoma,1
+1955,127,Michigan State,2
+1955,120,Maryland,3
+1955,26,UCLA,4
+1955,194,Ohio State,5
+1955,2628,TCU,6
+1955,59,Georgia Tech,7
+1955,2,Auburn,8
+1955,87,Notre Dame,9
+1955,145,Ole Miss,10
+1955,221,Pittsburgh,11
+1955,130,Michigan,12
+1955,30,USC,13
+1955,2390,Miami,14
+1955,193,Miami (OH),15
+1955,24,Stanford,16
+1955,245,Texas A&M,17
+1955,2426,Navy,18
+1955,277,West Virginia,19
+1955,349,Army,20
+1956,201,Oklahoma,1
+1956,2633,Tennessee,2
+1956,2294,Iowa,3
+1956,59,Georgia Tech,4
+1956,245,Texas A&M,5
+1956,2390,Miami,6
+1956,130,Michigan,7
+1956,183,Syracuse,8
+1956,127,Michigan State,9
+1956,204,Oregon State,10
+1956,239,Baylor,11
+1956,135,Minnesota,12
+1956,221,Pittsburgh,13
+1956,2628,TCU,14
+1956,194,Ohio State,15
+1956,2426,Navy,16
+1956,1000025,George Washington,17
+1956,30,USC,18
+1956,228,Clemson,19
+1956,38,Colorado,20
+1957,2,Auburn,1
+1957,194,Ohio State,2
+1957,127,Michigan State,3
+1957,201,Oklahoma,4
+1957,2426,Navy,5
+1957,2294,Iowa,6
+1957,145,Ole Miss,7
+1957,242,Rice,8
+1957,245,Texas A&M,9
+1957,87,Notre Dame,10
+1957,251,Texas,11
+1957,9,Arizona State,12
+1957,2633,Tennessee,13
+1957,344,Mississippi State,14
+1957,152,NC State,15
+1957,150,Duke,16
+1957,57,Florida,17
+1957,349,Army,18
+1957,275,Wisconsin,19
+1957,2678,VMI,20
+1958,99,LSU,1
+1958,2294,Iowa,2
+1958,349,Army,3
+1958,2,Auburn,4
+1958,201,Oklahoma,5
+1958,2005,Air Force,6
+1958,275,Wisconsin,7
+1958,194,Ohio State,8
+1958,183,Syracuse,9
+1958,2628,TCU,10
+1958,145,Ole Miss,11
+1958,228,Clemson,12
+1958,2509,Purdue,13
+1958,57,Florida,14
+1958,2579,South Carolina,15
+1958,25,California,16
+1958,87,Notre Dame,17
+1958,2567,SMU,18
+1958,197,Oklahoma State,19
+1958,164,Rutgers,20
+1959,183,Syracuse,1
+1959,145,Ole Miss,2
+1959,99,LSU,3
+1959,251,Texas,4
+1959,61,Georgia,5
+1959,275,Wisconsin,6
+1959,2628,TCU,7
+1959,264,Washington,8
+1959,8,Arkansas,9
+1959,333,Alabama,10
+1959,228,Clemson,11
+1959,213,Penn State,12
+1959,356,Illinois,13
+1959,30,USC,14
+1959,201,Oklahoma,15
+1959,2751,Wyoming,16
+1959,87,Notre Dame,17
+1959,142,Missouri,18
+1959,57,Florida,19
+1959,221,Pittsburgh,20
+1960,135,Minnesota,1
+1960,145,Ole Miss,2
+1960,2294,Iowa,3
+1960,2426,Navy,4
+1960,142,Missouri,5
+1960,264,Washington,6
+1960,8,Arkansas,7
+1960,194,Ohio State,8
+1960,333,Alabama,9
+1960,150,Duke,10
+1960,2305,Kansas,11
+1960,239,Baylor,12
+1960,2,Auburn,13
+1960,43,Yale,14
+1960,127,Michigan State,15
+1960,213,Penn State,16
+1960,166,New Mexico State,17
+1960,57,Florida,18
+1960,2509,Purdue,19
+1960,183,Syracuse,19
+1961,333,Alabama,1
+1961,194,Ohio State,2
+1961,251,Texas,3
+1961,99,LSU,4
+1961,145,Ole Miss,5
+1961,135,Minnesota,6
+1961,38,Colorado,7
+1961,127,Michigan State,8
+1961,8,Arkansas,9
+1961,328,Utah State,10
+1961,142,Missouri,11
+1961,2509,Purdue,12
+1961,59,Georgia Tech,13
+1961,183,Syracuse,14
+1961,164,Rutgers,15
+1961,26,UCLA,16
+1961,12,Arizona,17
+1961,213,Penn State,17
+1961,242,Rice,17
+1961,150,Duke,20
+1962,30,USC,1
+1962,275,Wisconsin,2
+1962,145,Ole Miss,3
+1962,251,Texas,4
+1962,333,Alabama,5
+1962,8,Arkansas,6
+1962,99,LSU,7
+1962,201,Oklahoma,8
+1962,213,Penn State,9
+1962,135,Minnesota,10
+1963,251,Texas,1
+1963,2426,Navy,2
+1963,356,Illinois,3
+1963,221,Pittsburgh,4
+1963,2,Auburn,5
+1963,158,Nebraska,6
+1963,145,Ole Miss,7
+1963,333,Alabama,8
+1963,127,Michigan State,9
+1963,201,Oklahoma,10
+1964,333,Alabama,1
+1964,8,Arkansas,2
+1964,87,Notre Dame,3
+1964,130,Michigan,4
+1964,251,Texas,5
+1964,158,Nebraska,6
+1964,99,LSU,7
+1964,204,Oregon State,8
+1964,194,Ohio State,9
+1964,30,USC,10
+1965,333,Alabama,1
+1965,127,Michigan State,2
+1965,8,Arkansas,3
+1965,26,UCLA,4
+1965,158,Nebraska,5
+1965,142,Missouri,6
+1965,2633,Tennessee,7
+1965,99,LSU,8
+1965,87,Notre Dame,9
+1965,30,USC,10
+1966,87,Notre Dame,1
+1966,127,Michigan State,2
+1966,333,Alabama,3
+1966,61,Georgia,4
+1966,26,UCLA,5
+1966,158,Nebraska,6
+1966,2509,Purdue,7
+1966,59,Georgia Tech,8
+1966,2390,Miami,9
+1966,2567,SMU,10
+1967,30,USC,1
+1967,2633,Tennessee,2
+1967,201,Oklahoma,3
+1967,84,Indiana,4
+1967,87,Notre Dame,5
+1967,2751,Wyoming,6
+1967,204,Oregon State,7
+1967,333,Alabama,8
+1967,2509,Purdue,9
+1967,213,Penn State,10
+1968,194,Ohio State,1
+1968,213,Penn State,2
+1968,251,Texas,3
+1968,30,USC,4
+1968,87,Notre Dame,5
+1968,8,Arkansas,6
+1968,2305,Kansas,7
+1968,61,Georgia,8
+1968,142,Missouri,9
+1968,2509,Purdue,10
+1968,201,Oklahoma,11
+1968,130,Michigan,12
+1968,2633,Tennessee,13
+1968,2567,SMU,14
+1968,204,Oregon State,15
+1968,2,Auburn,16
+1968,333,Alabama,17
+1968,248,Houston,18
+1968,99,LSU,19
+1968,195,Ohio,20
+1969,251,Texas,1
+1969,213,Penn State,2
+1969,30,USC,3
+1969,194,Ohio State,4
+1969,87,Notre Dame,5
+1969,142,Missouri,6
+1969,8,Arkansas,7
+1969,145,Ole Miss,8
+1969,130,Michigan,9
+1969,99,LSU,10
+1969,158,Nebraska,11
+1969,248,Houston,12
+1969,26,UCLA,13
+1969,57,Florida,14
+1969,2633,Tennessee,15
+1969,38,Colorado,16
+1969,277,West Virginia,17
+1969,2509,Purdue,18
+1969,24,Stanford,19
+1969,2,Auburn,20
+1970,158,Nebraska,1
+1970,87,Notre Dame,2
+1970,251,Texas,3
+1970,2633,Tennessee,4
+1970,194,Ohio State,5
+1970,9,Arizona State,6
+1970,99,LSU,7
+1970,24,Stanford,8
+1970,130,Michigan,9
+1970,2,Auburn,10
+1970,8,Arkansas,11
+1970,2649,Toledo,12
+1970,59,Georgia Tech,13
+1970,159,Dartmouth,14
+1970,30,USC,15
+1970,2005,Air Force,16
+1970,2655,Tulane,17
+1970,213,Penn State,18
+1970,248,Houston,19
+1970,145,Ole Miss,20
+1970,201,Oklahoma,20
+1971,158,Nebraska,1
+1971,201,Oklahoma,2
+1971,38,Colorado,3
+1971,333,Alabama,4
+1971,213,Penn State,5
+1971,130,Michigan,6
+1971,61,Georgia,7
+1971,9,Arizona State,8
+1971,2633,Tennessee,9
+1971,24,Stanford,10
+1971,99,LSU,11
+1971,2,Auburn,12
+1971,87,Notre Dame,13
+1971,2649,Toledo,14
+1971,145,Ole Miss,15
+1971,8,Arkansas,16
+1971,248,Houston,17
+1971,251,Texas,18
+1971,264,Washington,19
+1971,30,USC,20
+1972,30,USC,1
+1972,201,Oklahoma,2
+1972,251,Texas,3
+1972,158,Nebraska,4
+1972,2,Auburn,5
+1972,130,Michigan,6
+1972,333,Alabama,7
+1972,2633,Tennessee,8
+1972,194,Ohio State,9
+1972,213,Penn State,10
+1972,99,LSU,11
+1972,153,North Carolina,12
+1972,9,Arizona State,13
+1972,87,Notre Dame,14
+1972,26,UCLA,15
+1972,38,Colorado,16
+1972,152,NC State,17
+1972,97,Louisville,18
+1972,265,Washington State,19
+1972,59,Georgia Tech,20
+1973,87,Notre Dame,1
+1973,194,Ohio State,2
+1973,201,Oklahoma,3
+1973,333,Alabama,4
+1973,213,Penn State,5
+1973,130,Michigan,6
+1973,158,Nebraska,7
+1973,30,USC,8
+1973,9,Arizona State,9
+1973,248,Houston,9
+1973,2641,Texas Tech,11
+1973,26,UCLA,12
+1973,99,LSU,13
+1973,251,Texas,14
+1973,193,Miami (OH),15
+1973,152,NC State,16
+1973,142,Missouri,17
+1973,2305,Kansas,18
+1973,2633,Tennessee,19
+1973,120,Maryland,20
+1973,2655,Tulane,20
+1974,201,Oklahoma,1
+1974,30,USC,2
+1974,130,Michigan,3
+1974,194,Ohio State,4
+1974,333,Alabama,5
+1974,87,Notre Dame,6
+1974,213,Penn State,7
+1974,2,Auburn,8
+1974,158,Nebraska,9
+1974,193,Miami (OH),10
+1974,152,NC State,11
+1974,127,Michigan State,12
+1974,120,Maryland,13
+1974,239,Baylor,14
+1974,57,Florida,15
+1974,245,Texas A&M,16
+1974,344,Mississippi State,17
+1974,251,Texas,17
+1974,248,Houston,19
+1974,2633,Tennessee,20
+1975,201,Oklahoma,1
+1975,9,Arizona State,2
+1975,333,Alabama,3
+1975,194,Ohio State,4
+1975,26,UCLA,5
+1975,251,Texas,6
+1975,8,Arkansas,7
+1975,130,Michigan,8
+1975,158,Nebraska,9
+1975,213,Penn State,10
+1975,245,Texas A&M,11
+1975,193,Miami (OH),12
+1975,120,Maryland,13
+1975,25,California,14
+1975,221,Pittsburgh,15
+1975,38,Colorado,16
+1975,30,USC,17
+1975,12,Arizona,18
+1975,61,Georgia,19
+1975,277,West Virginia,20
+1976,221,Pittsburgh,1
+1976,30,USC,2
+1976,130,Michigan,3
+1976,248,Houston,4
+1976,201,Oklahoma,5
+1976,194,Ohio State,6
+1976,245,Texas A&M,7
+1976,120,Maryland,8
+1976,158,Nebraska,9
+1976,61,Georgia,10
+1976,333,Alabama,11
+1976,87,Notre Dame,12
+1976,2641,Texas Tech,13
+1976,197,Oklahoma State,14
+1976,26,UCLA,15
+1976,38,Colorado,16
+1976,164,Rutgers,17
+1976,96,Kentucky,18
+1976,66,Iowa State,19
+1976,344,Mississippi State,20
+1977,87,Notre Dame,1
+1977,333,Alabama,2
+1977,8,Arkansas,3
+1977,251,Texas,4
+1977,213,Penn State,5
+1977,96,Kentucky,6
+1977,201,Oklahoma,7
+1977,221,Pittsburgh,8
+1977,130,Michigan,9
+1977,264,Washington,10
+1977,194,Ohio State,11
+1977,158,Nebraska,12
+1977,30,USC,13
+1977,52,Florida State,14
+1977,24,Stanford,15
+1977,21,San Diego State,16
+1977,153,North Carolina,17
+1977,9,Arizona State,18
+1977,228,Clemson,19
+1977,252,BYU,20
+1978,333,Alabama,1
+1978,30,USC,2
+1978,201,Oklahoma,3
+1978,213,Penn State,4
+1978,130,Michigan,5
+1978,228,Clemson,6
+1978,87,Notre Dame,7
+1978,158,Nebraska,8
+1978,251,Texas,9
+1978,248,Houston,10
+1978,8,Arkansas,11
+1978,127,Michigan State,12
+1978,2509,Purdue,13
+1978,26,UCLA,14
+1978,142,Missouri,15
+1978,61,Georgia,16
+1978,24,Stanford,17
+1978,152,NC State,18
+1978,245,Texas A&M,19
+1978,120,Maryland,20
+1979,333,Alabama,1
+1979,30,USC,2
+1979,201,Oklahoma,3
+1979,194,Ohio State,4
+1979,248,Houston,5
+1979,52,Florida State,6
+1979,221,Pittsburgh,7
+1979,8,Arkansas,8
+1979,158,Nebraska,9
+1979,2509,Purdue,10
+1979,264,Washington,11
+1979,251,Texas,12
+1979,252,BYU,13
+1979,239,Baylor,14
+1979,153,North Carolina,15
+1979,2,Auburn,16
+1979,218,Temple,17
+1979,130,Michigan,18
+1979,84,Indiana,19
+1979,213,Penn State,20
+1980,61,Georgia,1
+1980,221,Pittsburgh,2
+1980,201,Oklahoma,3
+1980,130,Michigan,4
+1980,52,Florida State,5
+1980,333,Alabama,6
+1980,158,Nebraska,7
+1980,213,Penn State,8
+1980,87,Notre Dame,9
+1980,153,North Carolina,10
+1980,30,USC,11
+1980,252,BYU,12
+1980,26,UCLA,13
+1980,239,Baylor,14
+1980,194,Ohio State,15
+1980,264,Washington,16
+1980,2509,Purdue,17
+1980,2390,Miami,18
+1980,344,Mississippi State,19
+1980,2567,SMU,20
+1981,228,Clemson,1
+1981,251,Texas,2
+1981,213,Penn State,3
+1981,221,Pittsburgh,4
+1981,2567,SMU,5
+1981,61,Georgia,6
+1981,333,Alabama,7
+1981,2390,Miami,8
+1981,153,North Carolina,9
+1981,264,Washington,10
+1981,158,Nebraska,11
+1981,130,Michigan,12
+1981,252,BYU,13
+1981,30,USC,14
+1981,194,Ohio State,15
+1981,9,Arizona State,16
+1981,277,West Virginia,17
+1981,2294,Iowa,18
+1981,142,Missouri,19
+1981,201,Oklahoma,20
+1982,213,Penn State,1
+1982,2567,SMU,2
+1982,158,Nebraska,3
+1982,61,Georgia,4
+1982,26,UCLA,5
+1982,9,Arizona State,6
+1982,264,Washington,7
+1982,228,Clemson,8
+1982,8,Arkansas,9
+1982,221,Pittsburgh,10
+1982,99,LSU,11
+1982,194,Ohio State,12
+1982,52,Florida State,13
+1982,2,Auburn,14
+1982,30,USC,15
+1982,201,Oklahoma,16
+1982,251,Texas,17
+1982,153,North Carolina,18
+1982,277,West Virginia,19
+1982,120,Maryland,20
+1983,2390,Miami,1
+1983,158,Nebraska,2
+1983,2,Auburn,3
+1983,61,Georgia,4
+1983,251,Texas,5
+1983,57,Florida,6
+1983,252,BYU,7
+1983,130,Michigan,8
+1983,194,Ohio State,9
+1983,356,Illinois,10
+1983,228,Clemson,11
+1983,2567,SMU,12
+1983,2005,Air Force,13
+1983,2294,Iowa,14
+1983,333,Alabama,15
+1983,277,West Virginia,16
+1983,26,UCLA,17
+1983,221,Pittsburgh,18
+1983,103,Boston College,19
+1983,151,East Carolina,20
+1984,252,BYU,1
+1984,264,Washington,2
+1984,57,Florida,3
+1984,158,Nebraska,4
+1984,103,Boston College,5
+1984,201,Oklahoma,6
+1984,197,Oklahoma State,7
+1984,2567,SMU,8
+1984,26,UCLA,9
+1984,30,USC,10
+1984,2579,South Carolina,11
+1984,120,Maryland,12
+1984,194,Ohio State,13
+1984,2,Auburn,14
+1984,99,LSU,15
+1984,2294,Iowa,16
+1984,52,Florida State,17
+1984,2390,Miami,18
+1984,96,Kentucky,19
+1984,258,Virginia,20
+1985,201,Oklahoma,1
+1985,130,Michigan,2
+1985,213,Penn State,3
+1985,2633,Tennessee,4
+1985,57,Florida,5
+1985,245,Texas A&M,6
+1985,26,UCLA,7
+1985,2005,Air Force,8
+1985,2390,Miami,9
+1985,2294,Iowa,10
+1985,158,Nebraska,11
+1985,8,Arkansas,12
+1985,333,Alabama,13
+1985,194,Ohio State,14
+1985,52,Florida State,15
+1985,252,BYU,16
+1985,239,Baylor,17
+1985,120,Maryland,18
+1985,59,Georgia Tech,19
+1985,99,LSU,20
+1986,213,Penn State,1
+1986,2390,Miami,2
+1986,201,Oklahoma,3
+1986,9,Arizona State,4
+1986,158,Nebraska,5
+1986,2,Auburn,6
+1986,194,Ohio State,7
+1986,130,Michigan,8
+1986,333,Alabama,9
+1986,99,LSU,10
+1986,12,Arizona,11
+1986,239,Baylor,12
+1986,245,Texas A&M,13
+1986,26,UCLA,14
+1986,8,Arkansas,15
+1986,2294,Iowa,16
+1986,228,Clemson,17
+1986,264,Washington,18
+1986,103,Boston College,19
+1986,259,Virginia Tech,20
+1987,2390,Miami,1
+1987,52,Florida State,2
+1987,201,Oklahoma,3
+1987,183,Syracuse,4
+1987,99,LSU,5
+1987,158,Nebraska,6
+1987,2,Auburn,7
+1987,127,Michigan State,8
+1987,26,UCLA,9
+1987,245,Texas A&M,10
+1987,197,Oklahoma State,11
+1987,228,Clemson,12
+1987,61,Georgia,13
+1987,2633,Tennessee,14
+1987,2579,South Carolina,15
+1987,2294,Iowa,16
+1987,87,Notre Dame,17
+1987,30,USC,18
+1987,130,Michigan,19
+1987,9,Arizona State,20
+1988,87,Notre Dame,1
+1988,2390,Miami,2
+1988,52,Florida State,3
+1988,130,Michigan,4
+1988,277,West Virginia,5
+1988,26,UCLA,6
+1988,30,USC,7
+1988,2,Auburn,8
+1988,228,Clemson,9
+1988,158,Nebraska,10
+1988,197,Oklahoma State,11
+1988,8,Arkansas,12
+1988,183,Syracuse,13
+1988,201,Oklahoma,14
+1988,61,Georgia,15
+1988,265,Washington State,16
+1988,333,Alabama,17
+1988,248,Houston,18
+1988,99,LSU,19
+1988,84,Indiana,20
+1989,2390,Miami,1
+1989,87,Notre Dame,2
+1989,52,Florida State,3
+1989,38,Colorado,4
+1989,2633,Tennessee,5
+1989,2,Auburn,6
+1989,130,Michigan,7
+1989,30,USC,8
+1989,333,Alabama,9
+1989,356,Illinois,10
+1989,158,Nebraska,11
+1989,228,Clemson,12
+1989,8,Arkansas,13
+1989,248,Houston,14
+1989,213,Penn State,15
+1989,127,Michigan State,16
+1989,221,Pittsburgh,17
+1989,258,Virginia,18
+1989,2641,Texas Tech,19
+1989,245,Texas A&M,20
+1989,277,West Virginia,21
+1989,252,BYU,22
+1989,264,Washington,23
+1989,194,Ohio State,24
+1989,12,Arizona,25
+1990,38,Colorado,1
+1990,59,Georgia Tech,2
+1990,2390,Miami,3
+1990,52,Florida State,4
+1990,264,Washington,5
+1990,87,Notre Dame,6
+1990,130,Michigan,7
+1990,2633,Tennessee,8
+1990,228,Clemson,9
+1990,248,Houston,10
+1990,213,Penn State,11
+1990,251,Texas,12
+1990,57,Florida,13
+1990,97,Louisville,14
+1990,245,Texas A&M,15
+1990,127,Michigan State,16
+1990,201,Oklahoma,17
+1990,2294,Iowa,18
+1990,2,Auburn,19
+1990,30,USC,20
+1990,145,Ole Miss,21
+1990,252,BYU,22
+1990,258,Virginia,23
+1990,158,Nebraska,24
+1990,356,Illinois,25
+1991,2390,Miami,1
+1991,264,Washington,2
+1991,213,Penn State,3
+1991,52,Florida State,4
+1991,333,Alabama,5
+1991,130,Michigan,6
+1991,57,Florida,7
+1991,25,California,8
+1991,151,East Carolina,9
+1991,2294,Iowa,10
+1991,183,Syracuse,11
+1991,245,Texas A&M,12
+1991,87,Notre Dame,13
+1991,2633,Tennessee,14
+1991,158,Nebraska,15
+1991,201,Oklahoma,16
+1991,61,Georgia,17
+1991,228,Clemson,18
+1991,26,UCLA,19
+1991,38,Colorado,20
+1991,202,Tulsa,21
+1991,24,Stanford,22
+1991,252,BYU,23
+1991,152,NC State,24
+1991,2005,Air Force,25
+1992,333,Alabama,1
+1992,52,Florida State,2
+1992,2390,Miami,3
+1992,87,Notre Dame,4
+1992,130,Michigan,5
+1992,183,Syracuse,6
+1992,245,Texas A&M,7
+1992,61,Georgia,8
+1992,24,Stanford,9
+1992,57,Florida,10
+1992,264,Washington,11
+1992,2633,Tennessee,12
+1992,38,Colorado,13
+1992,158,Nebraska,14
+1992,265,Washington State,15
+1992,145,Ole Miss,16
+1992,152,NC State,17
+1992,194,Ohio State,18
+1992,153,North Carolina,19
+1992,62,Hawai'i,20
+1992,103,Boston College,21
+1992,2305,Kansas,22
+1992,344,Mississippi State,23
+1992,278,Fresno State,24
+1992,154,Wake Forest,25
+1993,52,Florida State,1
+1993,87,Notre Dame,2
+1993,158,Nebraska,3
+1993,2,Auburn,4
+1993,57,Florida,5
+1993,275,Wisconsin,6
+1993,277,West Virginia,7
+1993,213,Penn State,8
+1993,245,Texas A&M,9
+1993,12,Arizona,10
+1993,194,Ohio State,11
+1993,2633,Tennessee,12
+1993,103,Boston College,13
+1993,333,Alabama,14
+1993,2390,Miami,15
+1993,38,Colorado,16
+1993,201,Oklahoma,17
+1993,26,UCLA,18
+1993,153,North Carolina,19
+1993,2306,Kansas State,20
+1993,130,Michigan,21
+1993,259,Virginia Tech,22
+1993,228,Clemson,23
+1993,97,Louisville,24
+1993,25,California,25
+1994,158,Nebraska,1
+1994,213,Penn State,2
+1994,38,Colorado,3
+1994,52,Florida State,4
+1994,333,Alabama,5
+1994,2390,Miami,6
+1994,57,Florida,7
+1994,245,Texas A&M,8
+1994,2,Auburn,9
+1994,254,Utah,10
+1994,2483,Oregon,11
+1994,130,Michigan,12
+1994,30,USC,13
+1994,194,Ohio State,14
+1994,258,Virginia,15
+1994,36,Colorado State,16
+1994,152,NC State,17
+1994,252,BYU,18
+1994,2306,Kansas State,19
+1994,12,Arizona,20
+1994,265,Washington State,21
+1994,2633,Tennessee,22
+1994,103,Boston College,23
+1994,344,Mississippi State,24
+1994,251,Texas,25
+1995,158,Nebraska,1
+1995,57,Florida,2
+1995,2633,Tennessee,3
+1995,52,Florida State,4
+1995,38,Colorado,5
+1995,194,Ohio State,6
+1995,2306,Kansas State,7
+1995,77,Northwestern,8
+1995,2305,Kansas,9
+1995,259,Virginia Tech,10
+1995,87,Notre Dame,11
+1995,30,USC,12
+1995,213,Penn State,13
+1995,251,Texas,14
+1995,245,Texas A&M,15
+1995,258,Virginia,16
+1995,130,Michigan,17
+1995,2483,Oregon,18
+1995,183,Syracuse,19
+1995,2390,Miami,20
+1995,333,Alabama,21
+1995,2,Auburn,22
+1995,2641,Texas Tech,23
+1995,2649,Toledo,24
+1995,2294,Iowa,25
+1996,57,Florida,1
+1996,194,Ohio State,2
+1996,52,Florida State,3
+1996,9,Arizona State,4
+1996,252,BYU,5
+1996,158,Nebraska,6
+1996,213,Penn State,7
+1996,38,Colorado,8
+1996,2633,Tennessee,9
+1996,153,North Carolina,10
+1996,333,Alabama,11
+1996,99,LSU,12
+1996,259,Virginia Tech,13
+1996,2390,Miami,14
+1996,77,Northwestern,15
+1996,264,Washington,16
+1996,2306,Kansas State,17
+1996,2294,Iowa,18
+1996,87,Notre Dame,19
+1996,130,Michigan,20
+1996,183,Syracuse,21
+1996,2751,Wyoming,22
+1996,251,Texas,23
+1996,2,Auburn,24
+1996,349,Army,25
+1997,130,Michigan,1
+1997,158,Nebraska,2
+1997,52,Florida State,3
+1997,57,Florida,4
+1997,26,UCLA,5
+1997,153,North Carolina,6
+1997,2633,Tennessee,7
+1997,2306,Kansas State,8
+1997,265,Washington State,9
+1997,61,Georgia,10
+1997,2,Auburn,11
+1997,194,Ohio State,12
+1997,99,LSU,13
+1997,9,Arizona State,14
+1997,2509,Purdue,15
+1997,213,Penn State,16
+1997,36,Colorado State,17
+1997,264,Washington,18
+1997,2572,Southern Miss,19
+1997,245,Texas A&M,20
+1997,183,Syracuse,21
+1997,145,Ole Miss,22
+1997,142,Missouri,23
+1997,197,Oklahoma State,24
+1997,59,Georgia Tech,25
+1998,2633,Tennessee,1
+1998,194,Ohio State,2
+1998,52,Florida State,3
+1998,12,Arizona,4
+1998,57,Florida,5
+1998,275,Wisconsin,6
+1998,2655,Tulane,7
+1998,26,UCLA,8
+1998,59,Georgia Tech,9
+1998,2306,Kansas State,10
+1998,245,Texas A&M,11
+1998,130,Michigan,12
+1998,2005,Air Force,13
+1998,61,Georgia,14
+1998,251,Texas,15
+1998,8,Arkansas,16
+1998,213,Penn State,17
+1998,258,Virginia,18
+1998,158,Nebraska,19
+1998,2390,Miami,20
+1998,142,Missouri,21
+1998,87,Notre Dame,22
+1998,259,Virginia Tech,23
+1998,2509,Purdue,24
+1998,183,Syracuse,25
+1999,52,Florida State,1
+1999,259,Virginia Tech,2
+1999,158,Nebraska,3
+1999,275,Wisconsin,4
+1999,130,Michigan,5
+1999,2306,Kansas State,6
+1999,127,Michigan State,7
+1999,333,Alabama,8
+1999,2633,Tennessee,9
+1999,276,Marshall,10
+1999,213,Penn State,11
+1999,57,Florida,12
+1999,344,Mississippi State,13
+1999,2572,Southern Miss,14
+1999,2390,Miami,15
+1999,61,Georgia,16
+1999,8,Arkansas,17
+1999,135,Minnesota,18
+1999,2483,Oregon,19
+1999,59,Georgia Tech,20
+1999,251,Texas,21
+1999,145,Ole Miss,22
+1999,245,Texas A&M,23
+1999,356,Illinois,24
+1999,2509,Purdue,25
+2000,201,Oklahoma,1
+2000,2390,Miami,2
+2000,264,Washington,3
+2000,204,Oregon State,4
+2000,52,Florida State,5
+2000,259,Virginia Tech,6
+2000,2483,Oregon,7
+2000,158,Nebraska,8
+2000,2306,Kansas State,9
+2000,57,Florida,10
+2000,130,Michigan,11
+2000,251,Texas,12
+2000,2509,Purdue,13
+2000,36,Colorado State,14
+2000,87,Notre Dame,15
+2000,228,Clemson,16
+2000,59,Georgia Tech,17
+2000,2,Auburn,18
+2000,2579,South Carolina,19
+2000,61,Georgia,20
+2000,2628,TCU,21
+2000,99,LSU,22
+2000,275,Wisconsin,23
+2000,344,Mississippi State,24
+2000,66,Iowa State,25
+2001,2390,Miami,1
+2001,2483,Oregon,2
+2001,38,Colorado,3
+2001,158,Nebraska,4
+2001,57,Florida,5
+2001,120,Maryland,6
+2001,356,Illinois,7
+2001,2633,Tennessee,8
+2001,251,Texas,9
+2001,201,Oklahoma,10
+2001,24,Stanford,11
+2001,99,LSU,12
+2001,265,Washington State,13
+2001,2579,South Carolina,14
+2001,259,Virginia Tech,15
+2001,61,Georgia,16
+2001,130,Michigan,17
+2001,183,Syracuse,18
+2001,252,BYU,19
+2001,278,Fresno State,20
+2001,264,Washington,21
+2001,194,Ohio State,22
+2001,97,Louisville,23
+2001,52,Florida State,24
+2001,2649,Toledo,25
+2002,2390,Miami,1
+2002,194,Ohio State,2
+2002,2294,Iowa,3
+2002,61,Georgia,4
+2002,30,USC,5
+2002,2306,Kansas State,6
+2002,265,Washington State,7
+2002,201,Oklahoma,8
+2002,251,Texas,9
+2002,213,Penn State,10
+2002,87,Notre Dame,11
+2002,130,Michigan,12
+2002,333,Alabama,13
+2002,38,Colorado,14
+2002,277,West Virginia,15
+2002,52,Florida State,16
+2002,152,NC State,17
+2002,68,Boise State,18
+2002,2,Auburn,19
+2002,120,Maryland,20
+2002,259,Virginia Tech,21
+2002,57,Florida,22
+2002,36,Colorado State,23
+2002,221,Pittsburgh,24
+2002,8,Arkansas,25
+2003,30,USC,1
+2003,99,LSU,2
+2003,201,Oklahoma,3
+2003,194,Ohio State,4
+2003,2390,Miami,5
+2003,130,Michigan,6
+2003,61,Georgia,7
+2003,2294,Iowa,8
+2003,265,Washington State,9
+2003,193,Miami (OH),10
+2003,52,Florida State,11
+2003,251,Texas,12
+2003,145,Ole Miss,13
+2003,2306,Kansas State,14
+2003,2633,Tennessee,15
+2003,68,Boise State,16
+2003,120,Maryland,17
+2003,2509,Purdue,18
+2003,158,Nebraska,19
+2003,135,Minnesota,20
+2003,254,Utah,21
+2003,228,Clemson,22
+2003,189,Bowling Green,23
+2003,57,Florida,24
+2003,2628,TCU,25
+2004,30,USC,1
+2004,2,Auburn,2
+2004,201,Oklahoma,3
+2004,254,Utah,4
+2004,251,Texas,5
+2004,97,Louisville,6
+2004,61,Georgia,7
+2004,2294,Iowa,8
+2004,25,California,9
+2004,259,Virginia Tech,10
+2004,2390,Miami,11
+2004,68,Boise State,12
+2004,2633,Tennessee,13
+2004,130,Michigan,14
+2004,52,Florida State,15
+2004,99,LSU,16
+2004,275,Wisconsin,17
+2004,2641,Texas Tech,18
+2004,9,Arizona State,19
+2004,194,Ohio State,20
+2004,103,Boston College,21
+2004,278,Fresno State,22
+2004,258,Virginia,23
+2004,2426,Navy,24
+2004,221,Pittsburgh,25
+2005,251,Texas,1
+2005,30,USC,2
+2005,213,Penn State,3
+2005,194,Ohio State,4
+2005,277,West Virginia,5
+2005,99,LSU,6
+2005,259,Virginia Tech,7
+2005,333,Alabama,8
+2005,87,Notre Dame,9
+2005,61,Georgia,10
+2005,2628,TCU,11
+2005,2483,Oregon,12
+2005,57,Florida,12
+2005,2,Auburn,14
+2005,275,Wisconsin,15
+2005,26,UCLA,16
+2005,2390,Miami,17
+2005,103,Boston College,18
+2005,97,Louisville,19
+2005,2641,Texas Tech,20
+2005,228,Clemson,21
+2005,201,Oklahoma,22
+2005,52,Florida State,23
+2005,158,Nebraska,24
+2005,25,California,25
+2006,57,Florida,1
+2006,194,Ohio State,2
+2006,99,LSU,3
+2006,30,USC,4
+2006,68,Boise State,5
+2006,97,Louisville,6
+2006,275,Wisconsin,7
+2006,130,Michigan,8
+2006,2,Auburn,9
+2006,277,West Virginia,10
+2006,201,Oklahoma,11
+2006,164,Rutgers,12
+2006,251,Texas,13
+2006,25,California,14
+2006,8,Arkansas,15
+2006,252,BYU,16
+2006,87,Notre Dame,17
+2006,154,Wake Forest,18
+2006,259,Virginia Tech,19
+2006,103,Boston College,20
+2006,204,Oregon State,21
+2006,2628,TCU,22
+2006,61,Georgia,23
+2006,213,Penn State,24
+2006,2633,Tennessee,25
+2007,99,LSU,1
+2007,61,Georgia,2
+2007,30,USC,3
+2007,142,Missouri,4
+2007,194,Ohio State,5
+2007,277,West Virginia,6
+2007,2305,Kansas,7
+2007,201,Oklahoma,8
+2007,259,Virginia Tech,9
+2007,251,Texas,10
+2007,103,Boston College,10
+2007,2633,Tennessee,12
+2007,57,Florida,13
+2007,252,BYU,14
+2007,2,Auburn,15
+2007,9,Arizona State,16
+2007,2132,Cincinnati,17
+2007,130,Michigan,18
+2007,62,Hawai'i,19
+2007,356,Illinois,20
+2007,228,Clemson,21
+2007,2641,Texas Tech,22
+2007,2483,Oregon,23
+2007,275,Wisconsin,24
+2007,204,Oregon State,25
+2008,57,Florida,1
+2008,254,Utah,2
+2008,30,USC,3
+2008,251,Texas,4
+2008,201,Oklahoma,5
+2008,333,Alabama,6
+2008,2628,TCU,7
+2008,213,Penn State,8
+2008,194,Ohio State,9
+2008,2483,Oregon,10
+2008,68,Boise State,11
+2008,2641,Texas Tech,12
+2008,61,Georgia,13
+2008,145,Ole Miss,14
+2008,259,Virginia Tech,15
+2008,197,Oklahoma State,16
+2008,2132,Cincinnati,17
+2008,204,Oregon State,18
+2008,142,Missouri,19
+2008,2294,Iowa,20
+2008,52,Florida State,21
+2008,59,Georgia Tech,22
+2008,277,West Virginia,23
+2008,127,Michigan State,24
+2008,252,BYU,25
+2009,333,Alabama,1
+2009,251,Texas,2
+2009,57,Florida,3
+2009,68,Boise State,4
+2009,194,Ohio State,5
+2009,2628,TCU,6
+2009,2294,Iowa,7
+2009,2132,Cincinnati,8
+2009,213,Penn State,9
+2009,259,Virginia Tech,10
+2009,2483,Oregon,11
+2009,252,BYU,12
+2009,59,Georgia Tech,13
+2009,158,Nebraska,14
+2009,221,Pittsburgh,15
+2009,275,Wisconsin,16
+2009,99,LSU,17
+2009,254,Utah,18
+2009,2390,Miami,19
+2009,145,Ole Miss,20
+2009,2641,Texas Tech,21
+2009,30,USC,22
+2009,2117,Central Michigan,23
+2009,228,Clemson,24
+2009,277,West Virginia,25
+2010,2,Auburn,1
+2010,2628,TCU,2
+2010,2483,Oregon,3
+2010,24,Stanford,4
+2010,194,Ohio State,5
+2010,201,Oklahoma,6
+2010,275,Wisconsin,7
+2010,99,LSU,8
+2010,68,Boise State,9
+2010,333,Alabama,10
+2010,2440,Nevada,11
+2010,8,Arkansas,12
+2010,197,Oklahoma State,13
+2010,127,Michigan State,14
+2010,344,Mississippi State,15
+2010,259,Virginia Tech,16
+2010,52,Florida State,17
+2010,142,Missouri,18
+2010,245,Texas A&M,19
+2010,158,Nebraska,20
+2010,2116,UCF,21
+2010,2579,South Carolina,22
+2010,120,Maryland,23
+2010,202,Tulsa,24
+2010,152,NC State,25
+2011,333,Alabama,1
+2011,99,LSU,2
+2011,197,Oklahoma State,3
+2011,2483,Oregon,4
+2011,8,Arkansas,5
+2011,30,USC,6
+2011,24,Stanford,7
+2011,68,Boise State,8
+2011,2579,South Carolina,9
+2011,275,Wisconsin,10
+2011,127,Michigan State,11
+2011,130,Michigan,12
+2011,239,Baylor,13
+2011,2628,TCU,14
+2011,2306,Kansas State,15
+2011,201,Oklahoma,16
+2011,277,West Virginia,17
+2011,248,Houston,18
+2011,61,Georgia,19
+2011,2572,Southern Miss,20
+2011,259,Virginia Tech,21
+2011,228,Clemson,22
+2011,52,Florida State,23
+2011,158,Nebraska,24
+2011,2132,Cincinnati,25
+2012,333,Alabama,1
+2012,2483,Oregon,2
+2012,194,Ohio State,3
+2012,87,Notre Dame,4
+2012,61,Georgia,5
+2012,245,Texas A&M,5
+2012,24,Stanford,7
+2012,2579,South Carolina,8
+2012,57,Florida,9
+2012,52,Florida State,10
+2012,228,Clemson,11
+2012,2306,Kansas State,12
+2012,97,Louisville,13
+2012,99,LSU,14
+2012,201,Oklahoma,15
+2012,328,Utah State,16
+2012,77,Northwestern,17
+2012,68,Boise State,18
+2012,251,Texas,19
+2012,204,Oregon State,20
+2012,23,San José State,21
+2012,2459,Northern Illinois,22
+2012,238,Vanderbilt,23
+2012,130,Michigan,24
+2012,158,Nebraska,25
+2013,52,Florida State,1
+2013,2,Auburn,2
+2013,127,Michigan State,3
+2013,2579,South Carolina,4
+2013,142,Missouri,5
+2013,201,Oklahoma,6
+2013,333,Alabama,7
+2013,228,Clemson,8
+2013,2483,Oregon,9
+2013,2116,UCF,10
+2013,24,Stanford,11
+2013,194,Ohio State,12
+2013,239,Baylor,13
+2013,99,LSU,14
+2013,97,Louisville,15
+2013,26,UCLA,16
+2013,197,Oklahoma State,17
+2013,245,Texas A&M,18
+2013,30,USC,19
+2013,87,Notre Dame,20
+2013,9,Arizona State,21
+2013,275,Wisconsin,22
+2013,150,Duke,23
+2013,238,Vanderbilt,24
+2013,264,Washington,25
+2014,194,Ohio State,1
+2014,2483,Oregon,2
+2014,2628,TCU,3
+2014,333,Alabama,4
+2014,127,Michigan State,5
+2014,52,Florida State,5
+2014,239,Baylor,7
+2014,59,Georgia Tech,8
+2014,61,Georgia,9
+2014,26,UCLA,10
+2014,344,Mississippi State,11
+2014,9,Arizona State,12
+2014,275,Wisconsin,13
+2014,142,Missouri,14
+2014,228,Clemson,15
+2014,68,Boise State,16
+2014,145,Ole Miss,17
+2014,2306,Kansas State,18
+2014,12,Arizona,19
+2014,30,USC,20
+2014,254,Utah,21
+2014,2,Auburn,22
+2014,276,Marshall,23
+2014,97,Louisville,24
+2014,235,Memphis,25
+2015,333,Alabama,1
+2015,228,Clemson,2
+2015,24,Stanford,3
+2015,194,Ohio State,4
+2015,201,Oklahoma,5
+2015,127,Michigan State,6
+2015,2628,TCU,7
+2015,248,Houston,8
+2015,2294,Iowa,9
+2015,145,Ole Miss,10
+2015,87,Notre Dame,11
+2015,130,Michigan,12
+2015,239,Baylor,13
+2015,52,Florida State,14
+2015,153,North Carolina,15
+2015,99,LSU,16
+2015,254,Utah,17
+2015,2426,Navy,18
+2015,2483,Oregon,19
+2015,197,Oklahoma State,20
+2015,275,Wisconsin,21
+2015,2633,Tennessee,22
+2015,77,Northwestern,23
+2015,98,Western Kentucky,24
+2015,57,Florida,25
+2016,228,Clemson,1
+2016,333,Alabama,2
+2016,30,USC,3
+2016,264,Washington,4
+2016,201,Oklahoma,5
+2016,194,Ohio State,6
+2016,213,Penn State,7
+2016,52,Florida State,8
+2016,275,Wisconsin,9
+2016,130,Michigan,10
+2016,197,Oklahoma State,11
+2016,24,Stanford,12
+2016,99,LSU,13
+2016,57,Florida,14
+2016,2711,Western Michigan,15
+2016,259,Virginia Tech,16
+2016,38,Colorado,17
+2016,277,West Virginia,18
+2016,58,South Florida,19
+2016,2390,Miami,20
+2016,97,Louisville,21
+2016,2633,Tennessee,22
+2016,254,Utah,23
+2016,2,Auburn,24
+2016,21,San Diego State,25
+2017,333,Alabama,1
+2017,61,Georgia,2
+2017,201,Oklahoma,3
+2017,228,Clemson,4
+2017,194,Ohio State,5
+2017,2116,UCF,6
+2017,275,Wisconsin,7
+2017,213,Penn State,8
+2017,2628,TCU,9
+2017,2,Auburn,10
+2017,87,Notre Dame,11
+2017,30,USC,12
+2017,2390,Miami,13
+2017,197,Oklahoma State,14
+2017,127,Michigan State,15
+2017,264,Washington,16
+2017,77,Northwestern,17
+2017,99,LSU,18
+2017,344,Mississippi State,19
+2017,24,Stanford,20
+2017,58,South Florida,21
+2017,68,Boise State,22
+2017,152,NC State,23
+2017,259,Virginia Tech,24
+2017,235,Memphis,25
+2018,228,Clemson,1
+2018,333,Alabama,2
+2018,194,Ohio State,3
+2018,201,Oklahoma,4
+2018,87,Notre Dame,5
+2018,99,LSU,6
+2018,57,Florida,7
+2018,61,Georgia,7
+2018,251,Texas,9
+2018,265,Washington State,10
+2018,2116,UCF,11
+2018,96,Kentucky,12
+2018,264,Washington,13
+2018,130,Michigan,14
+2018,183,Syracuse,15
+2018,245,Texas A&M,16
+2018,213,Penn State,17
+2018,278,Fresno State,18
+2018,349,Army,19
+2018,277,West Virginia,20
+2018,77,Northwestern,21
+2018,328,Utah State,22
+2018,68,Boise State,23
+2018,2132,Cincinnati,24
+2018,2294,Iowa,25
+2019,99,LSU,1
+2019,228,Clemson,2
+2019,194,Ohio State,3
+2019,61,Georgia,4
+2019,2483,Oregon,5
+2019,57,Florida,6
+2019,201,Oklahoma,7
+2019,333,Alabama,8
+2019,213,Penn State,9
+2019,135,Minnesota,10
+2019,275,Wisconsin,11
+2019,87,Notre Dame,12
+2019,239,Baylor,13
+2019,2,Auburn,14
+2019,2294,Iowa,15
+2019,254,Utah,16
+2019,235,Memphis,17
+2019,130,Michigan,18
+2019,2026,App State,19
+2019,2426,Navy,20
+2019,2132,Cincinnati,21
+2019,2005,Air Force,22
+2019,68,Boise State,23
+2019,2116,UCF,24
+2019,251,Texas,25
+2020,333,Alabama,1
+2020,194,Ohio State,2
+2020,228,Clemson,3
+2020,245,Texas A&M,4
+2020,87,Notre Dame,5
+2020,201,Oklahoma,6
+2020,61,Georgia,7
+2020,2132,Cincinnati,8
+2020,66,Iowa State,9
+2020,77,Northwestern,10
+2020,252,BYU,11
+2020,84,Indiana,12
+2020,57,Florida,13
+2020,324,Coastal Carolina,14
+2020,309,Louisiana,15
+2020,2294,Iowa,16
+2020,2335,Liberty,17
+2020,153,North Carolina,18
+2020,251,Texas,19
+2020,197,Oklahoma State,20
+2020,30,USC,21
+2020,2390,Miami,22
+2020,2050,Ball State,23
+2020,23,San José State,24
+2020,2084,Buffalo,25
+2021,61,Georgia,1
+2021,333,Alabama,2
+2021,130,Michigan,3
+2021,2132,Cincinnati,4
+2021,239,Baylor,5
+2021,194,Ohio State,6
+2021,197,Oklahoma State,7
+2021,87,Notre Dame,8
+2021,127,Michigan State,9
+2021,201,Oklahoma,10
+2021,145,Ole Miss,11
+2021,254,Utah,12
+2021,221,Pittsburgh,13
+2021,228,Clemson,14
+2021,154,Wake Forest,15
+2021,309,Louisiana,16
+2021,248,Houston,17
+2021,96,Kentucky,18
+2021,252,BYU,19
+2021,152,NC State,20
+2021,8,Arkansas,21
+2021,2483,Oregon,22
+2021,2294,Iowa,23
+2021,328,Utah State,24
+2021,21,San Diego State,25
+2022,61,Georgia,1
+2022,2628,TCU,2
+2022,130,Michigan,3
+2022,194,Ohio State,4
+2022,333,Alabama,5
+2022,2633,Tennessee,6
+2022,213,Penn State,7
+2022,264,Washington,8
+2022,2655,Tulane,9
+2022,254,Utah,10
+2022,52,Florida State,11
+2022,30,USC,12
+2022,228,Clemson,13
+2022,2306,Kansas State,14
+2022,2483,Oregon,15
+2022,99,LSU,16
+2022,204,Oregon State,17
+2022,87,Notre Dame,18
+2022,2653,Troy,19
+2022,344,Mississippi State,20
+2022,26,UCLA,21
+2022,221,Pittsburgh,22
+2022,2579,South Carolina,23
+2022,278,Fresno State,24
+2022,251,Texas,25
+2023,130,Michigan,1
+2023,264,Washington,2
+2023,251,Texas,3
+2023,61,Georgia,4
+2023,333,Alabama,5
+2023,52,Florida State,6
+2023,2483,Oregon,6
+2023,142,Missouri,8
+2023,344,Mississippi State,9
+2023,194,Ohio State,10
+2023,12,Arizona,11
+2023,99,LSU,12
+2023,213,Penn State,13
+2023,87,Notre Dame,14
+2023,201,Oklahoma,15
+2023,197,Oklahoma State,16
+2023,2633,Tennessee,17
+2023,2306,Kansas State,18
+2023,97,Louisville,19
+2023,228,Clemson,20
+2023,152,NC State,21
+2023,2567,SMU,22
+2023,2305,Kansas,23
+2023,2294,Iowa,24
+2023,2335,Liberty,25
+2024,194,Ohio State,1
+2024,87,Notre Dame,2
+2024,2483,Oregon,3
+2024,251,Texas,4
+2024,213,Penn State,5
+2024,61,Georgia,6
+2024,9,Arizona State,7
+2024,68,Boise State,8
+2024,2633,Tennessee,9
+2024,84,Indiana,10
+2024,145,Ole Miss,11
+2024,2567,SMU,12
+2024,252,BYU,13
+2024,228,Clemson,14
+2024,66,Iowa State,15
+2024,356,Illinois,16
+2024,333,Alabama,17
+2024,2390,Miami,18
+2024,2579,South Carolina,19
+2024,183,Syracuse,20
+2024,349,Army,21
+2024,142,Missouri,22
+2024,2439,UNLV,23
+2024,235,Memphis,24
+2024,38,Colorado,25
+2025,84,Indiana,1
+2025,2390,Miami,2
+2025,145,Ole Miss,3
+2025,2483,Oregon,4
+2025,194,Ohio State,5
+2025,61,Georgia,6
+2025,2641,Texas Tech,7
+2025,245,Texas A&M,8
+2025,333,Alabama,9
+2025,87,Notre Dame,10
+2025,252,BYU,11
+2025,251,Texas,12
+2025,201,Oklahoma,13
+2025,254,Utah,14
+2025,238,Vanderbilt,15
+2025,258,Virginia,16
+2025,2294,Iowa,17
+2025,2655,Tulane,18
+2025,256,James Madison,19
+2025,30,USC,20
+2025,130,Michigan,21
+2025,248,Houston,22
+2025,2426,Navy,23
+2025,249,North Texas,24
+2025,2628,TCU,25

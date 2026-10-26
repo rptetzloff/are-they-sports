@@ -842,7 +842,8 @@ markActiveMonth() {
       return {
         key: String(event.id), date, phase: event._seasonType,
         home: gb?.homeAway === 'home',
-        opp: opp.team?.shortDisplayName || opp.team?.name || opp.team?.displayName || '',
+        // With its place in the poll, as ESPN gave it for the game.
+        opp: `${opp.curatedRank?.current >= 1 && opp.curatedRank.current <= 25 ? `No. ${opp.curatedRank.current} ` : ''}${opp.team?.shortDisplayName || opp.team?.name || opp.team?.displayName || ''}`,
         state, text,
         tv: upcoming ? tvLabels : [],
         // H2H only on the current season's schedule (offseason included).
@@ -921,6 +922,9 @@ createGameItem(event, nextGame, liveGame, now) {
   let packersScore = 0;
   let opponentScore = 0;
   let opponent = '';
+  // The opponent's place in the poll, shown beside its name (ESPN says 99 for
+  // unranked). Kept apart from the name, which the head-to-head looks up.
+  let opponentRank = null;
   let isHome = false;
 
   competitors.forEach(competitor => {
@@ -940,6 +944,8 @@ createGameItem(event, nextGame, liveGame, now) {
            0
            );
         opponent = competitor.team.displayName;
+        const rank = competitor.curatedRank?.current;
+        opponentRank = rank >= 1 && rank <= 25 ? rank : null;
     }
 });
 
@@ -977,7 +983,7 @@ gameDetails.className = 'game-details';
 
 const opponentDiv = document.createElement('div');
 opponentDiv.className = 'game-opponent';
-opponentDiv.textContent = `${isHome ? 'vs' : '@'} ${opponent}`;
+opponentDiv.textContent = `${isHome ? 'vs' : '@'} ${opponentRank ? `No. ${opponentRank} ` : ''}${opponent}`;
 
 const dateDiv = document.createElement('div');
 dateDiv.className = 'game-date';

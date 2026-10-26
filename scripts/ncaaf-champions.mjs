@@ -47,15 +47,29 @@ const rows = [];
 const last = Math.max(...(await import('node:fs')).readdirSync(CACHE)
 	.map((f) => /^games-(\d{4})\.json$/.exec(f)?.[1]).filter(Boolean).map(Number));
 
-// The AP's final poll, 1936-1997: its postseason poll, else its last of the
+// The AP's final poll of a season: its postseason poll, else its last of the
 // regular season.
-for (let season = 1936; season <= 1997; season++) {
+async function apFinal(season) {
 	let polls = await cached(`rankings-${season}-postseason.json`, `https://api.collegefootballdata.com/rankings?year=${season}&seasonType=postseason`);
 	let ap = polls.flatMap((w) => w.polls).find((p) => p.poll === 'AP Top 25');
 	if (!ap) {
 		polls = await cached(`rankings-${season}-regular.json`, `https://api.collegefootballdata.com/rankings?year=${season}&seasonType=regular`);
 		ap = polls.sort((a, b) => b.week - a.week).flatMap((w) => w.polls).find((p) => p.poll === 'AP Top 25');
 	}
+	return ap ?? null;
+}
+
+// Every finished season's final AP poll, for the clubs' history pages
+// (data/reference/ncaaf-ap-final.csv, web/ncaaf/history.js).
+const finals = [];
+for (let season = 1936; season < last; season++) {
+	const ap = await apFinal(season);
+	for (const r of ap?.ranks ?? []) if (r.teamId != null) finals.push({ season, teamId: r.teamId, school: r.school, rank: r.rank });
+}
+
+// The AP's No. 1, 1936-1997.
+for (let season = 1936; season <= 1997; season++) {
+	const ap = await apFinal(season);
 	const first = ap?.ranks.find((r) => r.rank === 1);
 	if (!first) { console.error(`${season}: no AP No. 1`); continue; }
 	rows.push({ season, champion: first.teamId, championName: first.school, method: 'poll', title: 'AP national title', notes: 'AP poll, final No. 1' });
@@ -88,4 +102,12 @@ writeFileSync(join(ROOT, 'data', 'reference', 'ncaaf-champions.csv'), [
 	'season,champion,championName,runnerUp,runnerUpName,method,title,gameId,notes',
 	...rows.map((r) => [r.season, r.champion, r.championName, r.runnerUp, r.runnerUpName, r.method, r.title, r.gameId, r.notes].map(csv).join(',')),
 ].join('\n') + '\n');
+writeFileSync(join(ROOT, 'data', 'reference', 'ncaaf-ap-final.csv'), [
+	'# Each finished season\'s final AP poll, 1936 on: its last poll, after the bowls',
+	'# from the 1960s and before them in the earliest seasons. Teams are ESPN\'s ids.',
+	'# Made by scripts/ncaaf-champions.mjs from CollegeFootballData.com; do not edit by hand.',
+	'season,team,school,rank',
+	...finals.map((r) => [r.season, r.teamId, r.school, r.rank].map(csv).join(',')),
+].join('\n') + '\n');
+console.log(`${finals.length} final AP ranks, ${finals[0]?.season}-${finals.at(-1)?.season}`);
 console.log(`${rows.length} champions, ${rows[0]?.season}-${rows.at(-1)?.season}`);

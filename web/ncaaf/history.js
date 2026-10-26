@@ -29,8 +29,13 @@ function seasonLabel(s) {
 	return `${s.season} · ${s.record} · PF ${s.pf} · PA ${s.pa}${finishNotes(s).length ? ` · ${finishNotes(s).join(', ')}` : ''}`;
 }
 
+// Each season's final AP rank, where the programme had one (data/rankings.json,
+// from data/reference/ncaaf-ap-final.csv); filled before anything is drawn.
+let AP = {};
+
 function finishNotes(s) {
 	const notes = [];
+	if (AP[s.season]) notes.push(`AP No. ${AP[s.season]}`);
 	// The title game's winner, or the AP poll's No. 1 before there was one.
 	if (s.championship || s.champion) notes.push('national champions');
 	if (s.undefeated) notes.push(`${SITE.losslessSeasonNoun.toLowerCase()} season`);
@@ -140,10 +145,13 @@ function renderTable(history) {
 async function init() {
 	try {
 		// The season being played counts, from ESPN (games-client.js).
-		const [{ games: rows }, coachesRes] = await Promise.all([
+		const [{ games: rows }, coachesRes, ranks] = await Promise.all([
 			loadGames(),
 			fetch('data/coaches.json'),
+			// Without it the page is the same, with no ranks.
+			fetch('data/rankings.json').then((r) => (r.ok ? r.json() : {})).catch(() => ({})),
 		]);
+		AP = ranks ?? {};
 		if (!coachesRes.ok) throw new Error('coaches fetch failed');
 		const histories = {
 			regular: computeSeasonHistory(rows),
