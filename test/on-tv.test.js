@@ -33,6 +33,24 @@ test('football answers the TV question by the baseball page\'s rule', async () =
 	assert.equal(tvStatus(EMPTY_LOOKUP, [b('WTMJ', 'Radio')]), 'no')
 })
 
+test('ESPN\'s broadcast labels count in any case: its MLS games say STREAMING', async () => {
+	// Ray, 2026-10-25: Minnesota United v Sporting KC on Apple TV showed under
+	// no heading. ESPN sent { type: 'STREAMING', media: 'Apple TV' }, a name the
+	// table did not know, and every check of the label was for 'Streaming'.
+	const appleTv = b('Apple TV', 'STREAMING')
+	for (const sport of ['mlb', 'nfl', 'nba', 'nhl', 'wnba', 'mls']) {
+		const { tvStatus, broadcastType, EMPTY_LOOKUP } = await import(`../web/${sport}/tv-core.js`)
+		assert.equal(tvStatus(EMPTY_LOOKUP, [appleTv]), 'streaming', sport)
+		assert.equal(broadcastType(EMPTY_LOOKUP, appleTv), 'streaming', sport)
+		assert.equal(broadcastType(EMPTY_LOOKUP, b('WTMJ', 'RADIO')), 'radio', sport)
+		assert.equal(tvStatus(EMPTY_LOOKUP, [b('FOX', 'tv')]), 'yes', sport)
+	}
+	// And the game's own list, which groups by the label: none is left unmatched.
+	for (const f of ['web/mlb/main.js', 'web/mls/main.js', 'web/nba/main.js', 'web/nhl/main.js', 'web/wnba/main.js', 'web/nfl/tv-ui.js']) {
+		assert.doesNotMatch(read(f), /shortName[^\n;]*=== '(?:Streaming|Radio)'/, f)
+	}
+})
+
 test('the answer\'s second line says when and where', () => {
 	assert.equal(tvLineOf(event([b('Fox', 'TV'), b('Fox', 'TV')]), { timeZone: 'America/Chicago' }), 'Sun, Oct 25, 3:25 PM · Fox')
 	assert.equal(tvLineOf(event([b('NBC', 'TV')], { state: 'in' })), 'On now · NBC')

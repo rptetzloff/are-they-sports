@@ -109,9 +109,9 @@ export function tvStatus(lookup, broadcasts) {
 			if (TV_TYPES.has(ch.type)) { hasTV = true; continue; }
 			if (ch.type === 'streaming') { hasStreaming = true; continue; }
 		}
-		const t = b.type?.shortName || '';
+		const t = (b.type?.shortName || '').toUpperCase();
 		if (t === 'TV') hasTV = true;
-		else if (t === 'Streaming') hasStreaming = true;
+		else if (t === 'STREAMING') hasStreaming = true;
 	}
 	return hasTV ? 'yes' : hasStreaming ? 'streaming' : 'no';
 }
@@ -120,8 +120,8 @@ export function tvStatus(lookup, broadcasts) {
 export function broadcastType(lookup, b) {
 	const ch = resolveChannel(lookup, b.media?.shortName);
 	if (ch) return ch.type;
-	const t = b.type?.shortName;
-	return t === 'Streaming' ? 'streaming' : t === 'Radio' ? 'radio' : 'cable';
+	const t = (b.type?.shortName || '').toUpperCase();
+	return t === 'STREAMING' ? 'streaming' : t === 'RADIO' ? 'radio' : 'cable';
 }
 
 const TYPE_RANK = { broadcast: 0, regional: 1, cable: 2, streaming: 3, radio: 4 };
