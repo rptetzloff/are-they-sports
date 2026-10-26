@@ -63,7 +63,7 @@ export const credits = [
 	{
 		name: 'CollegeFootballData.com',
 		url: 'https://collegefootballdata.com',
-		note: 'every FBS programme\'s games from 1869, and the AP poll\'s champions',
+		note: 'every FBS programme\'s games from 1869, its head coaches, and the AP poll\'s champions',
 	},
 	{
 		name: 'ESPN',
