@@ -755,10 +755,11 @@ markActiveMonth() {
                 : `Preseason: ${preRecord.w}-${preRecord.l}`)
              : null;
 
+             // A bowl, for most programmes, rather than the playoff.
              const postText = hasPostGames
              ? (postRecord.t > 0
-                ? `Playoff Record: ${postRecord.w}-${postRecord.l}-${postRecord.t}`
-                : `Playoff Record: ${postRecord.w}-${postRecord.l}`)
+                ? `Postseason: ${postRecord.w}-${postRecord.l}-${postRecord.t}`
+                : `Postseason: ${postRecord.w}-${postRecord.l}`)
              : null;
 
              let html = '';
@@ -766,6 +767,8 @@ markActiveMonth() {
              html += regularText;
              if (postText) html += `<br><span class="playoff-record">${postText}</span>`;
              recordEl.innerHTML = html;
+             // Where the polls have the programme this week, under its record.
+             if (!isPastSeason) this.showRank(recordEl);
          }
 
          displaySchedule(events, isPastSeason = false) {
@@ -865,6 +868,17 @@ markActiveMonth() {
     // (game-core.js), from /api/boxscore/<id>, which the server reduces from
     // ESPN's 600KB summary to about 15KB. Focus goes back to the row that
     // opened it.
+    // The programme's place in this week's polls (api/rank: AP, coaches' and,
+    // from November, the CFP's), under its record: asked once a page, and
+    // drawn again whenever the record is. Nothing where it is unranked.
+    async showRank(recordEl) {
+      this.rankPromise ??= fetch('api/rank').then((r) => (r.ok ? r.json() : null)).catch(() => null);
+      const got = await this.rankPromise;
+      if (!got?.ranks?.length || recordEl.querySelector('.poll-rank')) return;
+      const text = got.ranks.map((r) => `No. ${r.rank} ${r.poll}`).join(' · ');
+      recordEl.insertAdjacentHTML('beforeend', `<br><a class="poll-rank" href="../rankings" title="${got.week ? `${got.week} polls` : 'This week\'s polls'}">${text}</a>`);
+    }
+
     async openGameSummary(id, opener) {
       const modal = document.getElementById('summary-modal');
       const title = document.getElementById('summary-title');
