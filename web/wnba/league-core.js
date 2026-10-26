@@ -119,7 +119,6 @@ export function gameOf(event) {
 			abbr: c.team?.abbreviation ?? '',
 			name: c.team?.displayName ?? c.team?.name ?? '',
 			short: c.team?.shortDisplayName ?? c.team?.name ?? '',
-			logo: c.team?.logo ?? '',
 			score: scoreOf(c),
 			pens: c.shootoutScore ?? null,
 			winner: c.winner === true,
@@ -212,7 +211,6 @@ export function gameCardHtml(g, { clubHref = () => null, timeZone, extraHtml = '
 		const name = href ? `<a href="${esc(href)}">${esc(t.name)}</a>` : esc(t.name);
 		const lead = g.state !== 'pre' && t.score != null;
 		return `<div class="league-team${g.final && t.winner ? ' league-won' : ''}">`
-			+ (t.logo ? `<img class="league-logo" src="${esc(t.logo)}" alt="" loading="lazy">` : '<span class="league-logo"></span>')
 			+ `<span class="league-name">${name}${t.record ? ` <span class="league-record">${esc(t.record)}</span>` : ''}</span>`
 			+ (lead ? `<span class="league-score">${esc(t.score)}${t.pens != null ? ` <span class="league-record">(${esc(t.pens)})</span>` : ''}</span>` : '')
 			+ '</div>';

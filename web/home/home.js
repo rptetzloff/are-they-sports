@@ -41,8 +41,7 @@ function team(t, g) {
 	const star = t.key && pins.has(t.key) ? '<span class="star" title="Pinned">★</span>' : '';
 	const score = g.state === 'pre' ? '' : esc(t.score ?? '');
 	const rec = g.state === 'pre' && t.record ? `<span class="rec">${esc(t.record)}</span>` : '';
-	return `<span class="t${g.state === 'post' && t.winner ? ' won' : ''}">${t.logo ? `<img src="${esc(t.logo)}" alt="" loading="lazy">` : '<span></span>'}
-<span class="nm">${star}${name}${rec}</span><span class="sc">${score}</span></span>`;
+	return `<span class="t${g.state === 'post' && t.winner ? ' won' : ''}"><span class="nm">${star}${name}${rec}</span><span class="sc">${score}</span></span>`;
 }
 // --- the viewer's TV provider, the same choice the club pages keep ---
 let tv = { providers: [], networks: [], channels: [] };

@@ -15,7 +15,7 @@
 
 .league-team {
     display: grid;
-    grid-template-columns: 2rem 1fr auto;
+    grid-template-columns: 1fr auto;
     align-items: center;
     gap: 0.6rem;
     font-size: 1.1rem;
@@ -31,12 +31,6 @@
 .league-team.league-won .league-name,
 .league-team.league-won .league-score {
     font-weight: 700;
-}
-
-.league-logo {
-    width: 2rem;
-    height: 2rem;
-    object-fit: contain;
 }
 
 .league-name a {
