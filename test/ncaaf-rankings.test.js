@@ -76,3 +76,33 @@ test('each finished season\'s final AP poll from 1936, ranks in order, teams by 
 	}
 	assert.ok(rows.some((r) => r.season === '1942' && r.school === 'Wisconsin' && r.rank === '3'))
 })
+
+test('a programme\'s page asks where it is ranked this week, and says nothing unranked', async () => {
+	const { createFront } = await import('../lib/web-routes.js')
+	const { loadTeams, loadSports } = await import('../lib/teams.js')
+	const { resolver, loadHistory } = await import('../lib/names.js')
+	const teams = await loadTeams()
+	const adapters = await loadSports()
+	const espnStub = async (url) => (url.endsWith('/rankings') ? { status: 200, body: JSON.stringify(espn) } : null)
+	const front = (id, code) => createFront({
+		league: false, team: teams.find((t) => t.sport === 'ncaaf' && t.id === id), franchise: code, adapter: adapters.ncaaf,
+		namer: resolver('ncaaf'), history: loadHistory('ncaaf'), currentCodes: new Set(), palette: null, base: `/ncaaf/${id}`, clubs: [],
+		store: { rawGamesFor: async () => [], standingsTitles: async () => [], finalRounds: async () => new Map() },
+		creditHtml: '', origin: () => 'http://x', espn: espnStub,
+	})
+	const ask = async (id, code) => {
+		let body = ''
+		const res = { writeHead() {}, end(b) { body = String(b ?? '') } }
+		const url = new URL('http://x/api/rank')
+		const handled = await (await front(id, code))({ headers: {} }, res, '/api/rank', url, () => {})
+		return { handled, json: JSON.parse(body) }
+	}
+	const osu = await ask('ohiostate', 'OSU')
+	assert.equal(osu.handled, true)
+	assert.deepEqual(osu.json, { week: 'Week 9', ranks: [{ poll: 'AP', rank: 2 }] })
+	const wis = await ask('wisconsin', 'WIS')
+	assert.deepEqual(wis.json.ranks, [], 'unranked: no line on the page')
+	// The page draws it under the record, linked to the polls.
+	assert.match(read('web/ncaaf/main.js'), /fetch\('api\/rank'\)/)
+	assert.match(read('web/ncaaf/main.js'), /class="poll-rank" href="\.\.\/rankings"/)
+})
