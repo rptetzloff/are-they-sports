@@ -1,25 +1,38 @@
 // The strip of scores along the top of the page (lib/scorebar.js): every
-// league with games today, the NFL's whole week, from /api/today. The
-// visitor's choice of leagues (leagues-pref.js) orders it, hides some, and
-// folds some to their label, which is a button: tap it to fold or unfold.
-// Within a league, this club's and the pinned teams' games come first, then
-// live, then to come, then over. Scrolled sideways by hand; it moves only to
-// refresh, every half minute while a game is live and every five minutes
+// league with games today, football's whole week, from /api/today.
+//
+// Two lists at its left choose what it shows (Ray, 2026-10-25): the league,
+// or all of them, and within a league a filter: a conference or a division, or
+// for college the Top 25. A league's page opens on its league, the home page
+// on them all, and a choice is kept for that kind of page. The visitor's
+// leagues (leagues-pref.js) order the list and can hide some, from its last
+// entry. Within a league, this club's and the pinned teams' games come first,
+// then live, then to come, then over. Scrolled sideways by hand; it moves only
+// to refresh, every half minute while a game is live and every five minutes
 // otherwise, and not while the tab is hidden.
 import { readLeagues, writeLeagues, ordered, onLeagues } from './leagues-pref.js';
 
 const bar = document.getElementById('scorebar');
 if (bar) {
 	const row = bar.querySelector('.sb-row');
-	const pick = bar.querySelector('.sb-pick');
+	const leagueSel = bar.querySelector('.sb-league');
+	const filterSel = bar.querySelector('.sb-filter');
+	const filterWrap = filterSel.closest('.sb-pick');
 	const panel = bar.querySelector('.sb-panel');
 	const all = JSON.parse(bar.dataset.leagues);
 	const labelOf = Object.fromEntries(all.map((l) => [l.sport, l.label]));
 	const club = bar.dataset.club ?? null;
+	const lead = bar.dataset.lead || null;
 	// From the root, which the server names: under a club, <base> is the club's.
 	const api = bar.dataset.api;
 	const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 	const pins = () => { try { return new Set(JSON.parse(localStorage.getItem('ats.pins') || '[]')); } catch { return new Set(); } };
+
+	// The choice, kept per kind of page: the home page's, the NBA's pages'.
+	const KEY = `ats.strip.${lead || 'home'}`;
+	const readPick = () => { try { return JSON.parse(localStorage.getItem(KEY) || 'null'); } catch { return null; } };
+	const writePick = (v) => { try { localStorage.setItem(KEY, JSON.stringify(v)); } catch { /* no storage: this page only */ } };
+	let pick = readPick() ?? { league: lead ?? 'all', filter: '' };
 
 	// Edge to edge, whatever the page's body pads itself with: the club pages
 	// pad nothing, the server's pages 2rem 1rem. And at the top: body centres
@@ -36,7 +49,7 @@ if (bar) {
 	const sameDay = (iso) => ymd(new Date(iso)) === ymd(new Date());
 	const weekday = (iso) => new Date(iso).toLocaleDateString('en-US', { weekday: 'short' });
 
-	// The NFL's week reaches past today, so a game on another day says which.
+	// Football's week reaches past today, so a game on another day says which.
 	function status(g) {
 		const other = g.start && !sameDay(g.start);
 		if (g.state === 'in') return esc(g.status || 'Live');
@@ -48,8 +61,9 @@ if (bar) {
 	function side(t, g, mine) {
 		const won = g.state === 'post' && t.winner ? ' won' : '';
 		const me = t.key && mine.has(t.key) ? ' me' : '';
+		const rank = t.rank ? `<small class="sb-rk">${t.rank}</small>` : '';
 		return `<span class="sb-t${won}${me}">${t.logo ? `<img src="${esc(t.logo)}" alt="" loading="lazy">` : '<span></span>'}`
-			+ `<span>${esc(t.abbr || t.short)}</span><b>${g.state === 'pre' ? '' : esc(t.score ?? '')}</b></span>`;
+			+ `<span>${rank}${esc(t.abbr || t.short)}</span><b>${g.state === 'pre' ? '' : esc(t.score ?? '')}</b></span>`;
 	}
 	function chip(g, mine) {
 		const own = keysOf(g).some((k) => mine.has(k));
@@ -66,29 +80,86 @@ if (bar) {
 	const byInterest = (a, b) => (ORDER[a.state] ?? 3) - (ORDER[b.state] ?? 3)
 		|| (a.state === 'post' ? String(b.start).localeCompare(String(a.start)) : String(a.start).localeCompare(String(b.start)));
 
+	/** A league's filters, for the games it has: college's Top 25, then each
+	 *  conference, then each division, every one with games in it. A division
+	 *  is named with its conference where that is short (AFC North, AL East)
+	 *  and alone where not (Atlantic). College's conferences lose "Conference". */
+	function filtersOf(l) {
+		const sides = (g) => [g.away, g.home];
+		const out = [];
+		if (l.sport === 'ncaaf') out.push({ value: 'top25', label: 'Top 25', test: (g) => sides(g).some((t) => t.rank) });
+		const confs = new Map(), divs = new Map();
+		for (const g of l.games) {
+			for (const t of sides(g)) {
+				if (t.conference) confs.set(t.conference, t.conference.replace(/ Conference$/, ''));
+				if (t.conference && t.division) divs.set(`${t.conference}|${t.division}`, t.conference.length <= 3 ? `${t.conference} ${t.division}` : t.division);
+			}
+		}
+		for (const [conf, label] of [...confs].sort((a, b) => a[1].localeCompare(b[1]))) {
+			out.push({ value: `c:${conf}`, label, test: (g) => sides(g).some((t) => t.conference === conf) });
+		}
+		for (const [key, label] of [...divs].sort((a, b) => a[1].localeCompare(b[1]))) {
+			const [conf, div] = key.split('|');
+			out.push({ value: `d:${key}`, label, test: (g) => sides(g).some((t) => t.conference === conf && t.division === div) });
+		}
+		// A filter that would show every game is no filter.
+		return out.map((f) => ({ ...f, n: l.games.filter(f.test).length })).filter((f) => f.n > 0 && f.n < l.games.length);
+	}
+
 	let leagues = [];
 	let lastDay = '';
+	let current = 'all';
 	function draw() {
 		const p = readLeagues();
 		const mine = pins();
 		if (club) mine.add(club);
 		const first = (g) => (keysOf(g).some((k) => mine.has(k)) ? 0 : 1);
+		const live = (l) => l.games.filter((g) => g.state === 'in').length;
 		const withGames = leagues.filter((l) => l.games.length);
 		const shown = ordered(all.map((l) => l.sport), p).filter((s) => !p.hidden.includes(s))
 			.map((s) => withGames.find((l) => l.sport === s)).filter(Boolean);
-		const html = shown.map((l) => {
-			const folded = p.folded.includes(l.sport);
-			const live = l.games.filter((g) => g.state === 'in').length;
-			const head = `<button type="button" class="sb-lg" data-sport="${esc(l.sport)}" aria-expanded="${!folded}" title="${folded ? 'Show' : 'Fold'} ${esc(l.label)}">`
-				+ `${esc(l.label)}&nbsp;<span style="font-weight:400">${folded ? `${l.games.length}${live ? ` · ${live} live` : ''}&nbsp;▸` : '◂'}</span></button>`;
-			if (folded) return head;
-			return head + [...l.games].sort((a, b) => first(a) - first(b) || byInterest(a, b)).map((g) => chip(g, mine)).join('');
+
+		// The league list: every shown league with games, and the way to choose
+		// which are shown. A choice whose league has no games today shows all.
+		current = pick.league === 'fav' || shown.some((l) => l.sport === pick.league) ? pick.league : 'all';
+		const total = shown.reduce((n, l) => n + l.games.length, 0);
+		const lives = shown.reduce((n, l) => n + live(l), 0);
+		const count = (n, lv) => ` · ${n}${lv ? ` · ${lv} live` : ''}`;
+		// The visitor's favourites (the pinned teams, ats.pins) across every
+		// league: their games only, each league's under its name.
+		const starred = pins();
+		const favs = shown.map((l) => ({ ...l, games: l.games.filter((g) => keysOf(g).some((k) => starred.has(k))) })).filter((l) => l.games.length);
+		const favN = favs.reduce((n, l) => n + l.games.length, 0);
+		leagueSel.innerHTML = `<option value="all">All${count(total, lives)}</option>`
+			+ `<option value="fav">★ Favorites${starred.size ? count(favN, favs.reduce((n, l) => n + live(l), 0)) : ''}</option>`
+			+ shown.map((l) => `<option value="${esc(l.sport)}">${esc(l.label)}${count(l.games.length, live(l))}</option>`).join('')
+			+ '<option disabled>──────────</option><option value="edit">Show, hide and order leagues…</option>';
+		leagueSel.value = current;
+
+		// Within a league, its filters.
+		const league = current === 'all' || current === 'fav' ? null : shown.find((l) => l.sport === current);
+		const filters = league ? filtersOf(league) : [];
+		const filter = filters.find((f) => f.value === pick.filter) ?? null;
+		filterWrap.hidden = !filters.length;
+		filterSel.innerHTML = '<option value="">All games</option>'
+			+ filters.map((f) => `<option value="${esc(f.value)}">${esc(f.label)} · ${f.n}</option>`).join('');
+		filterSel.value = filter?.value ?? '';
+		// The short names shown over the two lists.
+		leagueSel.previousElementSibling.textContent = current === 'all' ? 'All' : current === 'fav' ? '★ Favorites' : labelOf[current];
+		filterSel.previousElementSibling.textContent = filter?.label ?? 'All games';
+
+		const html = (league ? [league] : current === 'fav' ? favs : shown).map((l) => {
+			const games = l.games.filter((g) => !filter || filter.test(g)).sort((a, b) => first(a) - first(b) || byInterest(a, b));
+			return (league ? '' : `<span class="sb-lg">${esc(l.label)}</span>`) + games.map((g) => chip(g, mine)).join('');
 		}).join('');
 		// Hidden only on a day with no games anywhere; with games but every one of
 		// their leagues hidden, it stays, so the way to unhide them does too.
 		bar.hidden = !withGames.length;
 		const keep = ymd(new Date()) === lastDay ? row.scrollLeft : 0;
-		row.innerHTML = html || '<span class="sb-none">Every league playing today is hidden. Choose them under Leagues.</span>';
+		const none = current !== 'fav' ? 'Every league playing today is hidden. Choose them from the list.'
+			: starred.size ? 'None of your favorites play today.'
+				: 'Star a team in the Team menu below to see its games here.';
+		row.innerHTML = html || `<span class="sb-none">${none}</span>`;
 		row.scrollLeft = keep;
 		lastDay = ymd(new Date());
 		drawPanel();
@@ -103,19 +174,30 @@ if (bar) {
 			if (r.ok) leagues = (await r.json()).leagues ?? [];
 		} catch { /* keep what is shown */ }
 		draw();
-		const live = leagues.some((l) => l.games.some((g) => g.state === 'in'));
-		timer = setTimeout(() => { if (document.hidden) timer = null; else load(); }, live ? 30_000 : 300_000);
+		const anyLive = leagues.some((l) => l.games.some((g) => g.state === 'in'));
+		timer = setTimeout(() => { if (document.hidden) timer = null; else load(); }, anyLive ? 30_000 : 300_000);
 	}
 	document.addEventListener('visibilitychange', () => { if (!document.hidden && timer === null) load(); });
 
-	// Folding a league from its label.
-	row.addEventListener('click', (e) => {
-		const b = e.target.closest('.sb-lg');
-		if (!b) return;
-		const p = readLeagues();
-		const s = b.dataset.sport;
-		p.folded = p.folded.includes(s) ? p.folded.filter((x) => x !== s) : [...p.folded, s];
-		writeLeagues(p);
+	// A new league, or a new filter, starts at the beginning.
+	leagueSel.addEventListener('change', () => {
+		if (leagueSel.value === 'edit') {
+			// The list's last entry opens the choice of leagues and leaves the
+			// strip on what it showed.
+			leagueSel.value = current;
+			setTimeout(() => open(true));
+			return;
+		}
+		pick = { league: leagueSel.value, filter: '' };
+		writePick(pick);
+		lastDay = '';
+		draw();
+	});
+	filterSel.addEventListener('change', () => {
+		pick = { ...pick, filter: filterSel.value };
+		writePick(pick);
+		lastDay = '';
+		draw();
 	});
 
 	// The choice of leagues: each shown or not, and moved up or down.
@@ -150,10 +232,9 @@ if (bar) {
 		// Keep the moved league's button under the finger.
 		panel.querySelector(`li[data-sport="${CSS.escape(s)}"] [data-move="${b.dataset.move}"]`)?.focus();
 	});
-	const open = (on) => { panel.hidden = !on; pick.setAttribute('aria-expanded', String(on)); };
-	pick.addEventListener('click', (e) => { e.stopPropagation(); open(panel.hidden); });
+	const open = (on) => { panel.hidden = !on; if (on) panel.querySelector('input')?.focus(); };
 	document.addEventListener('click', (e) => { if (!panel.hidden && !panel.contains(e.target)) open(false); });
-	document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !panel.hidden) { open(false); pick.focus(); } });
+	document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !panel.hidden) { open(false); leagueSel.focus(); } });
 	onLeagues(draw);
 	// Favourites starred in the footer's Team menu come first at once.
 	window.addEventListener('ats-pins', draw);
