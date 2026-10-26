@@ -54,6 +54,7 @@ import { colorsFor, currentFranchises, displayName, loadHistory, resolver } from
 import { hasFrontEnd, WEB_DIR } from './lib/web.js';
 import { homePage } from './lib/home.js';
 import { todayGames } from './lib/today.js';
+import { scorebarSports, withScorebar } from './lib/scorebar.js';
 import { coverageFor, marketPoints } from './lib/coverage.js';
 import { createFront, sharedEspn } from './lib/web-routes.js';
 import { LEAGUE_ABBR, SPORTS, loadSports, loadTeams } from './lib/teams.js';
@@ -849,8 +850,18 @@ function main() {
 			// where it is set: server.js already warns that without it any Host
 			// header becomes canonical, which for a share card means a staging
 			// deploy telling every reader that it IS the site.
-			const html = (res2, code, body, meta = {}) =>
-				sendHtml(res2, code, body, { url: `${origin}${url.pathname}`, ...meta });
+			//
+			// And the strip of the day's scores along the top (lib/scorebar.js),
+			// where there is more than one club: the page's league's games, or
+			// every league's on the home page, this club's first.
+			const html = (res2, code, body, meta = {}) => {
+				if (code === 200 && needsSelector(table)) {
+					const sports = scorebarSports(url.pathname, [...new Set(table.map((e) => e.sport))]);
+					const here = sports.length === 1 ? matchRoute(url.pathname, table)?.entry : null;
+					body = withScorebar(body, { sports, club: here ? `${here.sport}/${here.teamId}` : null });
+				}
+				return sendHtml(res2, code, body, { url: `${origin}${url.pathname}`, ...meta });
+			};
 
 			if (url.pathname === '/healthz') {
 				// Queried live, every time. It used to report the value captured
@@ -942,8 +953,9 @@ function main() {
 
 			// The home page's script, and its games: every league's for a day,
 			// through the shared ESPN cache (lib/today.js).
-			if (url.pathname === '/home.js' && needsSelector(table)) {
-				const js = readFileSync(join(WEB_DIR, 'home', 'home.js'));
+			// The scores strip's too (lib/scorebar.js), which every page loads.
+			if ((url.pathname === '/home.js' || url.pathname === '/scorebar.js') && needsSelector(table)) {
+				const js = readFileSync(join(WEB_DIR, 'home', url.pathname.slice(1)));
 				res.writeHead(200, { 'content-type': 'text/javascript; charset=utf-8', 'content-length': js.length, 'cache-control': 'no-cache' });
 				return res.end(js);
 			}
@@ -971,7 +983,11 @@ function main() {
 			if (url.pathname === '/api/today' && needsSelector(table)) {
 				const date = url.searchParams.get('date') ?? '';
 				if (!/^\d{8}$/.test(date)) return json(res, 400, { error: 'date is YYYYMMDD' });
-				const sports = [...new Set(table.map((e) => e.sport))];
+				// Every league in the scope, or those of them asked for (`sports=nba`,
+				// the scores strip on a league's pages).
+				const inScope = [...new Set(table.map((e) => e.sport))];
+				const asked = (url.searchParams.get('sports') ?? '').split(',').filter((s) => inScope.includes(s));
+				const sports = asked.length ? asked : inScope;
 				// Each team's page here, by its full name in its sport, as ESPN names it.
 				const clubs = new Map(table.filter((e) => e.available && clubFor(e)).flatMap((e) => {
 					const to = { url: `${e.base}/`, key: `${e.sport}/${e.teamId}` };
