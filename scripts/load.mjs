@@ -1446,25 +1446,47 @@ async function main() {
 			// January) are always asked again; anything older is settled.
 			if (!existsSync(path) || season >= playing - 1) {
 				// Spaced, and a 429 waited out: the API turns away a quick run of
-				// calls, and the first full load is about 160 of them.
-				let res;
-				for (let attempt = 0; attempt < 6; attempt++) {
-					await new Promise((r) => setTimeout(r, fetched ? 1200 : 0));
-					res = await fetch(adapter.sources.cfbd.url(season), { headers: { Authorization: `Bearer ${key}`, Accept: 'application/json' } });
-					if (res.status !== 429) break;
-					const wait = Number(res.headers.get('retry-after')) || 5 * 2 ** attempt;
-					console.log(`  cfbd         ${season}: asked to slow down; waiting ${wait}s`);
-					await new Promise((r) => setTimeout(r, wait * 1000));
+				// calls, and the first full load is about 160 of them. A connection
+				// dropped part-way (ECONNRESET, read while the body arrives, which
+				// took down Ray's first load on Coolify) or one that hangs is asked
+				// again too, after a longer wait each time. A season is written only
+				// whole and parsed, so a rerun never trusts a half-read file.
+				let res = null, body = null, failure = '';
+				for (let attempt = 0; attempt < 6 && body === null; attempt++) {
+					await new Promise((r) => setTimeout(r, fetched || attempt ? 1200 : 0));
+					try {
+						res = await fetch(adapter.sources.cfbd.url(season), {
+							headers: { Authorization: `Bearer ${key}`, Accept: 'application/json' },
+							signal: AbortSignal.timeout(90_000),
+						});
+						if (res.status === 429) {
+							const wait = Number(res.headers.get('retry-after')) || 5 * 2 ** attempt;
+							console.log(`  cfbd         ${season}: asked to slow down; waiting ${wait}s`);
+							await new Promise((r) => setTimeout(r, wait * 1000));
+							continue;
+						}
+						if (!res.ok) break;
+						const text = await res.text();
+						JSON.parse(text);
+						body = text;
+					} catch (e) {
+						failure = e.cause?.code ?? e.name ?? e.message;
+						const wait = 5 * 2 ** attempt;
+						console.log(`  cfbd         ${season}: ${failure}; trying again in ${wait}s`);
+						await new Promise((r) => setTimeout(r, wait * 1000));
+					}
 				}
-				if (!res.ok) {
-					console.error(`  cfbd         ${season}: ${res.status} ${res.statusText}${res.status === 401 ? ' (is the key whole?)' : ''}`);
+				if (body === null) {
+					const why = res && !res.ok ? `${res.status} ${res.statusText}${res.status === 401 ? ' (is the key whole?)' : ''}` : failure || 'no answer';
+					console.error(`  cfbd         ${season}: ${why}; ${fetched} seasons fetched this run are kept, so a rerun picks up here`);
 					await client.query('ROLLBACK');
 					await client.end();
 					return 1;
 				}
 				remaining = res.headers.get('x-calllimit-remaining') ?? remaining;
-				writeFileSync(path, await res.text());
+				writeFileSync(path, body);
 				fetched++;
+				if (fetched % 20 === 0) console.log(`  cfbd         ${season}: ${fetched} seasons fetched${remaining != null ? `, ${remaining} calls left` : ''}`);
 			}
 			for (const g of JSON.parse(readFileSync(path, 'utf8'))) {
 				const row = adapter.cfbdGameRow(g, { finished: season < playing });
