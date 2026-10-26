@@ -896,7 +896,7 @@ markActiveMonth() {
         			const name = x.media?.shortName;
         			if (!name) return false;
         			const ch = this.resolveChannel(name);
-        			return ch ? tvTypes.has(ch.type) : (x.type?.shortName || '') === 'TV';
+        			return ch ? tvTypes.has(ch.type) : (x.type?.shortName || '').toUpperCase() === 'TV';
         		}));
         		if (!b) return '';
         		const ch = this.resolveChannel(b.media.shortName);
@@ -2531,9 +2531,9 @@ async openWatchModal(event) {
   //                   market: { type: 'National'|'Home'|'Away' },
   //                   media: { shortName: 'FOX' } }
   const raw = this.broadcastsFor(event).filter(b => b.media?.shortName);
-  const tv = raw.filter(b => (b.type?.shortName || '') === 'TV');
-  const streaming = raw.filter(b => (b.type?.shortName || '') === 'Streaming');
-  const radio = raw.filter(b => (b.type?.shortName || '') === 'Radio');
+  const tv = raw.filter(b => (b.type?.shortName || '').toUpperCase() === 'TV');
+  const streaming = raw.filter(b => (b.type?.shortName || '').toUpperCase() === 'STREAMING');
+  const radio = raw.filter(b => (b.type?.shortName || '').toUpperCase() === 'RADIO');
 
   // Resolve each to our channel metadata; dedupe by display name + type.
   const resolve = (list) => {
@@ -2543,8 +2543,8 @@ async openWatchModal(event) {
       const name = b.media.shortName;
       const ch = this.resolveChannel(name) || {
         key: name, display_name: name,
-        type: b.type?.shortName === 'Streaming' ? 'streaming'
-          : b.type?.shortName === 'Radio' ? 'radio' : 'cable',
+        type: b.type?.shortName?.toUpperCase() === 'STREAMING' ? 'streaming'
+          : b.type?.shortName?.toUpperCase() === 'RADIO' ? 'radio' : 'cable',
         providers: [], description: null, website_url: null,
       };
       const sig = ch.display_name + '|' + ch.type;

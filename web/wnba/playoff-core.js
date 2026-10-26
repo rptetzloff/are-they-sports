@@ -47,7 +47,7 @@ export function espnPostseasonGames(events, team = TEAM) {
 				detail: status.detail || status.shortDetail || '',
 				// The schedule lists radio too; the scoreboard's shape has `names`.
 				networks: [...new Set((comp?.broadcasts || [])
-					.filter((b) => (b.type?.shortName ?? 'TV') === 'TV')
+					.filter((b) => (b.type?.shortName ?? 'TV').toUpperCase() === 'TV')
 					.flatMap((b) => b.names || (b.media?.shortName ? [b.media.shortName] : [])))],
 			};
 		});
