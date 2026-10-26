@@ -38,6 +38,8 @@ function finishNotes(s) {
 	if (AP[s.season]) notes.push(`AP No. ${AP[s.season]}`);
 	// The title game's winner, or the AP poll's No. 1 before there was one.
 	if (s.championship || s.champion) notes.push('national champions');
+	// The season's bowl, by name, and how it went.
+	if (s.bowl) notes.push(`${s.bowl.won ? 'won' : s.bowl.tie ? 'tied' : 'lost'} the ${s.bowl.name}`);
 	if (s.undefeated) notes.push(`${SITE.losslessSeasonNoun.toLowerCase()} season`);
 	return notes;
 }

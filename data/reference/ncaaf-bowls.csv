@@ -1,0 +1,1684 @@
+# Every postseason game an FBS programme played that has a bowl's name: from
+# CollegeFootballData's notes (2013 on), ESPN's postseason scoreboard
+# (2002-2012) and Wikipedia's season pages (CC BY-SA; 1902-2001). Made by
+# scripts/ncaaf-bowls.mjs; do not edit by hand. id is CollegeFootballData's.
+id,season,bowl,source
+3207,1901,Rose Bowl,wikipedia
+9252,1915,Rose Bowl,wikipedia
+9758,1916,Rose Bowl,wikipedia
+11062,1919,Rose Bowl,wikipedia
+11582,1920,Rose Bowl,wikipedia
+12145,1921,Rose Bowl,wikipedia
+12761,1922,Rose Bowl,wikipedia
+13376,1923,Rose Bowl,wikipedia
+13981,1924,Rose Bowl,wikipedia
+14574,1925,Rose Bowl,wikipedia
+15118,1926,Rose Bowl,wikipedia
+15675,1927,Rose Bowl,wikipedia
+16251,1928,Rose Bowl,wikipedia
+16827,1929,Rose Bowl,wikipedia
+17448,1930,Rose Bowl,wikipedia
+18097,1931,Rose Bowl,wikipedia
+18758,1932,Rose Bowl,wikipedia
+19444,1933,Rose Bowl,wikipedia
+20132,1934,Orange Bowl,wikipedia
+20131,1934,Rose Bowl,wikipedia
+20134,1934,Sugar Bowl,wikipedia
+20844,1935,Orange Bowl,wikipedia
+20847,1935,Rose Bowl,wikipedia
+20848,1935,Sugar Bowl,wikipedia
+20845,1935,Sun Bowl,wikipedia
+21573,1936,Cotton Bowl Classic,wikipedia
+21569,1936,Orange Bowl,wikipedia
+21571,1936,Rose Bowl,wikipedia
+21572,1936,Sugar Bowl,wikipedia
+21570,1936,Sun Bowl,wikipedia
+22258,1937,Cotton Bowl Classic,wikipedia
+22256,1937,Orange Bowl,wikipedia
+22257,1937,Rose Bowl,wikipedia
+22259,1937,Sugar Bowl,wikipedia
+22261,1937,Sun Bowl,wikipedia
+22921,1938,Cotton Bowl Classic,wikipedia
+22923,1938,Orange Bowl,wikipedia
+22922,1938,Rose Bowl,wikipedia
+22924,1938,Sugar Bowl,wikipedia
+22926,1938,Sun Bowl,wikipedia
+23578,1939,Cotton Bowl Classic,wikipedia
+23579,1939,Orange Bowl,wikipedia
+23581,1939,Rose Bowl,wikipedia
+23582,1939,Sugar Bowl,wikipedia
+23577,1939,Sun Bowl,wikipedia
+24228,1940,Cotton Bowl Classic,wikipedia
+24226,1940,Orange Bowl,wikipedia
+24227,1940,Rose Bowl,wikipedia
+24225,1940,Sugar Bowl,wikipedia
+24229,1940,Sun Bowl,wikipedia
+24857,1941,Cotton Bowl Classic,wikipedia
+24859,1941,Orange Bowl,wikipedia
+24860,1941,Rose Bowl,wikipedia
+24858,1941,Sugar Bowl,wikipedia
+24861,1941,Sun Bowl,wikipedia
+25525,1942,Cotton Bowl Classic,wikipedia
+25521,1942,Orange Bowl,wikipedia
+25522,1942,Rose Bowl,wikipedia
+25524,1942,Sugar Bowl,wikipedia
+25914,1943,Cotton Bowl Classic,wikipedia
+25911,1943,Orange Bowl,wikipedia
+25912,1943,Rose Bowl,wikipedia
+25910,1943,Sugar Bowl,wikipedia
+25913,1943,Sun Bowl,wikipedia
+26428,1944,Cotton Bowl Classic,wikipedia
+26431,1944,Orange Bowl,wikipedia
+26429,1944,Rose Bowl,wikipedia
+26427,1944,Sugar Bowl,wikipedia
+26961,1945,Cotton Bowl Classic,wikipedia
+26957,1945,Oil Bowl,wikipedia
+26958,1945,Orange Bowl,wikipedia
+26955,1945,Rose Bowl,wikipedia
+26962,1945,South Carolina Gamecocks football team,wikipedia
+26960,1945,Sugar Bowl,wikipedia
+26959,1945,Sun Bowl,wikipedia
+27595,1946,Cotton Bowl Classic,wikipedia
+27597,1946,Gator Bowl,wikipedia
+27596,1946,Harbor Bowl,wikipedia
+27592,1946,Oil Bowl,wikipedia
+27598,1946,Orange Bowl,wikipedia
+27594,1946,Rose Bowl,wikipedia
+27591,1946,Sugar Bowl,wikipedia
+27590,1946,Sun Bowl,wikipedia
+28241,1947,Cotton Bowl Classic,wikipedia
+28238,1947,Delta Bowl,wikipedia
+28231,1947,Dixie Bowl,wikipedia
+28235,1947,Gator Bowl,wikipedia
+28234,1947,Harbor Bowl,wikipedia
+28233,1947,Orange Bowl,wikipedia
+28237,1947,Rose Bowl,wikipedia
+28239,1947,Salad Bowl,wikipedia
+28242,1947,Sugar Bowl,wikipedia
+28236,1947,Sun Bowl,wikipedia
+28232,1947,Tangerine Bowl,wikipedia
+28887,1948,Cotton Bowl Classic,wikipedia
+28892,1948,Delta Bowl,wikipedia
+28880,1948,Dixie Bowl,wikipedia
+28881,1948,Gator Bowl,wikipedia
+28890,1948,Harbor Bowl,wikipedia
+28889,1948,Orange Bowl,wikipedia
+28883,1948,Rose Bowl,wikipedia
+28882,1948,Salad Bowl,wikipedia
+28885,1948,Sugar Bowl,wikipedia
+28891,1948,Sun Bowl,wikipedia
+29534,1949,Cotton Bowl Classic,wikipedia
+29531,1949,Gator Bowl,wikipedia
+29535,1949,Orange Bowl,wikipedia
+29532,1949,Rose Bowl,wikipedia
+29530,1949,Salad Bowl,wikipedia
+29533,1949,Sugar Bowl,wikipedia
+29538,1949,Sun Bowl,wikipedia
+30187,1950,Cotton Bowl Classic,wikipedia
+30189,1950,Gator Bowl,wikipedia
+30182,1950,Orange Bowl,wikipedia
+30186,1950,Rose Bowl,wikipedia
+30185,1950,Salad Bowl,wikipedia
+30184,1950,Sugar Bowl,wikipedia
+30188,1950,Sun Bowl,wikipedia
+30810,1951,Cotton Bowl Classic,wikipedia
+30812,1951,Gator Bowl,wikipedia
+30807,1951,Orange Bowl,wikipedia
+30809,1951,Rose Bowl,wikipedia
+30811,1951,Sugar Bowl,wikipedia
+30814,1951,Sun Bowl,wikipedia
+30813,1951,Tangerine Bowl,wikipedia
+31409,1952,Gator Bowl,wikipedia
+31408,1952,Orange Bowl,wikipedia
+31412,1952,Rose Bowl,wikipedia
+31410,1952,Sugar Bowl,wikipedia
+31411,1952,Sun Bowl,wikipedia
+31986,1953,Cotton Bowl Classic,wikipedia
+31988,1953,Gator Bowl,wikipedia
+31985,1953,Orange Bowl,wikipedia
+31984,1953,Rose Bowl,wikipedia
+31983,1953,Sugar Bowl,wikipedia
+31989,1953,Sun Bowl,wikipedia
+31987,1953,Tangerine Bowl,wikipedia
+32571,1954,Cotton Bowl Classic,wikipedia
+32569,1954,Gator Bowl,wikipedia
+32570,1954,Orange Bowl,wikipedia
+32574,1954,Rose Bowl,wikipedia
+32572,1954,Sugar Bowl,wikipedia
+33147,1955,Cotton Bowl Classic,wikipedia
+33144,1955,Gator Bowl,wikipedia
+33149,1955,Orange Bowl,wikipedia
+33146,1955,Rose Bowl,wikipedia
+33145,1955,Sugar Bowl,wikipedia
+33150,1955,Sun Bowl,wikipedia
+33736,1956,Cotton Bowl Classic,wikipedia
+33731,1956,Gator Bowl,wikipedia
+33733,1956,Orange Bowl,wikipedia
+33735,1956,Rose Bowl,wikipedia
+33732,1956,Sugar Bowl,wikipedia
+33734,1956,Sun Bowl,wikipedia
+33737,1956,Tangerine Bowl,wikipedia
+34324,1957,Cotton Bowl Classic,wikipedia
+34321,1957,Gator Bowl,wikipedia
+34326,1957,Orange Bowl,wikipedia
+34325,1957,Rose Bowl,wikipedia
+34323,1957,Sugar Bowl,wikipedia
+34322,1957,Sun Bowl,wikipedia
+34327,1957,Tangerine Bowl,wikipedia
+34914,1958,Cotton Bowl Classic,wikipedia
+34911,1958,Gator Bowl,wikipedia
+34917,1958,Orange Bowl,wikipedia
+34915,1958,Rose Bowl,wikipedia
+34916,1958,Sugar Bowl,wikipedia
+34913,1958,Sun Bowl,wikipedia
+35506,1959,Bluebonnet Bowl,wikipedia
+35512,1959,Cotton Bowl Classic,wikipedia
+35514,1959,Gator Bowl,wikipedia
+35507,1959,Liberty Bowl,wikipedia
+35509,1959,Orange Bowl,wikipedia
+35513,1959,Rose Bowl,wikipedia
+35511,1959,Sugar Bowl,wikipedia
+35508,1959,Sun Bowl,wikipedia
+36114,1960,Cotton Bowl Classic,wikipedia
+36112,1960,Gator Bowl,wikipedia
+36109,1960,Liberty Bowl,wikipedia
+36116,1960,Orange Bowl,wikipedia
+36117,1960,Rose Bowl,wikipedia
+36115,1960,Sugar Bowl,wikipedia
+36113,1960,Sun Bowl,wikipedia
+36700,1961,Bluebonnet Bowl,wikipedia
+36708,1961,Cotton Bowl Classic,wikipedia
+36703,1961,Gator Bowl,wikipedia
+36698,1961,Gotham Bowl,wikipedia
+36701,1961,Liberty Bowl,wikipedia
+36706,1961,Orange Bowl,wikipedia
+36707,1961,Rose Bowl,wikipedia
+36705,1961,Sugar Bowl,wikipedia
+36702,1961,Tangerine Bowl,wikipedia
+37333,1962,Bluebonnet Bowl,wikipedia
+37337,1962,Cotton Bowl Classic,wikipedia
+37334,1962,Gator Bowl,wikipedia
+37330,1962,Gotham Bowl,wikipedia
+37331,1962,Liberty Bowl,wikipedia
+37336,1962,Orange Bowl,wikipedia
+37339,1962,Rose Bowl,wikipedia
+37338,1962,Sugar Bowl,wikipedia
+37335,1962,Sun Bowl,wikipedia
+37332,1962,Tangerine Bowl,wikipedia
+37952,1963,Bluebonnet Bowl,wikipedia
+37954,1963,Gator Bowl,wikipedia
+37953,1963,Liberty Bowl,wikipedia
+37959,1963,Orange Bowl,wikipedia
+37958,1963,Rose Bowl,wikipedia
+37957,1963,Sugar Bowl,wikipedia
+37956,1963,Sun Bowl,wikipedia
+38587,1964,Bluebonnet Bowl,wikipedia
+38590,1964,Cotton Bowl Classic,wikipedia
+38594,1964,Gator Bowl,wikipedia
+38588,1964,Liberty Bowl,wikipedia
+38592,1964,Rose Bowl,wikipedia
+38589,1964,Sun Bowl,wikipedia
+39232,1965,Bluebonnet Bowl,wikipedia
+39236,1965,Cotton Bowl Classic,wikipedia
+39233,1965,Gator Bowl,wikipedia
+39231,1965,Liberty Bowl,wikipedia
+39235,1965,Orange Bowl,wikipedia
+39238,1965,Rose Bowl,wikipedia
+39237,1965,Sugar Bowl,wikipedia
+39234,1965,Sun Bowl,wikipedia
+39870,1966,Bluebonnet Bowl,wikipedia
+39872,1966,Cotton Bowl Classic,wikipedia
+39873,1966,Gator Bowl,wikipedia
+39868,1966,Liberty Bowl,wikipedia
+39875,1966,Orange Bowl,wikipedia
+39876,1966,Rose Bowl,wikipedia
+39874,1966,Sugar Bowl,wikipedia
+39871,1966,Sun Bowl,wikipedia
+40506,1967,Bluebonnet Bowl,wikipedia
+40512,1967,Cotton Bowl Classic,wikipedia
+40507,1967,Gator Bowl,wikipedia
+40504,1967,Liberty Bowl,wikipedia
+40510,1967,Orange Bowl,wikipedia
+40511,1967,Rose Bowl,wikipedia
+40509,1967,Sugar Bowl,wikipedia
+41152,1968,Astro-Bluebonnet Bowl,wikipedia
+41156,1968,Cotton Bowl Classic,wikipedia
+41150,1968,Gator Bowl,wikipedia
+41147,1968,Liberty Bowl,wikipedia
+41155,1968,Orange Bowl,wikipedia
+41151,1968,Peach Bowl,wikipedia
+41154,1968,Rose Bowl,wikipedia
+41153,1968,Sugar Bowl,wikipedia
+41149,1968,Sun Bowl,wikipedia
+41148,1968,Tangerine Bowl,wikipedia
+41813,1969,Astro-Bluebonnet Bowl,wikipedia
+41817,1969,Cotton Bowl Classic,wikipedia
+41811,1969,Gator Bowl,wikipedia
+41808,1969,Liberty Bowl,wikipedia
+41815,1969,Orange Bowl,wikipedia
+41812,1969,Peach Bowl,wikipedia
+41816,1969,Rose Bowl,wikipedia
+41814,1969,Sugar Bowl,wikipedia
+41809,1969,Sun Bowl,wikipedia
+41810,1969,Tangerine Bowl,wikipedia
+42517,1970,Bluebonnet Bowl,wikipedia
+42519,1970,Cotton Bowl Classic,wikipedia
+42522,1970,Gator Bowl,wikipedia
+42512,1970,Liberty Bowl,wikipedia
+42518,1970,Orange Bowl,wikipedia
+42516,1970,Peach Bowl,wikipedia
+42520,1970,Rose Bowl,wikipedia
+42521,1970,Sugar Bowl,wikipedia
+42513,1970,Sun Bowl,wikipedia
+42515,1970,Tangerine Bowl,wikipedia
+43265,1971,Astro-Bluebonnet Bowl,wikipedia
+43269,1971,Cotton Bowl Classic,wikipedia
+43262,1971,Fiesta Bowl,wikipedia
+43266,1971,Gator Bowl,wikipedia
+43261,1971,Liberty Bowl,wikipedia
+43267,1971,Orange Bowl,wikipedia
+43260,1971,Pasadena Bowl,wikipedia
+43264,1971,Peach Bowl,wikipedia
+43270,1971,Rose Bowl,wikipedia
+43268,1971,Sugar Bowl,wikipedia
+43259,1971,Sun Bowl,wikipedia
+43263,1971,Tangerine Bowl,wikipedia
+44010,1972,Astro-Bluebonnet Bowl,wikipedia
+44014,1972,Cotton Bowl Classic,wikipedia
+44005,1972,Fiesta Bowl,wikipedia
+44008,1972,Gator Bowl,wikipedia
+44004,1972,Liberty Bowl,wikipedia
+44012,1972,Orange Bowl,wikipedia
+44006,1972,Peach Bowl,wikipedia
+44013,1972,Rose Bowl,wikipedia
+44011,1972,Sugar Bowl,wikipedia
+44009,1972,Sun Bowl,wikipedia
+44007,1972,Tangerine Bowl,wikipedia
+44770,1973,Astro-Bluebonnet Bowl,wikipedia
+44774,1973,Cotton Bowl Classic,wikipedia
+44767,1973,Fiesta Bowl,wikipedia
+44772,1973,Gator Bowl,wikipedia
+44766,1973,Liberty Bowl,wikipedia
+44776,1973,Orange Bowl,wikipedia
+44769,1973,Peach Bowl,wikipedia
+44775,1973,Rose Bowl,wikipedia
+44773,1973,Sugar Bowl,wikipedia
+44771,1973,Sun Bowl,wikipedia
+44768,1973,Tangerine Bowl,wikipedia
+45533,1974,Astro-Bluebonnet Bowl,wikipedia
+45540,1974,Cotton Bowl Classic,wikipedia
+45535,1974,Fiesta Bowl,wikipedia
+45537,1974,Gator Bowl,wikipedia
+45531,1974,Liberty Bowl,wikipedia
+45539,1974,Orange Bowl,wikipedia
+45536,1974,Peach Bowl,wikipedia
+45541,1974,Rose Bowl,wikipedia
+45538,1974,Sugar Bowl,wikipedia
+45534,1974,Sun Bowl,wikipedia
+45532,1974,Tangerine Bowl,wikipedia
+46341,1975,Astro-Bluebonnet Bowl,wikipedia
+46345,1975,Cotton Bowl Classic,wikipedia
+46339,1975,Fiesta Bowl,wikipedia
+46342,1975,Gator Bowl,wikipedia
+46338,1975,Liberty Bowl,wikipedia
+46346,1975,Orange Bowl,wikipedia
+46344,1975,Peach Bowl,wikipedia
+46347,1975,Rose Bowl,wikipedia
+46343,1975,Sugar Bowl,wikipedia
+46340,1975,Sun Bowl,wikipedia
+46337,1975,Tangerine Bowl,wikipedia
+47146,1976,Astro-Bluebonnet Bowl,wikipedia
+47147,1976,Cotton Bowl Classic,wikipedia
+47143,1976,Fiesta Bowl,wikipedia
+47144,1976,Gator Bowl,wikipedia
+47140,1976,Independence Bowl,wikipedia
+47142,1976,Liberty Bowl,wikipedia
+47148,1976,Orange Bowl,wikipedia
+47145,1976,Peach Bowl,wikipedia
+47150,1976,Rose Bowl,wikipedia
+47149,1976,Sugar Bowl,wikipedia
+47151,1976,Sun Bowl,wikipedia
+47141,1976,Tangerine Bowl,wikipedia
+48013,1977,Astro-Bluebonnet Bowl,wikipedia
+48017,1977,Cotton Bowl Classic,wikipedia
+48010,1977,Fiesta Bowl,wikipedia
+48011,1977,Gator Bowl,wikipedia
+48008,1977,Hall of Fame Classic,wikipedia
+48006,1977,Independence Bowl,wikipedia
+48007,1977,Liberty Bowl,wikipedia
+48016,1977,Orange Bowl,wikipedia
+48012,1977,Peach Bowl,wikipedia
+48018,1977,Rose Bowl,wikipedia
+48015,1977,Sugar Bowl,wikipedia
+48014,1977,Sun Bowl,wikipedia
+48009,1977,Tangerine Bowl,wikipedia
+48830,1978,Astro-Bluebonnet Bowl,wikipedia
+48832,1978,Cotton Bowl Classic,wikipedia
+48828,1978,Fiesta Bowl,wikipedia
+48820,1978,Garden State Bowl,wikipedia
+48829,1978,Gator Bowl,wikipedia
+48822,1978,Hall of Fame Classic,wikipedia
+48823,1978,Holiday Bowl,wikipedia
+48821,1978,Independence Bowl,wikipedia
+48824,1978,Liberty Bowl,wikipedia
+48833,1978,Orange Bowl,wikipedia
+48827,1978,Peach Bowl,wikipedia
+48834,1978,Rose Bowl,wikipedia
+48831,1978,Sugar Bowl,wikipedia
+48826,1978,Sun Bowl,wikipedia
+48825,1978,Tangerine Bowl,wikipedia
+49655,1979,Astro-Bluebonnet Bowl,wikipedia
+49657,1979,Cotton Bowl Classic,wikipedia
+49651,1979,Fiesta Bowl,wikipedia
+49646,1979,Garden State Bowl,wikipedia
+49652,1979,Gator Bowl,wikipedia
+49653,1979,Hall of Fame Classic,wikipedia
+49647,1979,Holiday Bowl,wikipedia
+49645,1979,Independence Bowl,wikipedia
+49649,1979,Liberty Bowl,wikipedia
+49658,1979,Orange Bowl,wikipedia
+49654,1979,Peach Bowl,wikipedia
+49659,1979,Rose Bowl,wikipedia
+49656,1979,Sugar Bowl,wikipedia
+49650,1979,Sun Bowl,wikipedia
+49648,1979,Tangerine Bowl,wikipedia
+50470,1980,Astro-Bluebonnet Bowl,wikipedia
+50471,1980,Cotton Bowl Classic,wikipedia
+50465,1980,Fiesta Bowl,wikipedia
+50462,1980,Garden State Bowl,wikipedia
+50469,1980,Gator Bowl,wikipedia
+50466,1980,Hall of Fame Classic,wikipedia
+50463,1980,Holiday Bowl,wikipedia
+50461,1980,Independence Bowl,wikipedia
+50468,1980,Liberty Bowl,wikipedia
+50474,1980,Orange Bowl,wikipedia
+50475,1980,Peach Bowl,wikipedia
+50473,1980,Rose Bowl,wikipedia
+50472,1980,Sugar Bowl,wikipedia
+50467,1980,Sun Bowl,wikipedia
+50464,1980,Tangerine Bowl,wikipedia
+51272,1981,Astro-Bluebonnet Bowl,wikipedia
+51278,1981,Cotton Bowl Classic,wikipedia
+51276,1981,Fiesta Bowl,wikipedia
+51270,1981,Gator Bowl,wikipedia
+51273,1981,Hall of Fame Classic,wikipedia
+51266,1981,Holiday Bowl,wikipedia
+51264,1981,Independence Bowl,wikipedia
+51271,1981,Liberty Bowl,wikipedia
+51275,1981,Orange Bowl,wikipedia
+51274,1981,Peach Bowl,wikipedia
+51279,1981,Rose Bowl,wikipedia
+51277,1981,Sugar Bowl,wikipedia
+51269,1981,Sun Bowl,wikipedia
+51960,1982,Astro-Bluebonnet Bowl,wikipedia
+51954,1982,California Bowl,wikipedia
+51965,1982,Cotton Bowl Classic,wikipedia
+51962,1982,Fiesta Bowl,wikipedia
+51958,1982,Gator Bowl,wikipedia
+51959,1982,Hall of Fame Classic,wikipedia
+51952,1982,Holiday Bowl,wikipedia
+51957,1982,Liberty Bowl,wikipedia
+51963,1982,Orange Bowl,wikipedia
+51961,1982,Peach Bowl,wikipedia
+51966,1982,Rose Bowl,wikipedia
+51964,1982,Sugar Bowl,wikipedia
+51955,1982,Sun Bowl,wikipedia
+51953,1982,Tangerine Bowl,wikipedia
+52653,1983,Aloha Bowl,wikipedia
+52657,1983,Astro-Bluebonnet Bowl,wikipedia
+52647,1983,California Bowl,wikipedia
+52659,1983,Cotton Bowl Classic,wikipedia
+52661,1983,Fiesta Bowl,wikipedia
+52649,1983,Florida Citrus Bowl,wikipedia
+52655,1983,Gator Bowl,wikipedia
+52650,1983,Hall of Fame Classic,wikipedia
+52651,1983,Holiday Bowl,wikipedia
+52645,1983,Independence Bowl,wikipedia
+52654,1983,Liberty Bowl,wikipedia
+52660,1983,Orange Bowl,wikipedia
+52656,1983,Peach Bowl,wikipedia
+52662,1983,Rose Bowl,wikipedia
+52658,1983,Sugar Bowl,wikipedia
+52652,1983,Sun Bowl,wikipedia
+53331,1984,Aloha Bowl,wikipedia
+53333,1984,Astro-Bluebonnet Bowl,wikipedia
+53324,1984,Cherry Bowl,wikipedia
+53334,1984,Cotton Bowl Classic,wikipedia
+53337,1984,Fiesta Bowl,wikipedia
+53325,1984,Florida Citrus Bowl,wikipedia
+53327,1984,Freedom Bowl,wikipedia
+53329,1984,Gator Bowl,wikipedia
+53330,1984,Hall of Fame Classic,wikipedia
+53323,1984,Holiday Bowl,wikipedia
+53321,1984,Independence Bowl,wikipedia
+53328,1984,Liberty Bowl,wikipedia
+53332,1984,Peach Bowl,wikipedia
+53336,1984,Rose Bowl,wikipedia
+53335,1984,Sugar Bowl,wikipedia
+53326,1984,Sun Bowl,wikipedia
+54006,1985,All-American Bowl,wikipedia
+53999,1985,Aloha Bowl,wikipedia
+54004,1985,Bluebonnet Bowl,wikipedia
+53994,1985,California Bowl,wikipedia
+53995,1985,Cherry Bowl,wikipedia
+54010,1985,Cotton Bowl Classic,wikipedia
+54007,1985,Fiesta Bowl,wikipedia
+54001,1985,Florida Citrus Bowl,wikipedia
+54003,1985,Freedom Bowl,wikipedia
+54002,1985,Gator Bowl,wikipedia
+53997,1985,Holiday Bowl,wikipedia
+53996,1985,Independence Bowl,wikipedia
+53998,1985,Liberty Bowl,wikipedia
+54008,1985,Orange Bowl,wikipedia
+54005,1985,Peach Bowl,wikipedia
+54011,1985,Rose Bowl,wikipedia
+54009,1985,Sugar Bowl,wikipedia
+54000,1985,Sun Bowl,wikipedia
+54641,1986,All-American Bowl,wikipedia
+54635,1986,Aloha Bowl,wikipedia
+54640,1986,Bluebonnet Bowl,wikipedia
+54646,1986,Cotton Bowl Classic,wikipedia
+54648,1986,Fiesta Bowl,wikipedia
+54644,1986,Florida Citrus Bowl,wikipedia
+54639,1986,Freedom Bowl,wikipedia
+54636,1986,Gator Bowl,wikipedia
+54633,1986,Hall of Fame Bowl,wikipedia
+54638,1986,Holiday Bowl,wikipedia
+54632,1986,Independence Bowl,wikipedia
+54637,1986,Liberty Bowl,wikipedia
+54647,1986,Orange Bowl,wikipedia
+54642,1986,Peach Bowl,wikipedia
+54643,1986,Rose Bowl,wikipedia
+54645,1986,Sugar Bowl,wikipedia
+54634,1986,Sun Bowl,wikipedia
+55266,1987,All-American Bowl,wikipedia
+55268,1987,Aloha Bowl,wikipedia
+55273,1987,Astro-Bluebonnet Bowl,wikipedia
+55264,1987,California Bowl,wikipedia
+55279,1987,Cotton Bowl Classic,wikipedia
+55275,1987,Fiesta Bowl,wikipedia
+55274,1987,Florida Citrus Bowl,wikipedia
+55270,1987,Freedom Bowl,wikipedia
+55272,1987,Gator Bowl,wikipedia
+55280,1987,Hall of Fame Bowl,wikipedia
+55271,1987,Holiday Bowl,wikipedia
+55265,1987,Independence Bowl,wikipedia
+55269,1987,Liberty Bowl,wikipedia
+55276,1987,Orange Bowl,wikipedia
+55281,1987,Peach Bowl,wikipedia
+55277,1987,Rose Bowl,wikipedia
+55278,1987,Sugar Bowl,wikipedia
+55267,1987,Sun Bowl,wikipedia
+55907,1988,All-American Bowl,wikipedia
+55904,1988,Aloha Bowl,wikipedia
+55917,1988,Cotton Bowl Classic,wikipedia
+55915,1988,Fiesta Bowl,wikipedia
+55911,1988,Florida Citrus Bowl,wikipedia
+55906,1988,Freedom Bowl,wikipedia
+55910,1988,Gator Bowl,wikipedia
+55916,1988,Hall of Fame Bowl,wikipedia
+55908,1988,Holiday Bowl,wikipedia
+55905,1988,Liberty Bowl,wikipedia
+55913,1988,Orange Bowl,wikipedia
+55909,1988,Peach Bowl,wikipedia
+55914,1988,Rose Bowl,wikipedia
+55912,1988,Sugar Bowl,wikipedia
+55903,1988,Sun Bowl,wikipedia
+56536,1989,All-American Bowl,wikipedia
+56542,1989,Copper Bowl,wikipedia
+56549,1989,Cotton Bowl Classic,wikipedia
+56544,1989,Fiesta Bowl,wikipedia
+56545,1989,Florida Citrus Bowl,wikipedia
+56541,1989,Freedom Bowl,wikipedia
+56538,1989,Gator Bowl,wikipedia
+56543,1989,Hall of Fame Bowl,wikipedia
+56537,1989,Holiday Bowl,wikipedia
+56533,1989,Independence Bowl,wikipedia
+56539,1989,John Hancock Bowl,wikipedia
+56535,1989,Liberty Bowl,wikipedia
+56547,1989,Orange Bowl,wikipedia
+56540,1989,Peach Bowl,wikipedia
+56548,1989,Rose Bowl,wikipedia
+56546,1989,Sugar Bowl,wikipedia
+57182,1990,All-American Bowl,wikipedia
+57179,1990,Aloha Bowl,wikipedia
+57181,1990,Blockbuster Bowl,wikipedia
+57177,1990,California Bowl,wikipedia
+57186,1990,Copper Bowl,wikipedia
+57192,1990,Cotton Bowl Classic,wikipedia
+57191,1990,Fiesta Bowl,wikipedia
+57190,1990,Florida Citrus Bowl,wikipedia
+57184,1990,Freedom Bowl,wikipedia
+57193,1990,Gator Bowl,wikipedia
+57188,1990,Hall of Fame Bowl,wikipedia
+57185,1990,Holiday Bowl,wikipedia
+57178,1990,Independence Bowl,wikipedia
+57187,1990,John Hancock Bowl,wikipedia
+57180,1990,Liberty Bowl,wikipedia
+57189,1990,Orange Bowl,wikipedia
+57183,1990,Peach Bowl,wikipedia
+57195,1990,Rose Bowl,wikipedia
+57194,1990,Sugar Bowl,wikipedia
+57818,1991,Aloha Bowl,wikipedia
+57819,1991,Blockbuster Bowl,wikipedia
+57817,1991,California Bowl,wikipedia
+57825,1991,Copper Bowl,wikipedia
+57829,1991,Cotton Bowl Classic,wikipedia
+57832,1991,Fiesta Bowl,wikipedia
+57827,1991,Florida Citrus Bowl,wikipedia
+57824,1991,Freedom Bowl,wikipedia
+57822,1991,Gator Bowl,wikipedia
+57833,1991,Hall of Fame Bowl,wikipedia
+57823,1991,Holiday Bowl,wikipedia
+57821,1991,Independence Bowl,wikipedia
+57826,1991,John Hancock Bowl,wikipedia
+57820,1991,Liberty Bowl,wikipedia
+57830,1991,Orange Bowl,wikipedia
+57828,1991,Peach Bowl,wikipedia
+57834,1991,Rose Bowl,wikipedia
+57831,1991,Sugar Bowl,wikipedia
+58455,1992,Aloha Bowl,wikipedia
+58468,1992,Blockbuster Bowl,wikipedia
+58454,1992,Bowling Green Falcons football team,wikipedia
+58457,1992,Copper Bowl,wikipedia
+58467,1992,Cotton Bowl Classic,wikipedia
+58469,1992,Fiesta Bowl,wikipedia
+58465,1992,Florida Citrus Bowl,wikipedia
+58456,1992,Freedom Bowl,wikipedia
+58460,1992,Gator Bowl,wikipedia
+58470,1992,Hall of Fame Bowl,wikipedia
+58458,1992,Holiday Bowl,wikipedia
+58462,1992,Independence Bowl,wikipedia
+58459,1992,John Hancock Bowl,wikipedia
+58461,1992,Liberty Bowl,wikipedia
+58464,1992,Orange Bowl,wikipedia
+58471,1992,Peach Bowl,wikipedia
+58466,1992,Rose Bowl,wikipedia
+58463,1992,Sugar Bowl,wikipedia
+59093,1993,Alamo Bowl,wikipedia
+59087,1993,Aloha Bowl,wikipedia
+59097,1993,Carquest Bowl,wikipedia
+59102,1993,Citrus Bowl,wikipedia
+59089,1993,Copper Bowl,wikipedia
+59101,1993,Cotton Bowl Classic,wikipedia
+59096,1993,Fiesta Bowl,wikipedia
+59091,1993,Freedom Bowl,wikipedia
+59092,1993,Gator Bowl,wikipedia
+59100,1993,Hall of Fame Bowl,wikipedia
+59090,1993,Holiday Bowl,wikipedia
+59095,1993,Independence Bowl,wikipedia
+59086,1993,John Hancock Bowl,wikipedia
+59085,1993,Las Vegas Bowl,wikipedia
+59088,1993,Liberty Bowl,wikipedia
+59099,1993,Orange Bowl,wikipedia
+59094,1993,Peach Bowl,wikipedia
+59103,1993,Rose Bowl,wikipedia
+59098,1993,Sugar Bowl,wikipedia
+59730,1994,Alamo Bowl,wikipedia
+59722,1994,Aloha Bowl,wikipedia
+59737,1994,Carquest Bowl,wikipedia
+59725,1994,Copper Bowl,wikipedia
+59738,1994,Cotton Bowl Classic,wikipedia
+59734,1994,Fiesta Bowl,wikipedia
+59733,1994,Florida Citrus Bowl,wikipedia
+59723,1994,Freedom Bowl,wikipedia
+59727,1994,Gator Bowl,wikipedia
+59739,1994,Hall of Fame Bowl,wikipedia
+59726,1994,Holiday Bowl,wikipedia
+59724,1994,Independence Bowl,wikipedia
+59721,1994,Las Vegas Bowl,wikipedia
+59729,1994,Liberty Bowl,wikipedia
+59731,1994,Orange Bowl,wikipedia
+59732,1994,Peach Bowl,wikipedia
+59736,1994,Rose Bowl,wikipedia
+59735,1994,Sugar Bowl,wikipedia
+59728,1994,Sun Bowl,wikipedia
+60365,1995,Alamo Bowl,wikipedia
+60363,1995,Aloha Bowl,wikipedia
+60370,1995,Carquest Bowl,wikipedia
+60364,1995,Copper Bowl,wikipedia
+60373,1995,Cotton Bowl Classic,wikipedia
+60379,1995,Fiesta Bowl,wikipedia
+60378,1995,Florida Citrus Bowl,wikipedia
+60377,1995,Gator Bowl,wikipedia
+60367,1995,Holiday Bowl,wikipedia
+60368,1995,Independence Bowl,wikipedia
+60362,1995,Las Vegas Bowl,wikipedia
+60369,1995,Liberty Bowl,wikipedia
+60374,1995,Orange Bowl,wikipedia
+60375,1995,Outback Bowl,wikipedia
+60371,1995,Peach Bowl,wikipedia
+60376,1995,Rose Bowl,wikipedia
+60372,1995,Sugar Bowl,wikipedia
+60366,1995,Sun Bowl,wikipedia
+61030,1996,Alamo Bowl,wikipedia
+61025,1996,Aloha Bowl,wikipedia
+61026,1996,Carquest Bowl,wikipedia
+61028,1996,Copper Bowl,wikipedia
+61036,1996,Cotton Bowl Classic,wikipedia
+61039,1996,Fiesta Bowl,wikipedia
+61040,1996,Florida Citrus Bowl,wikipedia
+61037,1996,Gator Bowl,wikipedia
+61031,1996,Holiday Bowl,wikipedia
+61032,1996,Independence Bowl,wikipedia
+61024,1996,Las Vegas Bowl,wikipedia
+61027,1996,Liberty Bowl,wikipedia
+61033,1996,Orange Bowl,wikipedia
+61035,1996,Outback Bowl,wikipedia
+61029,1996,Peach Bowl,wikipedia
+61038,1996,Rose Bowl,wikipedia
+61041,1996,Sugar Bowl,wikipedia
+61034,1996,Sun Bowl,wikipedia
+61696,1997,Alamo Bowl,wikipedia
+61689,1997,Aloha Bowl,wikipedia
+61695,1997,Carquest Bowl,wikipedia
+61705,1997,Cotton Bowl Classic,wikipedia
+61698,1997,Fiesta Bowl,wikipedia
+61700,1997,Florida Citrus Bowl,wikipedia
+61704,1997,Gator Bowl,wikipedia
+61694,1997,Holiday Bowl,wikipedia
+61693,1997,Humanitarian Bowl,wikipedia
+61692,1997,Independence Bowl,wikipedia
+61691,1997,Insight.com Bowl,wikipedia
+61688,1997,Las Vegas Bowl,wikipedia
+61699,1997,Liberty Bowl,wikipedia
+61690,1997,Motor City Bowl,wikipedia
+61707,1997,Orange Bowl,wikipedia
+61702,1997,Outback Bowl,wikipedia
+61706,1997,Peach Bowl,wikipedia
+61703,1997,Rose Bowl,wikipedia
+61701,1997,Sugar Bowl,wikipedia
+61697,1997,Sun Bowl,wikipedia
+62366,1998,Alamo Bowl,wikipedia
+62363,1998,Aloha Bowl,wikipedia
+62378,1998,Cotton Bowl Classic,wikipedia
+62381,1998,Fiesta Bowl,wikipedia
+62375,1998,Florida Citrus Bowl,wikipedia
+62374,1998,Gator Bowl,wikipedia
+62368,1998,Holiday Bowl,wikipedia
+62369,1998,Humanitarian Bowl,wikipedia
+62371,1998,Independence Bowl,wikipedia
+62364,1998,Insight.com Bowl,wikipedia
+62360,1998,Las Vegas Bowl,wikipedia
+62373,1998,Liberty Bowl,wikipedia
+62365,1998,MicronPC Bowl,wikipedia
+62361,1998,Motor City Bowl,wikipedia
+62367,1998,Music City Bowl,wikipedia
+62362,1998,Oahu Bowl,wikipedia
+62380,1998,Orange Bowl,wikipedia
+62377,1998,Outback Bowl,wikipedia
+62370,1998,Peach Bowl,wikipedia
+62379,1998,Rose Bowl,wikipedia
+62376,1998,Sugar Bowl,wikipedia
+62372,1998,Sun Bowl,wikipedia
+63050,1999,Alamo Bowl,wikipedia
+63048,1999,Aloha Bowl,wikipedia
+63060,1999,Cotton Bowl Classic,wikipedia
+63066,1999,Fiesta Bowl,wikipedia
+63064,1999,Florida Citrus Bowl,wikipedia
+63062,1999,Gator Bowl,wikipedia
+63051,1999,Holiday Bowl,wikipedia
+63053,1999,Humanitarian Bowl,wikipedia
+63057,1999,Independence Bowl,wikipedia
+63056,1999,Insight.com Bowl,wikipedia
+63045,1999,Las Vegas Bowl,wikipedia
+63059,1999,Liberty Bowl,wikipedia
+63054,1999,MicronPC Bowl,wikipedia
+63046,1999,Mobile Alabama Bowl,wikipedia
+63049,1999,Motor City Bowl,wikipedia
+63052,1999,Music City Bowl,wikipedia
+63047,1999,Oahu Bowl,wikipedia
+63055,1999,Peach Bowl,wikipedia
+63065,1999,Rose Bowl,wikipedia
+63067,1999,Sugar Bowl,wikipedia
+63058,1999,Sun Bowl,wikipedia
+63759,2000,Alamo Bowl,wikipedia
+63748,2000,Aloha Bowl,wikipedia
+63762,2000,Cotton Bowl,wikipedia
+63764,2000,Fiesta Bowl,wikipedia
+63763,2000,Florida Citrus Bowl,wikipedia
+63749,2000,Galleryfurniture.com Bowl,wikipedia
+63766,2000,Gator Bowl,wikipedia
+63757,2000,Holiday Bowl,wikipedia
+63751,2000,Humanitarian Bowl,wikipedia
+63761,2000,Independence Bowl,wikipedia
+63752,2000,Insight.com Bowl,wikipedia
+63746,2000,Las Vegas Bowl,wikipedia
+63755,2000,Liberty Bowl,wikipedia
+63753,2000,MicronPC.com Bowl,wikipedia
+63745,2000,Mobile Alabama Bowl,wikipedia
+63750,2000,Motor City Bowl,wikipedia
+63754,2000,Music City Bowl,wikipedia
+63747,2000,Oahu Bowl,wikipedia
+63769,2000,Orange Bowl,wikipedia
+63765,2000,Outback Bowl,wikipedia
+63756,2000,Peach Bowl,wikipedia
+63767,2000,Rose Bowl,wikipedia
+63760,2000,Silicon Valley Classic,wikipedia
+63768,2000,Sugar Bowl,wikipedia
+63758,2000,Sun Bowl,wikipedia
+213632641,2001,Alamo Bowl,wikipedia
+220010201,2001,Cotton Bowl Classic,wikipedia
+220012483,2001,Fiesta Bowl,wikipedia
+220012633,2001,Florida Citrus Bowl,wikipedia
+213620245,2001,Galleryfurniture.com Bowl,wikipedia
+220010259,2001,Gator Bowl,wikipedia
+213530276,2001,GMAC Bowl,wikipedia
+213620251,2001,Holiday Bowl,wikipedia
+213652348,2001,Humanitarian Bowl,wikipedia
+213610066,2001,Independence Bowl,wikipedia
+213632306,2001,Insight Bowl,wikipedia
+213590254,2001,Las Vegas Bowl,wikipedia
+213650252,2001,Liberty Bowl,wikipedia
+213632649,2001,Motor City Bowl,wikipedia
+213620061,2001,Music City Bowl,wikipedia
+213520036,2001,New Orleans Bowl,wikipedia
+220020057,2001,Orange Bowl,wikipedia
+220012579,2001,Outback Bowl,wikipedia
+213650002,2001,Peach Bowl,wikipedia
+220032390,2001,Rose Bowl,wikipedia
+213610024,2001,Seattle Bowl,wikipedia
+213650278,2001,Silicon Valley Football Classic,wikipedia
+220010356,2001,Sugar Bowl,wikipedia
+213650265,2001,Sun Bowl,wikipedia
+213540152,2001,Tangerine Bowl,wikipedia
+223620275,2002,Alamo Bowl,espn
+230032390,2002,At Tempe Az,espn
+230010002,2002,Capital One Bowl,espn
+223620258,2002,Continental Tire Bowl,espn
+230010099,2002,Cotton Bowl,espn
+230010087,2002,Gator Bowl,espn
+223520276,2002,Gmac Bowl,espn
+223590062,2002,Hawaii Bowl,espn
+223610009,2002,Holiday Bowl,espn
+223610197,2002,Houston Bowl,espn
+223650068,2002,Humanitarian Bowl,espn
+223610145,2002,Independence Bowl,espn
+223600204,2002,Insight Bowl,espn
+223590167,2002,Las Vegas Bowl,espn
+223650036,2002,Liberty Bowl,espn
+223602649,2002,Motor City Bowl,espn
+223640135,2002,Music City Bowl,espn
+223512132,2002,New Orleans Bowl,espn
+230020030,2002,Orange Bowl,espn
+230010057,2002,Outback Bowl,espn
+223652633,2002,Peach Bowl,espn
+230010265,2002,Rose Bowl,espn
+223650259,2002,San Francisco Bowl,espn
+223640154,2002,Seattle Bowl,espn
+223650278,2002,Silicon Valley Classic,espn
+230010052,2002,Sugar Bowl,espn
+223650264,2002,Sun Bowl,espn
+223572641,2002,Tangerine Bowl,espn
+233652572,2003,Axa Liberty Bowl,espn
+240012509,2003,Capital One Bowl,espn
+240020228,2003,Chick-Fil-A Peach Bowl,espn
+233610258,2003,Continental Tire Bowl,espn
+233650036,2003,Diamond Walnut Sf Bowl,espn
+233642641,2003,Ev1.Net Houston Bowl,espn
+240010052,2003,Fedex Orange Bowl,espn
+233650002,2003,Gaylord Hotels Music City Bowl,espn
+233520097,2003,Gmac Bowl,espn
+240030202,2003,Humanitarian Bowl,espn
+233600025,2003,Insight Bowl,espn
+233580167,2003,Las Vegas Bowl,espn
+233650008,2003,Mainstay Independence Bowl,espn
+233630158,2003,Mastercard Alamo Bowl,espn
+233562305,2003,Mazda Tangerine Bowl,espn
+233600189,2003,Motor City Bowl,espn
+233500249,2003,New Orleans Bowl,espn
+240040099,2003,Nokia Sugar Bowl,espn
+240010057,2003,Outback Bowl,espn
+233640265,2003,Pacific Life Holiday Bowl,espn
+233570068,2003,Plains Capital Fort Worth Bowl,espn
+240010030,2003,Rose Bowl,espn
+240020197,2003,Sbc Cotton Bowl Classic,espn
+233590062,2003,Sheraton Hawaii Bowl,espn
+233640278,2003,Silicon Valley Football Classic,espn
+240020194,2003,Tostitos Fiesta Bowl,espn
+240010277,2003,Toyota Gator Bowl,espn
+233650135,2003,Wells Fargo Sun Bowl,espn
+243640197,2004,Alamo Bowl,espn
+250012294,2004,Capital One Bowl,espn
+243560059,2004,Champs Sports Bowl,espn
+243650153,2004,Continental Tire Bowl,espn
+250010245,2004,Cotton Bowl,espn
+243652426,2004,Emerald Bowl,espn
+250010221,2004,Fiesta Bowl,espn
+243582132,2004,Fort Worth Bowl,espn
+250010277,2004,Gator Bowl,espn
+243570235,2004,GMAC Bowl,espn
+243590005,2004,Hawaii Bowl,espn
+243650025,2004,Holiday Bowl,espn
+243642638,2004,Houston Bowl,espn
+243630066,2004,Independence Bowl,espn
+243630087,2004,Insight Bowl,espn
+243582751,2004,Las Vegas Bowl,espn
+243660097,2004,Liberty Bowl,espn
+243622649,2004,Motor City Bowl,espn
+243620278,2004,MPC Computers Bowl,espn
+243660135,2004,Music City Bowl,espn
+243492572,2004,New Orleans Bowl,espn
+250040030,2004,Orange Bowl,espn
+250010275,2004,Outback Bowl,espn
+243660057,2004,Peach Bowl,espn
+250010130,2004,Rose Bowl,espn
+243652653,2004,Silicon Valley Classic,espn
+250030259,2004,Sugar Bowl,espn
+243662509,2004,Sun Bowl,espn
+260020333,2005,AT&T Cotton Bowl,espn
+253650278,2005,AutoZone Liberty Bowl,espn
+260020002,2005,Capital One Bowl,espn
+253610038,2005,Champs Sports Bowl,espn
+253640099,2005,Chick-fil-A Peach Bowl,espn
+253630254,2005,Emerald Bowl,espn
+253650066,2005,EV1.net Houston Bowl,espn
+260030052,2005,FedEx Orange Bowl,espn
+253570248,2005,Forth Worth Bowl,espn
+253640258,2005,Gaylord Hotels Music City Bowl,espn
+253552638,2005,GMAC Bowl,espn
+253640142,2005,Independence Bowl,espn
+253610164,2005,Insight Bowl,espn
+253620158,2005,MasterCard Alamo Bowl,espn
+253650152,2005,Meineke Car Care Bowl,espn
+253602006,2005,Motor City Bowl,espn
+253620103,2005,MPC Computers Bowl,espn
+253542032,2005,New Orleans Bowl,espn
+260020061,2005,Nokia Sugar Bowl,espn
+260020057,2005,Outback Bowl,espn
+253630201,2005,Pacific Life Holiday Bowl,espn
+253560025,2005,Pioneer PureVision Las Vegas Bowl,espn
+253562426,2005,San Diego County Credit Union Poinsettia Bowl,espn
+253582116,2005,Sheraton Hawaii Bowl,espn
+260040030,2005,The Rose Bowl Game,espn
+260020194,2005,Tostitos Fiesta Bowl,espn
+260020259,2005,Toyota Gator Bowl,espn
+253640026,2005,Vitalis Sun Bowl,espn
+263642294,2006,Alamo Bowl,espn
+263570254,2006,Armed Forces Bowl,espn
+270080194,2006,Bcs National Championship,espn
+270010275,2006,Capital One Bowl,espn
+263630120,2006,Champs Sports Bowl,espn
+263640259,2006,Chick Fil-A Bowl,espn
+270010158,2006,Cotton Bowl,espn
+263610026,2006,Emerald Bowl,espn
+270010201,2006,Fiesta Bowl,espn
+270010277,2006,Gator Bowl,espn
+270072572,2006,Gmac Bowl,espn
+263580062,2006,Hawaii Bowl,espn
+263620025,2006,Holiday Bowl,espn
+263620333,2006,Independence Bowl,espn
+263630135,2006,Insight Bowl,espn
+270062132,2006,International Bowl,espn
+263552483,2006,Las Vegas Bowl,espn
+263632579,2006,Liberty Bowl,espn
+263640103,2006,Meineke Car Care Bowl,espn
+263602117,2006,Motor City Bowl,espn
+263652440,2006,Mpc Computers Bowl,espn
+263630096,2006,Music City Bowl,espn
+263570023,2006,New Mexico Bowl,espn
+263562653,2006,New Orleans Bowl,espn
+270020154,2006,Orange Bowl,espn
+270010213,2006,Outback Bowl,espn
+263570151,2006,Papajohns.Com Bowl,espn
+263532628,2006,Poinsettia Bowl,espn
+270010130,2006,Rose Bowl,espn
+270030099,2006,Sugar Bowl,espn
+263630142,2006,Sun Bowl,espn
+263622306,2006,Texas Bowl,espn
+280070194,2007,Allstate Bcs National Championship Game,espn
+280010061,2007,Allstate Sugar Bowl,espn
+273630344,2007,Autozone Liberty Bowl,espn
+273652005,2007,Bell Helicopter Armed Forces Bowl,espn
+280010057,2007,Capital One Bowl,espn
+273620127,2007,Champs Sports Bowl,espn
+273650002,2007,Chick-Fil-A Bowl,espn
+280010008,2007,Cotton Bowl,espn
+273620204,2007,Emerald Bowl,espn
+280030259,2007,Fedex Orange Bowl,espn
+280010258,2007,Gator Bowl,espn
+273650052,2007,Gaylord Hotels Music City Bowl,espn
+280060189,2007,Gmac Bowl,espn
+273650197,2007,Insight Bowl,espn
+280050164,2007,International Bowl,espn
+273630154,2007,Meineke Car Care Bowl,espn
+273602117,2007,Motor City Bowl,espn
+273560167,2007,New Mexico Bowl,espn
+280010275,2007,Outback Bowl,espn
+273610251,2007,Pacific Life Holiday Bowl,espn
+273562132,2007,Papajohns.Com Bowl,espn
+273640038,2007,Petrosun Independence Bowl,espn
+273560252,2007,Pioneer Las Vegas Bowl,espn
+273550235,2007,R+L Carriers New Orleans Bowl,espn
+273650278,2007,Roady'S Humanitarian Bowl,espn
+273542426,2007,San Diego County Credit Union Poinsettia Bowl,espn
+273570151,2007,Sheraton Hawaii Bowl,espn
+273652483,2007,Sun Bowl,espn
+273620248,2007,Texas Bowl,espn
+280010030,2007,The Rose Bowl Game,espn
+280020201,2007,Tostitos Fiesta Bowl,espn
+273630245,2007,Valero Alamo Bowl,espn
+290020333,2008,Allstate Sugar Bowl,espn
+290020151,2008,Autozone Liberty Bowl,espn
+283662005,2008,Bell Helicopter Armed Forces Bowl,espn
+290010127,2008,Capital One Bowl,espn
+283620052,2008,Champs Sports Bowl,espn
+283660059,2008,Chick-Fil-A Bowl,espn
+290022641,2008,Cotton Bowl,espn
+283552426,2008,Eaglebank Bowl,espn
+283620025,2008,Emerald Bowl,espn
+290080201,2008,Fedex Bcs National Championship Game,espn
+290010259,2008,Fedex Orange Bowl,espn
+290010228,2008,Gator Bowl,espn
+283660238,2008,Gaylord Hotels Music City Bowl,espn
+290060202,2008,Gmac Bowl,espn
+283632348,2008,Independence Bowl,espn
+283660135,2008,Insight Bowl,espn
+290030041,2008,International Bowl,espn
+283550058,2008,Magicjack St. Petersburg Bowl,espn
+283620153,2008,Meineke Car Care Bowl,espn
+283612117,2008,Motor City Bowl,espn
+283550278,2008,New Mexico Bowl,espn
+290012294,2008,Outback Bowl,espn
+283652483,2008,Pacific Life Holiday Bowl,espn
+283640164,2008,Papajohns.Com Bowl,espn
+283550012,2008,Pioneer Las Vegas Bowl,espn
+283562653,2008,R+L Carriers New Orleans Bowl,espn
+283652440,2008,Roady'S Humanitarian Bowl,espn
+283582628,2008,San Diego County Credit Union Poinsettia Bowl,espn
+283590087,2008,Sheraton Hawaii Bowl,espn
+283660221,2008,Sun Bowl,espn
+283650242,2008,Texas Bowl,espn
+290010030,2008,The Rose Bowl Game,espn
+290050251,2008,Tostitos Fiesta Bowl,espn
+283640077,2008,Valero Alamo Bowl,espn
+293620061,2009,AdvoCare V100 INDEPENDENCE BOWL,espn
+300010057,2009,Allstate Sugar Bowl,espn
+300020145,2009,At&T Cotton Bowl,espn
+300020151,2009,AutoZone LIBERTY BOWL,espn
+293652005,2009,Bell Helicopter Armed Forces Bowl,espn
+293650024,2009,Brut Sun Bowl,espn
+300010099,2009,Capital One Bowl,espn
+293630275,2009,Champs Sports Bowl,espn
+293652633,2009,Chick-fil-A BOWL,espn
+300070333,2009,Citi Bcs National Championship Game,espn
+293630218,2009,EagleBank BOWL,espn
+293600030,2009,Emerald Bowl,espn
+300050059,2009,FedEx ORANGE BOWL,espn
+293610228,2009,Gaylord Hotels Music City Bowl,espn
+300062653,2009,Gmac Bowl,espn
+293650066,2009,Insight Bowl,espn
+300022459,2009,International Bowl,espn
+300010052,2009,Konica Minolta Gator Bowl,espn
+293600195,2009,Little Caesars Bowl,espn
+293560252,2009,Maaco Bowl Las Vegas,espn
+293600153,2009,Meineke Car Care Bowl,espn
+293532751,2009,New Mexico Bowl,espn
+300010002,2009,Outback Bowl,espn
+293640158,2009,Pacific Life Holiday Bowl,espn
+300020041,2009,PAPAJOHNS.com BOWL,espn
+293542393,2009,R+L Carriers New Orleans Bowl,espn
+293640070,2009,Roady'S Humanitarian Bowl,espn
+300012483,2009,Rose Bowl Game,espn
+293570025,2009,San Diego County Credit Union Poinsettia Bowl,espn
+293582567,2009,Sheraton Hawaii Bowl,espn
+293530164,2009,St. Petersburg Bowl,espn
+293650142,2009,Texas Bowl,espn
+300042628,2009,Tostitos Fiesta Bowl,espn
+300022641,2009,Valero Alamo Bowl,espn
+303610059,2010,AdvoCare V100 INDEPENDENCE BOWL,espn
+310040008,2010,Allstate Sugar Bowl,espn
+310070245,2010,At&T Cotton Bowl,espn
+303652116,2010,AutoZone LIBERTY BOWL,espn
+310080096,2010,Bbva Compass Bowl,espn
+303550097,2010,Beef 'O' Brady'S Bowl St. Petersburg,espn
+303642567,2010,Bell Helicopter Armed Forces Bowl,espn
+303640264,2010,Bridgepoint Education Holiday Bowl,espn
+310010127,2010,Capital One Bowl,espn
+303620152,2010,Champs Sports Bowl,espn
+303650052,2010,Chick-fil-A BOWL,espn
+310030259,2010,Discover Orange Bowl,espn
+303642633,2010,Franklin American Mortgage Music City Bowl,espn
+310060193,2010,GODADDY.com BOWL,espn
+303652390,2010,Hyundai Sun Bowl,espn
+303622294,2010,Insight Bowl,espn
+310090103,2010,Kraft Fight Hunger Bowl,espn
+303602649,2010,Little Caesars Bowl,espn
+303560068,2010,Maaco Bowl Las Vegas,espn
+303650228,2010,Meineke Car Care Bowl,espn
+303630120,2010,Military Bowl,espn
+303640183,2010,New Era Pinstripe Bowl,espn
+303522638,2010,New Mexico Bowl,espn
+310010213,2010,Outback Bowl,espn
+310010130,2010,Progressive Gator Bowl,espn
+303522653,2010,R+L Carriers New Orleans Bowl,espn
+310012628,2010,Rose Bowl Game,espn
+303570021,2010,San Diego County Credit Union Poinsettia Bowl,espn
+303580202,2010,Sheraton Hawaii Bowl,espn
+303630239,2010,Texas Bowl,espn
+310012641,2010,Ticketcity Bowl,espn
+310102483,2010,Tostitos Bcs National Championship Game,espn
+310010201,2010,Tostitos Fiesta Bowl,espn
+303520278,2010,uDROVE HUMANITARIAN BOWL,espn
+303630012,2010,Valero Alamo Bowl,espn
+313600153,2011,AdvoCare V100 INDEPENDENCE BOWL,espn
+320090099,2011,Allstate Bcs National Championship,espn
+320030259,2011,Allstate Sugar Bowl,espn
+320060008,2011,At&T Cotton Bowl,espn
+313650238,2011,AutoZone LIBERTY BOWL,espn
+320070221,2011,Bbva Compass Bowl,espn
+313540276,2011,Beef 'O' Brady'S Bowl St. Petersburg,espn
+313610152,2011,Belk Bowl,espn
+313640202,2011,Bell Helicopter Armed Forces Bowl,espn
+313620251,2011,Bridgepoint Education Holiday Bowl,espn
+320022579,2011,Capital One Bowl,espn
+313630087,2011,Champs Sports Bowl,espn
+313650002,2011,Chick-fil-A BOWL,espn
+320040228,2011,Discover Orange Bowl,espn
+313510328,2011,Famous Idaho Potato Bowl,espn
+313640154,2011,Franklin American Mortgage Music City Bowl,espn
+313512751,2011,Gildan New Mexico Bowl,espn
+320082459,2011,GODADDY.com BOWL,espn
+313650254,2011,Hyundai Sun Bowl,espn
+313640201,2011,Insight Bowl,espn
+313650026,2011,Kraft Fight Hunger Bowl,espn
+313612509,2011,Little Caesars Bowl,espn
+313560068,2011,Maaco Bowl Las Vegas,espn
+313650077,2011,Meineke Car Care Bowl Of Texas,espn
+313622005,2011,Military Bowl -,espn
+313640066,2011,New Era Pinstripe Bowl,espn
+320020061,2011,Outback Bowl,espn
+313510309,2011,R+L Carriers New Orleans Bowl,espn
+320022483,2011,Rose Bowl Game,espn
+313552348,2011,San Diego County Credit Union Poinsettia Bowl,espn
+313582572,2011,Sheraton Hawaii Bowl,espn
+320020057,2011,TAXSLAYER.com GATOR BOWL,espn
+320020213,2011,Ticketcity Bowl,espn
+320020197,2011,Tostitos Fiesta Bowl,espn
+313630239,2011,Valero Alamo Bowl,espn
+323632433,2012,AdvoCare V100 INDEPENDENCE BOWL,espn
+330020057,2012,Allstate Sugar Bowl,espn
+330040201,2012,At&T Cotton Bowl,espn
+323660202,2012,AutoZone LIBERTY BOWL,espn
+330050145,2012,Bbva Compass Bowl,espn
+323562116,2012,Beef 'O' Brady'S Bowl St. Petersburg,espn
+323620150,2012,Belk Bowl,espn
+323642005,2012,Bell Helicopter Armed Forces Bowl,espn
+323620026,2012,Bridgepoint Education Holiday Bowl,espn
+323640127,2012,Buffalo Wild Wings Bowl,espn
+330010158,2012,Capital One Bowl,espn
+323660228,2012,Chick-fil-A BOWL,espn
+330070333,2012,Discover Bcs National Championship,espn
+330010052,2012,Discover Orange Bowl,espn
+323500328,2012,Famous Idaho Potato Bowl,espn
+323660238,2012,Franklin American Mortgage Music City Bowl,espn
+323500012,2012,Gildan New Mexico Bowl,espn
+330062032,2012,GODADDY.com BOWL,espn
+330010197,2012,Heart Of Dallas Bowl,espn
+323660059,2012,Hyundai Sun Bowl,espn
+323640009,2012,Kraft Fight Hunger Bowl,espn
+323612117,2012,Little Caesars Bowl,espn
+323570068,2012,Maaco Bowl Las Vegas,espn
+323632641,2012,Meineke Car Care Bowl Of Texas,espn
+323620189,2012,Military Bowl -,espn
+323640183,2012,New Era Pinstripe Bowl,espn
+330010130,2012,Outback Bowl,espn
+323570309,2012,R+L Carriers New Orleans Bowl,espn
+330010024,2012,Rose Bowl Game,espn
+323630259,2012,Russell Athletic Bowl,espn
+323550021,2012,San Diego County Credit Union Poinsettia Bowl,espn
+323592567,2012,Sheraton Hawaii Bowl,espn
+330010077,2012,TAXSLAYER.com GATOR BOWL,espn
+330032306,2012,Tostitos Fiesta Bowl,espn
+323640204,2012,Valero Alamo Bowl,espn
+333650103,2013,AdvoCare V100 BOWL,cfbd
+340020333,2013,Allstate Sugar Bowl,cfbd
+340030142,2013,At&T Cotton Bowl,cfbd
+333650344,2013,AutoZone LIBERTY BOWL,cfbd
+340040248,2013,Bbva Compass Bowl,cfbd
+333570151,2013,Beef 'O' Brady'S Bowl St. Petersburg,cfbd
+333620153,2013,Belk Bowl,cfbd
+333642426,2013,Bell Helicopter Armed Forces Bowl,cfbd
+333622306,2013,Buffalo Wild Wings Bowl,cfbd
+340012579,2013,Capital One Bowl,cfbd
+333650245,2013,Chick-fil-A BOWL,cfbd
+340030194,2013,Discover Orange Bowl,cfbd
+333550021,2013,Famous Idaho Potato Bowl,cfbd
+333610264,2013,Fight Hunger Bowl,cfbd
+333640059,2013,Franklin American Mortgage Music City Bowl,cfbd
+333550036,2013,Gildan New Mexico Bowl,cfbd
+340052050,2013,Godaddy Bowl,cfbd
+340010249,2013,Heart Of Dallas Bowl -,cfbd
+333650026,2013,Hyundai Sun Bowl,cfbd
+333600189,2013,Little Caesars Bowl,cfbd
+333610120,2013,Military Bowl -,cfbd
+333642641,2013,National University Holiday Bowl,cfbd
+340042449,2013,Ncaa Division I Football Championship,espn
+333542449,2013,Ncaa Division I Football Championship - Semifinal,espn
+333620087,2013,New Era Pinstripe Bowl,cfbd
+340010099,2013,Outback Bowl,cfbd
+333550309,2013,R+L Carriers New Orleans Bowl,cfbd
+340010127,2013,Rose Bowl Game,cfbd
+333550030,2013,Royal Purple Las Vegas Bowl,cfbd
+333620097,2013,Russell Athletic Bowl,cfbd
+333602459,2013,San Diego County Credit Union Poinsettia Bowl,cfbd
+333580204,2013,Sheraton Hawai'I Bowl,cfbd
+340010061,2013,TAXSLAYER.com GATOR BOWL,cfbd
+333610135,2013,Texas Bowl,cfbd
+340010239,2013,Tostitos Fiesta Bowl,cfbd
+333640251,2013,Valero Alamo Bowl,cfbd
+340060002,2013,Vizio Bcs National Championship,cfbd
+400610223,2014,Advocare V100 Texas Bowl,cfbd
+400610178,2014,Allstate Sugar Bowl - Semifinal,cfbd
+400610226,2014,Autozone Liberty Bowl,cfbd
+400610215,2014,Belk Bowl,cfbd
+400610228,2014,Birmingham Bowl,cfbd
+400610209,2014,Bitcoin St. Petersburg Bowl,cfbd
+400610203,2014,Boca Raton Bowl,cfbd
+400610217,2014,Buffalo Wild Wings Citrus Bowl,cfbd
+400610180,2014,Capital One Orange Bowl,espn
+400610325,2014,CFP National Championship Game,cfbd
+400610182,2014,Chick-Fil-A Peach Bowl,cfbd
+400610216,2014,Duck Commander Independence Bowl,cfbd
+400610198,2014,Famous Idaho Potato Bowl,cfbd
+400610206,2014,Foster Farms Bowl,cfbd
+400610214,2014,Franklin American Mortgage Music City Bowl,cfbd
+400610202,2014,Gildan New Mexico Bowl,cfbd
+400610200,2014,Godaddy Bowl,cfbd
+400610179,2014,Goodyear Cotton Bowl Classic,cfbd
+400610204,2014,Hawai'I Bowl,cfbd
+400610211,2014,Hyundai Sun Bowl,cfbd
+400610213,2014,Lockheed Martin Armed Forces Bowl,cfbd
+400610225,2014,Miami Beach Bowl,cfbd
+400610207,2014,Military Bowl,cfbd
+400610220,2014,National University Holiday Bowl,cfbd
+400749714,2014,Ncaa Division I Football Championship,espn
+400610895,2014,Ncaa Division I Football Championship - Semifinal,espn
+400610210,2014,New Era Pinstripe Bowl,cfbd
+400610219,2014,Outback Bowl,cfbd
+400610205,2014,Popeyes Bahamas Bowl,cfbd
+400610212,2014,Quick Lane Bowl,cfbd
+400610197,2014,R+L Carriers New Orleans Bowl,cfbd
+400610201,2014,Raycom Media Camellia Bowl,cfbd
+400610177,2014,Rose Bowl Game,cfbd
+400610221,2014,Royal Purple Las Vegas Bowl,cfbd
+400610208,2014,Russell Athletic Bowl,cfbd
+400610199,2014,San Diego County Credit Union Poinsettia Bowl,cfbd
+400610224,2014,Taxslayer Bowl,cfbd
+400610227,2014,Ticketcity Cactus Bowl,cfbd
+400610218,2014,Valero Alamo Bowl,cfbd
+400610181,2014,Vizio Fiesta Bowl,espn
+400610222,2014,Zaxby'S Heart Of Dallas Bowl,cfbd
+400852726,2015,Advocare V100 Texas Bowl,cfbd
+400852738,2015,Allstate Sugar Bowl,cfbd
+400852683,2015,Autonation Cure Bowl,cfbd
+400852740,2015,Autozone Liberty Bowl,cfbd
+400852736,2015,Battlefrog Fiesta Bowl,cfbd
+400852728,2015,Belk Bowl,espn
+400852727,2015,Birmingham Bowl,espn
+400852735,2015,Buffalo Wild Wings Citrus Bowl,cfbd
+400852719,2015,Camping World Independence Bowl,cfbd
+400852733,2015,Capital One Orange Bowl - CFP Semifinal,espn
+400852743,2015,CFP National Championship Game,cfbd
+400852731,2015,Chick-fil-A Peach Bowl,espn
+400852708,2015,Famous Idaho Potato Bowl,cfbd
+400852720,2015,Foster Farms Bowl,cfbd
+400852729,2015,Franklin American Mortgage Music City Bowl,espn
+400852668,2015,Gildan New Mexico Bowl,cfbd
+400852711,2015,Godaddy Bowl,cfbd
+400852732,2015,Goodyear Cotton Bowl Classic - CFP Semifinal,espn
+400852714,2015,Hawai'I Bowl,cfbd
+400852716,2015,Hyundai Sun Bowl,cfbd
+400852723,2015,Lockheed Martin Armed Forces Bowl,cfbd
+400852709,2015,Marmot Boca Raton Bowl,cfbd
+400852687,2015,Miami Beach Bowl,cfbd
+400852721,2015,Military Bowl,cfbd
+400852742,2015,Motel 6 Cactus Bowl,cfbd
+400852730,2015,National Funding Holiday Bowl,cfbd
+400857728,2015,Ncaa Division I Football Championship,espn
+400856848,2015,Ncaa Division I Football Championship - Semifinal,espn
+400856849,2015,Ncaa Division I Football Championship - Semifinal,espn
+400852718,2015,New Era Pinstripe Bowl,cfbd
+400852725,2015,Nova Home Loans Arizona Bowl,cfbd
+400852734,2015,Outback Bowl,cfbd
+400852713,2015,Popeyes Bahamas Bowl,cfbd
+400852722,2015,Quick Lane Bowl,cfbd
+400852686,2015,R+L Carriers New Orleans Bowl,cfbd
+400852685,2015,Raycom Media Camellia Bowl,cfbd
+400852737,2015,Rose Bowl Game,cfbd
+400852684,2015,Royal Purple Las Vegas Bowl,cfbd
+400852724,2015,Russell Athletic Bowl,cfbd
+400852710,2015,San Diego County Credit Union Poinsettia Bowl,cfbd
+400852715,2015,St. Petersburg Bowl,cfbd
+400852739,2015,Taxslayer Bowl,cfbd
+400852741,2015,Valero Alamo Bowl,cfbd
+400852717,2015,Zaxby'S Heart Of Dallas Bowl,cfbd
+400876099,2016,Advocare V100 Texas Bowl,cfbd
+400876112,2016,Allstate Sugar Bowl,cfbd
+400903611,2016,Autonation Cure Bowl,cfbd
+400876103,2016,AutoZone LIBERTY BOWL,espn
+400876101,2016,Belk Bowl,espn
+400876100,2016,Birmingham Bowl,espn
+400876043,2016,Boca Raton Bowl,cfbd
+400876106,2016,Buffalo Wild Wings Citrus Bowl,espn
+400876092,2016,Camping World Independence Bowl,cfbd
+400876105,2016,Capital One Orange Bowl,cfbd
+400876570,2016,CFP National Championship Game,cfbd
+400876107,2016,Chick-fil-A Peach Bowl - CFP Semifinal,espn
+400876048,2016,Dollar General Bowl,cfbd
+400876045,2016,Famous Idaho Potato Bowl,cfbd
+400903226,2016,Foster Farms Bowl,cfbd
+400876104,2016,Franklin American Mortgage Music City Bowl,espn
+400876038,2016,Gildan New Mexico Bowl,cfbd
+400876110,2016,Goodyear Cotton Bowl Classic,cfbd
+400876049,2016,Hawai'I Bowl,cfbd
+400878692,2016,Hyundai Sun Bowl,espn
+400876039,2016,Las Vegas Bowl,cfbd
+400876047,2016,Lockheed Martin Armed Forces Bowl,cfbd
+400876042,2016,Miami Beach Bowl,cfbd
+400876094,2016,Military Bowl,cfbd
+400876096,2016,Motel 6 Cactus Bowl,cfbd
+400876095,2016,National Funding Holiday Bowl,cfbd
+400928522,2016,Ncaa Division I Football Championship - Semifinal,espn
+400930788,2016,Ncaa Fcs Football Championship,espn
+400876097,2016,New Era Pinstripe Bowl,cfbd
+400928102,2016,Nova Home Loans Arizona Bowl,espn
+400876109,2016,Outback Bowl,cfbd
+400876108,2016,PlayStation Fiesta Bowl - CFP Semifinal,espn
+400876046,2016,Popeyes Bahamas Bowl,cfbd
+400876091,2016,Quick Lane Bowl,cfbd
+400876041,2016,R+L Carriers New Orleans Bowl,cfbd
+400876040,2016,Raycom Media Camellia Bowl,cfbd
+400876111,2016,Rose Bowl Game,cfbd
+400876098,2016,Russell Athletic Bowl,cfbd
+400876044,2016,San Diego County Credit Union Poinsettia Bowl,cfbd
+400876090,2016,St. Petersburg Bowl,cfbd
+400876113,2016,Taxslayer Bowl,espn
+400876102,2016,Valero Alamo Bowl,cfbd
+400876093,2016,Zaxby'S Heart Of Dallas Bowl,cfbd
+400953399,2017,Academy Sports + Outdoors Texas Bowl,cfbd
+400953413,2017,Allstate Sugar Bowl - CFP Semifinal,cfbd
+400953409,2017,Autonation Cure Bowl,cfbd
+400953406,2017,Autozone Liberty Bowl,espn
+400953387,2017,Bad Boy Mowers Gasparilla Bowl,cfbd
+400953388,2017,Bahamas Bowl,cfbd
+400953402,2017,Belk Bowl,espn
+400953390,2017,Birmingham Bowl,cfbd
+400953396,2017,Cactus Bowl,cfbd
+400953416,2017,Camping World Bowl,cfbd
+400953408,2017,Capital One Orange Bowl,espn
+400953415,2017,CFP National Championship,cfbd
+400953386,2017,Cheribundi Tart Cherry Boca Raton Bowl,cfbd
+400953411,2017,Chick-Fil-A Peach Bowl,cfbd
+400953414,2017,Citrus Bowl,cfbd
+400953392,2017,Dollar General Bowl,cfbd
+400954523,2017,Dxl Frisco Bowl,cfbd
+400953389,2017,Famous Idaho Potato Bowl,cfbd
+400959398,2017,Foster Farms Bowl,cfbd
+400953403,2017,Franklin American Mortgage Music City Bowl,espn
+400953324,2017,Gildan New Mexico Bowl,cfbd
+400953404,2017,Goodyear Cotton Bowl Classic,espn
+400953393,2017,Hawai'I Bowl,cfbd
+400953417,2017,Hyundai Sun Bowl,espn
+400953323,2017,Las Vegas Bowl,cfbd
+400953391,2017,Lockheed Martin Armed Forces Bowl,cfbd
+400953400,2017,Military Bowl,cfbd
+401004846,2017,Ncaa Fcs Football Championship,espn
+401003810,2017,Ncaa Fcs Football Championship Semifinal,espn
+401003826,2017,Ncaa Fcs Football Championship Semifinal,espn
+400953398,2017,New Era Pinstripe Bowl,cfbd
+400966332,2017,Nova Home Loans Arizona Bowl,espn
+400953410,2017,Outback Bowl,cfbd
+400953407,2017,PlayStation Fiesta Bowl,espn
+400953394,2017,Quick Lane Bowl,cfbd
+400953322,2017,R+L Carriers New Orleans Bowl,cfbd
+400953325,2017,Raycom Media Camellia Bowl,cfbd
+400953412,2017,Rose Bowl Game,cfbd
+400959397,2017,San Diego County Credit Union Holiday Bowl,cfbd
+400953405,2017,Taxslayer Bowl,espn
+400953401,2017,Valero Alamo Bowl,cfbd
+400953397,2017,Walk-On'S Independence Bowl,cfbd
+400953395,2017,Zaxby'S Heart Of Dallas Bowl,cfbd
+401032072,2018,Academy Sports + Outdoors Texas Bowl,cfbd
+401032086,2018,Allstate Sugar Bowl,cfbd
+401035253,2018,Autonation Cure Bowl,cfbd
+401032081,2018,Autozone Liberty Bowl,espn
+401032060,2018,Bad Boy Mowers Gasparilla Bowl,cfbd
+401032077,2018,Belk Bowl,espn
+401032074,2018,Camping World Bowl,cfbd
+401032078,2018,Capital One Orange Bowl - CFP Semifinal,cfbd
+401032087,2018,CFP National Championship,cfbd
+401032069,2018,Cheez-It Bowl,cfbd
+401032058,2018,Cheribundi Boca Raton Bowl,cfbd
+401032076,2018,Chick-Fil-A Peach Bowl,cfbd
+401032065,2018,Dollar General Bowl,cfbd
+401032059,2018,Dxl Frisco Bowl,cfbd
+401032062,2018,Famous Idaho Potato Bowl,cfbd
+401104373,2018,Fcs Championship,espn
+401102913,2018,Fcs Championship - Semifinals,espn
+401032073,2018,Franklin American Mortgage Music City Bowl,cfbd
+401032079,2018,Goodyear Cotton Bowl Classic - CFP Semifinal,cfbd
+401035251,2018,Hyundai Sun Bowl,espn
+401032063,2018,Jared Birmingham Bowl,cfbd
+401032064,2018,Lockheed Martin Armed Forces Bowl,cfbd
+401032061,2018,Makers Wanted Bahamas Bowl,cfbd
+401032080,2018,Military Bowl,espn
+401032055,2018,Mitsubishi Motors Las Vegas Bowl,cfbd
+401032071,2018,New Era Pinstripe Bowl,cfbd
+401032054,2018,New Mexico Bowl,cfbd
+401035252,2018,Nova Home Loans Arizona Bowl,espn
+401032083,2018,Outback Bowl,cfbd
+401032084,2018,Playstation Fiesta Bowl,cfbd
+401032068,2018,Quick Lane Bowl,cfbd
+401032057,2018,R+L Carriers New Orleans Bowl,cfbd
+401032056,2018,Raycom Media Camellia Bowl,cfbd
+401035254,2018,Redbox Bowl,espn
+401032085,2018,Rose Bowl Game,cfbd
+401035250,2018,San Diego County Credit Union Holiday Bowl,espn
+401032066,2018,Sofi Hawai'I Bowl,cfbd
+401032082,2018,Taxslayer Gator Bowl,espn
+401032075,2018,Valero Alamo Bowl,cfbd
+401032088,2018,Vrbo Citrus Bowl,cfbd
+401032070,2018,Walk-On'S Independence Bowl,cfbd
+401135274,2019,Academy Sports + Outdoors Texas Bowl,cfbd
+401135289,2019,Allstate Sugar Bowl,cfbd
+401135284,2019,Autozone Liberty Bowl,espn
+401135268,2019,Bad Boy Mowers Gasparilla Bowl,cfbd
+401135283,2019,Belk Bowl,espn
+401135265,2019,Camellia Bowl,cfbd
+401135276,2019,Camping World Bowl,cfbd
+401135282,2019,Capital One Orange Bowl,cfbd
+401135295,2019,CFP National Championship,cfbd
+401135275,2019,Cheez-It Bowl,cfbd
+401135264,2019,Cheribundi Boca Raton Bowl,cfbd
+401135278,2019,Chick-Fil-A Peach Bowl - CFP Semifinal,cfbd
+401135292,2019,Famous Idaho Potato Bowl,cfbd
+401147693,2019,Fbc Mortgage Cure Bowl,cfbd
+401198013,2019,Fcs Championship,espn
+401189293,2019,Fcs Championship - Semifinals,espn
+401189294,2019,Fcs Championship - Semifinals,espn
+401135281,2019,Franklin American Mortgage Music City Bowl,cfbd
+401135277,2019,Goodyear Cotton Bowl Classic,cfbd
+401135294,2019,Lendingtree Bowl,cfbd
+401135293,2019,Lockheed Martin Armed Forces Bowl,cfbd
+401135260,2019,Makers Wanted Bahamas Bowl,cfbd
+401135272,2019,Military Bowl,cfbd
+401135266,2019,Mitsubishi Motors Las Vegas Bowl,cfbd
+401135273,2019,New Era Pinstripe Bowl,cfbd
+401135263,2019,New Mexico Bowl,cfbd
+401147695,2019,Nova Home Loans Arizona Bowl,espn
+401135287,2019,Outback Bowl,cfbd
+401135279,2019,Playstation Fiesta Bowl - CFP Semifinal,cfbd
+401135271,2019,Quick Lane Bowl,cfbd
+401135267,2019,R+L Carriers New Orleans Bowl,cfbd
+401136254,2019,Redbox Bowl,cfbd
+401135288,2019,Rose Bowl Game,cfbd
+401136253,2019,San Diego County Credit Union Holiday Bowl,cfbd
+401135280,2019,Servpro First Responder Bowl,cfbd
+401135269,2019,Sofi Hawai'I Bowl,cfbd
+401135291,2019,Taxslayer Gator Bowl,cfbd
+401135290,2019,Ticketsmarter Birmingham Bowl,cfbd
+401136255,2019,Tony The Tiger Sun Bowl,espn
+401135261,2019,Tropical Smoothie Cafe Frisco Bowl,cfbd
+401135285,2019,Valero Alamo Bowl,espn
+401135286,2019,Vrbo Citrus Bowl,cfbd
+401135270,2019,Walk-On'S Independence Bowl,cfbd
+401240173,2020,Allstate Sugar Bowl - CFP Semifinal,cfbd
+401256197,2020,AutoZone Liberty Bowl,cfbd
+401256141,2020,Camellia Bowl,cfbd
+401256112,2020,Capital One Orange Bowl,cfbd
+401240174,2020,CFP National Championship,cfbd
+401256150,2020,Cheez-It Bowl,cfbd
+401256108,2020,Chick-fil-A Peach Bowl,cfbd
+401256152,2020,Duke's Mayo Bowl,cfbd
+401256136,2020,Famous Idaho Potato Bowl,cfbd
+401256143,2020,FBC Mortgage Cure Bowl,cfbd
+401321794,2020,FCS Championship - First Round,cfbd
+401322680,2020,FCS Championship - Quarterfinals,cfbd
+401324093,2020,FCS Championship - Semifinals,cfbd
+401256194,2020,Goodyear Cotton Bowl Classic,cfbd
+401256145,2020,LendingTree Bowl,cfbd
+401256196,2020,Lockheed Martin Armed Forces Bowl,cfbd
+401256139,2020,Montgomery Bowl,cfbd
+401256135,2020,Myrtle Beach Bowl,cfbd
+401256140,2020,New Mexico Bowl,cfbd
+401268773,2020,Offerpad Arizona Bowl,cfbd
+401256110,2020,Outback Bowl,cfbd
+401256111,2020,PlayStation Fiesta Bowl,cfbd
+401256138,2020,R+L Carriers New Orleans Bowl,cfbd
+401256137,2020,RoofClaim.com Boca Raton Bowl,cfbd
+401240152,2020,Rose Bowl Game,cfbd
+401256144,2020,SERVPRO First Responder Bowl,cfbd
+401256109,2020,TaxSlayer Gator Bowl,cfbd
+401256151,2020,Valero Alamo Bowl,cfbd
+401256199,2020,Vrbo Citrus Bowl,cfbd
+401331240,2021,Allstate Sugar Bowl,cfbd
+401331223,2021,AutoZone Liberty Bowl,cfbd
+401331164,2021,Bahamas Bowl,cfbd
+401331242,2021,CFP National Championship,cfbd
+401331234,2021,CFP Semifinal at the Capital One Orange Bowl,cfbd
+401331235,2021,CFP Semifinal at the Goodyear Cotton Bowl Classic,cfbd
+401331227,2021,Cheez-It Bowl,cfbd
+401331231,2021,Chick-fil-A Peach Bowl,cfbd
+401331229,2021,Duke's Mayo Bowl,cfbd
+401331213,2021,Famous Idaho Potato Bowl,cfbd
+401391352,2021,FCS Championship,espn
+401391130,2021,FCS Championship - Quarterfinals,cfbd
+401389870,2021,FCS Championship - Second Round,cfbd
+401391353,2021,FCS Championship - Semifinals,espn
+401391158,2021,Frisco Football Classic,cfbd
+401331224,2021,Guaranteed Rate Bowl,cfbd
+401331170,2021,Jimmy Kimmel LA Bowl,cfbd
+401331169,2021,LendingTree Bowl,cfbd
+401331215,2021,Lockheed Martin Armed Forces Bowl,cfbd
+401331172,2021,Myrtle Beach Bowl,cfbd
+401331226,2021,New Era Pinstripe Bowl,cfbd
+401331236,2021,Outback Bowl,cfbd
+401331238,2021,PlayStation Fiesta Bowl,cfbd
+401331167,2021,PUBG Mobile New Mexico Bowl,cfbd
+401331219,2021,Quick Lane Bowl,cfbd
+401331171,2021,R+L Carriers New Orleans Bowl,cfbd
+401331168,2021,Radiance Technologies Independence Bowl,cfbd
+401331166,2021,RoofClaim.com Boca Raton Bowl,cfbd
+401331239,2021,Rose Bowl Game,cfbd
+401331222,2021,SERVPRO First Responder Bowl,cfbd
+401331232,2021,SRS Distribution Las Vegas Bowl,cfbd
+401331165,2021,Tailgreeter Cure Bowl,cfbd
+401331218,2021,TaxAct Camellia Bowl,cfbd
+401331241,2021,TaxAct Texas Bowl,cfbd
+401331233,2021,TaxSlayer Gator Bowl,cfbd
+401331221,2021,TicketSmarter Birmingham Bowl,cfbd
+401331654,2021,Tony the Tiger Sun Bowl,cfbd
+401331230,2021,TransPerfect Music City Bowl,cfbd
+401331214,2021,Tropical Smoothie Cafe Frisco Bowl,cfbd
+401331216,2021,Union Home Mortgage Gasparilla Bowl,cfbd
+401331228,2021,Valero Alamo Bowl,cfbd
+401331237,2021,Vrbo Citrus Bowl,cfbd
+401442018,2022,Allstate Sugar Bowl,cfbd
+401442030,2022,AutoZone Liberty Bowl,cfbd
+401442032,2022,Bad Boy Mowers Pinstripe Bowl,cfbd
+401443543,2022,Barstool Sports Arizona Bowl,cfbd
+401441998,2022,Camellia Bowl,cfbd
+401442019,2022,Capital One Orange Bowl,cfbd
+401442010,2022,CFP National Championship,cfbd
+401442015,2022,CFP Semifinal at the Chick-fil-A Peach Bowl,cfbd
+401442016,2022,CFP Semifinal at the Vrbo Fiesta Bowl,cfbd
+401442033,2022,Cheez-It Bowl,cfbd
+401442012,2022,Cheez-It Citrus Bowl,cfbd
+401442035,2022,Duke's Mayo Bowl,cfbd
+401441994,2022,Duluth Trading Cure Bowl,cfbd
+401442009,2022,EasyPost Hawai'i Bowl,cfbd
+401442004,2022,Famous Idaho Potato Bowl,cfbd
+401445817,2022,FCS Championship,cfbd
+401508850,2022,FCS Championship - Semifinals,cfbd
+401442001,2022,Frisco Bowl,cfbd
+401442013,2022,Goodyear Cotton Bowl Classic,cfbd
+401442005,2022,Guaranteed Rate Bowl,cfbd
+401441993,2022,HomeTown Lenders Bahamas Bowl,cfbd
+401442038,2022,Jimmy Kimmel LA Bowl,cfbd
+401442041,2022,LendingTree Bowl,cfbd
+401442040,2022,Lockheed Martin Armed Forces Bowl,cfbd
+401442008,2022,Military Bowl,cfbd
+401442003,2022,Myrtle Beach Bowl,cfbd
+401441997,2022,New Mexico Bowl,cfbd
+401442037,2022,Quick Lane Bowl,cfbd
+401442039,2022,R+L Carriers New Orleans Bowl,cfbd
+401442042,2022,Radiance Technologies Independence Bowl,cfbd
+401442011,2022,ReliaQuest Bowl,cfbd
+401442006,2022,RoofClaim.com Boca Raton Bowl,cfbd
+401442014,2022,Rose Bowl Game,cfbd
+401470891,2022,San Diego County Credit Union Holiday Bowl,cfbd
+401442000,2022,SERVPRO First Responder Bowl,cfbd
+401441999,2022,SRS Distribution Las Vegas Bowl,cfbd
+401442031,2022,TaxAct Texas Bowl,cfbd
+401442036,2022,TaxSlayer Gator Bowl,cfbd
+401442002,2022,TicketSmarter Birmingham Bowl,cfbd
+401443542,2022,Tony the Tiger Sun Bowl,cfbd
+401442017,2022,TransPerfect Music City Bowl,cfbd
+401442007,2022,Union Home Mortgage Gasparilla Bowl,cfbd
+401442034,2022,Valero Alamo Bowl,cfbd
+401441995,2022,Wasabi Fenway Bowl,cfbd
+401551755,2023,68 Ventures Bowl,cfbd
+401551739,2023,76 Birmingham Bowl,cfbd
+401551767,2023,AutoZone Liberty Bowl,cfbd
+401551731,2023,Avocados From Mexico Cure Bowl,cfbd
+401551762,2023,Bad Boy Mowers Pinstripe Bowl,cfbd
+401554566,2023,Barstool Sports Arizona Bowl,cfbd
+401551741,2023,Camellia Bowl,cfbd
+401551773,2023,Capital One Orange Bowl,cfbd
+401551789,2023,CFP National Championship,cfbd
+401551788,2023,CFP Semifinal at the Allstate Sugar Bowl,cfbd
+401551786,2023,CFP Semifinal at the Rose Bowl Game,cfbd
+401551780,2023,Cheez-It Citrus Bowl,cfbd
+401551769,2023,Chick-fil-A Peach Bowl,cfbd
+401581109,2023,DIRECTV Holiday Bowl,cfbd
+401551761,2023,Duke's Mayo Bowl,cfbd
+401551746,2023,EasyPost Hawaiʻi Bowl,cfbd
+401551743,2023,Famous Idaho Potato Bowl,cfbd
+401551469,2023,Famous Toastery Bowl,cfbd
+401614603,2023,FCS Championship - First Round,cfbd
+401614616,2023,FCS Championship - First Round,cfbd
+401614604,2023,FCS Championship - First Round,cfbd
+401617308,2023,FCS Championship - Quarterfinals,cfbd
+401615819,2023,FCS Championship - Second Round,cfbd
+401615900,2023,FCS Championship - Second Round,cfbd
+401615859,2023,FCS Championship - Second Round,cfbd
+401618099,2023,FCS Championship - Semifinals,cfbd
+401551768,2023,Goodyear Cotton Bowl Classic,cfbd
+401551757,2023,Guaranteed Rate Bowl,cfbd
+401551732,2023,Isleta New Mexico Bowl,cfbd
+401551742,2023,Lockheed Martin Armed Forces Bowl,cfbd
+401551758,2023,Military Bowl,cfbd
+401551733,2023,Myrtle Beach Bowl,cfbd
+401551764,2023,Pop-Tarts Bowl,cfbd
+401551756,2023,Quick Lane Bowl,cfbd
+401551751,2023,R+L Carriers New Orleans Bowl,cfbd
+401551753,2023,Radiance Technologies Independence Bowl,cfbd
+401551778,2023,ReliaQuest Bowl,cfbd
+401551737,2023,RoofClaim.com Boca Raton Bowl,cfbd
+401551735,2023,Scooter's Coffee Frisco Bowl,cfbd
+401551748,2023,SERVPRO First Responder Bowl,cfbd
+401551744,2023,SRS Distribution Las Vegas Bowl,cfbd
+401551752,2023,Starco Brands LA Bowl,cfbd
+401551749,2023,TaxAct Texas Bowl,cfbd
+401551766,2023,TaxSlayer Gator Bowl,cfbd
+401551798,2023,Tony the Tiger Sun Bowl,cfbd
+401551770,2023,TransPerfect Music City Bowl,cfbd
+401551754,2023,Union Home Mortgage Gasparilla Bowl,cfbd
+401551765,2023,Valero Alamo Bowl,cfbd
+401551782,2023,Vrbo Fiesta Bowl,cfbd
+401551750,2023,Wasabi Fenway Bowl,cfbd
+401677089,2024,68 Ventures Bowl,cfbd
+401677081,2024,Art of Sport LA Bowl,cfbd
+401677092,2024,AutoZone Liberty Bowl,cfbd
+401677095,2024,Bad Boy Mowers Pinstripe Bowl,cfbd
+401677108,2024,Bahamas Bowl,cfbd
+401677091,2024,Birmingham Bowl,cfbd
+401677079,2024,Boca Raton Bowl,cfbd
+401677103,2024,Cheez-It Citrus Bowl,cfbd
+401677179,2024,College Football Playoff First Round Game,cfbd
+401677178,2024,College Football Playoff First Round Game,cfbd
+401677176,2024,College Football Playoff First Round Game,cfbd
+401677177,2024,College Football Playoff First Round Game,cfbd
+401677192,2024,College Football Playoff National Championship,cfbd
+401677184,2024,College Football Playoff Quarterfinal at the Allstate Sugar Bowl - Rescheduled from Jan 1,cfbd
+401677182,2024,College Football Playoff Quarterfinal at the Chick-fil-A Peach Bowl,cfbd
+401677183,2024,College Football Playoff Quarterfinal at the Rose Bowl,cfbd
+401677181,2024,College Football Playoff Quarterfinal at the Vrbo Fiesta Bowl,cfbd
+401677189,2024,College Football Playoff Semifinal at the Capital One Orange Bowl,cfbd
+401677191,2024,College Football Playoff Semifinal at the Goodyear Cotton Bowl Classic,cfbd
+401729867,2024,DirecTV Holiday Bowl,cfbd
+401677107,2024,Duke's Mayo Bowl,cfbd
+401677086,2024,Famous Idaho Potato Bowl,cfbd
+401680057,2024,FCS Championship,cfbd
+401729786,2024,FCS Championship - Semifinals,cfbd
+401677180,2024,GameAbove Sports Bowl,cfbd
+401677098,2024,Go Bowling Military Bowl,cfbd
+401677087,2024,Hawaiʻi Bowl,cfbd
+401677077,2024,IS4S Salute to Veterans Bowl,cfbd
+401677096,2024,Isleta New Mexico Bowl,cfbd
+401677104,2024,Kinder's Texas Bowl,cfbd
+401677090,2024,Lockheed Martin Armed Forces Bowl,cfbd
+401677085,2024,Myrtle Beach Bowl,cfbd
+401677097,2024,Pop-Tarts Bowl,cfbd
+401677082,2024,R+L Carriers New Orleans Bowl,cfbd
+401677100,2024,Radiance Technologies Independence Bowl,cfbd
+401677088,2024,Rate Bowl,cfbd
+401677102,2024,ReliaQuest Bowl,cfbd
+401677080,2024,Scooter's Coffee Frisco Bowl,cfbd
+401677106,2024,SERVPRO First Responder Bowl,cfbd
+401677188,2024,Snoop Dogg Arizona Bowl,cfbd
+401677093,2024,SRS Distribution Las Vegas Bowl,cfbd
+401677083,2024,StaffDNA Cure Bowl,cfbd
+401677105,2024,TaxSlayer Gator Bowl,cfbd
+401677190,2024,Tony the Tiger Sun Bowl,cfbd
+401677101,2024,TransPerfect Music City Bowl,cfbd
+401677084,2024,Union Home Mortgage Gasparilla Bowl,cfbd
+401677099,2024,Valero Alamo Bowl,cfbd
+401677094,2024,Wasabi Fenway Bowl,cfbd
+401778305,2025,68 Ventures Bowl,cfbd
+401778333,2025,AutoZone Liberty Bowl,cfbd
+401778317,2025,Bad Boy Mowers Pinstripe Bowl,cfbd
+401778302,2025,Bucked Up LA Bowl,cfbd
+401778309,2025,Bush's Boca Raton Bowl,cfbd
+401778330,2025,Cheez-It Citrus Bowl,cfbd
+401779840,2025,College Football Playoff First Round Game,cfbd
+401779841,2025,College Football Playoff First Round Game,cfbd
+401779842,2025,College Football Playoff First Round Game,cfbd
+401779843,2025,College Football Playoff First Round Game,cfbd
+401769076,2025,College Football Playoff National Championship,cfbd
+401769073,2025,College Football Playoff Quarterfinal at the Allstate Sugar Bowl,cfbd
+401769071,2025,College Football Playoff Quarterfinal at the Capital One Orange Bowl,cfbd
+401769070,2025,College Football Playoff Quarterfinal at the Goodyear Cotton Bowl Classic,cfbd
+401769072,2025,College Football Playoff Quarterfinal at the Rose Bowl,cfbd
+401769074,2025,College Football Playoff Semifinal at the Chick-fil-A Peach Bowl,cfbd
+401769075,2025,College Football Playoff Semifinal at the Vrbo Fiesta Bowl,cfbd
+401778334,2025,Duke's Mayo Bowl,cfbd
+401778308,2025,Famous Idaho Potato Bowl,cfbd
+401778313,2025,GameAbove Sports Bowl,cfbd
+401778316,2025,Go Bowling Military Bowl,cfbd
+401778303,2025,IS4S Salute to Veterans Bowl,cfbd
+401778321,2025,Isleta New Mexico Bowl,cfbd
+401778324,2025,JLab Birmingham Bowl,cfbd
+401778323,2025,Kinder's Texas Bowl,cfbd
+401778326,2025,Liberty Mutual Music City Bowl,cfbd
+401778332,2025,Lockheed Martin Armed Forces Bowl,cfbd
+401778306,2025,Myrtle Beach Bowl,cfbd
+401778310,2025,New Orleans Bowl,cfbd
+401778319,2025,Pop-Tarts Bowl,cfbd
+401778325,2025,Radiance Technologies Independence Bowl,cfbd
+401778314,2025,Rate Bowl,cfbd
+401778328,2025,ReliaQuest Bowl,cfbd
+401778311,2025,Scooter's Coffee Frisco Bowl,cfbd
+401778315,2025,SERVPRO First Responder Bowl,cfbd
+401778312,2025,Sheraton Hawaiʻi Bowl,cfbd
+401778320,2025,Snoop Dogg Arizona Bowl,cfbd
+401778331,2025,SRS Distribution Las Vegas Bowl,cfbd
+401778304,2025,StaffDNA Cure Bowl,cfbd
+401778322,2025,TaxSlayer Gator Bowl,cfbd
+401778329,2025,Tony the Tiger Sun Bowl,cfbd
+401831583,2025,Trust & Will Holiday Bowl,cfbd
+401778307,2025,Union Home Mortgage Gasparilla Bowl,cfbd
+401778327,2025,Valero Alamo Bowl,cfbd
+401778318,2025,Wasabi Fenway Bowl,cfbd
+401838053,2025,Xbox Bowl,cfbd

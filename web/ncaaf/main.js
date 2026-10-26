@@ -372,7 +372,8 @@ displayCsvSchedule(games, season) {
       home: g.location !== 'AWAY',
       opp: g.Opponent, state: res,
       text: `${res === 'win' ? 'W' : res === 'loss' ? 'L' : 'T'} ${parseInt(g.scoreFor) || 0}-${parseInt(g.scoreAgainst) || 0}`,
-      tv: isSuperBowl ? [g.championship] : [],
+      // The title game, a bowl or a conference championship, by name.
+      tv: isSuperBowl ? [g.championship] : g.bowl ? [g.bowl] : [],
       phase: g.playoff === '1' ? 'post' : g.regular_season === '1' ? 'regular' : 'other',
       h2h: showH2h ? this.h2hLink(g.Opponent) : null,
     };
@@ -842,13 +843,18 @@ markActiveMonth() {
         const num = regional ? null : this.scheduleChannelNumber(b);
         return `${this.resolveChannel(b.media.shortName)?.display_name || b.media.shortName}${num ? ` ${num}` : ''}${regional ? ` (${regional})` : ''}`;
       });
+      // A bowl, the playoff's games and a conference championship carry their
+      // name in ESPN's notes ("Rose Bowl Game Presented by Prudential"), shown
+      // without the sponsor, played or to come.
+      const named = (event.competitions?.[0]?.notes ?? []).map((n) => n.headline).find(Boolean);
+      const gameName = named ? named.replace(/\s+(presented|pres\.?|powered)\s+by\s+.*$/i, '').trim() : null;
       return {
         key: String(event.id), date, phase: event._seasonType,
         home: gb?.homeAway === 'home',
         // With its place in the poll, as ESPN gave it for the game.
         opp: `${opp.curatedRank?.current >= 1 && opp.curatedRank.current <= 25 ? `No. ${opp.curatedRank.current} ` : ''}${opp.team?.shortDisplayName || opp.team?.name || opp.team?.displayName || ''}`,
         state, text,
-        tv: upcoming ? tvLabels : [],
+        tv: [...(gameName ? [gameName] : []), ...(upcoming ? tvLabels : [])],
         // H2H only on the current season's schedule (offseason included).
         h2h: this.currentSeason === this.latestSeason ? this.h2hLink(opp.team?.displayName) : null,
         // A game played or being played: its summary pop-up, which a click
