@@ -52,6 +52,8 @@ export function parseGames(raw) {
 		// are-they-sports the server writes them neutrally (`result`,
 		// `team_score`), because one file shape serves every club.
 		championship: r.superbowl,
+		// The bowl, or the conference championship, by name (lib/web.js).
+		bowl: r.bowl || '',
 		Opponent: r.Opponent,
 		result: r.result,
 		scoreFor: r.team_score,
@@ -350,8 +352,11 @@ export function computeSeasonHistory(rows, { now = new Date(), playoffs = false 
 	return [...bySeason.keys()].sort((a, b) => a - b).map((yr) => {
 		let w = 0, l = 0, t = 0, pf = 0, pa = 0, regLosses = 0, regWins = 0;
 		let championship = false;
+		// The season's bowl, the last named one, and whether it was won.
+		let bowl = null;
 		for (const g of bySeason.get(yr)) {
 			const isReg = g.regular_season === '1';
+			if (!isReg && g.bowl && !(g.championship && g.championship.trim())) bowl = { name: g.bowl, won: g.result === 'WIN', tie: g.result === 'TIE' };
 			if (!isReg) {
 				if (g.championship && g.championship.trim() && g.result === 'WIN') championship = true;
 			}
@@ -378,6 +383,7 @@ export function computeSeasonHistory(rows, { now = new Date(), playoffs = false 
 			// was the AP poll's No. 1 (1936-1997, from the championship table).
 			champion: STANDINGS_TITLES.has(yr) || championship,
 			championship,
+			bowl,
 			undefeated: regLosses === 0 && regWins > 0 && seasonSettled(yr, now),
 		};
 	});

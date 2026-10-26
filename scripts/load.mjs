@@ -1439,6 +1439,8 @@ async function main() {
 		mkdirSync(dir, { recursive: true });
 		const playing = adapter.sources.live.seasonOf(new Date());
 		const opponents = new Map();
+		// Conference championships, by game id, for their names (sports/ncaaf.js).
+		const conferenceTitles = new Map();
 		let fetched = 0, notClubs = 0, remaining = null;
 		for (let season = adapter.sources.cfbd.first; season <= playing; season++) {
 			const path = join(dir, `games-${season}.json`);
@@ -1496,10 +1498,28 @@ async function main() {
 				// The latest name a team went by, for the ones that are no club.
 				if (!homeClub) opponents.set(row.home, g.homeTeam);
 				if (!awayClub) opponents.set(row.away, g.awayTeam);
+				if (row.round === 'regular' && row.title) conferenceTitles.set(row.id, row.title);
 				await put(row);
 			}
 		}
 		await flush();
+		// Each game's name where it has one that is no national title: its bowl
+		// (data/reference/ncaaf-bowls.csv, scripts/ncaaf-bowls.mjs) or its
+		// conference's championship (sports/ncaaf.js). The title games are
+		// named after, from the champions.
+		const names = new Map(conferenceTitles);
+		const bowlsPath = join(REFERENCE_DIR, 'ncaaf-bowls.csv');
+		if (existsSync(bowlsPath)) for (const r of parseCsv(readFileSync(bowlsPath, 'utf8'))) names.set(r.id, r.bowl);
+		// A name no longer given (a game that turned out to be no conference's
+		// championship) goes, as a game the source drops would.
+		await client.query(
+			`UPDATE game SET title = NULL WHERE sport = 'ncaaf' AND round <> 'championship' AND title IS NOT NULL AND NOT (id = ANY($1::text[]))`,
+			[[...names.keys()]]);
+		const { rowCount: named } = await client.query(
+			`UPDATE game g SET title = v.title FROM unnest($1::text[], $2::text[]) AS v(id, title)
+			  WHERE g.sport = 'ncaaf' AND g.id = v.id AND g.round <> 'championship' AND g.title IS DISTINCT FROM v.title`,
+			[[...names.keys()], [...names.values()]]);
+		console.log(`  named        ${named} bowls and conference championships`);
 		// Their names: replaced every load, as the games are.
 		await client.query("DELETE FROM franchise_name WHERE sport = 'ncaaf' AND source = 'cfbd'");
 		for (const [id, name] of opponents) {

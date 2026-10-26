@@ -123,8 +123,16 @@ export function cfbdGameRow(g, { finished = false } = {}) {
 	const played = g.completed === true && g.homePoints != null && g.awayPoints != null;
 	if (!played && finished) return null;
 	const season = Number(g.season);
-	const post = g.seasonType === 'postseason';
-	const title = post ? titleOf(season, g.notes, g.homeId, g.awayId) : null;
+	// A conference's championship game is its regular season's last, as ESPN
+	// and the conferences count it. CollegeFootballData files 23 of them, 1992 to
+	// 2000 mostly, as postseason: two sides of one conference in early December.
+	// Independents are no conference: two of them in December played a bowl
+	// (the 1966 Liberty Bowl).
+	const confGame = g.seasonType === 'postseason' && g.homeConference && g.homeConference === g.awayConference
+		&& !/independent/i.test(g.homeConference)
+		&& new Date(g.startDate).getUTCMonth() === 11 && new Date(g.startDate).getUTCDate() <= 14;
+	const post = g.seasonType === 'postseason' && !confGame;
+	const title = post ? titleOf(season, g.notes, g.homeId, g.awayId) : confGame ? `${g.homeConference} Championship` : null;
 	return {
 		id: String(g.id),
 		season,
@@ -138,7 +146,7 @@ export function cfbdGameRow(g, { finished = false } = {}) {
 		neutral: g.neutralSite === true,
 		status: played ? 'final' : 'scheduled',
 		source: 'cfbd',
-		week: post ? null : Number(g.week) || null,
+		week: post || confGame ? null : Number(g.week) || null,
 		title,
 	};
 }
