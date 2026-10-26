@@ -988,7 +988,7 @@ function main() {
 				const date = url.searchParams.get('date') ?? '';
 				if (!/^\d{8}$/.test(date)) return json(res, 400, { error: 'date is YYYYMMDD' });
 				// Every league in the scope, or those of them asked for (`sports=nba`).
-				// `nfl=week`: the NFL's whole week rather than the day, for the strip.
+				// `football=week`: football's whole week rather than the day, for the strip.
 				const inScope = [...new Set(table.map((e) => e.sport))];
 				const asked = (url.searchParams.get('sports') ?? '').split(',').filter((s) => inScope.includes(s));
 				const sports = asked.length ? asked : inScope;
@@ -1001,7 +1001,7 @@ function main() {
 				// (lib/coverage.js), read for every market an area is in.
 				const dma = (url.searchParams.get('dma') ?? '').slice(0, 60) || null;
 				const coverage = dma ? async (season, week) => coverageFor(season, week, { points: marketPoints((await tvTables().catch(() => ({ areas: [] }))).areas) }) : null;
-				return json(res, 200, { date, leagues: await todayGames({ sports, date, espn: sharedEspn(), clubs, dma, coverage, nflWeek: url.searchParams.get('nfl') === 'week' }) });
+				return json(res, 200, { date, leagues: await todayGames({ sports, date, espn: sharedEspn(), clubs, dma, coverage, footballWeek: url.searchParams.get('football') === 'week' }) });
 			}
 
 			if (url.pathname === '/' && needsSelector(table)) {

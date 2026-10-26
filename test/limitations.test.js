@@ -5,7 +5,7 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { BY_SPORT, COMMON, limitationsHtml } from '../lib/limitations.js'
 import { navFor, createFront } from '../lib/web-routes.js'
-import { shell, clubConfig } from '../lib/web.js'
+import { shell, clubConfig, hasFrontEnd } from '../lib/web.js'
 import { SPORTS, loadSports, loadTeams } from '../lib/teams.js'
 import { loadHistory, resolver } from '../lib/names.js'
 
@@ -28,7 +28,8 @@ test('every sport has its own list, and the page escapes it', () => {
 test('"no coaches page" is said exactly where the nav has no coaches link', () => {
 	// The line is a fact about the nav, so the nav decides it: when a sport's
 	// coaches arrive and its link comes back, this goes red until the line goes.
-	for (const s of SPORTS) {
+	// Every sport with a front end: college football's arrives after its data.
+	for (const s of SPORTS.filter(hasFrontEnd)) {
 		const linked = /href="(?:coaches|managers)"/.test(navFor(read(`web/${s}/index.html`), s))
 		const said = BY_SPORT[s].some((l) => /no coaches page/.test(l))
 		assert.equal(said, !linked, `${s}: nav ${linked ? 'links' : 'has no'} coaches page, limitations ${said ? 'say' : 'do not say'} there is none`)
@@ -72,6 +73,6 @@ test('a club and a league each serve it, under their own footer', async () => {
 })
 
 test('every sport\'s front end carries the same page', () => {
-	const copies = SPORTS.map((s) => read(`web/${s}/limitations.html`))
+	const copies = SPORTS.filter(hasFrontEnd).map((s) => read(`web/${s}/limitations.html`))
 	assert.equal(new Set(copies).size, 1)
 })

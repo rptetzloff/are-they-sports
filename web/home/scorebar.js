@@ -99,7 +99,7 @@ if (bar) {
 	async function load() {
 		clearTimeout(timer);
 		try {
-			const r = await fetch(`${api}?date=${ymd(new Date())}&nfl=week`);
+			const r = await fetch(`${api}?date=${ymd(new Date())}&football=week`);
 			if (r.ok) leagues = (await r.json()).leagues ?? [];
 		} catch { /* keep what is shown */ }
 		draw();

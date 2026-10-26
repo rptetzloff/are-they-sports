@@ -73,6 +73,7 @@ DATABASE_URL=... npm run load nba     # FiveThirtyEight 1947-2001, sportsdataver
 DATABASE_URL=... npm run load nhl     # the NHL's own APIs, 1917-18 on
 DATABASE_URL=... npm run load wnba    # the WNBA's own logs 1997-2025, ESPN after
 DATABASE_URL=... npm run load mls     # MLS's own stats API, 1996 on
+DATABASE_URL=... CFBD_API_KEY=... npm run load ncaaf   # CollegeFootballData, 1869 on (FBS)
 ```
 
 Both work **inside the deployed container**, which is usually where the database
@@ -1903,6 +1904,7 @@ docker run -p 3000:3000 -e SCOPE=division:nfl/nfc-north are-they-sports
 | `PORT` | defaults to 3000. |
 | `BUILD_SHA` | stamped into `/healthz` as `build`. Coolify's `SOURCE_COMMIT` is read too. Unset reports `"unknown"` rather than guessing. |
 | `MLB_GAMELOGS_URL` | base URL for Retrosheet's `gl*.txt` game logs, one object per file, for `npm run load mlb`. Signed automatically when `S3_ACCESS_KEY_ID` and `S3_SECRET_ACCESS_KEY` are set. |
+| `CFBD_API_KEY` | CollegeFootballData.com's API key, for `npm run load ncaaf`. Free (1,000 calls a month); a full load is about 160 calls the first time and 2 after, because finished seasons are kept in `data/sources/cfbd`. |
 | `MLB_GAMELOGS_DIR` | the same thing as a local directory, for a load running where the files are. Either variable accepts either form. |
 | `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`, `S3_REGION` | credentials for a private bucket. Any host that is not GitHub is signed when these are set; an unsigned GET against a private bucket returns 403. |
 
