@@ -41,7 +41,7 @@ import { seasonVerdict } from './lib/season-state.js';
 
         	async init() {
         		try {
-        			['streak-details', 'otd-details'].forEach(id => {
+        			['streak-details', 'otd-details', 'polls-details'].forEach(id => {
         				const details = document.getElementById(id);
         				if (!details) return;
         				const stored = localStorage.getItem(`sectionOpen:${id}`);
@@ -874,9 +874,37 @@ markActiveMonth() {
     async showRank(recordEl) {
       this.rankPromise ??= fetch('api/rank').then((r) => (r.ok ? r.json() : null)).catch(() => null);
       const got = await this.rankPromise;
+      this.renderPolls(got);
       if (!got?.ranks?.length || recordEl.querySelector('.poll-rank')) return;
       const text = got.ranks.map((r) => `No. ${r.rank} ${r.poll}`).join(' · ');
       recordEl.insertAdjacentHTML('beforeend', `<br><a class="poll-rank" href="../rankings" title="${got.week ? `${got.week} polls` : 'This week\'s polls'}">${text}</a>`);
+    }
+
+    // The Rankings section (index.html #polls-details), once: the AP rank each
+    // week of the season, then this week's Top 25 with this programme marked,
+    // folded until opened. Hidden when ESPN had no polls to give.
+    renderPolls(got) {
+      const section = document.getElementById('polls-details');
+      const box = document.getElementById('polls');
+      if (!section || !box || box.dataset.drawn || (!got?.weeks?.length && !got?.top)) return;
+      box.dataset.drawn = '1';
+      const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      const short = (w) => (w === 'Preseason' ? 'Pre' : w.replace(/^Week /, 'Wk '));
+      const weeks = (got.weeks ?? []).map((w) => `<li class="poll-week${w.rank ? '' : ' unranked'}"><span>${esc(short(w.week))}</span><b>${w.rank ?? '—'}</b></li>`).join('');
+      const me = String(SITE.espnSlug);
+      const top = got.top ? `<details id="polls-top-details" class="polls-top">
+        <summary>${esc(got.top.poll)}${got.week ? `, ${esc(got.week)}` : ''}</summary>
+        <ol class="polls-list">${got.top.ranks.map((r) => `<li class="${r.id === me ? 'me' : ''}"><span class="n">${r.rank}</span>`
+          + `${r.href ? `<a href="${esc(r.href)}">${esc(r.name)}</a>` : `<span>${esc(r.name)}</span>`}<span class="rec">${esc(r.record ?? '')}</span></li>`).join('')}</ol>
+        <a class="polls-all" href="../rankings">Every poll</a>
+      </details>` : '';
+      box.innerHTML = (weeks ? `<p class="polls-caption">AP poll, week by week</p><ol class="poll-weeks">${weeks}</ol>` : '') + top;
+      section.hidden = false;
+      const fold = document.getElementById('polls-top-details');
+      if (fold) {
+        try { fold.open = localStorage.getItem('sectionOpen:polls-top-details') === 'true'; } catch { /* no storage */ }
+        fold.addEventListener('toggle', () => { try { localStorage.setItem('sectionOpen:polls-top-details', String(fold.open)); } catch { /* no storage */ } });
+      }
     }
 
     async openGameSummary(id, opener) {
