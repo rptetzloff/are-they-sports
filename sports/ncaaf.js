@@ -217,6 +217,9 @@ export const defaults = {
 		/** A dozen games a season, so three days either side. */
 		onThisDayWindowDays: 3,
 		schedulePeriod: 'week',
+		/** A conference is ranked by its conference games, as college football
+		 *  ranks one (lib/standings.js). */
+		standingsByConference: true,
 	},
 };
 

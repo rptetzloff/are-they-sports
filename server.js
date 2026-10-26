@@ -598,7 +598,7 @@ function main() {
 			}
 			const version = versionOf(withRows, stampOf);
 			const standings = memo(derivedCache, `division/${entry.sport}/${entry.code}/${season}`, version,
-				() => computeStandings(withRows, { season: Number(season), points: adapters[entry.sport]?.standingsPoints }));
+				() => computeStandings(withRows, { season: Number(season), points: adapters[entry.sport]?.standingsPoints, byConference: Boolean(adapters[entry.sport]?.defaults?.rules?.standingsByConference) }));
 			if (!standings.groups.length) return null;
 			// Mark the club whose page this is, and link the ones this deployment
 			// actually serves. A club with no manifest has no page here, and a
@@ -1148,7 +1148,7 @@ function main() {
 						// played moves every time a game ends.
 						standings: await summarised(`standings/${sport}/${season}`,
 							{ scope: scopeKey, sport, view: 'standings', season: season ?? 0 }, version,
-							async () => computeStandings(await inSport(), { season, points: adapters[sport]?.standingsPoints })),
+							async () => computeStandings(await inSport(), { season, points: adapters[sport]?.standingsPoints, byConference: Boolean(adapters[sport]?.defaults?.rules?.standingsByConference) })),
 					};
 				}));
 				const [firstSport, ...otherSports] = bySport;
