@@ -382,6 +382,48 @@ async function loadChampionships(client, sportId, byCode) {
 	// re-running rather than by hand-editing a table.
 	await client.query('DELETE FROM championship WHERE sport = $1', [sportId]);
 
+	// College football's, from its own curated file: the CFP's and BCS's title
+	// games, each checked against the game the load marked, and the AP poll's
+	// No. 1 before 1998, which no game decided (sports/ncaaf.js).
+	if (sportId === 'ncaaf') {
+		const path = join(REFERENCE_DIR, 'ncaaf-champions.csv');
+		if (!existsSync(path)) { console.log('  champions    SKIPPED, no data/reference/ncaaf-champions.csv'); return; }
+		const { rows: haveF } = await client.query('SELECT id FROM franchise WHERE sport = $1', [sportId]);
+		const known = new Set(haveF.map((r) => r.id));
+		const { rows: games } = await client.query(
+			`SELECT id, home, away, home_score, away_score FROM game WHERE sport = $1 AND round = 'championship' AND status = 'final'`, [sportId]);
+		const gameById = new Map(games.map((g) => [g.id, g]));
+		let wrote = 0;
+		const problems = [];
+		for (const r of parseCsv(readFileSync(path, 'utf8'))) {
+			const season = Number(r.season);
+			const champion = byCode.get(r.champion) ?? r.champion;
+			const runnerUp = r.runnerUp ? (byCode.get(r.runnerUp) ?? r.runnerUp) : null;
+			if (!known.has(champion) || (runnerUp && !known.has(runnerUp))) { problems.push(`${season} ${r.championName}: no games on record`); continue; }
+			let gameId = null;
+			if (r.method === 'championship game') {
+				const g = gameById.get(r.gameId);
+				const won = g && (g.home_score > g.away_score ? g.home : g.away);
+				if (won === champion) gameId = g.id;
+				else problems.push(`${season} ${r.championName}: the load marked no title game ${r.gameId} won by them`);
+			}
+			await client.query(
+				`INSERT INTO championship (sport, season, league, champion, runner_up, method, title, game_id, source)
+				 VALUES ($1,$2,'FBS',$3,$4,$5,$6,$7,'cfbd')`,
+				[sportId, season, champion, runnerUp, r.method, r.title, gameId]);
+			wrote++;
+		}
+		const { rowCount: named } = await client.query(`
+			UPDATE game g SET title = c.title FROM championship c
+			 WHERE c.sport = g.sport AND c.game_id = g.id AND g.title IS DISTINCT FROM c.title`);
+		console.log(`  champions    ${wrote} from ncaaf-champions.csv; ${named} title games named`);
+		if (problems.length) {
+			console.log(`  DISAGREEMENT ${problems.length}:`);
+			for (const p of problems) console.log(`               ${p}`);
+		}
+		return;
+	}
+
 	// Baseball has no curated file and needs none: every World Series was played,
 	// so its champions derive from the games. It is still written here rather than
 	// left out, because `/champions` reads this table and a sport missing from it
@@ -1377,6 +1419,72 @@ async function main() {
 			}
 		}
 		if (notClubs) console.log(`  not clubs    ${notClubs} games with a side the franchise table does not know`);
+	}
+
+	if (sportId === 'ncaaf') {
+		// CollegeFootballData, one call a season, every division; see
+		// sports/ncaaf.js. A finished season is kept once fetched, so a reload
+		// spends its calls (1,000 a month on the free key) on the season being
+		// played alone. A game counts when one of the clubs played in it; the
+		// other side, if it is no club, becomes a franchise named from the games.
+		const key = process.env[adapter.sources.cfbd.key];
+		if (!key) {
+			console.error(`${adapter.sources.cfbd.key} is required for college football: CollegeFootballData.com's API key`);
+			await client.query('ROLLBACK');
+			await client.end();
+			return 2;
+		}
+		const codes = codeTable('ncaaf', loadHistory('ncaaf'));
+		const dir = join(SOURCE_DIR, 'cfbd');
+		mkdirSync(dir, { recursive: true });
+		const playing = adapter.sources.live.seasonOf(new Date());
+		const opponents = new Map();
+		let fetched = 0, notClubs = 0, remaining = null;
+		for (let season = adapter.sources.cfbd.first; season <= playing; season++) {
+			const path = join(dir, `games-${season}.json`);
+			// The season being played and the one before it (whose bowls end in
+			// January) are always asked again; anything older is settled.
+			if (!existsSync(path) || season >= playing - 1) {
+				// Spaced, and a 429 waited out: the API turns away a quick run of
+				// calls, and the first full load is about 160 of them.
+				let res;
+				for (let attempt = 0; attempt < 6; attempt++) {
+					await new Promise((r) => setTimeout(r, fetched ? 1200 : 0));
+					res = await fetch(adapter.sources.cfbd.url(season), { headers: { Authorization: `Bearer ${key}`, Accept: 'application/json' } });
+					if (res.status !== 429) break;
+					const wait = Number(res.headers.get('retry-after')) || 5 * 2 ** attempt;
+					console.log(`  cfbd         ${season}: asked to slow down; waiting ${wait}s`);
+					await new Promise((r) => setTimeout(r, wait * 1000));
+				}
+				if (!res.ok) {
+					console.error(`  cfbd         ${season}: ${res.status} ${res.statusText}${res.status === 401 ? ' (is the key whole?)' : ''}`);
+					await client.query('ROLLBACK');
+					await client.end();
+					return 1;
+				}
+				remaining = res.headers.get('x-calllimit-remaining') ?? remaining;
+				writeFileSync(path, await res.text());
+				fetched++;
+			}
+			for (const g of JSON.parse(readFileSync(path, 'utf8'))) {
+				const row = adapter.cfbdGameRow(g, { finished: season < playing });
+				if (!row) continue;
+				const homeClub = codes.knows(row.home), awayClub = codes.knows(row.away);
+				if (!homeClub && !awayClub) { notClubs++; continue; }
+				// The latest name a team went by, for the ones that are no club.
+				if (!homeClub) opponents.set(row.home, g.homeTeam);
+				if (!awayClub) opponents.set(row.away, g.awayTeam);
+				await put(row);
+			}
+		}
+		await flush();
+		// Their names: replaced every load, as the games are.
+		await client.query("DELETE FROM franchise_name WHERE sport = 'ncaaf' AND source = 'cfbd'");
+		for (const [id, name] of opponents) {
+			if (!name) continue;
+			await client.query('INSERT INTO franchise_name (sport, franchise, name, source) VALUES ($1,$2,$3,$4)', ['ncaaf', id, name, 'cfbd']);
+		}
+		console.log(`  cfbd         ${fetched} seasons fetched${remaining != null ? `, ${remaining} calls left this month` : ''}; ${opponents.size} opponents named; ${notClubs} games between two non-clubs left out`);
 	}
 
 	// Championship games, marked after the fact.

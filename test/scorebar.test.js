@@ -35,12 +35,18 @@ test('the strip goes first in the body, with its leagues, its club and the way t
 	assert.equal(scorebarHtml({ leagues: [] }), '')
 })
 
-test('the NFL\'s week is its scoreboard asked for no day; the others keep the day', async () => {
+test('football\'s week is its scoreboard asked for no day; the others keep the day', async () => {
 	const asked = []
 	const espn = async (url) => { asked.push(url); return { status: 200, body: '{"events":[]}' } }
-	await todayGames({ sports: ['nfl', 'nba'], date: '20261025', espn, nflWeek: true })
+	await todayGames({ sports: ['nfl', 'ncaaf', 'nba'], date: '20261025', espn, footballWeek: true })
 	assert.deepEqual(asked, [
 		'https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard',
+		// The whole FBS: without group 80 a week is only the ranked teams' games.
+		'https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard?groups=80&limit=300',
 		'https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard?dates=20261025',
 	])
+	// A day, for the home page, is still a day, and still the whole FBS.
+	asked.length = 0
+	await todayGames({ sports: ['ncaaf'], date: '20261024', espn })
+	assert.deepEqual(asked, ['https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard?dates=20261024&groups=80&limit=300'])
 })
