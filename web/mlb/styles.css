@@ -2095,6 +2095,8 @@ details:not([open]) > .collapsible-summary::before {
 .site-footer {
     position: sticky;
     bottom: 0;
+    align-self: stretch;
+    box-sizing: border-box;
     margin-top: 1.5rem;
     padding: 0.4rem 1rem;
     display: flex;
