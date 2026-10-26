@@ -155,6 +155,9 @@ if (bar) {
 	document.addEventListener('click', (e) => { if (!panel.hidden && !panel.contains(e.target)) open(false); });
 	document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !panel.hidden) { open(false); pick.focus(); } });
 	onLeagues(draw);
+	// Favourites starred in the footer's Team menu come first at once.
+	window.addEventListener('ats-pins', draw);
+	window.addEventListener('storage', (e) => { if (e.key === 'ats.pins') draw(); });
 
 	// The arrows, where there is a mouse: a screenful at a time.
 	const [back, on] = bar.querySelectorAll('.sb-step');
