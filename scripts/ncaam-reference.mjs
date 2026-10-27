@@ -35,6 +35,20 @@ if (!existsSync(path)) {
 }
 const teams = JSON.parse(readFileSync(path, 'utf8'));
 
+// ESPN's abbreviation for each programme, by its team id: the club pages find
+// their own side of an ESPN game by it, and five of CollegeBasketballData's
+// are not ESPN's (AFA is ESPN's AF, Butler's BUT its BTLR). Kept like the
+// teams list.
+const espnPath = join(ROOT, 'data', 'sources', 'espn-ncaam', 'teams.json');
+if (!existsSync(espnPath)) {
+	mkdirSync(dirname(espnPath), { recursive: true });
+	const r = await fetch('https://site.api.espn.com/apis/site/v2/sports/basketball/mens-college-basketball/teams?groups=50&limit=500');
+	if (!r.ok) throw new Error(`${r.status} ESPN teams`);
+	writeFileSync(espnPath, await r.text());
+}
+const espnAbbr = new Map(JSON.parse(readFileSync(espnPath, 'utf8')).sports[0].leagues[0].teams
+	.map(({ team }) => [String(team.id), team.abbreviation]));
+
 const slug = (s) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/&/g, 'and').replace(/[^a-z0-9]/g, '');
 const hex = (c) => (/^[0-9a-f]{6}$/i.test(c ?? '') && !/^(000000|ffffff)$/i.test(c) ? `#${c.toUpperCase()}` : '');
 const csv = (v) => (/[",\n]/.test(String(v ?? '')) ? `"${String(v).replace(/"/g, '""')}"` : String(v ?? ''));
@@ -74,10 +88,10 @@ writeFileSync(join(ref, 'ncaam-franchise-history.csv'), [
 	'# Every Division I men\'s basketball programme: codes, conference and colours,',
 	`# from CollegeBasketballData.com's ${season} teams list (scripts/ncaam-reference.mjs; do not edit).`,
 	'#',
-	'# espnAbbrv is the abbreviation; idAbbrv ESPN\'s team id, as ESPN\'s scoreboard',
+	'# espnAbbrv is ESPN\'s abbreviation; idAbbrv ESPN\'s team id, as ESPN\'s scoreboard',
 	'# names a side; cbbdAbbrv CollegeBasketballData\'s id with a c, as its games do.',
 	'franchiseAbbrv,teamAbbrv,espnAbbrv,idAbbrv,cbbdAbbrv,league,conference,division,city,teamName,alternateName,startSeason,endSeason,locationCity,locationState,colorA,colorB,colorC,colorD,colorE',
-	...clubs.map((c) => [c.abbr, c.abbr, c.abbr, c.espn, c.cbbd, 'NCAAM', c.conference, '', c.school, c.mascot, '', firstSeason.get(c.cbbd) ?? 1950, '', '', '', c.colors[0] ?? '', c.colors[1] ?? '', '', '', '']
+	...clubs.map((c) => [c.abbr, c.abbr, espnAbbr.get(c.espn) ?? c.abbr, c.espn, c.cbbd, 'NCAAM', c.conference, '', c.school, c.mascot, '', firstSeason.get(c.cbbd) ?? 1950, '', '', '', c.colors[0] ?? '', c.colors[1] ?? '', '', '', '']
 		.map(csv).join(',')),
 ].join('\n') + '\n');
 writeFileSync(join(ref, 'ncaam-divisions.csv'), [
