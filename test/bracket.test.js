@@ -70,6 +70,14 @@ test('the page: champion, rounds, seeds and each side linked', () => {
 	assert.match(html, /<span class="sd">1<\/span><span class="nm"><a href="\/ncaam\/a1\/2025">A1<\/a>/)
 	assert.match(html, /href="2024">‹ 2024/)
 	assert.match(html, /<h2>First Four<\/h2>/)
+	// A game with ESPN's id opens its summary; the rest are plain boxes.
+	assert.doesNotMatch(html, /data-game=/, 'no summary address, no pop-up')
+	const withSum = bracketPage({ season: 2025, seasons: [2025], bracket: b, heading: 'h', colors: { base: '#222', accent: '#fff' },
+		team: (code) => ({ name: code, href: null }), summaryUrl: '/ncaam/api/espn/summary?event=' })
+	assert.equal(withSum.match(/data-game="/g).length, games.filter((x) => x.homeScore != null).length)
+	assert.match(withSum, /data-game="7" tabindex="0" role="button" aria-label="Summary: A1 vs B2"/)
+	assert.match(withSum, /<dialog id="br-sum"/)
+	assert.match(withSum, /"\/ncaam\/api\/espn\/summary\?event="/)
 	assert.match(bracketPage({ season: 2020, seasons: [2019, 2021], bracket: null, heading: 'h', colors: { base: '#222', accent: '#fff' }, team: () => ({}) }),
 		/the 2020 tournament was cancelled/)
 })

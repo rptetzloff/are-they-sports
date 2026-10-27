@@ -1131,7 +1131,10 @@ function main() {
 				const heading = `${season} NCAA Tournament`;
 				return html(res, bracket || !leagueRoute.season ? 200 : 404, bracketPage({
 					season, seasons, bracket, team, heading, colors: NEUTRAL,
-					note: season < 1979 ? 'No seeds before 1979: the field was not seeded.' : '',
+					// A game's summary, from ESPN through the league page's cache.
+					summaryUrl: `/${sport}/api/espn/apis/site/v2/sports/${POLLED[sport].league}/summary?event=`,
+					note: [season < 1979 ? 'No seeds before 1979: the field was not seeded.' : '',
+						season < 2003 ? 'ESPN has no summaries of games before 2003.' : 'A game opens its summary.'].filter(Boolean).join(' '),
 					footer: footerFor(req, url, { sport, current: 'bracket', title: heading }),
 				}));
 			}
