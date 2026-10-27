@@ -42,6 +42,9 @@ export function scheduleRowHtml(row) {
 	const d = row.date;
 	const when = `<span class="sched-dow">${DOW[d.getDay()]}</span> ${SHORT[d.getMonth()]} ${d.getDate()}`;
 	const tv = (row.tv || []).filter(Boolean);
+	// A channel's name, and its number on the chosen provider as a pill.
+	const tvHtml = (t) => (typeof t === 'string' ? esc(t)
+		: `${esc(t.name)}${t.num ? ` <span class="ch-pill" title="Channel ${esc(t.num)}">${esc(t.num)}</span>` : ''}${t.note ? ` ${esc(t.note)}` : ''}`);
 	const h2h = row.h2h
 		? ` <a class="sched-h2h" href="${esc(row.h2h.href)}" title="${esc(row.h2h.title)}">${esc(row.h2h.text)}</a>`
 		: '';
@@ -56,7 +59,7 @@ export function scheduleRowHtml(row) {
 		+ `<span class="sched-date">${when}</span>`
 		+ `<span class="sched-opp">${row.home ? 'vs' : '@'} ${esc(row.opp)}${h2h}</span>`
 		+ `<span class="sched-out">${row.state === 'live' ? '<span class="live-indicator-small"></span>' : ''}${esc(row.text)}</span>`
-		+ `<span class="sched-tv">${esc(tv.join(' · '))}</span>`
+		+ `<span class="sched-tv">${tv.map(tvHtml).join(' · ')}</span>`
 		+ rowLinksHtml(row.links)
 		+ '</div>';
 }

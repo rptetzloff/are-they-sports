@@ -893,7 +893,7 @@ markActiveMonth() {
         		// underneath. Clicks bubble to the answer (Where to Watch).
         		if (provider.displayLogo && provider.logo_url) {
         			const bg = provider.logo_bg ? ` style="background:${provider.logo_bg}"` : '';
-        			const chPill = num ? ` <span class="answer-provider-ch">Ch. ${num}</span>` : '';
+        			const chPill = num ? ` <span class="ch-pill" title="Channel ${num}">${num}</span>` : '';
         			return `<div class="answer-provider-note answer-provider-note-sponsor">
         				<span class="answer-sponsor-banner" role="button" title="Where to watch">
         					<span class="answer-sponsor-logo"${bg}><img src="${provider.logo_url}" alt="${provider.display_name} logo"></span>
@@ -901,7 +901,7 @@ markActiveMonth() {
         				</span>
         			</div>`;
         		}
-        		return `<div class="answer-provider-note">${provider.display_name} has the ${gameWord} on ${network}${num ? ` (Ch. ${num})` : ''}</div>`;
+        		return `<div class="answer-provider-note">${provider.display_name} has the ${gameWord} on ${network}${num ? ` <span class="ch-pill" title="Channel ${num}">${num}</span>` : ''}</div>`;
         	}
 
         	// Re-render the note when the provider or service area changes.
@@ -1086,7 +1086,7 @@ markActiveMonth() {
         const num = this.scheduleChannelNumber(b);
         // The network's own name where the tables know it: ESPN's 'MyMi' is
         // MyMilwaukee24.
-        return `${this.resolveChannel(b.media.shortName)?.display_name || b.media.shortName}${num ? ` ${num}` : ''}`;
+        return { name: this.resolveChannel(b.media.shortName)?.display_name || b.media.shortName, num };
       }) : [];
       const canWatch = upcoming && !isPastSeason && this.broadcastsFor(event).some((b) => b.media?.shortName);
       const clickable = state === 'win' || state === 'loss' || state === 'tie' || state === 'live' || canWatch;
@@ -1216,7 +1216,7 @@ if ((scheduleBroadcasts.length || canWatch) && !gameIsCompleted) {
    html += scheduleBroadcasts.map(b => {
      const name = this.resolveChannel(b.media.shortName)?.display_name || b.media.shortName;
      const num = this.scheduleChannelNumber(b);
-     return `<span class="game-network">${name}${num ? ` <span class="game-channum">Ch. ${num}</span>` : ''}</span>`;
+     return `<span class="game-network">${name}${num ? ` <span class="ch-pill" title="Channel ${num}">${num}</span>` : ''}</span>`;
    }).join('<span class="game-network-sep"> · </span>');
  }
  if (canWatch && !scheduleBroadcasts.length) {
@@ -2450,7 +2450,7 @@ _renderWatchChannels(channelsEl, resolved, radioResolved) {
         if (num) {
           const fmt = this.formatChannelNum(num);
           const note = fmt.ambiguous ? ` <span class="watch-channel-num-note">(listings vary — check your guide)</span>` : '';
-          numDiv.innerHTML = `<span class="watch-channel-num-label">${provider.display_name}</span> <span class="watch-channel-num-value">Ch. ${fmt.text}</span>${note}`;
+          numDiv.innerHTML = `<span class="watch-channel-num-label">${provider.display_name}</span> <span class="ch-pill" title="Channel ${fmt.text}">${fmt.text}</span>${note}`;
         } else {
           numDiv.innerHTML = `<span class="watch-channel-num-label watch-channel-num-none">Not listed for ${provider.display_name}</span>`;
         }
