@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { clubPage, clubSwitcher, leagueNav, leagueRecordsPage, leagueSchedulePage, selectorPage, siteNav, sportTabs, standingsModal, standingsPage } from '../lib/render.js'
+import { THEME_HEAD, clubPage, clubSwitcher, leagueNav, leagueRecordsPage, leagueSchedulePage, selectorPage, siteNav, sportTabs, standingsModal, standingsPage } from '../lib/render.js'
 import { matchRoute, parseView, routeTable } from '../lib/routes.js'
 import { parseScope } from '../lib/scope.js'
 import mlb from '../sports/mlb.js'
@@ -588,7 +588,8 @@ test('the modal needs no script', () => {
 		team: clubTeam, season: '2026', tally: { w: 85, l: 52, t: 0 }, verdict: 'no', answer: 'NO',
 		recordLabel: '85-52', colors: COLORS, standings: standingsModal({ standings: DIVISION, season: 2026 }),
 	})
-	assert.equal(/<script/.test(html), false, 'the club page grew a script tag')
+	// The theme switch's, which the modal does not need, and no other.
+	assert.equal(/<script/.test(html.replace(THEME_HEAD, '')), false, 'the club page grew a script tag')
 	assert.ok(html.includes('.modal:target'), 'nothing opens the modal')
 })
 

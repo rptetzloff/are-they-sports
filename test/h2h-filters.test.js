@@ -2,7 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { computeHeadToHead, filterGames, opponentDetail } from '../lib/headtohead.js'
 import { currentFranchises } from '../lib/names.js'
-import { headToHeadPage, h2hColumns, opponentPage } from '../lib/render.js'
+import { headToHeadPage, h2hColumns, opponentPage, THEME_HEAD } from '../lib/render.js'
 import { parseSort } from '../lib/sort.js'
 import { loadTeam } from '../lib/teams.js'
 
@@ -235,7 +235,8 @@ test('the three controls are on the page, as a form the server reads', () => {
 	for (const name of ['q', 'venue', 'type']) {
 		assert.match(html, new RegExp(`name="${name}"`), `no ${name} control`)
 	}
-	assert.ok(!html.includes('<script'))
+	// The theme switch's, which nothing here needs, and no other.
+	assert.ok(!html.replace(THEME_HEAD, '').includes('<script'))
 	assert.ok(!html.includes('onchange'))
 })
 
