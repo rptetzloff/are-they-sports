@@ -5,7 +5,7 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { buildBracket, regionCells, regionOf, bracketPage, ncaamSeeds } from '../lib/bracket.js'
+import { buildBracket, regionCells, regionOf, bracketPage, ncaamSeeds, nitGames } from '../lib/bracket.js'
 import { siteFooterHtml } from '../lib/render.js'
 import { parseCsv } from '../lib/csv.js'
 
@@ -81,7 +81,37 @@ test('the page: champion, rounds, seeds and each side linked', () => {
 	assert.match(withSum, /<dialog id="br-sum"/)
 	assert.match(withSum, /"\/ncaam\/api\/espn\/summary\?event="/)
 	assert.match(bracketPage({ season: 2020, seasons: [2019, 2021], bracket: null, heading: 'h', colors: { base: '#222', accent: '#fff' }, team: () => ({}) }),
-		/the 2020 tournament was cancelled/)
+		/the 2020 tournaments were cancelled/)
+})
+
+test('the NIT: its final and third-place game from the titles, drawn in two halves', () => {
+	const nit = [
+		g('n1', '2025-03-01', 'NIT', 'A', 'B', 70, 60, 'NIT - 1st Round'),
+		g('n2', '2025-03-01', 'NIT', 'C', 'D', 70, 60, 'NIT - 1st Round'),
+		g('n3', '2025-03-01', 'NIT', 'E', 'F', 70, 60, 'NIT-FIRST-ROUND'),
+		g('n4', '2025-03-01', 'NIT', 'G', 'H', 70, 60, 'NIT-FIRST-ROUND'),
+		g('n5', '2025-03-03', 'NIT', 'A', 'C', 70, 60, 'NIT - Semifinal'),
+		g('n6', '2025-03-03', 'NIT', 'E', 'G', 70, 60, 'NIT-SEMIFINAL'),
+		g('n7', '2025-03-05', 'NIT', 'C', 'G', 70, 60, 'NIT CONSOLATION'),
+		g('n8', '2025-03-05', 'NIT', 'A', 'E', 75, 70, 'NIT CHAMPIONSHIP AT MADISON SQUARE GARDEN'),
+		// St. Francis (PA)'s win in 1955, whose next game the record lacks.
+		g('n9', '2025-03-01', 'NIT', 'X', 'Y', 70, 60, 'NIT-FIRST-ROUND'),
+	]
+	const staged = nitGames(nit)
+	assert.deepEqual(staged.filter((x) => x.stage !== 'NIT').map((x) => [x.id, x.stage]), [['n7', 'THIRD'], ['n8', 'FINAL']])
+	const b = buildBracket(staged, { halves: true })
+	assert.deepEqual(b.regions.map((r) => [r.name, r.top.game.id]), [['Top half', 'n6'], ['Bottom half', 'n5']], 'the visitors\' half on top, as the final lists them')
+	assert.deepEqual(b.semis, [])
+	assert.deepEqual(b.third.map((x) => x.id), ['n7'])
+	assert.deepEqual(b.unplaced.map((x) => x.id), ['n9'], 'listed, not dropped')
+	const html = bracketPage({ season: 2025, seasons: [2025], bracket: b, heading: '2025 NIT', colors: { base: '#222', accent: '#fff' },
+		team: (code) => ({ name: code, href: null }), finalTitle: 'Championship', base: '/ncaam/nit', tabs: '<nav class="br-tabs">t</nav>' })
+	assert.match(html, /<h2>Championship<\/h2>\s*<div class="br-row">/)
+	assert.doesNotMatch(html, /br-label">Championship/, 'said once')
+	assert.match(html, /<h2>Other games<\/h2>/)
+	assert.match(html, /<nav class="br-tabs">t<\/nav>/)
+	// "NIT-SEMIFINAL" is no final; with no title saying so, the last game is.
+	assert.equal(nitGames(nit.map((x) => ({ ...x, title: x.id === 'n8' ? 'NIT' : x.title }))).find((x) => x.stage === 'FINAL').id, 'n8')
 })
 
 test('seeds from 1979, by the loader\'s game ids, and the footer links the bracket', () => {
