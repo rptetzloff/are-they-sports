@@ -1018,8 +1018,49 @@ markActiveMonth() {
              if (!isPastSeason) {
                const link = recordEl.querySelector('.record-standings-link');
                if (link) link.addEventListener('click', () => this.openStandingsModal());
+               // Where the polls have the programme this week, under its record.
+               this.showRank(recordEl);
              }
          }
+
+    // The programme's place in this week's polls (api/rank: AP's and the
+    // coaches'), under its record: asked once a page, and
+    // drawn again whenever the record is. Nothing where it is unranked.
+    async showRank(recordEl) {
+      this.rankPromise ??= fetch('api/rank').then((r) => (r.ok ? r.json() : null)).catch(() => null);
+      const got = await this.rankPromise;
+      this.renderPolls(got);
+      if (!got?.ranks?.length || recordEl.querySelector('.poll-rank')) return;
+      const text = got.ranks.map((r) => `No. ${r.rank} ${r.poll}`).join(' · ');
+      recordEl.insertAdjacentHTML('beforeend', `<br><a class="poll-rank" href="../rankings" title="${got.week ? `${got.week} polls` : 'This week\'s polls'}">${text}</a>`);
+    }
+
+    // The Rankings section (index.html #polls-details), once: the AP rank each
+    // week of the season, then this week's Top 25 with this programme marked,
+    // folded until opened. Hidden when ESPN had no polls to give.
+    renderPolls(got) {
+      const section = document.getElementById('polls-details');
+      const box = document.getElementById('polls');
+      if (!section || !box || box.dataset.drawn || (!got?.weeks?.length && !got?.top)) return;
+      box.dataset.drawn = '1';
+      const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      const short = (w) => (w === 'Preseason' ? 'Pre' : w.replace(/^Week /, 'Wk '));
+      const weeks = (got.weeks ?? []).map((w) => `<li class="poll-week${w.rank ? '' : ' unranked'}"><span>${esc(short(w.week))}</span><b>${w.rank ?? '—'}</b></li>`).join('');
+      const me = String(SITE.espnSlug);
+      const top = got.top ? `<details id="polls-top-details" class="polls-top">
+        <summary>${esc(got.top.poll)}${got.week ? `, ${esc(got.week)}` : ''}</summary>
+        <ol class="polls-list">${got.top.ranks.map((r) => `<li class="${r.id === me ? 'me' : ''}"><span class="n">${r.rank}</span>`
+          + `${r.href ? `<a href="${esc(r.href)}">${esc(r.name)}</a>` : `<span>${esc(r.name)}</span>`}<span class="rec">${esc(r.record ?? '')}</span></li>`).join('')}</ol>
+        <a class="polls-all" href="../rankings">Every poll</a>
+      </details>` : '';
+      box.innerHTML = (weeks ? `<p class="polls-caption">AP poll, week by week</p><ol class="poll-weeks">${weeks}</ol>` : '') + top;
+      section.hidden = false;
+      const fold = document.getElementById('polls-top-details');
+      if (fold) {
+        try { fold.open = localStorage.getItem('sectionOpen:polls-top-details') === 'true'; } catch { /* no storage */ }
+        fold.addEventListener('toggle', () => { try { localStorage.setItem('sectionOpen:polls-top-details', String(fold.open)); } catch { /* no storage */ } });
+      }
+    }
 
          displaySchedule(events, isPastSeason = false) {
           const now = new Date();
@@ -1103,7 +1144,8 @@ markActiveMonth() {
       return {
         key: String(event.id), date, phase: event._seasonType,
         home: mil?.homeAway === 'home',
-        opp: opp.team?.shortDisplayName || opp.team?.name || opp.team?.displayName || '',
+        // With its place in the poll, as ESPN gave it for the game.
+        opp: `${opp.curatedRank?.current >= 1 && opp.curatedRank.current <= 25 ? `No. ${opp.curatedRank.current} ` : ''}${opp.team?.shortDisplayName || opp.team?.name || opp.team?.displayName || ''}`,
         state, text, tv, clickable,
         // A game played or being played: its summary pop-up, the site's box
         // score (built from ESPN's, /game/<id>), and ESPN's own page.
@@ -1127,6 +1169,9 @@ createGameItem(event, nextGame, liveGame, now) {
   let brewersScore = 0;
   let opponentScore = 0;
   let opponent = '';
+  // The opponent's place in the poll, shown beside its name (ESPN says 99 for
+  // unranked). Kept apart from the name, which the head-to-head looks up.
+  let opponentRank = null;
   let isHome = false;
 
   competitors.forEach(competitor => {
@@ -1146,6 +1191,8 @@ createGameItem(event, nextGame, liveGame, now) {
            0
            ) || 0;
         opponent = competitor.team.displayName;
+        const rank = competitor.curatedRank?.current;
+        opponentRank = rank >= 1 && rank <= 25 ? rank : null;
     }
 });
 
@@ -1184,7 +1231,7 @@ gameDetails.className = 'game-details';
 
 const opponentDiv = document.createElement('div');
 opponentDiv.className = 'game-opponent';
-opponentDiv.textContent = `${isHome ? 'vs' : '@'} ${opponent}`;
+opponentDiv.textContent = `${isHome ? 'vs' : '@'} ${opponentRank ? `No. ${opponentRank} ` : ''}${opponent}`;
 
 const scheduleBroadcasts = this.scheduleBroadcasts(event);
 const hasBroadcasts = this.broadcastsFor(event).some(b => b.media?.shortName);
