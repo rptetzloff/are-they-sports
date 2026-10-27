@@ -1577,7 +1577,12 @@ async function main() {
 				await new Promise((r) => setTimeout(r, calls || attempt ? 1200 : 0));
 				try {
 					const res = await fetch(url, { headers: { Authorization: `Bearer ${key}`, Accept: 'application/json' }, signal: AbortSignal.timeout(90_000) });
-					if (res.status === 429) { await new Promise((r) => setTimeout(r, (Number(res.headers.get('retry-after')) || 5 * 2 ** attempt) * 1000)); continue; }
+					if (res.status === 429) {
+						const wait = Number(res.headers.get('retry-after')) || 5 * 2 ** attempt;
+						console.log(`  cbbd         too many calls at once; waiting ${wait}s`);
+						await new Promise((r) => setTimeout(r, wait * 1000));
+						continue;
+					}
 					if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
 					const body = await res.json();
 					calls++;
@@ -1603,7 +1608,11 @@ async function main() {
 		const names = new Map();
 		const opponents = new Map();
 		const kept = new Set();
+		const started = Date.now();
+		const elapsed = () => `${Math.round((Date.now() - started) / 1000)}s`;
+		console.log(`  cbbd         ${cfg.first} to ${playing}, a season at a time; a season not kept is fetched (a few calls each)`);
 		for (let season = cfg.first; season <= playing; season++) {
+			const before = calls;
 			const path = join(dir, `games-${season}.json`);
 			// A kept season of exactly the cap is one call's answer, cut short, and
 			// is asked again (2025's first copy was 3,000 games of about 6,000).
@@ -1613,9 +1622,11 @@ async function main() {
 				// A window's edge can return a game twice.
 				const byId = new Map(all.map((g) => [g.id, g]));
 				writeFileSync(path, JSON.stringify([...byId.values()]));
-				if (season % 10 === 0) console.log(`  cbbd         ${season}: ${calls} calls so far${remaining != null ? `, ${remaining} left` : ''}`);
 			}
-			for (const g of JSON.parse(readFileSync(path, 'utf8'))) {
+			const seasonGames = JSON.parse(readFileSync(path, 'utf8'));
+			const fetched = calls - before;
+			console.log(`  cbbd         ${season}: ${seasonGames.length} games, ${fetched ? `fetched in ${fetched} call${fetched === 1 ? '' : 's'} (${calls} so far${remaining != null ? `, ${remaining} left this month` : ''})` : 'kept'}; ${elapsed()}`);
+			for (const g of seasonGames) {
 				const row = adapter.cbbdGameRow(g, { finished: season < playing });
 				if (!row) continue;
 				if (!codes.knows(row.home) && !codes.knows(row.away)) { notClubs++; continue; }
@@ -1628,6 +1639,7 @@ async function main() {
 			}
 		}
 		await flush();
+		console.log(`  cbbd         games written; marking the tournaments' rounds and finals; ${elapsed()}`);
 		// A game the API no longer gives, or no longer as a game: called off, or
 		// a 0-0 that was never played (sports/ncaam.js). The first load kept 8,000
 		// of them as finished 0-0s.
@@ -1680,6 +1692,7 @@ async function main() {
 			counted++;
 		}
 		if (counted) console.log(`  cbbd         ${counted} seasons' rounds counted from their finals`);
+		console.log(`  cbbd         naming tournament games and opponents; ${elapsed()}`);
 		// Names: a tournament game's note.
 		await client.query(
 			`UPDATE game g SET title = v.title FROM unnest($1::text[], $2::text[]) AS v(id, title)
