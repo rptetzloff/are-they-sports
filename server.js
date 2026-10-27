@@ -962,7 +962,7 @@ function main() {
 			// through the shared ESPN cache (lib/today.js).
 			// The scores strip's too (lib/scorebar.js), which every page loads, and
 			// the visitor's choice of leagues both read.
-			if (['/home.js', '/scorebar.js', '/leagues-pref.js', '/tv-pick.js'].includes(url.pathname) && needsSelector(table)) {
+			if (['/home.js', '/scorebar.js', '/leagues-pref.js', '/tv-pick.js', '/theme.js'].includes(url.pathname) && needsSelector(table)) {
 				const js = readFileSync(join(WEB_DIR, 'home', url.pathname.slice(1)));
 				res.writeHead(200, { 'content-type': 'text/javascript; charset=utf-8', 'content-length': js.length, 'cache-control': 'no-cache' });
 				return res.end(js);
