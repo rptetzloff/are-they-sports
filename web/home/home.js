@@ -4,6 +4,7 @@
 // half minute while a game is live, every five minutes otherwise.
 
 import { readLeagues, ordered, onLeagues } from './leagues-pref.js';
+import { loadTv, market, tvHtml, wirePicker } from './tv-pick.js';
 
 const PINS = 'ats.pins';
 const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -43,80 +44,16 @@ function team(t, g) {
 	const rec = g.state === 'pre' && t.record ? `<span class="rec">${esc(t.record)}</span>` : '';
 	return `<span class="t${g.state === 'post' && t.winner ? ' won' : ''}"><span class="nm">${star}${name}${rec}</span><span class="sc">${score}</span></span>`;
 }
-// --- the viewer's TV provider, the same choice the club pages keep ---
-let tv = { providers: [], networks: [], channels: [] };
-const store = {
-	get: (k) => { try { return localStorage.getItem(k); } catch { return null; } },
-	set: (k, v) => { try { if (v == null || v === '') localStorage.removeItem(k); else localStorage.setItem(k, v); } catch { /* no storage */ } },
-};
-const provider = () => tv.providers.find((p) => p.id === store.get('tvProvider')) ?? null;
-const areaOf = (p) => { const i = Number.parseInt(store.get(`tvServiceArea.${p.id}`), 10); return Number.isInteger(i) && i >= 0 && i < p.areas.length ? i : 0; };
-// The viewer's TV market (their area's, set in the admin), for which CBS and
-// FOX game its stations carry; null without one.
-const market = () => { const p = provider(); return p ? (p.dmas?.[p.areas.length ? areaOf(p) : 0] ?? null) : null; };
-
-/** A network's number on the viewer's provider, in their area: an area's own
- *  channel, else the one for every area. A club's own network counts only for
- *  that club's games: Brewers.TV is not the Cubs'. Null where not carried. */
-function channelFor(name, g) {
-	const p = provider();
-	if (!p) return null;
-	const lower = String(name).toLowerCase();
-	const net = tv.networks.find((n) => n.names.includes(lower) && (!n.club || n.club === g.away.key || n.club === g.home.key));
-	if (!net) return null;
-	const area = p.areas.length ? areaOf(p) : null;
-	const mine = tv.channels.filter((c) => c.provider === p.id && c.network === net.id);
-	return (mine.find((c) => c.area === area) ?? mine.find((c) => c.area == null) ?? (p.areas.length <= 1 ? mine.find((c) => c.area === 0) : null))?.channel ?? null;
-}
-function networkName(name, g) {
-	const lower = String(name).toLowerCase();
-	return tv.networks.find((n) => n.names.includes(lower) && (!n.club || n.club === g.away.key || n.club === g.home.key))?.display ?? name;
-}
-
-function tvOf(g) {
-	if (!g.tv.length) return '';
-	// A regional CBS or FOX game (lib/today.js, from 506sports' maps): no number
-	// where the viewer's station carries another game, and said so; 'regional'
-	// where their market is not known or the maps are not posted.
-	const cov = g.coverage;
-	const regional = (name) => (cov?.regional && cov.network === String(name).toUpperCase() ? cov : null);
-	const all = g.tv.map((name) => {
-		const r = regional(name);
-		if (r?.carried === false) return { name: networkName(name, g), ch: null, note: 'not here', title: r.other ? `Your station has ${r.other}` : '' };
-		if (r && r.carried == null) return { name: networkName(name, g), ch: null, note: 'regional', title: 'Which markets get it: 506sports' };
-		return { name: networkName(name, g), ch: channelFor(name, g) };
-	});
-	// A streaming game's over-the-air simulcast, where it is the viewer's market's.
-	if (cov?.station) all.push({ name: networkName(cov.station.net, g), ch: channelFor(cov.station.net, g), note: cov.station.call });
-	// The ones on the viewer's provider first, with their numbers.
-	all.sort((a, b) => Number(Boolean(b.ch)) - Number(Boolean(a.ch)));
-	const item = (n) => {
-		const note = n.note ? ` <span class="more"${n.title ? ` title="${esc(n.title)}"` : ''}>(${esc(n.note)})</span>` : '';
-		return n.ch ? `<span class="on">${esc(n.name)} <span class="ch">${esc(n.ch)}</span>${note}</span>` : `${esc(n.name)}${note}`;
-	};
-	const shown = all.slice(0, 3).map(item).join(' · ');
-	return all.length > 3 ? `${shown} <span class="more" title="${esc(all.slice(3).map((n) => n.name).join(', '))}">+${all.length - 3}</span>` : shown;
-}
-
-function drawPicker() {
-	const bar = document.getElementById('tvbar');
-	if (!tv.providers.length) return;
-	bar.hidden = false;
-	const sel = document.getElementById('provider');
-	const p = provider();
-	sel.replaceChildren(sel.options[0], ...tv.providers.map((x) => { const o = document.createElement('option'); o.value = x.id; o.textContent = x.name; return o; }));
-	sel.value = p?.id ?? '';
-	const wrap = document.getElementById('area-wrap'), area = document.getElementById('area');
-	wrap.hidden = !p || p.areas.length < 2;
-	if (p && p.areas.length > 1) {
-		area.replaceChildren(...p.areas.map((name, i) => { const o = document.createElement('option'); o.value = String(i); o.textContent = name; return o; }));
-		area.value = String(areaOf(p));
-	}
-}
+// --- the viewer's TV provider, the same choice the club pages and the league
+// pages keep (tv-pick.js) ---
+const tvOf = (g) => tvHtml(g.tv, { clubs: [g.away.key, g.home.key].filter(Boolean), coverage: g.coverage });
 // A new provider or area is a new market, so the day is read again for it.
-document.getElementById('provider').addEventListener('change', (e) => { store.set('tvProvider', e.target.value); drawPicker(); draw(); load(); });
-document.getElementById('area').addEventListener('change', (e) => { const p = provider(); if (p) store.set(`tvServiceArea.${p.id}`, e.target.value); draw(); load(); });
-fetch('api/tv').then((r) => (r.ok ? r.json() : null)).then((t) => { if (t) { tv = t; drawPicker(); if (market()) load(); else if (leagues.length) draw(); } }).catch(() => {});
+loadTv().then((ok) => {
+	if (!ok) return;
+	wirePicker({ bar: document.getElementById('tvbar'), sel: document.getElementById('provider'), area: document.getElementById('area'),
+		areaWrap: document.getElementById('area-wrap'), onChange: () => { draw(); load(); } });
+	if (market()) load(); else if (leagues.length) draw();
+});
 const row = (g, label = '') => `<li class="g s-${esc(g.state)}"><span class="when">${label}${when(g)}</span>
 <span class="teams">${team(g.away, g)}${team(g.home, g)}</span><span class="tv">${tvOf(g)}</span></li>`;
 

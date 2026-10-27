@@ -182,8 +182,10 @@ export function pickGame(games, now = Date.now()) {
 /** The period's games as rows, in the front page's own row markup
  *  (schedule-core.js scheduleRowHtml's classes), so they look as a club's
  *  schedule does: when, the two clubs, the score or start time, TV. A week
- *  says the day; a day says only the time. */
-export function gameRowsHtml(games, { selected = null, weekly = false, timeZone } = {}) {
+ *  says the day; a day says only the time. `tvHtml(g)` draws a game's TV,
+ *  with the viewer's channel numbers (league.js); its networks' names
+ *  otherwise. */
+export function gameRowsHtml(games, { selected = null, weekly = false, timeZone, tvHtml = null } = {}) {
 	if (!games.length) return '<div class="loading">No games.</div>';
 	return [...games].sort((a, b) => Date.parse(a.date) - Date.parse(b.date) || a.id.localeCompare(b.id)).map((g) => {
 		const state = g.postponed ? 'postponed' : g.state === 'in' ? 'live' : g.state === 'post' ? 'final' : 'upcoming';
@@ -197,7 +199,7 @@ export function gameRowsHtml(games, { selected = null, weekly = false, timeZone 
 			+ `<span class="sched-date">${esc(when)}</span>`
 			+ `<span class="sched-opp"><span class="${won(g.away).trim()}">${ranked(g.away)}</span> ${g.neutral ? 'vs' : '@'} <span class="${won(g.home).trim()}">${ranked(g.home)}</span></span>`
 			+ `<span class="sched-out">${state === 'live' ? '<span class="live-indicator-small"></span>' : ''}${esc(out)}</span>`
-			+ `<span class="sched-tv" title="${esc(g.tv.join(', '))}">${esc(g.tv.join(' · '))}</span>`
+			+ `<span class="sched-tv" title="${esc(g.tv.join(', '))}">${tvHtml ? tvHtml(g) : esc(g.tv.join(' · '))}</span>`
 			+ '</div>';
 	}).join('');
 }
@@ -205,8 +207,9 @@ export function gameRowsHtml(games, { selected = null, weekly = false, timeZone 
 /** One game as a card, from neither side: both clubs, both scores, where and
  *  when, how to watch, and how it stands or ended. `clubHref(name)` gives a
  *  club's page on this site when there is one; `extraHtml` is the sport's
- *  own live detail (baseball's bases and outs), already drawn. */
-export function gameCardHtml(g, { clubHref = () => null, timeZone, extraHtml = '' } = {}) {
+ *  own live detail (baseball's bases and outs), already drawn; `tvHtml` as
+ *  gameRowsHtml's. */
+export function gameCardHtml(g, { clubHref = () => null, timeZone, extraHtml = '', tvHtml = null } = {}) {
 	const live = g.state === 'in';
 	const cls = ['game-item', 'league-card', live ? 'live' : g.final ? 'completed' : 'next'].join(' ');
 	const team = (t) => {
@@ -225,7 +228,7 @@ export function gameCardHtml(g, { clubHref = () => null, timeZone, extraHtml = '
 		g.note ? `<div class="game-status">${esc(g.note)}</div>` : '',
 		`<div class="game-date">${g.state === 'pre' ? esc(when) : when}</div>`,
 		g.venue ? `<div class="league-venue">${esc(g.venue)}${g.city ? ` · ${esc(g.city)}` : ''}</div>` : '',
-		g.tv.length && !g.final ? `<div class="game-channel"><span class="game-network">${esc(g.tv.join(' · '))}</span></div>` : '',
+		g.tv.length && !g.final ? `<div class="game-channel"><span class="game-network">${tvHtml ? tvHtml(g) : esc(g.tv.join(' · '))}</span></div>` : '',
 	];
 	// Starting pitchers or goalies, where ESPN names them before the game.
 	if (g.state === 'pre' && (g.away.probable || g.home.probable)) {
