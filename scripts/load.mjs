@@ -1602,6 +1602,7 @@ async function main() {
 		};
 		const names = new Map();
 		const opponents = new Map();
+		const kept = new Set();
 		for (let season = cfg.first; season <= playing; season++) {
 			const path = join(dir, `games-${season}.json`);
 			// A kept season of exactly the cap is one call's answer, cut short, and
@@ -1622,10 +1623,17 @@ async function main() {
 				if (!codes.knows(row.home)) opponents.set(row.home, g.homeTeam);
 				if (!codes.knows(row.away)) opponents.set(row.away, g.awayTeam);
 				if (row.title) names.set(row.id, row.title);
+				kept.add(row.id);
 				await put(row);
 			}
 		}
 		await flush();
+		// A game the API no longer gives, or no longer as a game: called off, or
+		// a 0-0 that was never played (sports/ncaam.js). The first load kept 8,000
+		// of them as finished 0-0s.
+		const { rowCount: dropped } = await client.query(
+			"DELETE FROM game WHERE sport = 'ncaam' AND source = 'cbbd' AND NOT (id = ANY($1::text[]))", [[...kept]]);
+		if (dropped) console.log(`  cbbd         ${dropped} games no longer given dropped`);
 		// Each season's NCAA final: its last NCAA tournament game that is no
 		// third-place game, the one a note calls the final where two share the
 		// last day (1950s finals were played after the consolation game).
@@ -1639,6 +1647,39 @@ async function main() {
 				 ORDER BY season, date DESC, (stage = 'FINAL') DESC, id)
 			UPDATE game g SET round = CASE WHEN g.id IN (SELECT id FROM last) THEN 'championship' ELSE 'playoff' END
 			  FROM ncaa WHERE g.sport = 'ncaam' AND g.id = ncaa.id`);
+		// 2003 to 2007's notes name no round ("NCAA CHAMPIONSHIP", "EAST
+		// REGION"). Those brackets were 64 teams, and a round is played on days
+		// of its own, so counted back from the final by date the games are the
+		// final, two semifinals, four regional finals, eight, sixteen and
+		// thirty-two. Only where every round's last game is a day apart from the
+		// next round's first, and where some game's round is unnamed.
+		const SIZES = [['FINAL', 1], ['F4', 2], ['E8', 4], ['S16', 8], ['R32', 16], ['R64', 32]];
+		const { rows: tourney } = await client.query(`
+			SELECT id, season, date::text AS day, stage FROM game
+			 WHERE sport = 'ncaam' AND round <> 'regular' AND status = 'final'
+			   AND stage IN ('FF','R64','R32','S16','E8','F4','FINAL','NCAA')
+			 ORDER BY season, date DESC`);
+		const bySeason = Map.groupBy(tourney, (g) => g.season);
+		let counted = 0;
+		for (const games of bySeason.values()) {
+			if (!games.some((g) => g.stage === 'NCAA') || games.length < 63) continue;
+			const stages = [];
+			let at = 0, clean = true;
+			for (const [stage, n] of SIZES) {
+				const next = games[at + n];
+				if (next && next.day === games[at + n - 1].day) clean = false;
+				for (let i = 0; i < n; i++) stages.push([games[at + i].id, stage]);
+				at += n;
+			}
+			if (!clean) continue;
+			for (const g of games.slice(at)) stages.push([g.id, 'FF']);
+			await client.query(
+				`UPDATE game g SET stage = v.stage FROM unnest($1::text[], $2::text[]) AS v(id, stage)
+				  WHERE g.sport = 'ncaam' AND g.id = v.id`,
+				[stages.map((s) => s[0]), stages.map((s) => s[1])]);
+			counted++;
+		}
+		if (counted) console.log(`  cbbd         ${counted} seasons' rounds counted from their finals`);
 		// Names: a tournament game's note.
 		await client.query(
 			`UPDATE game g SET title = v.title FROM unnest($1::text[], $2::text[]) AS v(id, title)

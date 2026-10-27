@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>League</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css">
+    <!-- The saved theme, applied before the page paints (theme.js). -->
+    <script>try{var t=localStorage.getItem('theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="league.css">
+</head>
+<body>
+    <!-- A league's page, in a club page's layout: the chosen game where a
+         club's own game sits, the bracket below it, and the day's or week's
+         games in the schedule column (league.js). -->
+    <div class="container home-layout">
+        <h1 id="site-title" class="site-title">League</h1>
+        <div class="home-main">
+        <div id="record" class="record"></div>
+        <div id="schedule-featured" class="schedule-featured" hidden></div>
+        <details id="playoff-details" class="collapsible-section" open hidden>
+            <summary class="collapsible-summary">Postseason</summary>
+            <div id="playoff-panel" class="playoff-panel"></div>
+        </details>
+        </div>
+
+        <aside class="home-schedule" aria-label="Schedule">
+        <div class="season-selector league-period">
+            <button id="league-prev" class="season-nav" aria-label="Earlier"><i class="mdi mdi-chevron-left"></i></button>
+            <span id="season-label" class="season-label"></span>
+            <button id="league-next" class="season-nav" aria-label="Later"><i class="mdi mdi-chevron-right"></i></button>
+            <button id="league-today" class="season-nav league-today" hidden>Today</button>
+        </div>
+
+        <div id="schedule" class="schedule-section">
+            <h3 id="schedule-title"><i class="mdi mdi-calendar-month"></i> Games</h3>
+            <div id="schedule-grid" class="schedule-grid">
+                <div class="loading">Loading games...</div>
+            </div>
+        </div>
+        <p class="league-more"><a href="schedule">Every season, from the record</a></p>
+        </aside>
+    </div>
+
+    <footer class="site-footer">
+        <nav class="footer-nav">
+            <a href="../" class="footer-nav-link"><i class="mdi mdi-home-outline"></i><span class="footer-nav-label">Home</span></a>
+            <a href="./" class="footer-nav-link" aria-current="page"><i class="mdi mdi-scoreboard-outline"></i><span class="footer-nav-label">Scores</span></a>
+            <a href="schedule" class="footer-nav-link"><i class="mdi mdi-calendar-month"></i><span class="footer-nav-label">Schedule</span></a>
+            <a href="standings" class="footer-nav-link"><i class="mdi mdi-table"></i><span class="footer-nav-label">Standings</span></a>
+            <a href="champions" class="footer-nav-link"><i class="mdi mdi-trophy-variant-outline"></i><span class="footer-nav-label">Champions</span></a>
+            <a href="records" class="footer-nav-link"><i class="mdi mdi-trophy-outline"></i><span class="footer-nav-label">Records</span></a>
+            <div class="footer-share-wrap">
+                <button id="footer-share-trigger" class="footer-nav-link footer-share-trigger" type="button" aria-haspopup="true" aria-expanded="false">
+                    <i class="mdi mdi-share-variant"></i><span class="footer-nav-label">Share</span> <i class="mdi mdi-chevron-down footer-share-caret"></i>
+                </button>
+                <div class="footer-share" id="footer-share" role="menu" hidden></div>
+            </div>
+            <a href="https://github.com/rptetzloff/AreTheBrewersOnTV" target="_blank" rel="noopener noreferrer" class="footer-nav-link footer-github"><i class="mdi mdi-github"></i><span class="footer-nav-label">GitHub</span></a>
+        </nav>
+    </footer>
+
+    <script src="league.js" type="module"></script>
+    <script src="theme.js" defer></script>
+    <script src="license-modal.js" defer></script>
+</body>
+</html>

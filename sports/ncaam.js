@@ -79,16 +79,24 @@ const easternDay = (iso) => new Date(iso).toLocaleDateString('en-CA', { timeZone
 
 /** A tournament game's round, from its note: "Men's Basketball Championship -
  *  East Region - Sweet 16", "NCAA Men's Tourn., National - National Final",
- *  "NCAA MIDWEST REGION AT SPOKANE WA". Null where the note does not say. */
-export function roundOf(notes) {
+ *  "NCAA MIDWEST REGION AT SPOKANE WA". Null where the note does not say.
+ *
+ *  From 2011 to 2015 the NCAA numbered the First Four as the first round, so
+ *  that season's "2nd Round" is the round of 64 and its "3rd Round" the round
+ *  of 32. A regional third-place game (to 1975) was played by the regional
+ *  semifinals' losers, and is no Final Four's. */
+export function roundOf(notes, season = null) {
 	const n = String(notes ?? '');
+	if (/regional third place/i.test(n)) return 'R3RD';
 	if (/third place|consolation/i.test(n)) return 'THIRD';
 	if (/national championship|national final|championship game/i.test(n)) return 'FINAL';
 	if (/final four|national semifinal/i.test(n)) return 'F4';
 	if (/elite (8|eight)|regional final/i.test(n)) return 'E8';
 	if (/sweet (16|sixteen)|regional semifinal/i.test(n)) return 'S16';
-	if (/2nd round|second round/i.test(n)) return 'R32';
-	if (/1st round|first round/i.test(n)) return 'R64';
+	const numbered = season >= 2011 && season <= 2015;
+	if (numbered && /3rd round|third round/i.test(n)) return 'R32';
+	if (/2nd round|second round/i.test(n)) return numbered ? 'R64' : 'R32';
+	if (/1st (round|rd)\b|first round/i.test(n)) return numbered ? 'FF' : 'R64';
 	if (/first four|opening round/i.test(n)) return 'FF';
 	return null;
 }
@@ -112,11 +120,17 @@ export const gameName = (notes) => String(notes ?? '').replace(/\s+(presented|pr
  *  ESPN's where the game has one (every modern game), else the API's own. */
 export function cbbdGameRow(g, { finished = false } = {}) {
 	if (g?.id == null || g.homeTeamId == null || g.awayTeamId == null) return null;
-	const played = (g.status === 'final' || g.homePoints != null) && g.homePoints != null && g.awayPoints != null;
+	// A game called off is no game. The API gives every unplayed game 0-0, a
+	// scheduled one too, and a hundred-odd "final" 0-0s are games never played:
+	// no basketball game ends 0-0.
+	if (g.status === 'cancelled' || g.status === 'postponed') return null;
+	const scored = g.homePoints != null && g.awayPoints != null && !(Number(g.homePoints) === 0 && Number(g.awayPoints) === 0);
+	if (g.status === 'final' && !scored) return null;
+	const played = g.status === 'final';
 	if (!played && finished) return null;
 	const post = g.seasonType === 'postseason';
 	const which = post ? postseasonOf(g) : null;
-	const round = post && which === 'NCAA' ? roundOf(g.gameNotes) : null;
+	const round = post && which === 'NCAA' ? roundOf(g.gameNotes, Number(g.season)) : null;
 	return {
 		id: /^\d+$/.test(String(g.sourceId ?? '')) ? String(g.sourceId) : `cbbd-${g.id}`,
 		season: Number(g.season),

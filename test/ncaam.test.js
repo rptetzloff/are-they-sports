@@ -31,6 +31,13 @@ test('a CollegeBasketballData game: ESPN\'s id where it has one, sides with a c,
 	// An old game has no ESPN id, and keeps the API's own.
 	assert.equal(cbbdGameRow(game({ sourceId: 'TRONO#95#128', id: 332899 })).id, 'cbbd-332899')
 	assert.equal(cbbdGameRow(game({ status: 'scheduled', homePoints: null, awayPoints: null }), { finished: true }), null)
+	// The API gives a game not yet played 0-0, and it is not final; a game
+	// called off, or a "final" 0-0, is no game at all.
+	const later = cbbdGameRow(game({ status: 'scheduled', homePoints: 0, awayPoints: 0 }))
+	assert.deepEqual([later.status, later.homeScore, later.awayScore], ['scheduled', null, null])
+	assert.equal(cbbdGameRow(game({ status: 'cancelled', homePoints: 0, awayPoints: 0 })), null)
+	assert.equal(cbbdGameRow(game({ status: 'postponed' })), null)
+	assert.equal(cbbdGameRow(game({ status: 'final', homePoints: 0, awayPoints: 0 })), null)
 })
 
 test('a conference tournament is the regular season\'s; the NCAA tournament, the NIT and the rest are postseason', () => {
@@ -51,6 +58,14 @@ test('a round from its note, old notes and new', () => {
 	assert.equal(roundOf('Men\'s Basketball Championship - South Region - Elite 8'), 'E8')
 	assert.equal(roundOf('Men\'s Basketball Championship - First Four'), 'FF')
 	assert.equal(roundOf('NCAA MIDWEST REGION AT SPOKANE WA'), null)
+	// A regional third-place game's teams lost in the regional semifinals.
+	assert.equal(roundOf('NCAA Men\'s Tourn., East - Regional Third Place'), 'R3RD')
+	// 2011 to 2015 counted the First Four as the first round.
+	assert.equal(roundOf('MEN\'S BASKETBALL CHAMPIONSHIP - West - 1st ROUND', 2013), 'FF')
+	assert.equal(roundOf('MEN\'S BASKETBALL CHAMPIONSHIP - West - 2nd ROUND', 2013), 'R64')
+	assert.equal(roundOf('MEN\'S BASKETBALL CHAMPIONSHIP - West - 3rd ROUND', 2013), 'R32')
+	assert.equal(roundOf('MEN\'S BASKETBALL CHAMPIONSHIP - West - 2nd ROUND', 2019), 'R32')
+	assert.equal(roundOf('Men\'s Basketball Champ. - East - 1st Rd', 2008), 'R64')
 	assert.equal(postseasonOf({ tournament: null, gameNotes: 'NCAA MIDWEST REGIONAL' }), 'NCAA')
 	assert.equal(postseasonOf({ tournament: 'CBI', gameNotes: '' }), 'CBI')
 })
