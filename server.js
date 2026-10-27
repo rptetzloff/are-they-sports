@@ -975,7 +975,9 @@ function main() {
 						const areas = (id) => tv.areas.filter((a) => a.providerId === id).sort((a, b) => a.position - b.position).map((a) => a.name);
 						homeTv = { at: Date.now(), body: {
 							// Each area's TV market too (tv_area.dma), for the NFL's regional games.
-							providers: tv.providers.map((p) => ({ id: p.id, name: p.displayName, areas: areas(p.id),
+							// Its other names, logo and site, for the picker (web/home/tv-pick.js).
+							providers: tv.providers.map((p) => ({ id: p.id, name: p.displayName, aliases: p.alternateNames ?? [],
+								logo: p.logoUrl || null, logoBg: p.logoBg || null, displayLogo: Boolean(p.displayLogo), website: p.websiteUrl || null, areas: areas(p.id),
 								dmas: tv.areas.filter((a) => a.providerId === p.id).sort((a, b) => a.position - b.position).map((a) => a.dma ?? null) })).sort((a, b) => a.name.localeCompare(b.name)),
 							networks: tv.networks.map((n) => ({ id: n.id, display: n.displayName, kind: n.kind, club: n.club ?? null,
 								names: [...new Set([n.key, n.displayName, ...(n.aliases ?? [])].map((s) => String(s).toLowerCase()))] })),
