@@ -39,6 +39,8 @@ import { computeStandings, divisionPeers, playedSeasons } from './lib/standings.
 import { Lru, memo, mergeGames, versionOf } from './lib/derived.js';
 import { chartGeometry, coachEras, historyPoints } from './lib/history.js';
 import { codeTables, franchisesForClub, staleFranchises } from './lib/codes.js';
+import { tournamentGames, tournamentSeasons } from './lib/store.js';
+import { buildBracket, bracketPage, ncaamSeeds } from './lib/bracket.js';
 import { availability, championships, close, connect, finalRounds, franchisesWithGames, gameCount, gamesFor, gamesSince, health, lastUpdated, lastUpdatedAll, leaderGames, leaderTenures, rawGamesFor, readSummary, simulcastsFor, standingsTitles, tvTables, withClient, writeSummary } from './lib/store.js';
 import { lockKeyFor, nextDelay, refreshLive, startLiveLoops, withLock } from './lib/live.js';
 import {
@@ -1070,7 +1072,7 @@ function main() {
 				// The fourth segment is the schedule's period — `w3`, `d2026-08-29`,
 				// the period's own key. Only the schedule takes one; /records/2011
 				// and /standings/2011 are whole seasons by definition.
-				const m = url.pathname.match(/^(?:\/([a-z0-9]+))?\/(records|schedule|standings|champions|rankings)(?:\/(\d{4})(?:\/([wd][\w-]+))?)?$/);
+				const m = url.pathname.match(/^(?:\/([a-z0-9]+))?\/(records|schedule|standings|champions|rankings|bracket)(?:\/(\d{4})(?:\/([wd][\w-]+))?)?$/);
 				if (!m) return null;
 				const [, sport, view, season, period] = m;
 				if (period && view !== 'schedule') return null;
@@ -1080,6 +1082,8 @@ function main() {
 				if ((view === 'records' || view === 'champions') && season) return null;
 				// Polls are college sports', and this week's.
 				if (view === 'rankings' && (!POLLED[sport] || season)) return null;
+				// The bracket is the NCAA tournament's, a season's.
+				if (view === 'bracket' && sport !== 'ncaam') return null;
 				return { sport: sport ?? null, view, season: season ?? null, period: period ?? null };
 			})();
 
@@ -1100,6 +1104,35 @@ function main() {
 					colors: NEUTRAL,
 					clubUrl: (id) => urlOf.get(String(id)) ?? null,
 					footer: footerFor(req, url, { sport, current: 'rankings', title: heading }),
+				}));
+			}
+
+			// The NCAA tournament's bracket, a season's (lib/bracket.js): the latest
+			// tournament's at /ncaam/bracket, any other's at /ncaam/bracket/<season>.
+			if (leagueRoute?.view === 'bracket' && needsSelector(table)) {
+				const sport = 'ncaam';
+				const seasons = await tournamentSeasons(sport);
+				const season = leagueRoute.season ? Number(leagueRoute.season) : seasons.at(-1);
+				const games = season ? await tournamentGames(sport, season) : [];
+				const titles = await championships(sport);
+				const bracket = buildBracket(games, { seeds: ncaamSeeds(season), finalId: titles.find((t) => t.season === season)?.gameId ?? null });
+				// A side by its school's name and its page that season, as the
+				// club table has it; a programme without a page by its name then.
+				const clubs = new Map(table.filter((e) => e.sport === sport && clubFor(e)).map((e) => [e.code, e]));
+				const team = (code) => {
+					const e = clubs.get(code);
+					const club = e ? clubFor(e) : null;
+					return {
+						name: club?.nouns?.school ?? namers[sport](code, { season: String(season) }).name,
+						href: e?.available ? `${e.base}/${season}` : null,
+					};
+				};
+				if (wantsJson(url)) return json(res, 200, { season, seasons, games });
+				const heading = `${season} NCAA Tournament`;
+				return html(res, bracket || !leagueRoute.season ? 200 : 404, bracketPage({
+					season, seasons, bracket, team, heading, colors: NEUTRAL,
+					note: season < 1979 ? 'No seeds before 1979: the field was not seeded.' : '',
+					footer: footerFor(req, url, { sport, current: 'bracket', title: heading }),
 				}));
 			}
 
