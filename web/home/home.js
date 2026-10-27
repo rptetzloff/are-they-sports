@@ -4,7 +4,7 @@
 // half minute while a game is live, every five minutes otherwise.
 
 import { readLeagues, ordered, onLeagues } from './leagues-pref.js';
-import { loadTv, market, tvHtml, wirePicker } from './tv-pick.js';
+import { loadTv, market, tvHtml, mountPicker } from './tv-pick.js';
 
 const PINS = 'ats.pins';
 const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -50,8 +50,7 @@ const tvOf = (g) => tvHtml(g.tv, { clubs: [g.away.key, g.home.key].filter(Boolea
 // A new provider or area is a new market, so the day is read again for it.
 loadTv().then((ok) => {
 	if (!ok) return;
-	wirePicker({ bar: document.getElementById('tvbar'), sel: document.getElementById('provider'), area: document.getElementById('area'),
-		areaWrap: document.getElementById('area-wrap'), onChange: () => { draw(); load(); } });
+	mountPicker({ bar: document.getElementById('tvbar'), onChange: () => { draw(); load(); } });
 	if (market()) load(); else if (leagues.length) draw();
 });
 const row = (g, label = '') => `<li class="g s-${esc(g.state)}"><span class="when">${label}${when(g)}</span>

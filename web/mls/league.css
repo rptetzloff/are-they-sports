@@ -216,28 +216,3 @@
         grid-template-columns: 4.3rem minmax(0, 1fr) auto;
     }
 }
-
-/* The viewer's TV provider, under the games (league.html): the home page's
-   picker, in the schedule card's colours. */
-.league-tvbar {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.4rem 0.9rem;
-    margin: 0.75rem 0 0;
-    font-size: 0.85rem;
-    color: rgb(var(--fg-rgb) / 0.7);
-}
-.league-tvbar[hidden] { display: none; }
-.league-tvbar label { display: flex; align-items: center; gap: 0.4rem; }
-.league-tvbar select {
-    font: inherit;
-    max-width: 16rem;
-    padding: 0.25rem 0.45rem;
-    border-radius: 8px;
-    border: 1px solid rgb(var(--fg-rgb) / 0.25);
-    background: rgb(var(--fg-rgb) / 0.06);
-    color: inherit;
-}
-.league-tvbar select option { color: #111; }
-.league-tvbar a { color: inherit; }

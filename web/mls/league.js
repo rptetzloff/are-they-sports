@@ -69,7 +69,7 @@ async function readCoverage() {
 const tvReady = import('../tv-pick.js').then(async (m) => {
 	if (!(await m.loadTv('../'))) return;
 	tv = m;
-	m.wirePicker({ bar: $('tvbar'), sel: $('provider'), area: $('area'), areaWrap: $('area-wrap'),
+	m.mountPicker({ bar: $('tvbar'), submit: '../tv/submit', examples: SITE.providerExamples,
 		onChange: () => { drawList(); drawCard(); readCoverage().then(() => { drawList(); drawCard(); }); } });
 }).catch(() => {});
 
