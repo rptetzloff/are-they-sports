@@ -1,0 +1,15 @@
+# The NCAA tournament's champions before CollegeBasketballData's games begin
+# (1939-1949), from Wikipedia's list of champions (CC BY-SA). Made by
+# scripts/ncaam-champions.mjs; do not edit. Later champions come from their finals.
+season,champion,championName,runnerUp,runnerUpName,score
+1939,ORE,Oregon,OSU,Ohio State,46–33
+1940,IU,Indiana,KU,Kansas,60–42
+1941,WIS,Wisconsin,WSU,Washington State,39–34
+1942,STAN,Stanford,DART,Dartmouth,53–38
+1943,WYO,Wyoming,GTWN,Georgetown,46–34
+1944,UTAH,Utah,DART,Dartmouth,42–40
+1945,OKST,Oklahoma A&M,c392,NYU,49–45
+1946,OKST,Oklahoma A&M,UNC,North Carolina,43–40
+1947,HC,Holy Cross,OU,Oklahoma,58–47
+1948,UK,Kentucky,BAY,Baylor,58–42
+1949,UK,Kentucky,OKST,Oklahoma A&M,46–36

@@ -1,0 +1,1074 @@
+# Every team a Division I programme has played that is no Division I programme
+# today, by CollegeBasketballData's id (with a c) and the latest name it gives it
+# (scripts/ncaam-reference.mjs, from the seasons the load keeps; do not edit).
+id,name
+c1575,Abraham Baldwin Agricultural College
+c1061,Academy of Art
+c948,Adams State
+c1152,Adrian
+c1367,Alabama-Huntsville
+c1452,Alaska
+c1225,Alaska Anchorage
+c916,Albany St (GA)
+c1486,Albertson College
+c1014,Albertus Magnus
+c1250,Albion
+c1415,Albright College
+c1359,Alfred State
+c506,Alice Lloyd College
+c1438,Allegheny
+c997,Allen University
+c1103,Alliance University
+c1027,Alma
+c1456,Alvernia College
+c1131,American International
+c823,Anderson (IN)
+c963,Anderson (SC)
+c1574,Andrew
+c867,Andrews University
+c911,Angelo State
+c966,Antelope Valley
+c759,Apprentice School
+c743,Aquinas
+c964,Arcadia
+c539,Arkansas Baptist
+c1198,Arkansas Tech
+c933,Arkansas-Fort Smith
+c1186,Arkansas-Monticello
+c742,Arlington Baptist
+c372,Armstrong
+c814,Asbury
+c1120,Ashland
+c684,Auburn-Montgomery
+c633,Augusta
+c1273,Augustana (IL)
+c901,Aurora
+c1303,Austin
+c872,Ave Maria
+c725,Averett
+c552,Avila
+c1490,Azusa Pacific
+c1563,Azusa Pacific
+c1109,Babson
+c1148,Bacone
+c1360,Baker University
+c582,Baldwin Wallace
+c424,Baldwin-Wallace
+c375,Baltimore
+c1540,Baptist (Fl)
+c1338,Baptist Bible
+c1132,Baptist Bible College (MO)
+c1335,Barber Scotia
+c1085,Barclay College
+c878,Bard College
+c1419,Barry University
+c1428,Barton
+c1386,Baruch College
+c923,Belhaven
+c917,Bellevue University
+c1147,Belmont Abbey
+c1223,Bemidji State
+c1173,Benedict
+c821,Benedictine (AZ)
+c1393,Benedictine College (KS)
+c1399,Benedictine College (KS)
+c736,Benedictine University (IL)
+c928,Berea
+c884,Berry
+c1210,Bethany (KS)
+c731,Bethany (WV)
+c1420,Bethany College (CA)
+c929,Bethel (IN)
+c540,Bethel (TN)
+c592,Bethesda University
+c1324,Biola
+c371,Birmingham-Southern
+c1275,Black Hills State
+c801,Blackburn
+c1537,Bloomfield
+c926,Bloomsburg
+c851,Blue Mountain
+c1176,Bluefield State
+c626,Bluefield University
+c508,Bluffton
+c533,Bob Jones
+c827,Bowdoin
+c828,Bowie State
+c581,Boyce
+c981,Brandeis
+c1492,Brandeis University
+c621,Brescia
+c741,Brevard
+c791,Brewton-Parker
+c1417,Briar Cliff
+c941,Bridgewater College (VA)
+c1314,Bristol
+c414,Brooklyn
+c602,Bryan (TN)
+c1530,Bryant & Stratton
+c1541,Bryant & Stratton (Ohio)
+c770,Bryn Athyn
+c1230,Buena Vista
+c936,Buffalo State
+c1013,Bushnell
+c1315,BYU-Hawaii
+c1306,Cabrini
+c756,Cairn University
+c1107,Cal Lutheran
+c578,Cal Maritime
+c1451,Cal Poly Pomona
+c1040,Cal State East Bay
+c1053,Cal State LA
+c374,Cal State Los Angeles
+c1201,Caldwell
+c1122,Caltech
+c745,Calumet College
+c685,Calvary
+c1171,Calvin University
+c1357,Cameron
+c651,Campbellsville
+c746,Campbellsville-Harrodsburg
+c679,Capital
+c1002,Cardinal Stritch
+c1031,Carlow
+c1258,Carnegie Mellon
+c586,Carolina Christian College
+c646,Carolina University
+c842,Carroll (MT)
+c1207,Carson-Newman
+c1016,Carver College
+c1138,Carver College
+c1446,Cascade
+c1352,Case Western Reserve
+c1168,Catawba
+c1279,Catholic
+c980,Cazenovia College
+c1159,Cedarville
+c367,Centenary (LA)
+c1060,Centenary (NJ)
+c1006,Central Baptist College
+c1573,Central Bible
+c947,Central Christian College
+c1571,Central College
+c1094,Central Methodist
+c1449,Central Missouri
+c729,Central Penn
+c678,Central State (OH)
+c1209,Central State Oklahoma
+c1253,Central Washington
+c1116,Centre College
+c789,Chadron State
+c902,Chaminade
+c557,Champion Christian
+c574,Chapman
+c627,Chatham University
+c757,Chestnut Hill College
+c505,Cheyney (PA)
+c1187,Chicago
+c1432,Chico State
+c1097,Chowan
+c642,Christendom
+c1498,Christian Brothers
+c1313,Cincinnati Christian
+c999,Cincinnati Clermont
+c1221,City College NY
+c393,City College of New York
+c1290,Claflin
+c1235,Clarion
+c1480,Clark (MA)
+c996,Clark (MA)
+c836,Clark Atlanta
+c1556,Clarke
+c909,Clarks Summit
+c1430,Clarkson
+c983,Clayton State
+c1378,Clearwater Christian
+c511,Cleary University
+c995,Clinton College
+c844,Coast Guard
+c609,Coastal Georgia
+c927,Coe
+c965,Coker
+c1401,Colby
+c824,Colby-Sawyer
+c520,College Of Biblical Studies
+c1340,College Of Faith
+c1153,College of Idaho
+c1000,College of New Jersey
+c1219,College Of New Rochelle
+c652,Colorado Christian
+c572,Colorado College
+c1283,Colorado Mesa
+c1466,Colorado School Of Mines
+c763,Colorado-Colorado Springs
+c1560,Columbia (MO)
+c765,Columbia College (SC)
+c517,Columbia International
+c1142,Columbus State
+c1051,Concord
+c1179,Concordia (WI)
+c1274,Concordia College (AL)
+c1444,Concordia College (NY)
+c1071,Concordia Moorhead
+c1293,Concordia Oregon
+c616,Concordia-Ann Arbor
+c1212,Concordia-Chicago
+c852,Concordia-Irvine
+c1244,Concordia-Nebraska
+c568,Concordia-St. Paul
+c1090,Concordia-Texas
+c1124,Connecticut College
+c1118,Converse University
+c654,Corban College
+c1174,Cornell College (IA)
+c1424,Cornerstone University
+c1197,Cortland
+c840,Covenant
+c660,Crowley's Ridge
+c777,Crown College
+c950,CS Dominguez Hills
+c1281,CS Monterey Bay
+c1195,CS San Bernardino
+c943,CSU Pueblo
+c1252,CSU San Marcos
+c1079,Culver-Stockton
+c766,Cumberland (KY)
+c1067,Cumberland (TN)
+c863,Curry College
+c904,D'Youville
+c1001,Dakota State
+c667,Dakota Wesleyan
+c554,Dallas
+c1375,Dallas Baptist
+c534,Dallas Christian
+c723,Dalton State
+c1427,Dana
+c1305,Daniel Webster College
+c600,Davenport
+c513,Davis & Elkins
+c547,Dean College
+c509,Defiance
+c955,Delaware Valley
+c839,Delta State
+c1323,Denison
+c883,Depauw
+c1231,DeSales
+c514,Dickinson (PA)
+c639,Dickinson State (ND)
+c630,Dillard
+c640,District Of Columbia
+c850,Doane
+c1396,Dominican (CA)
+c1241,Dominican (IL)
+c1457,Dominican (NY)
+c1422,Dowling
+c553,Dubuque
+c960,E. New Mexico
+c588,Earlham College
+c1203,East Central (OK)
+c1151,East Texas Baptist
+c688,East-West University
+c877,Eastern Mennonite
+c1023,Eastern Nazarene
+c822,Eastern Oregon
+c1127,Eastern University (PA)
+c668,Ecclesia
+c1095,Eckerd
+c1089,Edinboro
+c700,Edward Waters
+c730,Elizabeth City State
+c1096,Elizabethtown
+c1382,Elmhurst
+c1128,Elmira
+c816,Elms College
+c1267,Embry-Riddle (AZ)
+c687,Embry-Riddle (AZ)
+c1319,Embry-Riddle (FL)
+c658,Emerson
+c1146,Emmanuel (MA)
+c1263,Emory
+c978,Emory & Henry
+c1161,Emporia St
+c696,Endicott College
+c497,Erskine
+c597,Eureka
+c1129,Evangel
+c605,Evergreen State
+c1052,Fairmont St
+c1126,Farmingdale State
+c1257,Fayetteville St
+c925,FDU Florham
+c895,Felician
+c1299,Ferris State
+c708,Ferrum
+c1256,Findlay
+c693,Fisher College
+c555,Fisk
+c1139,Flagler
+c1059,Florida College
+c956,Florida Memorial
+c666,Florida National
+c1566,Florida Polytechnic
+c1405,Florida Southern
+c714,Florida Tech
+c1251,Fontbonne
+c1156,Fort Hays State
+c797,Fort Lauderdale
+c1295,Fort Lewis
+c820,Fort Valley State
+c499,Framingham State
+c1329,Francis Marion
+c788,Franciscan University
+c608,Franklin
+c647,Franklin Pierce
+c617,Fredonia State
+c1163,Freed-Hardeman
+c853,Fresno Pacific
+c815,Friends University
+c518,Frostburg State
+c682,Gallaudet
+c1140,Gannon
+c1202,Geneva
+c931,George Fox
+c1062,Georgetown College (KY)
+c1047,Georgia College
+c1576,Georgia Southern-East Georgia
+c1162,Georgia Southwestern
+c1058,Georgia Southwestern
+c501,Georgian Court
+c1189,Gettysburg
+c1054,Glenville State
+c861,Goldey-Beacom
+c1077,Gordon College
+c641,Goshen
+c1057,Goucher
+c1307,Grace
+c1318,Grace Bible College
+c1009,Grace Christian
+c1553,Grace University
+c1374,Graceland University
+c1483,Grand Valley State
+c1282,Great Falls
+c1555,Great Lakes Christian
+c954,Greensboro College
+c1143,Greenville
+c1369,Grinnell
+c975,Guilford
+c645,Gwynedd-Mercy
+c1447,Hamline
+c1188,Hampden-Sydney
+c512,Hannibal-LaGrange
+c1086,Hanover
+c772,Hardin-Simmons
+c987,Harding
+c758,Harris-Stowe State
+c363,Hartford
+c1100,Hartwick
+c680,Haskell
+c1070,Hastings
+c1366,Haverford
+c565,Hawai'i Hilo
+c721,Hawai'i Pacific
+c813,Heidelberg
+c1277,Henderson State
+c873,Hendrix College
+c1336,Hillsdale
+c1184,Hiram
+c1227,Hiwassee
+c1477,Hobart College
+c1397,Holy Cross
+c601,Holy Cross College (IN)
+c760,Holy Family University
+c1045,Holy Names University
+c912,Hood College
+c1075,Hope
+c1125,Hope International
+c504,Houghton
+c559,Howard Payne
+c1234,Humboldt State
+c1236,Huntingdon College (AL)
+c1487,Huntington (IN)
+c1501,Husson
+c1007,Huston-Tillotson
+c1493,Illinois College
+c882,Illinois Tech
+c1181,Illinois Wesleyan
+c985,Illinois-Springfield
+c792,Immaculata
+c1383,Indiana Tech
+c1395,Indiana University East
+c972,Indiana University Northwest
+c1455,Indiana Wesleyan
+c1113,Indiana-Kokomo
+c1436,Indiana-Pennsylvania
+c1017,Indiana-South Bend
+c1454,Indiana-Southeast
+c1012,Indianapolis
+c1035,Iowa Wesleyan
+c1015,Ithaca College
+c492,IU Columbus
+c542,Jamestown
+c846,Jarvis Christian
+c569,Jessup University
+c864,John Brown
+c1388,John Carroll
+c671,John Jay College
+c692,John Melvin
+c1474,Johns Hopkins University
+c1211,Johnson & Wales (CO)
+c1232,Johnson & Wales (FL)
+c881,Johnson & Wales (NC)
+c808,Johnson & Wales (RI)
+c1423,Johnson C Smith
+c699,Johnson University (TN)
+c835,Johnson University Florida
+c728,Judson University
+c1489,Juniata College
+c716,Justice College
+c1385,Kalamazoo
+c614,Kansas Christian
+c825,Kean
+c1114,Keene St
+c1491,Keene State
+c892,Keiser
+c1578,Kent State Tuscarawas
+c590,Kentucky Christian
+c707,Kentucky State
+c794,Kentucky Wesleyan
+c1292,Kenyon
+c1106,Keuka
+c1481,Keuka College
+c879,Keystone
+c834,King (TN)
+c1470,Kings (PA)
+c1048,Knox
+c1495,Knoxville
+c1565,Kutztown
+c1579,Kuyper
+c1316,La Roche
+c670,La Sierra
+c573,La Verne
+c495,LaGrange
+c899,Lake Erie
+c1478,Lake Forest
+c920,Lake Superior State
+c527,Lakeland
+c1439,Lambuth
+c625,Lancaster Bible College
+c1137,Lander
+c706,Lane College
+c1347,Langston
+c1473,Lasell College
+c1284,Lawrence Tech
+c1533,Lawrence University
+c973,Lebanon Valley
+c1164,Lee
+c1010,Lees-McRae
+c748,Lehman College
+c930,LeMoyne-Owen
+c1105,Lenoir-Rhyne
+c767,Lesley University
+c648,LeTourneau
+c1155,Lewis
+c589,Lewis & Clark
+c1354,Lewis-Clark St
+c570,Life Pacific
+c848,Life University
+c908,Limestone
+c1464,Lincoln
+c785,Lincoln (MO)
+c1036,Lincoln (PA)
+c1285,Lincoln Christian
+c754,Lincoln University (CA)
+c755,Lindsey Wilson College
+c833,Linfield College
+c1243,LIU Brooklyn
+c739,Livingstone
+c1442,Lock Haven University
+c885,Loras
+c537,Louisiana Christian
+c847,Lourdes University
+c400,Loyola (LA)
+c650,Loyola New Orleans
+c531,LSU Alexandria
+c962,LSU Shreveport
+c1398,Lubbock Christian
+c897,Luther
+c1467,Lycoming
+c529,Lynchburg
+c905,Lynn
+c880,Lyon
+c1471,Macalester
+c1411,MacMurray College
+c1297,Madonna
+c1200,Maine Maritime
+c735,Maine-Augusta
+c1078,Maine-Farmington
+c579,Maine-Fort Kent
+c1254,Maine-Machias
+c859,Maine-Presque Isle
+c837,Malone
+c1004,Manchester
+c1534,Manhattan Christian
+c809,Manhattanville
+c620,Manor College
+c697,Mansfield
+c727,MARIAN
+c1308,Marian (IN)
+c1412,Marietta
+c1024,Mars Hill
+c644,Mary Baldwin
+c1044,Mary Hardin-Baylor
+c1326,Mary Washington
+c1289,Marygrove
+c1434,Maryland Bible College
+c1177,Marymount (VA)
+c536,Maryville College (TN)
+c1121,Maryville University (MO)
+c523,Marywood
+c1567,Mass Maritime
+c1003,Massachusetts College of Liberal Arts
+c585,Massachusetts-Boston
+c1050,Master's University
+c940,Mayville State
+c1011,McDaniel
+c1259,McGill
+c1158,McKendree
+c615,McMurry
+c1288,McPherson
+c1298,Medaille College
+c826,Medgar Evers
+c629,Menlo
+c749,Merchant Marine Academy
+c643,Mercy
+c1300,Messiah
+c998,Methodist
+c610,Miami (OH)-Hamilton
+c979,Miami (OH)-Middletown
+c782,Michigan Tech
+c1134,Michigan-Dearborn
+c541,Mid-America Christian
+c516,Mid-Atlantic Christian
+c1364,Mid-Continent University
+c771,Middle Georgia State
+c1505,Middlebury
+c1043,Midland University
+c717,Midway University
+c1169,Midwestern State
+c1240,Miles
+c1108,Millersville
+c786,Milligan
+c1418,Millikin
+c843,Millsaps
+c951,Milwaukee School Of Engineering
+c703,Minnesota Crookston
+c1117,Minnesota Duluth
+c1101,Minnesota Morris
+c1390,Minot State
+c675,Misericordia
+c532,Mississippi College
+c598,Mississippi University For Women
+c915,Missouri Baptist
+c993,Missouri S&T
+c612,Missouri S&T
+c636,Missouri Southern State
+c1328,Missouri Valley
+c1302,Missouri Western
+c1204,Missouri-St. Louis
+c1093,MIT
+c694,Mitchell College
+c819,Mobile
+c866,Molloy
+c702,Monmouth (IL)
+c1381,Montana State-Billings
+c924,Montana State-Northern
+c764,Montana Tech
+c1034,Montana-Western
+c1482,Monterrey Tech
+c945,Montevallo
+c751,Montreat
+c1562,Montreat
+c1112,Moravian
+c829,Morehouse
+c1499,Morris Brown
+c507,Morris College
+c690,Mount Aloysius
+c1346,Mount Ida
+c628,Mount Marty College
+c515,Mount Olive
+c638,Mount Saint Mary (NY)
+c968,Mount Saint Vincent
+c1056,Mount St. Joseph
+c1485,Mount Union (OH)
+c1350,Mount Vernon Nazarene (OH)
+c1472,Mountain State University
+c1372,MSU Denver
+c1400,Muhlenberg
+c1025,Multnomah University
+c817,Muskingum
+c913,Navajo Tech
+c724,Nazareth College
+c519,NC Wesleyan
+c1286,Nebraska Christian
+c1216,Nebraska Wesleyan
+c1208,Nebraska-Kearney
+c618,Nelson
+c1577,Nelson American Indian
+c812,Neumann
+c528,New College (FL)
+c1304,New Hope Christian College
+c564,New Mexico Highlands
+c1425,New York City Tech
+c1194,New York Institute Of Technology
+c392,New York University
+c526,Newberry
+c1220,Newbury College
+c1167,Newman University
+c1345,Nichols College
+c664,Nobel
+c832,North American
+c562,North Central (MN)
+c798,North Central College
+c1136,North Georgia
+c665,North Greenville
+c869,North Park
+c390,Northeastern Illinois
+c543,Northeastern State
+c1310,Northern Michigan
+c720,Northern New Mexico
+c1525,Northern State
+c906,Northland
+c567,Northwest Indian
+c1402,Northwest Missouri St
+c932,Northwest Nazarene
+c566,Northwest University
+c1049,Northwestern Ohio
+c1341,Northwestern Oklahoma State
+c1460,Northwood (FL)
+c961,Northwood (MI)
+c1361,Northwood University
+c510,Notre Dame (Md)
+c976,Notre Dame College (OH)
+c1183,Notre Dame de Namur
+c1337,Nova Southeastern
+c1088,NVU-Lyndon
+c1407,NYU Poly
+c935,Oak Hills Christian
+c855,Oakland City
+c594,Oakwood
+c1087,Oberlin
+c655,Occidental
+c493,Oglethorpe
+c580,Ohio Christian
+c934,Ohio Dominican
+c1343,Ohio Midwestern
+c1199,Ohio Northern
+c1076,Ohio Valley
+c611,Ohio Wesleyan
+c1191,Ohio-Chillicothe
+c1018,Oklahoma Baptist
+c1072,Oklahoma Christian
+c1476,Oklahoma City
+c1484,Oklahoma Wesleyan Un
+c1019,Old Westbury
+c498,Old Westbury
+c1165,Olivet
+c1180,Olivet Nazarene
+c1270,Oregon Tech
+c1414,Oswego St
+c1022,Ottawa (AZ)
+c1309,Ottawa (KS)
+c1552,Ottawa (KS)
+c762,Ouachita Baptist
+c732,Our Lady Of The Lake
+c613,Ozark Christian
+c1334,Pace
+c773,Pacific (OR)
+c898,Pacific Lutheran
+c889,Pacific Union
+c1371,Pacifica College
+c1026,Paine
+c1111,Palm Beach Atlantic
+c1278,Panhandle St (OK)
+c549,Park University Gilbert
+c550,Paul Quinn
+c1532,Paul Smith'S
+c1404,Penn St Abington
+c546,Penn State - Wilkes-Barre
+c1353,Penn State (Beaver)
+c862,Penn State (Brandywine)
+c1320,Penn State (Harrisburg)
+c1348,Penn State (Mont Alto)
+c1561,Penn State Berks
+c1539,Penn State Hazleton
+c799,Penn State Scranton
+c946,Penn State-Alleghany
+c761,Penn State-Altoona
+c1098,Penn State-Behrend
+c793,Penn State-Fayette
+c953,Penn State-New Kensington
+c623,Penn State-Schuylkill
+c740,Penn State-Shenango
+c496,Penn State-York
+c1431,PennWest California
+c1239,Pensacola Christian College
+c1039,Peru State
+c535,Pfeiffer
+c1379,Philadelphia
+c1409,Philadelphia Biblical University
+c1042,Philander Smith
+c1084,Phoenix
+c503,Piedmont
+c1185,Pikeville
+c1205,Pine Manor
+c1426,Pittsburg St
+c903,Pittsburgh - Greensburg
+c737,Pittsburgh-Bradford
+c726,Plattsburgh St
+c1441,Plymouth State
+c1130,Point
+c914,Point Loma Nazarene
+c865,Point Park
+c591,Point University
+c1291,Pomona Pitzer
+c938,Portland Bible
+c1437,Post University
+c619,Pratt
+c1092,Presentation College
+c1510,Principia College
+c710,Puerto Rico-Bayamon
+c705,Puerto Rico-Mayaguez
+c713,Puerto Rico-Rio Piedras
+c994,Puget Sound
+c599,Purchase
+c1330,Purdue North Central
+c734,Purdue Northwest
+c1150,Purdue Northwest
+c970,Queens College NY
+c1115,Quincy
+c661,Randall University
+c538,Randolph College
+c689,Randolph-Macon
+c1119,Redlands
+c733,Regent
+c1572,Regent
+c810,Regis
+c1074,Regis (CO)
+c888,Reinhardt
+c1503,Rensselaer
+c1453,Rhema Bible Training Center
+c894,Rhode Island College
+c649,Rhodes
+c1206,Rio Grande
+c1504,Ripon
+c1526,RIT
+c502,Rivier
+c1317,Roanoke
+c1445,Robert Morris (IL)
+c1355,Robert Morris-Springfield (IL)
+c891,Roberts Wesleyan
+c992,Rochester University (MI)
+c676,Rockford
+c1268,Rockhurst
+c919,Rocky Mountain
+c715,Rogers State
+c1435,Rollins
+c1110,Roosevelt
+c712,Rosemont
+c1287,Rowan
+c795,Rust
+c1064,Rutgers-Camden
+c1311,Rutgers-Newark
+c1331,Ryerson
+c942,Saginaw Valley State
+c939,Saint Augustine's
+c695,Saint Elizabeth
+c1538,Saint John's (MN)
+c677,Saint Joseph's Long Island
+c1222,Saint Leo
+c1038,Saint Martin's
+c776,Saint Mary of the Woods College
+c674,Saint Mary's (MN)
+c1502,Saint Michael's
+c1358,Saint Rose
+c944,Saint Vincent
+c1154,Salem University
+c1080,Salisbury
+c1536,Salish Kootenai
+c1066,Salve Regina
+c991,San Diego Christian
+c571,San Francisco State
+c753,Sarah Lawrence
+c380,Savannah State
+c787,Schreiner
+c870,Science & Arts (OK)
+c663,Seattle Pacific
+c1296,Selma
+c1312,Seton Hill
+c1224,Sewanee
+c1528,Shaw
+c775,Shawnee State
+c1068,Shenandoah
+c1500,Shepherd
+c1479,Shippensburg
+c990,Shorter
+c606,Siena Heights
+c1269,Silver Lake
+c1029,Simon Fraser
+c1175,Simpson College (IA)
+c1141,Simpson University (CA)
+c1413,Sioux Falls
+c1260,Skidmore
+c1387,Slippery Rock
+c854,Sonoma State
+c1551,South Carolina Beaufort
+c1450,South Carolina-Aiken
+c790,South Dakota Mines
+c1321,South Dakota St School Of Mines
+c1569,South Florida Bible College
+c1342,South Vermont
+c1228,Southeastern
+c1081,Southeastern Baptist College
+c1463,Southeastern College
+c1229,Southeastern Oklahoma State
+c1356,Southern Arkansas
+c1459,Southern Colorado
+c984,Southern Nazarene
+c637,Southern Oregon
+c1363,Southern Polytechnic
+c683,Southern Virginia
+c691,Southern Wesleyan
+c561,Southern-New Orleans
+c1193,Southwest Baptist
+c887,Southwest Minnesota State
+c1233,Southwestern (KS)
+c607,Southwestern (TX)
+c783,Southwestern Adventist
+c849,Southwestern Assemblies of God
+c804,Southwestern Christian
+c1488,Southwestern College
+c1421,Southwestern College Arizona
+c959,Southwestern Oklahoma State
+c831,Spalding
+c800,Spartanburg Methodist
+c1261,Spring Arbor
+c686,Spring Hill
+c709,Springfield
+c1135,Spurgeon College
+c1389,St Gregory's
+c711,St. Ambrose
+c587,St. Andrews
+c1332,St. Catharine (KY)
+c1377,St. Catherine (MN)
+c1226,St. Edward's
+c545,St. Francis (IL)
+c1494,St. Francis (IN)
+c364,St. Francis Brooklyn
+c1030,St. John Fisher
+c1465,St. Joseph (VT)
+c1247,St. Joseph's (NY)
+c1301,St. Josephs (IND)
+c1041,St. Josephs (ME)
+c1564,St. Lawrence
+c874,St. Mary's (MD)
+c1542,St. Mary's (MI)
+c1008,St. Mary's (TX)
+c672,St. Norbert
+c1429,St. Olaf
+c1448,St. Pauls College
+c1531,St. Scholastica
+c1046,St. Thomas (FL)
+c779,St. Thomas (TX)
+c986,St. Thomas (TX)
+c1344,St. Thomas Aquinas
+c969,St. Xavier  (IL)
+c698,Stanislaus State
+c921,Stanton
+c1271,Staten Island
+c937,Sterling College (KS)
+c1433,Stevenson
+c1351,Stillman
+c1246,Stockton
+c1365,Suffolk
+c563,Sul Ross State
+c1416,SUNY Cobleskill
+c769,SUNY Delhi
+c1570,Suny Esf
+c860,SUNY Morrisville
+c624,SUNY Poly
+c750,SUNY-Brockport
+c576,SUNY-Canton
+c718,SUNY-Maritime
+c1065,SUNY-New Paltz
+c593,SUNY-Oneonta
+c922,SUNY-Potsdam
+c1280,Susquehanna
+c1410,Swarthmore
+c669,Tabor
+c958,Talladega
+c1213,Tampa
+c635,Taylor
+c1217,TBD
+c1020,Tennessee Southern
+c1333,Tennessee Temple
+c784,Tennessee Wesleyan
+c1069,Texas A&M-International
+c722,Texas A&M-Kingsville
+c583,Texas A&M-San Antonio
+c818,Texas A&M-Texarkana
+c673,Texas College
+c719,Texas Lutheran
+c1535,Texas Pan American
+c1123,Texas Permian Basin
+c701,Texas Wesleyan
+c1376,The Open Bible
+c1178,Thiel
+c1215,Thomas (GA)
+c752,Thomas (ME)
+c1322,Thomas More
+c886,Tiffin
+c577,Toccoa Falls
+c1133,Tougaloo
+c1091,Transylvania
+c967,Trevecca Nazarene
+c1144,Trine University
+c747,Trinity (FL)
+c551,Trinity (TX)
+c521,Trinity Baptist
+c681,Trinity Christian (IL)
+c1145,Trinity International
+c657,Truett-McConnell
+c957,Truman State
+c1028,Tufts
+c659,Tusculum
+c1157,Tuskegee
+c433,U.S. International
+c858,UC Merced
+c1182,UC Santa Cruz
+c1406,UNC Pembroke
+c1392,Union (KY)
+c1005,Union (NY)
+c548,Union (TN)
+c595,University of Health Sciences & Pharmacy
+c1265,University of Mary
+c1037,University of New England
+c1384,University of Rochester (NY)
+c893,University of Saint Katherine
+c876,University Of Saint Mary
+c1238,University of The Ozarks
+c1349,University of The Sciences
+c805,University of The Southwest
+c1082,University Of The Virgin Islands
+c952,University of Wisconsin River Falls
+c1245,University Park
+c494,UNT Dallas
+c1403,Upper Iowa
+c1196,Urbana
+c1327,Ursinus
+c603,UT Dallas
+c653,UT Permian Basin
+c875,UT Tyler
+c1325,Utica
+c796,UVA Wise
+c988,UW-Parkside
+c1462,Valdosta State
+c896,Valley City
+c631,Valley Forge
+c857,Vanguard
+c841,Vassar
+c634,Vermont State - Johnson
+c524,Vermont State - Lyndon
+c704,Vermont State - Randolph
+c1408,Victory University
+c1373,Virginia Intermont
+c977,Virginia St
+c1368,Virginia Union
+c803,Virginia Wesleyan
+c584,Virginia-Lynchburg
+c1362,Viterbo
+c632,Voorhees
+c1032,Wabash College
+c811,Waldorf College
+c774,Walla Walla
+c845,Warner Pacific
+c744,Warner University
+c1083,Warner University
+c918,Warren Wilson
+c989,Wartburg
+c1149,Washburn
+c1475,Washington & Jefferson
+c386,Washington & Lee
+c1166,Washington Adventist
+c830,Washington Adventist
+c838,Washington and Lee
+c500,Washington College (MD)
+c1458,Washington University (St. Louis)
+c604,Wayland Baptist
+c982,Wayne State (MI)
+c1294,Wayne State (NE)
+c1529,Waynesburg
+c802,Webber International
+c1104,Webster
+c1237,Welch
+c971,Wells College
+c1266,Wentworth Institute Of Technology
+c1469,Wesley
+c1190,Wesley
+c1242,West Alabama
+c476,West Chester
+c1033,West Coast Baptist
+c1073,West Florida
+c1440,West Texas A&M
+c778,West Virginia Wesleyan
+c806,Westcliff
+c544,Western Colorado
+c1021,Western New England
+c558,Western New Mexico
+c656,Western Oregon
+c1249,Western State Colorado University
+c890,Westfield State
+c556,Westminster (MO)
+c575,Westminster (PA)
+c662,Westminster (UT)
+c907,Westmont
+c1468,Wheaton
+c1276,Wheaton (MA)
+c1063,Wheeling
+c1262,Wheelock College
+c1391,Whitman
+c780,Whittier
+c1170,Whitworth
+c1214,Widener
+c871,Wilberforce
+c949,Wiley
+c900,Wilkes University
+c781,Willamette
+c560,William Carey
+c1160,William Jewell
+c1557,William Paterson
+c522,William Peace
+c1443,William Penn
+c807,William Woods
+c1497,Williams
+c1055,Williams Baptist
+c974,Wilmington (DE)
+c1218,Wilmington (OH)
+c1380,Wilmington University
+c1255,Wilson College
+c1172,Wingate
+c1248,Winston-Salem
+c1264,Wisconsin-Lacrosse
+c1192,Wisconsin-Lutheran
+c768,Wisconsin-Stout
+c1099,Wisconsin-Superior
+c910,Wittenberg
+c868,Worcester State
+c596,WPI
+c1559,Wright State - Lake
+c856,WVU Tech
+c622,Xavier (LA)
+c1102,Yellowstone Christian College
+c738,York (NY)
+c530,York College Nebraska
+c1272,York College Pa
+c1339,Young Harris College

@@ -470,7 +470,7 @@ async function loadChampionships(client, sportId, byCode) {
 				 WHERE sport = $1 AND round = 'championship' AND status = 'final'
 				 ORDER BY season, date DESC, id DESC)
 			INSERT INTO championship (sport, season, league, champion, runner_up, method, title, game_id, source)
-			SELECT $1, w.season, upper($1), w.club, l.club, 'championship series', COALESCE(c.title, $2), c.id, c.source
+			SELECT $1, w.season, upper($1), w.club, l.club, $3, CASE WHEN $4 THEN $2 ELSE COALESCE(c.title, $2) END, c.id, c.source
 			  FROM ranked w
 			  JOIN ranked l ON l.season = w.season AND l.rn = 2
 			  JOIN clincher c ON c.season = w.season
@@ -478,8 +478,31 @@ async function loadChampionships(client, sportId, byCode) {
 			 -- not happen in the data and inserting a coin-flip champion if it ever
 			 -- did would be worse than the row being absent.
 			 WHERE w.rn = 1 AND w.wins > l.wins`,
-		[sportId, sportId === 'mlb' ? 'World Series' : 'Championship']);
+		// College basketball's final is one game, and its own note ("Men's
+		// Basketball Championship - National Championship") is no title's name.
+		[sportId, sportId === 'mlb' ? 'World Series' : sportId === 'ncaam' ? 'NCAA Tournament' : 'Championship',
+			sportId === 'ncaam' ? 'championship game' : 'championship series', sportId === 'ncaam']);
 		console.log(`  champions    ${rowCount} derived from games`);
+		// College basketball's before its games begin (1939-1949), from
+		// Wikipedia's list (scripts/ncaam-champions.mjs): finals played, and no
+		// game here to link.
+		const early = join(REFERENCE_DIR, `${sportId}-champions.csv`);
+		if (sportId === 'ncaam' && existsSync(early)) {
+			const { rows: haveF } = await client.query('SELECT id FROM franchise WHERE sport = $1', [sportId]);
+			const known = new Set(haveF.map((r) => r.id));
+			let wrote = 0;
+			for (const r of parseCsv(readFileSync(early, 'utf8'))) {
+				const champion = byCode.get(r.champion) ?? r.champion;
+				const runnerUp = r.runnerUp ? (byCode.get(r.runnerUp) ?? r.runnerUp) : null;
+				if (!known.has(champion)) { console.log(`  champions    ${r.season} ${r.championName}: no such franchise`); continue; }
+				await client.query(
+					`INSERT INTO championship (sport, season, league, champion, runner_up, method, title, game_id, source)
+					 VALUES ($1,$2,'NCAAM',$3,$4,'championship game','NCAA Tournament',NULL,'wikipedia') ON CONFLICT DO NOTHING`,
+					[sportId, Number(r.season), champion, runnerUp && known.has(runnerUp) ? runnerUp : null]);
+				wrote++;
+			}
+			console.log(`  champions    ${wrote} from ${sportId}-champions.csv, before the games begin`);
+		}
 		return;
 	}
 
@@ -1530,6 +1553,102 @@ async function main() {
 			await client.query('INSERT INTO franchise_name (sport, franchise, name, source) VALUES ($1,$2,$3,$4)', ['ncaaf', id, name, 'cfbd']);
 		}
 		console.log(`  cfbd         ${fetched} seasons fetched${remaining != null ? `, ${remaining} calls left this month` : ''}; ${opponents.size} opponents named; ${notClubs} games between two non-clubs left out`);
+	}
+
+	if (sportId === 'ncaam') {
+		// CollegeBasketballData, a season a window of dates at a time: it answers
+		// at most 3,000 games a call, so a window that comes back full is halved
+		// and asked again. A finished season is kept whole; see sports/ncaam.js.
+		const cfg = adapter.sources.cbbd;
+		const key = cfg.key.map((k) => process.env[k]).find(Boolean);
+		if (!key) {
+			console.error(`${cfg.key.join(' or ')} is required for men's college basketball: CollegeBasketballData.com's API key (CollegeFootballData's works)`);
+			await client.query('ROLLBACK');
+			await client.end();
+			return 2;
+		}
+		const codes = codeTable('ncaam', loadHistory('ncaam'));
+		const dir = join(SOURCE_DIR, 'cbbd');
+		mkdirSync(dir, { recursive: true });
+		const playing = adapter.sources.live.seasonOf(new Date());
+		let calls = 0, remaining = null, notClubs = 0;
+		const ask = async (url) => {
+			for (let attempt = 0; attempt < 6; attempt++) {
+				await new Promise((r) => setTimeout(r, calls || attempt ? 1200 : 0));
+				try {
+					const res = await fetch(url, { headers: { Authorization: `Bearer ${key}`, Accept: 'application/json' }, signal: AbortSignal.timeout(90_000) });
+					if (res.status === 429) { await new Promise((r) => setTimeout(r, (Number(res.headers.get('retry-after')) || 5 * 2 ** attempt) * 1000)); continue; }
+					if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+					const body = await res.json();
+					calls++;
+					remaining = res.headers.get('x-calllimit-remaining') ?? remaining;
+					return body;
+				} catch (e) {
+					if (attempt === 5) throw e;
+					const wait = 5 * 2 ** attempt;
+					console.log(`  cbbd         ${e.cause?.code ?? e.message}; trying again in ${wait}s`);
+					await new Promise((r) => setTimeout(r, wait * 1000));
+				}
+			}
+			return [];
+		};
+		// Every game of a season between two dates, halving a window that comes
+		// back at the cap until none does.
+		const between = async (season, from, to) => {
+			const games = await ask(cfg.url(season, from.toISOString(), to.toISOString()));
+			if (games.length < cfg.cap || to - from < 6 * 3600 * 1000) return games;
+			const mid = new Date((from.getTime() + to.getTime()) / 2);
+			return [...await between(season, from, mid), ...await between(season, mid, to)];
+		};
+		const names = new Map();
+		const opponents = new Map();
+		for (let season = cfg.first; season <= playing; season++) {
+			const path = join(dir, `games-${season}.json`);
+			// A kept season of exactly the cap is one call's answer, cut short, and
+			// is asked again (2025's first copy was 3,000 games of about 6,000).
+			const short = existsSync(path) && JSON.parse(readFileSync(path, 'utf8')).length === cfg.cap;
+			if (!existsSync(path) || short || season >= playing - 1) {
+				const all = await between(season, new Date(Date.UTC(season - 1, 9, 1)), new Date(Date.UTC(season, 4, 1)));
+				// A window's edge can return a game twice.
+				const byId = new Map(all.map((g) => [g.id, g]));
+				writeFileSync(path, JSON.stringify([...byId.values()]));
+				if (season % 10 === 0) console.log(`  cbbd         ${season}: ${calls} calls so far${remaining != null ? `, ${remaining} left` : ''}`);
+			}
+			for (const g of JSON.parse(readFileSync(path, 'utf8'))) {
+				const row = adapter.cbbdGameRow(g, { finished: season < playing });
+				if (!row) continue;
+				if (!codes.knows(row.home) && !codes.knows(row.away)) { notClubs++; continue; }
+				// The latest name a team that is no club went by.
+				if (!codes.knows(row.home)) opponents.set(row.home, g.homeTeam);
+				if (!codes.knows(row.away)) opponents.set(row.away, g.awayTeam);
+				if (row.title) names.set(row.id, row.title);
+				await put(row);
+			}
+		}
+		await flush();
+		// Each season's NCAA final: its last NCAA tournament game that is no
+		// third-place game, the one a note calls the final where two share the
+		// last day (1950s finals were played after the consolation game).
+		const { rowCount: finals } = await client.query(`
+			WITH ncaa AS (
+				SELECT id, season, date, stage FROM game
+				 WHERE sport = 'ncaam' AND round <> 'regular' AND status = 'final'
+				   AND stage IN ('FF','R64','R32','S16','E8','F4','FINAL','NCAA')),
+			last AS (
+				SELECT DISTINCT ON (season) id FROM ncaa
+				 ORDER BY season, date DESC, (stage = 'FINAL') DESC, id)
+			UPDATE game g SET round = CASE WHEN g.id IN (SELECT id FROM last) THEN 'championship' ELSE 'playoff' END
+			  FROM ncaa WHERE g.sport = 'ncaam' AND g.id = ncaa.id`);
+		// Names: a tournament game's note.
+		await client.query(
+			`UPDATE game g SET title = v.title FROM unnest($1::text[], $2::text[]) AS v(id, title)
+			  WHERE g.sport = 'ncaam' AND g.id = v.id AND g.title IS DISTINCT FROM v.title`,
+			[[...names.keys()], [...names.values()]]);
+		await client.query("DELETE FROM franchise_name WHERE sport = 'ncaam' AND source = 'cbbd'");
+		for (const [id, name] of opponents) {
+			if (name) await client.query('INSERT INTO franchise_name (sport, franchise, name, source) VALUES ($1,$2,$3,$4)', ['ncaam', id, name, 'cbbd']);
+		}
+		console.log(`  cbbd         ${calls} calls${remaining != null ? `, ${remaining} left this month` : ''}; ${finals} NCAA games marked; ${notClubs} games between two non-clubs left out`);
 	}
 
 	// Championship games, marked after the fact.
