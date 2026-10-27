@@ -171,7 +171,7 @@ async loadTv() {
         		// underneath. Clicks bubble to the answer (Where to Watch).
         		if (provider.displayLogo && provider.logo_url) {
         			const bg = provider.logo_bg ? ` style="background:${provider.logo_bg}"` : '';
-        			const chPill = num ? ` <span class="answer-provider-ch">Ch. ${num}</span>` : '';
+        			const chPill = num ? ` <span class="ch-pill" title="Channel ${num}">${num}</span>` : '';
         			return `<div class="answer-provider-note answer-provider-note-sponsor">
         				<span class="answer-sponsor-banner" role="button" title="Where to watch">
         					<span class="answer-sponsor-logo"${bg}><img src="${provider.logo_url}" alt="${provider.display_name} logo"></span>
@@ -179,7 +179,7 @@ async loadTv() {
         				</span>
         			</div>`;
         		}
-        		return `<div class="answer-provider-note">${provider.display_name} has the ${gameWord} on ${network}${num ? ` (Ch. ${num})` : ''}${regional ? ` · ${regional.html}` : ''}</div>`;
+        		return `<div class="answer-provider-note">${provider.display_name} has the ${gameWord} on ${network}${num ? ` <span class="ch-pill" title="Channel ${num}">${num}</span>` : ''}${regional ? ` · ${regional.html}` : ''}</div>`;
         	}
 
         	// What a regional game means for the viewer's market (coverage-core.js),
@@ -847,7 +847,7 @@ _renderWatchChannels(channelsEl, resolved, radioResolved) {
         if (num) {
           const fmt = this.formatChannelNum(num);
           const note = fmt.ambiguous ? ` <span class="watch-channel-num-note">(listings vary — check your guide)</span>` : '';
-          numDiv.innerHTML = `<span class="watch-channel-num-label">${provider.display_name}</span> <span class="watch-channel-num-value">Ch. ${fmt.text}</span>${note}`;
+          numDiv.innerHTML = `<span class="watch-channel-num-label">${provider.display_name}</span> <span class="ch-pill" title="Channel ${fmt.text}">${fmt.text}</span>${note}`;
         } else {
           numDiv.innerHTML = `<span class="watch-channel-num-label watch-channel-num-none">Not listed for ${provider.display_name}</span>`;
         }

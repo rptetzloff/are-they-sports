@@ -841,7 +841,7 @@ markActiveMonth() {
         // to give (coverage-core.js); one with no market to check says so.
         const regional = this.regionalLabel(event, b);
         const num = regional ? null : this.scheduleChannelNumber(b);
-        return `${this.resolveChannel(b.media.shortName)?.display_name || b.media.shortName}${num ? ` ${num}` : ''}${regional ? ` (${regional})` : ''}`;
+        return { name: this.resolveChannel(b.media.shortName)?.display_name || b.media.shortName, num, note: regional ? `(${regional})` : '' };
       });
       // A bowl, the playoff's games and a conference championship carry their
       // name in ESPN's notes ("Rose Bowl Game Presented by Prudential"), shown
@@ -1041,7 +1041,7 @@ dateDiv.className = 'game-date';
 const network = this.scheduleBroadcasts(event).map(b => {
   const regional = this.regionalLabel(event, b);
   const num = regional ? null : this.scheduleChannelNumber(b);
-  return `${esc(this.resolveChannel(b.media.shortName)?.display_name || b.media.shortName)}${num ? ` <span class="game-channum">Ch. ${esc(num)}</span>` : ''}${regional ? ` <span class="game-channum">${esc(regional)}</span>` : ''}`;
+  return `${esc(this.resolveChannel(b.media.shortName)?.display_name || b.media.shortName)}${num ? ` <span class="ch-pill" title="Channel ${esc(num)}">${esc(num)}</span>` : ''}${regional ? ` <span class="game-channum">${esc(regional)}</span>` : ''}`;
 }).join('<span class="game-network-sep"> · </span>');
 
 if (isLive || isInProgress) {
