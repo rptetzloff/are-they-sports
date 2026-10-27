@@ -42,13 +42,44 @@ function clubHref(name) {
 	return clubLinks.get(name) ?? null;
 }
 
+// --- the viewer's TV ----------------------------------------------------------
+// The home page's provider choice and channel numbers (tv-pick.js, at the
+// site's root), which the club pages keep too: each network's number on the
+// viewer's provider as a pill. None where the site has no such tables.
+let tv = null;
+// A club's key ('mlb/brewers'), from its page's link: a club's own network,
+// Brewers.TV, is that club's games' only.
+const keyOf = (name) => { const m = /([a-z0-9]+)\/([a-z0-9-]+)\/?$/i.exec(clubHref(name) ?? ''); return m ? `${m[1]}/${m[2]}` : null; };
+// The NFL's regional CBS and FOX games, by game: which one the viewer's market
+// gets (the home page's /api/today, from 506sports' maps).
+let coverage = new Map();
+const tvOf = (g) => tv.tvHtml(g.tv, { clubs: [keyOf(g.away.name), keyOf(g.home.name)].filter(Boolean), coverage: coverage.get(g.id) ?? null });
+const ymdOf = (iso) => { const d = new Date(iso); return `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`; };
+async function readCoverage() {
+	coverage = new Map();
+	const dma = tv?.market();
+	const first = state.games.map((g) => g.date).filter(Boolean).sort()[0];
+	if (SITE.espnLeague !== 'football/nfl' || !dma || !first) return;
+	try {
+		const r = await fetch(`../api/today?date=${ymdOf(first)}&sports=nfl&football=week&dma=${encodeURIComponent(dma)}`);
+		const games = r.ok ? (await r.json()).leagues?.[0]?.games ?? [] : [];
+		coverage = new Map(games.filter((g) => g.coverage).map((g) => [g.id, g.coverage]));
+	} catch { /* named without saying whether the market has it */ }
+}
+const tvReady = import('../tv-pick.js').then(async (m) => {
+	if (!(await m.loadTv('../'))) return;
+	tv = m;
+	m.wirePicker({ bar: $('tvbar'), sel: $('provider'), area: $('area'), areaWrap: $('area-wrap'),
+		onChange: () => { drawList(); drawCard(); readCoverage().then(() => { drawList(); drawCard(); }); } });
+}).catch(() => {});
+
 // --- drawing --------------------------------------------------------------
 
 function drawList() {
 	const p = state.period;
 	$('season-label').textContent = p ? (weekly ? `${p.label}${p.season ? ` · ${p.season}` : ''}` : p.label) : '';
 	$('schedule-title').innerHTML = `<i class="mdi mdi-calendar-month"></i> ${weekly ? 'This week’s games' : 'The day’s games'}`;
-	$('schedule-grid').innerHTML = gameRowsHtml(state.games, { selected: state.selected, weekly });
+	$('schedule-grid').innerHTML = gameRowsHtml(state.games, { selected: state.selected, weekly, tvHtml: tv ? tvOf : null });
 	const i = state.periods.findIndex((x) => x.key === p?.key);
 	$('league-prev').disabled = !p;
 	$('league-next').disabled = !p;
@@ -65,7 +96,7 @@ function drawCard() {
 	const g = state.games.find((x) => x.id === state.selected);
 	if (!g) { slot.hidden = true; slot.innerHTML = ''; return; }
 	const extra = g.state === 'in' && situation && g.situation ? situation.situationHtml(situation.liveSituation(g.situation)) : '';
-	slot.innerHTML = gameCardHtml(g, { clubHref, extraHtml: extra });
+	slot.innerHTML = gameCardHtml(g, { clubHref, extraHtml: extra, tvHtml: tv ? tvOf : null });
 	slot.hidden = false;
 }
 
@@ -99,6 +130,8 @@ async function load(period, { keep = null } = {}) {
 	state.games = (data.events ?? []).map(gameOf).filter((g) => g.id);
 	state.selected = state.games.some((g) => g.id === keep) ? keep : pickGame(state.games)?.id ?? null;
 	await situationReady;
+	await tvReady;
+	await readCoverage();
 	drawList();
 	drawCard();
 	writeUrl();

@@ -39,6 +39,13 @@
                 <div class="loading">Loading games...</div>
             </div>
         </div>
+        <!-- The viewer's TV provider, for channel numbers (league.js, the
+             home page's choice): hidden until the site has providers. -->
+        <div id="tvbar" class="league-tvbar" hidden>
+            <label>Your TV <select id="provider" aria-label="Your TV provider"><option value="">Choose a provider for channel numbers…</option></select></label>
+            <label id="area-wrap" hidden>Area <select id="area" aria-label="Your service area"></select></label>
+            <a href="../tv/submit">Missing a channel?</a>
+        </div>
         <p class="league-more"><a href="schedule">Every season, from the record</a></p>
         </aside>
     </div>
