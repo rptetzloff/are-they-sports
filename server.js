@@ -26,6 +26,7 @@
  *  scores silently gone. A server that cannot do its job should not be healthy.
  */
 
+import { POLLED, rankingsUrl } from './lib/polls.js';
 import { createServer } from 'node:http';
 import { readdirSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -1077,26 +1078,28 @@ function main() {
 				// Neither of these is about one season: a record book and a list
 				// of champions are both the whole history by definition.
 				if ((view === 'records' || view === 'champions') && season) return null;
-				// Polls are college football's, and this week's.
-				if (view === 'rankings' && (sport !== 'ncaaf' || season)) return null;
+				// Polls are college sports', and this week's.
+				if (view === 'rankings' && (!POLLED[sport] || season)) return null;
 				return { sport: sport ?? null, view, season: season ?? null, period: period ?? null };
 			})();
 
-			// College football's polls this week, from ESPN through the shared
+			// A college sport's polls this week, from ESPN through the shared
 			// cache (lib/render.js rankingsPage), each team linked to its page here.
 			if (leagueRoute?.view === 'rankings' && needsSelector(table)) {
-				const got = await sharedEspn()(`https://site.api.espn.com/apis/site/v2/sports/football/college-football/rankings`);
+				const { sport } = leagueRoute;
+				const heading = `${sport.toUpperCase()} rankings`;
+				const got = await sharedEspn()(rankingsUrl(sport));
 				let polls = [];
 				try { if (got?.status === 200) polls = parseRankings(JSON.parse(got.body)); } catch { /* unreadable: none */ }
 				if (wantsJson(url)) return json(res, got?.status === 200 ? 200 : 502, { polls });
-				const urlOf = new Map(table.filter((e) => e.sport === 'ncaaf' && e.available && clubFor(e))
+				const urlOf = new Map(table.filter((e) => e.sport === sport && e.available && clubFor(e))
 					.map((e) => [String(clubFor(e).site?.espnSlug ?? ''), `${e.base}/`]));
 				return html(res, 200, rankingsPage({
 					polls,
-					heading: 'NCAAF rankings',
+					heading,
 					colors: NEUTRAL,
 					clubUrl: (id) => urlOf.get(String(id)) ?? null,
-					footer: footerFor(req, url, { sport: 'ncaaf', current: 'rankings', title: 'NCAAF rankings' }),
+					footer: footerFor(req, url, { sport, current: 'rankings', title: heading }),
 				}));
 			}
 
