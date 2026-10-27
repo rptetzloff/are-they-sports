@@ -40,7 +40,7 @@ import { Lru, memo, mergeGames, versionOf } from './lib/derived.js';
 import { chartGeometry, coachEras, historyPoints } from './lib/history.js';
 import { codeTables, franchisesForClub, staleFranchises } from './lib/codes.js';
 import { tournamentGames, tournamentSeasons } from './lib/store.js';
-import { buildBracket, bracketPage, ncaamSeeds } from './lib/bracket.js';
+import { buildBracket, bracketPage, ncaamSeeds, nitGames } from './lib/bracket.js';
 import { availability, championships, close, connect, finalRounds, franchisesWithGames, gameCount, gamesFor, gamesSince, health, lastUpdated, lastUpdatedAll, leaderGames, leaderTenures, rawGamesFor, readSummary, simulcastsFor, standingsTitles, tvTables, withClient, writeSummary } from './lib/store.js';
 import { lockKeyFor, nextDelay, refreshLive, startLiveLoops, withLock } from './lib/live.js';
 import {
@@ -1072,7 +1072,7 @@ function main() {
 				// The fourth segment is the schedule's period — `w3`, `d2026-08-29`,
 				// the period's own key. Only the schedule takes one; /records/2011
 				// and /standings/2011 are whole seasons by definition.
-				const m = url.pathname.match(/^(?:\/([a-z0-9]+))?\/(records|schedule|standings|champions|rankings|bracket)(?:\/(\d{4})(?:\/([wd][\w-]+))?)?$/);
+				const m = url.pathname.match(/^(?:\/([a-z0-9]+))?\/(records|schedule|standings|champions|rankings|bracket|nit)(?:\/(\d{4})(?:\/([wd][\w-]+))?)?$/);
 				if (!m) return null;
 				const [, sport, view, season, period] = m;
 				if (period && view !== 'schedule') return null;
@@ -1083,7 +1083,7 @@ function main() {
 				// Polls are college sports', and this week's.
 				if (view === 'rankings' && (!POLLED[sport] || season)) return null;
 				// The bracket is the NCAA tournament's, a season's.
-				if (view === 'bracket' && sport !== 'ncaam') return null;
+				if ((view === 'bracket' || view === 'nit') && sport !== 'ncaam') return null;
 				return { sport: sport ?? null, view, season: season ?? null, period: period ?? null };
 			})();
 
@@ -1108,14 +1108,18 @@ function main() {
 			}
 
 			// The NCAA tournament's bracket, a season's (lib/bracket.js): the latest
-			// tournament's at /ncaam/bracket, any other's at /ncaam/bracket/<season>.
-			if (leagueRoute?.view === 'bracket' && needsSelector(table)) {
+			// tournament's at /ncaam/bracket, any other's at /ncaam/bracket/<season>;
+			// the NIT's the same at /ncaam/nit.
+			if ((leagueRoute?.view === 'bracket' || leagueRoute?.view === 'nit') && needsSelector(table)) {
 				const sport = 'ncaam';
-				const seasons = await tournamentSeasons(sport);
+				const nit = leagueRoute.view === 'nit';
+				const seasons = await tournamentSeasons(sport, nit ? 'nit' : 'ncaa');
 				const season = leagueRoute.season ? Number(leagueRoute.season) : seasons.at(-1);
-				const games = season ? await tournamentGames(sport, season) : [];
-				const titles = await championships(sport);
-				const bracket = buildBracket(games, { seeds: ncaamSeeds(season), finalId: titles.find((t) => t.season === season)?.gameId ?? null });
+				const games = season ? await tournamentGames(sport, season, nit ? 'nit' : 'ncaa') : [];
+				const titles = nit ? [] : await championships(sport);
+				const bracket = nit
+					? buildBracket(nitGames(games), { halves: true })
+					: buildBracket(games, { seeds: ncaamSeeds(season), finalId: titles.find((t) => t.season === season)?.gameId ?? null });
 				// A side by its school's name and its page that season, as the
 				// club table has it; a programme without a page by its name then.
 				const clubs = new Map(table.filter((e) => e.sport === sport && clubFor(e)).map((e) => [e.code, e]));
@@ -1128,12 +1132,16 @@ function main() {
 					};
 				};
 				if (wantsJson(url)) return json(res, 200, { season, seasons, games });
-				const heading = `${season} NCAA Tournament`;
+				const heading = `${season} ${nit ? 'NIT' : 'NCAA Tournament'}`;
+				// The two tournaments, that season's.
+				const tab = (v, label) => (v === leagueRoute.view ? `<b>${label}</b>` : `<a href="/${sport}/${v}/${season}">${label}</a>`);
 				return html(res, bracket || !leagueRoute.season ? 200 : 404, bracketPage({
-					season, seasons, bracket, team, heading, colors: NEUTRAL, base: `/${sport}/bracket`,
+					season, seasons, bracket, team, heading, colors: NEUTRAL, base: `/${sport}/${leagueRoute.view}`,
+					tabs: `<nav class="br-tabs" aria-label="Tournament">${tab('bracket', 'NCAA Tournament')} · ${tab('nit', 'NIT')}</nav>`,
+					finalTitle: nit ? 'Championship' : 'Final Four',
 					// A game's summary, from ESPN through the league page's cache.
 					summaryUrl: `/${sport}/api/espn/apis/site/v2/sports/${POLLED[sport].league}/summary?event=`,
-					note: [season < 1979 ? 'No seeds before 1979: the field was not seeded.' : '',
+					note: [nit ? 'The NIT is drawn unseeded: the record has its seeds for too few years.' : season < 1979 ? 'No seeds before 1979: the field was not seeded.' : '',
 						season < 2003 ? 'ESPN has no summaries of games before 2003.' : 'A game opens its summary.'].filter(Boolean).join(' '),
 					footer: footerFor(req, url, { sport, current: 'bracket', title: heading }),
 				}));
