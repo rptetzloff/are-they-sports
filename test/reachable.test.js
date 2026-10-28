@@ -639,7 +639,8 @@ test('a league page drawn by the server has the fixed footer, its own page marke
 	]
 	const footer = siteFooterHtml({ sport: 'nhl', current: 'standings', clubs, share: { url: 'https://x/nhl/standings', links: [{ href: 'https://x.example/share', icon: 'twitter', label: 'Post on X' }] } })
 	const html = standingsPage({ standings: standingsFor(2025, [LINE]), label: 'NHL', seasons: [2025], heading: 'NHL', colors: COLORS, clubs: [], footer })
-	assert.ok(html.includes('<h1>NHL standings 2025</h1>'))
+	// Hockey's season named as its club pages name it.
+	assert.ok(html.includes('<h1>NHL standings 2024-2025</h1>'))
 	assert.match(html, /<footer class="site-footer">/)
 	assert.match(html, /<a href="\/nhl\/standings" class="footer-nav-link" aria-current="page">/)
 	for (const href of ['/', '/nhl/', '/nhl/schedule', '/nhl/champions', '/nhl/records']) assert.ok(hrefs(html).includes(href), `no ${href}`)
