@@ -73,8 +73,8 @@ test('the page: champion, rounds, seeds and each side linked', () => {
 	// Each season named as the club pages name it, 2023-2024; its path the
 	// year its tournament was played, as theirs.
 	// The other league pages' stepper, the season in the middle.
-	assert.match(html, /<nav class="season-nav"><span class="nav-label">Season<\/span>/)
-	assert.match(html, /<a href="\/ncaam\/bracket\/2024" title="Previous">‹<\/a><span class="current">2024-2025<\/span>/)
+	assert.match(html, /<nav class="season-nav" aria-label="Season">/)
+	assert.match(html, /<a class="step" href="\/ncaam\/bracket\/2024" title="Previous" aria-label="Previous"><i class="mdi mdi-chevron-left"><\/i><\/a><span class="current">2024-2025<span class="season-word"> Season<\/span><\/span>/)
 	assert.doesNotMatch(html, /<select/, 'no list of its own')
 	assert.match(read('web/ncaam/site.js'), /seasonLabel: \(season\) => `\$\{Number\(season\) - 1\}-\$\{season\}`/, 'the club pages\' own')
 	assert.match(read('server.js'), /const heading = `\$\{seasonLabel\(season\)\} /)

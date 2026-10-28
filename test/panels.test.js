@@ -190,8 +190,9 @@ test('navigation offers first, previous, next and last', () => {
 // was absent; what they meant is that nothing links backwards from the first
 // season, which is the stronger claim and the one that survives the change.
 
-const backLinks = (nav) => [...nav.matchAll(/<a href="([^"]*)"[^>]*>(?:\|‹|‹‹|‹)<\/a>/g)].map((m) => m[1])
-const fwdLinks = (nav) => [...nav.matchAll(/<a href="([^"]*)"[^>]*>(?:›\||››|›)<\/a>/g)].map((m) => m[1])
+// The club pages' chevron icons, three for an end and two for ten.
+const backLinks = (nav) => [...nav.matchAll(/<a class="step[^"]*" href="([^"]*)"[^>]*><i class="mdi mdi-chevron-(?:triple-|double-)?left"><\/i><\/a>/g)].map((m) => m[1])
+const fwdLinks = (nav) => [...nav.matchAll(/<a class="step[^"]*" href="([^"]*)"[^>]*><i class="mdi mdi-chevron-(?:triple-|double-)?right"><\/i><\/a>/g)].map((m) => m[1])
 
 test('the first season offers no previous', () => {
 	const nav = seasonNav(SEASONS, '1921', '/packers')
@@ -211,27 +212,28 @@ test('the ends stay on the page, disabled', () => {
 	// The row must not change width at the boundaries.
 	const first = seasonNav(SEASONS, '1921', '/packers')
 	const middle = seasonNav(SEASONS, SEASONS[3], '/packers')
-	const controls = (nav) => (nav.match(/<a |<span class="step-off"/g) ?? []).length
+	const controls = (nav) => (nav.match(/<a class="step|<span class="step step-off/g) ?? []).length
 	assert.equal(controls(first), controls(middle), 'the nav has a different number of controls at the ends')
 })
 
-test('every chevron is the same character, doubled or barred', () => {
-	// The club page mixed U+22D8, U+00AB and U+2039. The first is a MATHEMATICAL
-	// symbol drawn to different proportions, so it never matched the other two at
-	// any size — which is what made the row look like three unrelated buttons.
+test('every chevron is the club pages\' icon, tripled for an end, doubled for ten', () => {
+	// The club pages' season buttons (Ray, 2026-10-27: "these are not the same
+	// as these"): one icon family, no text glyphs. The club page once mixed
+	// U+22D8, U+00AB and U+2039, which never matched at any size.
 	const nav = seasonNav(SEASONS, SEASONS[3], '/packers')
-	for (const bad of ['⋘', '⋙', '«', '»']) {
-		assert.equal(nav.includes(bad), false, `${bad} is not from the chevron family`)
+	for (const bad of ['⋘', '⋙', '«', '»', '‹', '›']) {
+		assert.equal(nav.includes(bad), false, `${bad} is a text glyph`)
 	}
-	assert.ok(nav.includes('|‹') && nav.includes('›|'), 'the ends are not barred')
+	assert.ok(nav.includes('mdi-chevron-triple-left') && nav.includes('mdi-chevron-triple-right'), 'the ends are not tripled')
+	assert.match(nav, /<span class="current">\d{4}<span class="season-word"> Season<\/span><\/span>/, 'named as the club pages name it')
 })
 
 test('the ten-jump appears only where it saves clicks', () => {
 	// It earns its place on a hundred seasons and is clutter on eighteen weeks.
 	const many = Array.from({ length: 100 }, (_, i) => String(1921 + i))
-	assert.ok(seasonNav(many, '1960', '/packers').includes('‹‹'), 'no ten-jump across a century')
+	assert.ok(seasonNav(many, '1960', '/packers').includes('mdi-chevron-double-left'), 'no ten-jump across a century')
 	const few = ['2021', '2022', '2023', '2024']
-	assert.equal(seasonNav(few, '2022', '/packers').includes('‹‹'), false, 'a ten-jump across four seasons')
+	assert.equal(seasonNav(few, '2022', '/packers').includes('mdi-chevron-double-left'), false, 'a ten-jump across four seasons')
 })
 
 test('navigation only links seasons the club actually has', () => {
