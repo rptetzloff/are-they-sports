@@ -40,7 +40,7 @@ import { Lru, memo, mergeGames, versionOf } from './lib/derived.js';
 import { chartGeometry, coachEras, historyPoints } from './lib/history.js';
 import { codeTables, franchisesForClub, staleFranchises } from './lib/codes.js';
 import { tournamentGames, tournamentSeasons } from './lib/store.js';
-import { buildBracket, bracketPage, ncaamSeeds, nitGames } from './lib/bracket.js';
+import { buildBracket, bracketPage, ncaamSeeds, nitGames, seasonLabel } from './lib/bracket.js';
 import { availability, championships, close, connect, finalRounds, franchisesWithGames, gameCount, gamesFor, gamesSince, health, lastUpdated, lastUpdatedAll, leaderGames, leaderTenures, rawGamesFor, readSummary, simulcastsFor, standingsTitles, tvTables, withClient, writeSummary } from './lib/store.js';
 import { lockKeyFor, nextDelay, refreshLive, startLiveLoops, withLock } from './lib/live.js';
 import {
@@ -1132,7 +1132,8 @@ function main() {
 					};
 				};
 				if (wantsJson(url)) return json(res, 200, { season, seasons, games });
-				const heading = `${season} ${nit ? 'NIT' : 'NCAA Tournament'}`;
+				// The season as the club pages name it, "2024-2025".
+				const heading = `${seasonLabel(season)} ${nit ? 'NIT' : 'NCAA Tournament'}`;
 				// The two tournaments, that season's.
 				const tab = (v, label) => (v === leagueRoute.view ? `<b>${label}</b>` : `<a href="/${sport}/${v}/${season}">${label}</a>`);
 				return html(res, bracket || !leagueRoute.season ? 200 : 404, bracketPage({

@@ -10,6 +10,7 @@ import { siteFooterHtml } from '../lib/render.js'
 import { parseCsv } from '../lib/csv.js'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
+const read = (p) => readFileSync(join(ROOT, p), 'utf8')
 
 // Eight teams, two regions of two rounds each: A1 beats A8 and A4 beats A5 on
 // the 1st, A1 beats A4 on the 3rd; the same in B; A1 beats B2 in the final.
@@ -69,8 +70,12 @@ test('the page: champion, rounds, seeds and each side linked', () => {
 	assert.match(html, /A1 beat B2 70–68 for the title/)
 	assert.match(html, /<span class="sd">1<\/span><span class="nm"><a href="\/ncaam\/a1\/2025">A1<\/a>/)
 	// Whole paths, which work from /ncaam/bracket as from /ncaam/bracket/2025.
-	assert.match(html, /href="\/ncaam\/bracket\/2024">‹ 2024/)
-	assert.match(html, /<option value="\/ncaam\/bracket\/2024">2024/)
+	// Each season named as the club pages name it, 2023-2024; its path the
+	// year its tournament was played, as theirs.
+	assert.match(html, /href="\/ncaam\/bracket\/2024">‹ 2023-2024</)
+	assert.match(html, /<option value="\/ncaam\/bracket\/2024">2023-2024</)
+	assert.match(read('web/ncaam/site.js'), /seasonLabel: \(season\) => `\$\{Number\(season\) - 1\}-\$\{season\}`/, 'the club pages\' own')
+	assert.match(read('server.js'), /const heading = `\$\{seasonLabel\(season\)\} /)
 	assert.match(html, /<h2>First Four<\/h2>/)
 	// A game with ESPN's id opens its summary; the rest are plain boxes.
 	assert.doesNotMatch(html, /data-game=/, 'no summary address, no pop-up')
