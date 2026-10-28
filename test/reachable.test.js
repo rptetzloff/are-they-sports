@@ -606,7 +606,9 @@ test('a page carrying two steppers names both', () => {
 		periodNoun: 'Week',
 	})
 	const labels = [...html.matchAll(/<span class="nav-label">([^<]*)<\/span>/g)].map((m) => m[1])
-	assert.ok(labels.includes('Season'), 'the season nav is not named')
+	// The season named after its value, as the club pages have it ("2026
+	// Season"); the period row by its label.
+	assert.match(html, /<span class="season-word"> Season<\/span>/, 'the season nav is not named')
 	assert.ok(labels.includes('Week'), 'the period nav is not named')
 })
 
@@ -628,7 +630,9 @@ test('the standings nav is named too, so every stepper reads alike', () => {
 		standings: standingsFor(2025, [LINE]), label: 'NFL', seasons: [2024, 2025],
 		heading: 'Every NFL club', colors: COLORS, clubs: [],
 	})
-	assert.ok(html.includes('<span class="nav-label">Season</span>'), 'the standings nav is not named')
+	// After its value, as the club pages name it: "2025 Season".
+	assert.ok(html.includes('<nav class="season-nav" aria-label="Season">'), 'the standings nav is not named')
+	assert.ok(html.includes('2025<span class="season-word"> Season</span>'), 'the season is not named')
 })
 
 test('a league page drawn by the server has the fixed footer, its own page marked, and no old navigation', async () => {

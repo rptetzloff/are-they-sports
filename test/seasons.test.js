@@ -35,7 +35,7 @@ test('champions, standings and the schedule name the season so', () => {
 	assert.match(champs, /2 titles, 1949–2016/)
 	const stand = standingsPage({ standings: { season: 2027, groups: [] }, label: 'NHL', seasons: [2026, 2027], season: 2027, heading: 'NHL', colors: COLORS })
 	assert.match(stand, /<h1>NHL standings 2026-2027<\/h1>/)
-	assert.match(stand, /<span class="current">2026-2027<\/span>/)
+	assert.match(stand, /<span class="current">2026-2027<span class="season-word"> Season<\/span><\/span>/)
 	const sched = leagueSchedulePage({ schedule: { season: 2025, seasons: [2025], periods: [], period: null }, heading: 'NCAAM', colors: COLORS, resolve: (c) => ({ name: c }), label: 'NCAAM' })
 	assert.match(sched, /<h1>NCAAM schedule 2024-2025<\/h1>/)
 	// Several sports on one page keep the number: no one way to name it.
