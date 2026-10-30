@@ -1747,10 +1747,16 @@ async function main() {
 				return 1;
 			}
 			for await (const r of csvRows(path)) await take(r, season < playing);
+			console.log(`  ncaaw        ${season}: ${kept.size} games so far`);
 		}
 		// What those files lack, from ESPN's scoreboards (scripts/ncaaw-fill.mjs).
 		for await (const r of csvRows(join(REFERENCE_DIR, 'ncaaw-games-added.csv'))) await take(r, true);
 		await flush();
+		// championship's key to game sets its whole foreign key null, sport and
+		// all, which the table refuses; so a dropped game lets go of a title first,
+		// and the titles are derived again below.
+		await client.query(
+			"UPDATE championship SET game_id = NULL WHERE sport = 'ncaaw' AND game_id IS NOT NULL AND NOT (game_id = ANY($1::text[]))", [[...kept]]);
 		const { rowCount: dropped } = await client.query(
 			"DELETE FROM game WHERE sport = 'ncaaw' AND source = 'sportsdataverse' AND NOT (id = ANY($1::text[]))", [[...kept]]);
 		if (dropped) console.log(`  ncaaw        ${dropped} games no longer given dropped`);
