@@ -1,0 +1,78 @@
+# The tournaments' seeds, every spring, so nobody has to remember them.
+#
+# April 15th, May 1st and May 15th: read each NCAA tournament just played and
+# rewrite data/reference/ncaam-seeds.csv and ncaaw-seeds.csv. No change, nothing
+# happens. The later dates are for a source that was late. Dates, not "Mondays":
+# a tournament's first Monday of April can be the night of its final.
+#
+# GitHub schedules only the default branch's workflows, so this file is on main
+# as well as dev, and it checks out dev.
+#
+# A change goes on a branch and an issue links to it, rather than a pull request,
+# for two reasons: a pull request opened with GITHUB_TOKEN runs no CI, and this
+# repository does not let Actions open them. The one made from the issue's link
+# is an ordinary one, and dev is only ever changed by merging it.
+#
+# The scripts refuse a field they do not recognise (both tournaments may go to 76
+# teams in 2027) rather than write it, and a failure opens an issue too.
+
+name: seeds
+
+on:
+  schedule:
+    - cron: '0 14 15 4 *'
+    - cron: '0 14 1 5 *'
+    - cron: '0 14 15 5 *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  seeds:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: dev
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+
+      - name: Men's, from ESPN's scoreboards
+        run: node scripts/ncaam-seeds.mjs --espn
+      - name: Women's, from Wikipedia's brackets
+        run: node scripts/ncaaw-seeds.mjs
+
+      - name: A branch and an issue, if anything changed
+        run: |
+          if git diff --quiet data/reference; then
+            echo 'No new tournament.'
+            exit 0
+          fi
+          season=$(date -u +%Y)
+          branch="seeds-$season"
+          if git ls-remote --exit-code origin "refs/heads/$branch" > /dev/null; then
+            echo "$branch is already waiting to be merged."
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git switch -c "$branch"
+          git add data/reference
+          git commit -m "The $season tournaments' seeds"
+          git push origin "$branch"
+          gh issue create --title "Merge the $season tournament seeds" --body "The $season brackets have their seeds. [Open the pull request](https://github.com/$GITHUB_REPOSITORY/compare/dev...$branch?expand=1) and merge it. Nothing else to run."
+
+      - name: An issue, if this could not finish
+        if: failure()
+        run: |
+          title="Tournament seeds need a look"
+          if [ -z "$(gh issue list --state open --search "$title in:title" --json number --jq '.[0].number')" ]; then
+            gh issue create --title "$title" --body "[This run]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID) stopped, so no seeds were written. It runs again on May 1 and May 15, so a source that was simply late fixes itself. If it says the field has changed, the brackets need work: see lib/bracket.js."
+          fi

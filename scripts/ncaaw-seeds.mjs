@@ -20,13 +20,15 @@
  *  regions, each seed 1 to 16 once in a region and each pairing adding to 17.
  *  From 2024 the seeds are checked against ESPN's own as well.
  *
- *  Pages are kept in data/sources/wiki-ncaaw; the games come from the files the
- *  last load kept. Run again after a tournament: node scripts/ncaaw-seeds.mjs. */
+ *  Pages are kept in data/sources/wiki-ncaaw; the games come from sportsdataverse's
+ *  files, fetched where the last load did not keep them. Every spring by
+ *  .github/workflows/seeds.yml, or by hand: node scripts/ncaaw-seeds.mjs. */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { csvRows } from '../lib/csv.js';
 import adapter, { walkRounds } from '../sports/ncaaw.js';
+import { download } from './fetch.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const CACHE = join(ROOT, 'data', 'sources', 'wiki-ncaaw');
@@ -136,7 +138,10 @@ const problems = [];
 let espnChecked = 0;
 for (let season = FIRST; season <= LAST; season++) {
 	if (season === 2020) continue; // cancelled
-	if (!existsSync(join(FILES, `wbb_schedule_${season}.csv`))) continue;
+	const file = join(FILES, `wbb_schedule_${season}.csv`);
+	// The season being played may have no file yet; any other season must.
+	if (!existsSync(file)) await download(adapter.sources.schedules.url(season), file).catch((e) => { if (season !== LAST) throw e; });
+	if (!existsSync(file)) continue;
 	const games = await gamesOf(season);
 	if (!games.length) continue; // not played yet
 	const brackets = bracketsOf(await pageOf(season));
