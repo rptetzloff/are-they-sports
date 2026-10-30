@@ -5,7 +5,7 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { buildBracket, regionCells, regionOf, bracketPage, ncaamSeeds, nitGames } from '../lib/bracket.js'
+import { buildBracket, regionCells, regionOf, bracketPage, tournamentSeeds, nitGames } from '../lib/bracket.js'
 import { siteFooterHtml } from '../lib/render.js'
 import { parseCsv } from '../lib/csv.js'
 
@@ -124,7 +124,7 @@ test('the NIT: its final and third-place game from the titles, drawn in two halv
 test('seeds from 1979, by the loader\'s game ids, and the footer links the bracket', () => {
 	const rows = parseCsv(readFileSync(join(ROOT, 'data/reference/ncaam-seeds.csv'), 'utf8'))
 	assert.ok(!rows.some((r) => Number(r.season) < 1979 && r.home_seed), 'no seeds before 1979')
-	const s2025 = ncaamSeeds(2025)
+	const s2025 = tournamentSeeds('ncaam', 2025)
 	assert.equal(s2025.size, 67)
 	assert.ok([...s2025.values()].every((s) => s.home >= 1 && s.home <= 16 && s.away >= 1 && s.away <= 16))
 	assert.match(siteFooterHtml({ sport: 'ncaam' }), /href="\/ncaam\/bracket"/)

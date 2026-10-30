@@ -1246,6 +1246,7 @@ export function recordsCopy(slug, data, site = SITE) {
 	switch (slug) {
 		case 'best-starts': {
 			const b = data.bestStarts[0];
+			if (!b) return { title: `Best ${site.team} Season Starts`, desc: `The ${site.team} have none of these on record yet.` };
 			return {
 				title: `Best ${site.team} Season Starts — ${b.games}–0 in ${b.season}`,
 				desc: `The best start in ${site.fullName} history: ${b.games}–0 to open the ${b.season} season. Top ${data.bestStarts.length} starts, ${range}.`,
@@ -1272,6 +1273,7 @@ export function recordsCopy(slug, data, site = SITE) {
 		}
 		case 'win-streaks': {
 			const s = data.winStreaks[0];
+			if (!s) return { title: `Longest ${site.team} Win Streaks`, desc: `The ${site.team} have none of these on record yet.` };
 			return {
 				title: `Longest ${site.team} Win Streaks — ${s.games} straight (${streakSpan(s)})`,
 				desc: `The longest regular-season win streak in ${site.fullName} history: ${s.games} straight, ${formatDate(s.startDate)} to ${formatDate(s.endDate)}.`,
@@ -1305,6 +1307,7 @@ export function recordsCopy(slug, data, site = SITE) {
 		}
 		case 'worst-starts': {
 			const w = data.worstStarts[0];
+			if (!w) return { title: `Worst ${site.team} Season Starts`, desc: `The ${site.team} have never opened a season with a loss.` };
 			return {
 				title: `Worst ${site.team} Season Starts — 0–${w.games} in ${w.season}`,
 				desc: `The worst start in ${site.fullName} history: 0–${w.games} to open the ${w.season} season. ${site.copy.worstStartAside}`,
@@ -1312,6 +1315,7 @@ export function recordsCopy(slug, data, site = SITE) {
 		}
 		case 'lopsided-wins': {
 			const g = data.lopsidedWins[0];
+			if (!g) return { title: `Most Lopsided ${site.team} Wins`, desc: `The ${site.team} have none of these on record yet.` };
 			return {
 				title: `Most Lopsided ${site.team} Wins — ${g.pf}–${g.pa} over the ${g.opponent}`,
 				desc: `The biggest blowout in ${site.fullName} history: ${g.pf}–${g.pa} over the ${g.opponent} on ${formatDate(g.date)}.`,
@@ -1319,6 +1323,7 @@ export function recordsCopy(slug, data, site = SITE) {
 		}
 		case 'worst-losses': {
 			const g = data.lopsidedLosses[0];
+			if (!g) return { title: `Worst ${site.team} Losses`, desc: `The ${site.team} have none of these on record yet.` };
 			return {
 				title: `Worst ${site.team} Losses — ${g.pf}–${g.pa} to the ${g.opponent}`,
 				desc: `The most lopsided loss in ${site.fullName} history: ${g.pa}–${g.pf} to the ${g.opponent} on ${formatDate(g.date)}. ${site.copy.worstLossAside}`,
@@ -1334,6 +1339,7 @@ export function recordsCopy(slug, data, site = SITE) {
 		}
 		case 'best-seasons': {
 			const s = data.bestSeasons[0];
+			if (!s) return { title: `Best ${site.team} Seasons`, desc: `The ${site.team} have none of these on record yet.` };
 			return {
 				title: `Best ${site.team} Seasons — ${s.record} in ${s.season}`,
 				desc: `The best ${site.fullName} season: ${s.record} in ${s.season}. Top ${data.bestSeasons.length} seasons by winning percentage.`,
@@ -1341,6 +1347,7 @@ export function recordsCopy(slug, data, site = SITE) {
 		}
 		case 'worst-seasons': {
 			const s = data.worstSeasons[0];
+			if (!s) return { title: `Worst ${site.team} Seasons`, desc: `The ${site.team} have none of these on record yet.` };
 			return {
 				title: `Worst ${site.team} Seasons — ${s.record} in ${s.season}`,
 				desc: `The worst ${site.fullName} season: ${s.record} in ${s.season}. ${site.copy.worstStartAside}`,

@@ -1,0 +1,821 @@
+season,game,home_seed,away_seed,region
+2001,210752633,1,16,Mideast
+2001,210750251,8,9,Mideast
+2001,210750228,5,12,Mideast
+2001,210752752,4,13,Mideast
+2001,210750099,6,11,Mideast
+2001,210752509,3,14,Mideast
+2001,210750259,7,10,Mideast
+2001,210752641,2,15,Mideast
+2001,210760150,1,16,West
+2001,210760239,8,9,West
+2001,210762623,5,12,West
+2001,210760164,4,13,West
+2001,210750264,6,11,West
+2001,210750057,3,14,West
+2001,210760045,7,10,West
+2001,210760201,2,15,West
+2001,210760087,1,16,Midwest
+2001,210760130,8,9,Midwest
+2001,210760254,5,12,Midwest
+2001,210762294,4,13,Midwest
+2001,210760038,6,11,Midwest
+2001,210760238,3,14,Midwest
+2001,210750052,7,10,Midwest
+2001,210750066,2,15,Midwest
+2001,210760041,1,16,East
+2001,210760120,8,9,East
+2001,210750222,5,12,East
+2001,210750152,4,13,East
+2001,210760213,6,11,East
+2001,210762348,3,14,East
+2001,210750275,7,10,East
+2001,210750061,2,15,East
+2002,220750041,1,16,Mideast
+2002,220750258,8,9,Mideast
+2002,220742229,5,12,Mideast
+2002,220740213,4,13,Mideast
+2002,220740008,6,11,Mideast
+2002,220742306,3,14,Mideast
+2002,220750295,7,10,Mideast
+2002,220752509,2,15,Mideast
+2002,220750238,1,16,Midwest
+2002,220750275,8,9,Midwest
+2002,220750135,5,12,Midwest
+2002,220750153,4,13,Midwest
+2002,220750057,6,11,Midwest
+2002,220750066,3,14,Midwest
+2002,220740087,7,10,Midwest
+2002,220742633,2,15,Midwest
+2002,220750201,1,16,West
+2002,220752492,8,9,West
+2002,220740103,5,12,West
+2002,220742641,4,13,West
+2002,220740099,6,11,West
+2002,220740038,3,14,West
+2002,220750036,7,10,West
+2002,220750024,2,15,West
+2002,220740150,1,16,East
+2002,220742628,8,9,East
+2002,220742348,5,12,East
+2002,220740251,4,13,East
+2002,220752132,6,11,East
+2002,220752579,3,14,East
+2002,220742181,7,10,East
+2002,220740239,2,15,East
+2003,234000047,1,16,Mideast
+2003,234000048,8,9,Mideast
+2003,234000050,5,12,Mideast
+2003,234000051,4,13,Mideast
+2003,234000054,6,11,Mideast
+2003,234000055,3,14,Mideast
+2003,234000057,7,10,Mideast
+2003,234000058,2,15,Mideast
+2003,234000001,1,16,Midwest
+2003,234000002,8,9,Midwest
+2003,234000004,5,12,Midwest
+2003,234000005,4,13,Midwest
+2003,234000008,6,11,Midwest
+2003,234000009,3,14,Midwest
+2003,234000011,7,10,Midwest
+2003,234000012,2,15,Midwest
+2003,234000016,1,16,East
+2003,234000017,8,9,East
+2003,234000019,5,12,East
+2003,234000020,4,13,East
+2003,234000023,6,11,East
+2003,234000024,3,14,East
+2003,234000026,7,10,East
+2003,234000027,2,15,East
+2003,234000032,1,16,West
+2003,234000033,8,9,West
+2003,234000035,5,12,West
+2003,234000036,4,13,West
+2003,234000039,6,11,West
+2003,234000040,3,14,West
+2003,234000042,7,10,West
+2003,234000043,2,15,West
+2004,244000047,1,16,East
+2004,244000048,8,9,East
+2004,244000050,5,12,East
+2004,244000051,4,13,East
+2004,244000054,6,11,East
+2004,244000055,3,14,East
+2004,244000057,7,10,East
+2004,244000058,2,15,East
+2004,244000001,1,16,Mideast
+2004,244000002,8,9,Mideast
+2004,244000004,5,12,Mideast
+2004,244000005,4,13,Mideast
+2004,244000008,6,11,Mideast
+2004,244000009,3,14,Mideast
+2004,244000011,7,10,Mideast
+2004,244000012,2,15,Mideast
+2004,244000016,1,16,Midwest
+2004,244000017,8,9,Midwest
+2004,244000019,5,12,Midwest
+2004,244000020,4,13,Midwest
+2004,244000023,6,11,Midwest
+2004,244000024,3,14,Midwest
+2004,244000026,7,10,Midwest
+2004,244000027,2,15,Midwest
+2004,244000032,1,16,West
+2004,244000033,8,9,West
+2004,244000035,5,12,West
+2004,244000036,4,13,West
+2004,244000039,6,11,West
+2004,244000040,3,14,West
+2004,244000042,7,10,West
+2004,244000043,2,15,West
+2005,254000047,1,16,Chattanooga regional
+2005,254000048,8,9,Chattanooga regional
+2005,254000050,5,12,Chattanooga regional
+2005,254000051,4,13,Chattanooga regional
+2005,254000054,6,11,Chattanooga regional
+2005,254000055,3,14,Chattanooga regional
+2005,254000057,7,10,Chattanooga regional
+2005,254000058,2,15,Chattanooga regional
+2005,254000001,1,16,Tempe regional
+2005,254000002,8,9,Tempe regional
+2005,254000004,5,12,Tempe regional
+2005,254000005,4,13,Tempe regional
+2005,254000008,6,11,Tempe regional
+2005,254000009,3,14,Tempe regional
+2005,254000011,7,10,Tempe regional
+2005,254000012,2,15,Tempe regional
+2005,254000016,1,16,Philadelphia regional
+2005,254000017,8,9,Philadelphia regional
+2005,254000019,5,12,Philadelphia regional
+2005,254000020,4,13,Philadelphia regional
+2005,254000023,6,11,Philadelphia regional
+2005,254000024,3,14,Philadelphia regional
+2005,254000026,7,10,Philadelphia regional
+2005,254000027,2,15,Philadelphia regional
+2005,254000032,1,16,Kansas City regional
+2005,254000033,8,9,Kansas City regional
+2005,254000035,5,12,Kansas City regional
+2005,254000036,4,13,Kansas City regional
+2005,254000039,6,11,Kansas City regional
+2005,254000040,3,14,Kansas City regional
+2005,254000042,7,10,Kansas City regional
+2005,254000043,2,15,Kansas City regional
+2006,264000047,1,16,Cleveland regional
+2006,264000048,8,9,Cleveland regional
+2006,264000050,5,12,Cleveland regional
+2006,264000051,4,13,Cleveland regional
+2006,264000054,6,11,Cleveland regional
+2006,264000055,3,14,Cleveland regional
+2006,264000057,7,10,Cleveland regional
+2006,264000058,2,15,Cleveland regional
+2006,264000001,1,16,Albuquerque regional
+2006,264000002,8,9,Albuquerque regional
+2006,264000004,5,12,Albuquerque regional
+2006,264000005,4,13,Albuquerque regional
+2006,264000008,6,11,Albuquerque regional
+2006,264000009,3,14,Albuquerque regional
+2006,264000011,7,10,Albuquerque regional
+2006,264000012,2,15,Albuquerque regional
+2006,264000016,1,16,Bridgeport regional
+2006,264000017,8,9,Bridgeport regional
+2006,264000019,5,12,Bridgeport regional
+2006,264000020,4,13,Bridgeport regional
+2006,264000023,6,11,Bridgeport regional
+2006,264000024,3,14,Bridgeport regional
+2006,264000026,7,10,Bridgeport regional
+2006,264000027,2,15,Bridgeport regional
+2006,264000032,1,16,San Antonio regional
+2006,264000033,8,9,San Antonio regional
+2006,264000035,5,12,San Antonio regional
+2006,264000036,4,13,San Antonio regional
+2006,264000039,6,11,San Antonio regional
+2006,264000040,3,14,San Antonio regional
+2006,264000042,7,10,San Antonio regional
+2006,264000043,2,15,San Antonio regional
+2007,274000047,1,16,Dallas regional
+2007,274000048,8,9,Dallas regional
+2007,274000050,5,12,Dallas regional
+2007,274000051,4,13,Dallas regional
+2007,274000054,6,11,Dallas regional
+2007,274000055,3,14,Dallas regional
+2007,274000057,7,10,Dallas regional
+2007,274000058,2,15,Dallas regional
+2007,274000001,1,16,Dayton regional
+2007,274000002,8,9,Dayton regional
+2007,274000004,5,12,Dayton regional
+2007,274000005,4,13,Dayton regional
+2007,274000008,6,11,Dayton regional
+2007,274000009,3,14,Dayton regional
+2007,274000011,7,10,Dayton regional
+2007,274000012,2,15,Dayton regional
+2007,274000016,1,16,Fresno regional
+2007,274000017,8,9,Fresno regional
+2007,274000019,5,12,Fresno regional
+2007,274000020,4,13,Fresno regional
+2007,274000023,6,11,Fresno regional
+2007,274000024,3,14,Fresno regional
+2007,274000026,7,10,Fresno regional
+2007,274000027,2,15,Fresno regional
+2007,274000032,1,16,Greensboro regional
+2007,274000033,8,9,Greensboro regional
+2007,274000035,5,12,Greensboro regional
+2007,274000036,4,13,Greensboro regional
+2007,274000039,6,11,Greensboro regional
+2007,274000040,3,14,Greensboro regional
+2007,274000042,7,10,Greensboro regional
+2007,274000043,2,15,Greensboro regional
+2008,284000047,1,16,Greensboro regional
+2008,284000048,8,9,Greensboro regional
+2008,284000050,5,12,Greensboro regional
+2008,284000051,4,13,Greensboro regional
+2008,284000054,6,11,Greensboro regional
+2008,284000055,3,14,Greensboro regional
+2008,284000057,7,10,Greensboro regional
+2008,284000058,2,15,Greensboro regional
+2008,284000001,1,16,Spokane regional
+2008,284000002,8,9,Spokane regional
+2008,284000004,5,12,Spokane regional
+2008,284000005,4,13,Spokane regional
+2008,284000008,6,11,Spokane regional
+2008,284000009,3,14,Spokane regional
+2008,284000011,7,10,Spokane regional
+2008,284000012,2,15,Spokane regional
+2008,284000016,1,16,New Orleans regional
+2008,284000017,8,9,New Orleans regional
+2008,284000019,5,12,New Orleans regional
+2008,284000020,4,13,New Orleans regional
+2008,284000023,6,11,New Orleans regional
+2008,284000024,3,14,New Orleans regional
+2008,284000026,7,10,New Orleans regional
+2008,284000027,2,15,New Orleans regional
+2008,284000032,1,16,Oklahoma City regional
+2008,284000033,8,9,Oklahoma City regional
+2008,284000035,5,12,Oklahoma City regional
+2008,284000036,4,13,Oklahoma City regional
+2008,284000039,6,11,Oklahoma City regional
+2008,284000040,3,14,Oklahoma City regional
+2008,284000042,7,10,Oklahoma City regional
+2008,284000043,2,15,Oklahoma City regional
+2009,294000047,1,16,Trenton regional
+2009,294000048,8,9,Trenton regional
+2009,294000050,5,12,Trenton regional
+2009,294000051,4,13,Trenton regional
+2009,294000054,6,11,Trenton regional
+2009,294000055,3,14,Trenton regional
+2009,294000057,7,10,Trenton regional
+2009,294000058,2,15,Trenton regional
+2009,294000001,1,16,Berkeley regional
+2009,294000002,8,9,Berkeley regional
+2009,294000004,5,12,Berkeley regional
+2009,294000005,4,13,Berkeley regional
+2009,294000008,6,11,Berkeley regional
+2009,294000009,3,14,Berkeley regional
+2009,294000011,7,10,Berkeley regional
+2009,294000012,2,15,Berkeley regional
+2009,294000016,1,16,Raleigh regional
+2009,294000017,8,9,Raleigh regional
+2009,294000019,5,12,Raleigh regional
+2009,294000020,4,13,Raleigh regional
+2009,294000023,6,11,Raleigh regional
+2009,294000024,3,14,Raleigh regional
+2009,294000026,7,10,Raleigh regional
+2009,294000027,2,15,Raleigh regional
+2009,294000032,1,16,Oklahoma City regional
+2009,294000033,8,9,Oklahoma City regional
+2009,294000035,5,12,Oklahoma City regional
+2009,294000036,4,13,Oklahoma City regional
+2009,294000039,6,11,Oklahoma City regional
+2009,294000040,3,14,Oklahoma City regional
+2009,294000042,7,10,Oklahoma City regional
+2009,294000043,2,15,Oklahoma City regional
+2010,300800041,1,16,Dayton regional
+2010,300800218,8,9,Dayton regional
+2010,300800258,5,12,Dayton regional
+2010,300800066,4,13,Dayton regional
+2010,300792599,6,11,Dayton regional
+2010,300790052,3,14,Dayton regional
+2010,300800344,7,10,Dayton regional
+2010,300800194,2,15,Dayton regional
+2010,300792633,1,16,Memphis regional
+2010,300792168,8,9,Memphis regional
+2010,300790046,5,12,Memphis regional
+2010,300790239,4,13,Memphis regional
+2010,300800251,6,11,Memphis regional
+2010,300800277,3,14,Memphis regional
+2010,300790099,7,10,Memphis regional
+2010,300790150,2,15,Memphis regional
+2010,300790024,1,16,Sacramento regional
+2010,300792294,8,9,Sacramento regional
+2010,300790061,5,12,Sacramento regional
+2010,300790197,4,13,Sacramento regional
+2010,300800238,6,11,Sacramento regional
+2010,300802752,3,14,Sacramento regional
+2010,300792250,7,10,Sacramento regional
+2010,300790245,2,15,Sacramento regional
+2010,300800158,1,16,Kansas City regional
+2010,300800026,8,9,Kansas City regional
+2010,300790127,5,12,Kansas City regional
+2010,300790096,4,13,Kansas City regional
+2010,300800059,6,11,Kansas City regional
+2010,300800201,3,14,Kansas City regional
+2010,300800275,7,10,Kansas City regional
+2010,300800087,2,15,Kansas City regional
+2011,310790041,1,16,Philadelphia regional
+2011,310792306,8,9,Philadelphia regional
+2011,310790046,5,12,Philadelphia regional
+2011,310790120,4,13,Philadelphia regional
+2011,310780213,6,11,Philadelphia regional
+2011,310780305,3,14,Philadelphia regional
+2011,310780066,7,10,Philadelphia regional
+2011,310780150,2,15,Philadelphia regional
+2011,310782633,1,16,Dayton regional
+2011,310780269,8,9,Dayton regional
+2011,310780059,5,12,Dayton regional
+2011,310780194,4,13,Dayton regional
+2011,310790201,6,11,Dayton regional
+2011,310792390,3,14,Dayton regional
+2011,310780009,7,10,Dayton regional
+2011,310780087,2,15,Dayton regional
+2011,310780024,1,16,Spokane regional
+2011,310782641,8,9,Spokane regional
+2011,310780153,5,12,Spokane regional
+2011,310780096,4,13,Spokane regional
+2011,310782294,6,11,Spokane regional
+2011,310780026,3,14,Spokane regional
+2011,310790097,7,10,Spokane regional
+2011,310792752,2,15,Spokane regional
+2011,310790239,1,16,Dallas regional
+2011,310790248,8,9,Dallas regional
+2011,310792739,5,12,Dallas regional
+2011,310790127,4,13,Dallas regional
+2011,310790061,6,11,Dallas regional
+2011,310790052,3,14,Dallas regional
+2011,310790164,7,10,Dallas regional
+2011,310790245,2,15,Dallas regional
+2012,320780239,1,16,Des Moines regional
+2012,320780194,8,9,Des Moines regional
+2012,320780046,5,12,Des Moines regional
+2012,320780059,4,13,Des Moines regional
+2012,320780158,6,11,Des Moines regional
+2012,320780048,3,14,Des Moines regional
+2012,320770305,7,10,Des Moines regional
+2012,320772633,2,15,Des Moines regional
+2012,320770024,1,16,Fresno regional
+2012,320770277,8,9,Fresno regional
+2012,320772579,5,12,Fresno regional
+2012,320772509,4,13,Fresno regional
+2012,320780201,6,11,Fresno regional
+2012,320782599,3,14,Fresno regional
+2012,320780238,7,10,Fresno regional
+2012,320780150,2,15,Fresno regional
+2012,320780087,1,16,Raleigh regional
+2012,320780025,8,9,Raleigh regional
+2012,320780179,5,12,Raleigh regional
+2012,320780061,4,13,Raleigh regional
+2012,320770008,6,11,Raleigh regional
+2012,320770245,3,14,Raleigh regional
+2012,320770097,7,10,Raleigh regional
+2012,320770120,2,15,Raleigh regional
+2012,320770041,1,16,Kingston regional
+2012,320772306,8,9,Kingston regional
+2012,320780099,5,12,Kingston regional
+2012,320780213,4,13,Kingston regional
+2012,320770164,6,11,Kingston regional
+2012,320772390,3,14,Kingston regional
+2012,320772739,7,10,Kingston regional
+2012,320770096,2,15,Kingston regional
+2013,330830239,1,16,Oklahoma City regional
+2013,330830052,8,9,Oklahoma City regional
+2013,330830097,5,12,Oklahoma City regional
+2013,330832509,4,13,Oklahoma City regional
+2013,330820201,6,11,Oklahoma City regional
+2013,330820026,3,14,Oklahoma City regional
+2013,330820183,7,10,Oklahoma City regional
+2013,330822633,2,15,Oklahoma City regional
+2013,330830024,1,16,Spokane regional
+2013,330830130,8,9,Spokane regional
+2013,330820066,5,12,Spokane regional
+2013,330820061,4,13,Spokane regional
+2013,330830099,6,11,Spokane regional
+2013,330830213,3,14,Spokane regional
+2013,330822641,7,10,Spokane regional
+2013,330820025,2,15,Spokane regional
+2013,330830087,1,16,Norfolk regional
+2013,330832390,8,9,Norfolk regional
+2013,330820038,5,12,Norfolk regional
+2013,330822579,4,13,Norfolk regional
+2013,330820158,6,11,Norfolk regional
+2013,330820245,3,14,Norfolk regional
+2013,330830197,7,10,Norfolk regional
+2013,330830150,2,15,Norfolk regional
+2013,330820041,1,16,Bridgeport regional
+2013,330820238,8,9,Bridgeport regional
+2013,330820127,5,12,Bridgeport regional
+2013,330820120,4,13,Bridgeport regional
+2013,330830048,6,11,Bridgeport regional
+2013,330830153,3,14,Bridgeport regional
+2013,330832168,7,10,Bridgeport regional
+2013,330830096,2,15,Bridgeport regional
+2014,400547065,1,16,Lincoln regional
+2014,400547068,8,9,Lincoln regional
+2014,400547067,5,12,Lincoln regional
+2014,400547066,4,13,Lincoln regional
+2014,400547071,6,11,Lincoln regional
+2014,400547070,3,14,Lincoln regional
+2014,400547069,7,10,Lincoln regional
+2014,400547072,2,15,Lincoln regional
+2014,400547100,1,16,Notre Dame regional
+2014,400547101,8,9,Notre Dame regional
+2014,400547103,5,12,Notre Dame regional
+2014,400547102,4,13,Notre Dame regional
+2014,400547106,6,11,Notre Dame regional
+2014,400547105,3,14,Notre Dame regional
+2014,400547104,7,10,Notre Dame regional
+2014,400547107,2,15,Notre Dame regional
+2014,400547073,1,16,Louisville regional
+2014,400547076,8,9,Louisville regional
+2014,400547074,5,12,Louisville regional
+2014,400547075,4,13,Louisville regional
+2014,400547079,6,11,Louisville regional
+2014,400547077,3,14,Louisville regional
+2014,400547078,7,10,Louisville regional
+2014,400547082,2,15,Louisville regional
+2014,400547091,1,16,Stanford regional
+2014,400547094,8,9,Stanford regional
+2014,400547092,5,12,Stanford regional
+2014,400547095,4,13,Stanford regional
+2014,400547098,6,11,Stanford regional
+2014,400547097,3,14,Stanford regional
+2014,400547096,7,10,Stanford regional
+2014,400547099,2,15,Stanford regional
+2015,400785714,1,16,Albany regional
+2015,400785715,8,9,Albany regional
+2015,400785691,5,12,Albany regional
+2015,400785716,4,13,Albany regional
+2015,400785718,6,11,Albany regional
+2015,400785692,3,14,Albany regional
+2015,400785717,7,10,Albany regional
+2015,400785719,2,15,Albany regional
+2015,400785730,1,16,Spokane regional
+2015,400785731,8,9,Spokane regional
+2015,400785739,5,12,Spokane regional
+2015,400785732,4,13,Spokane regional
+2015,400785733,6,11,Spokane regional
+2015,400785740,3,14,Spokane regional
+2015,400785754,7,10,Spokane regional
+2015,400785755,2,15,Spokane regional
+2015,400785693,1,16,Oklahoma City regional
+2015,400785720,8,9,Oklahoma City regional
+2015,400785721,5,12,Oklahoma City regional
+2015,400785734,4,13,Oklahoma City regional
+2015,400785722,6,11,Oklahoma City regional
+2015,400785723,3,14,Oklahoma City regional
+2015,400785735,7,10,Oklahoma City regional
+2015,400785724,2,15,Oklahoma City regional
+2015,400785725,1,16,Greensboro regional
+2015,400785736,8,9,Greensboro regional
+2015,400785726,5,12,Greensboro regional
+2015,400785727,4,13,Greensboro regional
+2015,400785737,6,11,Greensboro regional
+2015,400785728,3,14,Greensboro regional
+2015,400785729,7,10,Greensboro regional
+2015,400785738,2,15,Greensboro regional
+2016,400871567,1,16,Bridgeport regional
+2016,400871568,8,9,Bridgeport regional
+2016,400871569,5,12,Bridgeport regional
+2016,400871570,4,13,Bridgeport regional
+2016,400871571,6,11,Bridgeport regional
+2016,400871572,3,14,Bridgeport regional
+2016,400871573,7,10,Bridgeport regional
+2016,400871574,2,15,Bridgeport regional
+2016,400871543,1,16,Dallas regional
+2016,400871544,8,9,Dallas regional
+2016,400871545,5,12,Dallas regional
+2016,400871546,4,13,Dallas regional
+2016,400871547,6,11,Dallas regional
+2016,400871548,3,14,Dallas regional
+2016,400871549,7,10,Dallas regional
+2016,400871550,2,15,Dallas regional
+2016,400871551,1,16,Lexington regional
+2016,400871552,8,9,Lexington regional
+2016,400871553,5,12,Lexington regional
+2016,400871554,4,13,Lexington regional
+2016,400871555,6,11,Lexington regional
+2016,400871556,3,14,Lexington regional
+2016,400871557,7,10,Lexington regional
+2016,400871558,2,15,Lexington regional
+2016,400871559,1,16,Sioux Falls regional
+2016,400871560,8,9,Sioux Falls regional
+2016,400871561,5,12,Sioux Falls regional
+2016,400871562,4,13,Sioux Falls regional
+2016,400871563,6,11,Sioux Falls regional
+2016,400871564,3,14,Sioux Falls regional
+2016,400871565,7,10,Sioux Falls regional
+2016,400871566,2,15,Sioux Falls regional
+2017,400946551,1,16,Bridgeport regional
+2017,400946596,8,9,Bridgeport regional
+2017,400946597,5,12,Bridgeport regional
+2017,400946552,4,13,Bridgeport regional
+2017,400946598,6,11,Bridgeport regional
+2017,400946599,3,14,Bridgeport regional
+2017,400946553,7,10,Bridgeport regional
+2017,400946600,2,15,Bridgeport regional
+2017,400946557,1,16,Oklahoma City regional
+2017,400946606,8,9,Oklahoma City regional
+2017,400946607,5,12,Oklahoma City regional
+2017,400946558,4,13,Oklahoma City regional
+2017,400946608,6,11,Oklahoma City regional
+2017,400946609,3,14,Oklahoma City regional
+2017,400946559,7,10,Oklahoma City regional
+2017,400946610,2,15,Oklahoma City regional
+2017,400946560,1,16,Lexington regional
+2017,400946611,8,9,Lexington regional
+2017,400946612,5,12,Lexington regional
+2017,400946561,4,13,Lexington regional
+2017,400946613,6,11,Lexington regional
+2017,400946614,3,14,Lexington regional
+2017,400946562,7,10,Lexington regional
+2017,400946615,2,15,Lexington regional
+2017,400946554,1,16,Stockton regional
+2017,400946601,8,9,Stockton regional
+2017,400946602,5,12,Stockton regional
+2017,400946555,4,13,Stockton regional
+2017,400946603,6,11,Stockton regional
+2017,400946604,3,14,Stockton regional
+2017,400946556,7,10,Stockton regional
+2017,400946605,2,15,Stockton regional
+2018,401026141,1,16,Albany regional
+2018,401026142,8,9,Albany regional
+2018,401026143,5,12,Albany regional
+2018,401026144,4,13,Albany regional
+2018,401026145,6,11,Albany regional
+2018,401026146,3,14,Albany regional
+2018,401026147,7,10,Albany regional
+2018,401026148,2,15,Albany regional
+2018,401026165,1,16,Kansas City regional
+2018,401026167,8,9,Kansas City regional
+2018,401026166,5,12,Kansas City regional
+2018,401026169,4,13,Kansas City regional
+2018,401026168,6,11,Kansas City regional
+2018,401026170,3,14,Kansas City regional
+2018,401026171,7,10,Kansas City regional
+2018,401026172,2,15,Kansas City regional
+2018,401026157,1,16,Lexington regional
+2018,401026158,8,9,Lexington regional
+2018,401026160,5,12,Lexington regional
+2018,401026159,4,13,Lexington regional
+2018,401026162,6,11,Lexington regional
+2018,401026161,3,14,Lexington regional
+2018,401026164,7,10,Lexington regional
+2018,401026163,2,15,Lexington regional
+2018,401026149,1,16,Spokane regional
+2018,401026150,8,9,Spokane regional
+2018,401026151,5,12,Spokane regional
+2018,401026152,4,13,Spokane regional
+2018,401026153,6,11,Spokane regional
+2018,401026154,3,14,Spokane regional
+2018,401026156,7,10,Spokane regional
+2018,401026155,2,15,Spokane regional
+2019,401124134,1,16,Albany regional
+2019,401124135,8,9,Albany regional
+2019,401124136,5,12,Albany regional
+2019,401124137,4,13,Albany regional
+2019,401124138,6,11,Albany regional
+2019,401124139,3,14,Albany regional
+2019,401124140,7,10,Albany regional
+2019,401124141,2,15,Albany regional
+2019,401124211,1,16,Chicago regional
+2019,401124148,8,9,Chicago regional
+2019,401124147,5,12,Chicago regional
+2019,401124146,4,13,Chicago regional
+2019,401124145,6,11,Chicago regional
+2019,401124144,3,14,Chicago regional
+2019,401124143,7,10,Chicago regional
+2019,401124142,2,15,Chicago regional
+2019,401124180,1,16,Greensboro regional
+2019,401124181,8,9,Greensboro regional
+2019,401124183,5,12,Greensboro regional
+2019,401124182,4,13,Greensboro regional
+2019,401124187,6,11,Greensboro regional
+2019,401124186,3,14,Greensboro regional
+2019,401124185,7,10,Greensboro regional
+2019,401124184,2,15,Greensboro regional
+2019,401124188,1,16,Portland regional
+2019,401124189,8,9,Portland regional
+2019,401124190,5,12,Portland regional
+2019,401124191,4,13,Portland regional
+2019,401124192,6,11,Portland regional
+2019,401124193,3,14,Portland regional
+2019,401124194,7,10,Portland regional
+2019,401124195,2,15,Portland regional
+2021,401311211,1,16,Alamo regional
+2021,401311210,8,9,Alamo regional
+2021,401311215,5,12,Alamo regional
+2021,401311214,4,13,Alamo regional
+2021,401311257,6,11,Alamo regional
+2021,401311256,3,14,Alamo regional
+2021,401311213,7,10,Alamo regional
+2021,401311212,2,15,Alamo regional
+2021,401311226,1,16,HemisFair regional
+2021,401311225,8,9,HemisFair regional
+2021,401311224,5,12,HemisFair regional
+2021,401311223,4,13,HemisFair regional
+2021,401311227,6,11,HemisFair regional
+2021,401311228,3,14,HemisFair regional
+2021,401311229,7,10,HemisFair regional
+2021,401311230,2,15,HemisFair regional
+2021,401311241,1,16,Mercado regional
+2021,401311238,8,9,Mercado regional
+2021,401311245,5,12,Mercado regional
+2021,401311244,4,13,Mercado regional
+2021,401311243,6,11,Mercado regional
+2021,401311242,3,14,Mercado regional
+2021,401311259,7,10,Mercado regional
+2021,401311258,2,15,Mercado regional
+2021,401311255,1,16,River Walk regional
+2021,401311254,8,9,River Walk regional
+2021,401311253,5,12,River Walk regional
+2021,401311252,4,13,River Walk regional
+2021,401311240,6,11,River Walk regional
+2021,401311239,3,14,River Walk regional
+2021,401311209,7,10,River Walk regional
+2021,401311208,2,15,River Walk regional
+2022,401414482,1,16,Greensboro regional
+2022,401414456,8,9,Greensboro regional
+2022,401414498,5,12,Greensboro regional
+2022,401414490,4,13,Greensboro regional
+2022,401414469,6,11,Greensboro regional
+2022,401412964,3,14,Greensboro regional
+2022,401414470,7,10,Greensboro regional
+2022,401414475,2,15,Greensboro regional
+2022,401414480,1,16,Wichita regional
+2022,401414479,8,9,Wichita regional
+2022,401414494,5,12,Wichita regional
+2022,401414493,4,13,Wichita regional
+2022,401414489,6,11,Wichita regional
+2022,401414492,3,14,Wichita regional
+2022,401414474,7,10,Wichita regional
+2022,401414477,2,15,Wichita regional
+2022,401414481,1,16,Spokane regional
+2022,401414471,8,9,Spokane regional
+2022,401414472,5,12,Spokane regional
+2022,401414478,4,13,Spokane regional
+2022,401414491,6,11,Spokane regional
+2022,401414495,3,14,Spokane regional
+2022,401414473,7,10,Spokane regional
+2022,401414476,2,15,Spokane regional
+2022,401414497,1,16,Bridgeport regional
+2022,401414483,8,9,Bridgeport regional
+2022,401414485,5,12,Bridgeport regional
+2022,401414484,4,13,Bridgeport regional
+2022,401414486,6,11,Bridgeport regional
+2022,401414496,3,14,Bridgeport regional
+2022,401414488,7,10,Bridgeport regional
+2022,401414487,2,15,Bridgeport regional
+2022,401414330,16,16,
+2022,401414332,11,11,
+2022,401414342,16,16,
+2022,401414363,11,11,
+2023,401527981,1,16,Greenville regional 1
+2023,401527980,8,9,Greenville regional 1
+2023,401527996,5,12,Greenville regional 1
+2023,401527997,4,13,Greenville regional 1
+2023,401527979,6,11,Greenville regional 1
+2023,401527976,3,14,Greenville regional 1
+2023,401527971,7,10,Greenville regional 1
+2023,401527968,2,15,Greenville regional 1
+2023,401527995,1,16,Greenville regional 2
+2023,401527994,8,9,Greenville regional 2
+2023,401527992,5,12,Greenville regional 2
+2023,401527993,4,13,Greenville regional 2
+2023,401527977,6,11,Greenville regional 2
+2023,401527978,3,14,Greenville regional 2
+2023,401527974,7,10,Greenville regional 2
+2023,401527975,2,15,Greenville regional 2
+2023,401527973,1,16,Seattle regional 3
+2023,401527972,8,9,Seattle regional 3
+2023,401527990,5,12,Seattle regional 3
+2023,401527989,4,13,Seattle regional 3
+2023,401527988,6,11,Seattle regional 3
+2023,401527991,3,14,Seattle regional 3
+2023,401527986,7,10,Seattle regional 3
+2023,401527987,2,15,Seattle regional 3
+2023,401527970,1,16,Seattle regional 4
+2023,401527969,8,9,Seattle regional 4
+2023,401527984,5,12,Seattle regional 4
+2023,401527985,4,13,Seattle regional 4
+2023,401527982,6,11,Seattle regional 4
+2023,401527983,3,14,Seattle regional 4
+2023,401527966,7,10,Seattle regional 4
+2023,401527967,2,15,Seattle regional 4
+2023,401527963,11,11,
+2023,401527964,16,16,
+2023,401527962,11,11,
+2023,401527965,16,16,
+2024,401637557,1,16,Albany regional 1
+2024,401637555,8,9,Albany regional 1
+2024,401637560,5,12,Albany regional 1
+2024,401637569,4,13,Albany regional 1
+2024,401637546,6,11,Albany regional 1
+2024,401637547,3,14,Albany regional 1
+2024,401637563,7,10,Albany regional 1
+2024,401637571,2,15,Albany regional 1
+2024,401637549,1,16,Portland regional 4
+2024,401637552,8,9,Portland regional 4
+2024,401637562,5,12,Portland regional 4
+2024,401637566,4,13,Portland regional 4
+2024,401637572,6,11,Portland regional 4
+2024,401637564,3,14,Portland regional 4
+2024,401637551,7,10,Portland regional 4
+2024,401637550,2,15,Portland regional 4
+2024,401637573,1,16,Albany regional 2
+2024,401637567,8,9,Albany regional 2
+2024,401637543,5,12,Albany regional 2
+2024,401637544,4,13,Albany regional 2
+2024,401637554,6,11,Albany regional 2
+2024,401637556,3,14,Albany regional 2
+2024,401637559,7,10,Albany regional 2
+2024,401637565,2,15,Albany regional 2
+2024,401637570,1,16,Portland regional 3
+2024,401637561,8,9,Portland regional 3
+2024,401637548,5,12,Portland regional 3
+2024,401637553,4,13,Portland regional 3
+2024,401637568,6,11,Portland regional 3
+2024,401637574,3,14,Portland regional 3
+2024,401637545,7,10,Portland regional 3
+2024,401637558,2,15,Portland regional 3
+2024,401637540,16,16,
+2024,401637542,11,11,
+2024,401637541,16,16,
+2024,401637539,12,12,
+2025,401745971,1,16,Spokane regional 1
+2025,401745973,8,9,Spokane regional 1
+2025,401745976,5,12,Spokane regional 1
+2025,401745975,4,13,Spokane regional 1
+2025,401745990,6,11,Spokane regional 1
+2025,401745988,3,14,Spokane regional 1
+2025,401745992,7,10,Spokane regional 1
+2025,401745991,2,15,Spokane regional 1
+2025,401746004,1,16,Spokane regional 4
+2025,401746006,8,9,Spokane regional 4
+2025,401745969,5,12,Spokane regional 4
+2025,401745967,4,13,Spokane regional 4
+2025,401746010,6,11,Spokane regional 4
+2025,401746008,3,14,Spokane regional 4
+2025,401746013,7,10,Spokane regional 4
+2025,401746011,2,15,Spokane regional 4
+2025,401745977,1,16,Birmingham regional 2
+2025,401745979,8,9,Birmingham regional 2
+2025,401745994,5,12,Birmingham regional 2
+2025,401745993,4,13,Birmingham regional 2
+2025,401745998,6,11,Birmingham regional 2
+2025,401745996,3,14,Birmingham regional 2
+2025,401745956,7,10,Birmingham regional 2
+2025,401745981,2,15,Birmingham regional 2
+2025,401746000,1,16,Birmingham regional 3
+2025,401746002,8,9,Birmingham regional 3
+2025,401745960,5,12,Birmingham regional 3
+2025,401745958,4,13,Birmingham regional 3
+2025,401745962,6,11,Birmingham regional 3
+2025,401745961,3,14,Birmingham regional 3
+2025,401745965,7,10,Birmingham regional 3
+2025,401745964,2,15,Birmingham regional 3
+2025,401745908,16,16,
+2025,401745910,11,11,
+2025,401745914,16,16,
+2025,401745912,11,11,
+2026,401856503,1,16,Fort Worth regional 1
+2026,401856504,8,9,Fort Worth regional 1
+2026,401856468,5,12,Fort Worth regional 1
+2026,401856467,4,13,Fort Worth regional 1
+2026,401856517,6,11,Fort Worth regional 1
+2026,401856538,3,14,Fort Worth regional 1
+2026,401856506,7,10,Fort Worth regional 1
+2026,401856505,2,15,Fort Worth regional 1
+2026,401856512,1,16,Sacramento regional 4
+2026,401856511,8,9,Sacramento regional 4
+2026,401856500,5,12,Sacramento regional 4
+2026,401856499,4,13,Sacramento regional 4
+2026,401856502,6,11,Sacramento regional 4
+2026,401856501,3,14,Sacramento regional 4
+2026,401856510,7,10,Sacramento regional 4
+2026,401856509,2,15,Sacramento regional 4
+2026,401856516,1,16,Sacramento regional 2
+2026,401856515,8,9,Sacramento regional 2
+2026,401856470,5,12,Sacramento regional 2
+2026,401856469,4,13,Sacramento regional 2
+2026,401856472,6,11,Sacramento regional 2
+2026,401856471,3,14,Sacramento regional 2
+2026,401856473,7,10,Sacramento regional 2
+2026,401856474,2,15,Sacramento regional 2
+2026,401856475,1,16,Fort Worth regional 3
+2026,401856476,8,9,Fort Worth regional 3
+2026,401856508,5,12,Fort Worth regional 3
+2026,401856507,4,13,Fort Worth regional 3
+2026,401856513,6,11,Fort Worth regional 3
+2026,401856514,3,14,Fort Worth regional 3
+2026,401856498,7,10,Fort Worth regional 3
+2026,401856477,2,15,Fort Worth regional 3
+2026,401859470,16,16,
+2026,401859469,11,11,
+2026,401859471,16,16,
+2026,401859472,10,10,
