@@ -22,6 +22,13 @@ export const SITE = {
 	scoreForLabel: 'Points For',
 	scoreAgainstLabel: 'Points Against',
 	championship: 'NBA Finals',
+	// Best Playoff Runs ranks each format apart: a champion needed 12 wins in
+	// 1980, 15 from 1984 and 16 from 2003, so a run is measured against its own.
+	playoffEras: [
+		{ label: 'Early playoffs', to: 1983 },
+		{ label: 'Best-of-five first round', from: 1984, to: 2002 },
+		{ label: 'Four best-of-seven rounds', from: 2003 },
+	],
 	leaderNoun: 'coach',
 	leaderPlural: 'coaches',
 	/** No NBA season has ended without a loss; the word is here for the

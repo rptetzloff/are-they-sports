@@ -37,6 +37,14 @@ export const SITE = {
 	scoreForLabel: 'Goals For',
 	scoreAgainstLabel: 'Goals Against',
 	championship: 'Stanley Cup Final',
+	// Best Playoff Runs ranks each format apart: a champion needed 8 wins until
+	// 1967, 12 after expansion, 15 from 1980 and 16 from 1987.
+	playoffEras: [
+		{ label: 'Before expansion', to: 1967 },
+		{ label: 'Expansion era', from: 1968, to: 1979 },
+		{ label: 'Best-of-five first round', from: 1980, to: 1986 },
+		{ label: 'Four best-of-seven rounds', from: 1987 },
+	],
 	leaderNoun: 'coach',
 	leaderPlural: 'coaches',
 	/** No NHL season has ended without a loss; the word is here for the

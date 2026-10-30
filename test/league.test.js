@@ -289,11 +289,12 @@ test('best playoff runs rank postseasons where the playoffs are series, and nowh
 		{ team: hockey('WSH', 'Capitals'), rows: caps },
 		{ team: hockey('BOS', 'Bruins'), rows: bruins },
 	])
-	// By winning percentage, then wins: 8-0, then 8-1, then 2-3.
-	assert.equal(l.bestPlayoffRuns.length, 1, 'hockey has one list, no eras')
-	assert.equal(l.bestPlayoffRuns[0].label, null)
-	assert.deepEqual(l.bestPlayoffRuns[0].runs.map((r) => [r.club, r.season, r.record, r.won]),
-		[['Red Wings', 1952, '8–0', true], ['Penguins', 1992, '8–1', true], ['Capitals', 1992, '2–3', false]])
+	// Each format apart: 8-0 won two rounds in 1952, and 1992 took four. Within
+	// one, by winning percentage, then wins: 8-1, then 2-3.
+	assert.deepEqual(l.bestPlayoffRuns.map((e) => e.label), ['Before expansion', 'Four best-of-seven rounds'])
+	assert.deepEqual(l.bestPlayoffRuns[0].runs.map((r) => [r.club, r.season, r.record, r.won]), [['Red Wings', 1952, '8–0', true]])
+	assert.deepEqual(l.bestPlayoffRuns[1].runs.map((r) => [r.club, r.season, r.record, r.won]),
+		[['Penguins', 1992, '8–1', true], ['Capitals', 1992, '2–3', false]])
 
 	// Football's postseason is single games: no card.
 	const gb = [...season(1966, 'WWW'), ...playoffs(1966, 'WW', true)]

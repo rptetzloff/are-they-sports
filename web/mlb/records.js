@@ -66,7 +66,7 @@ const streakEntries = (list) => (list || []).map((s) => ({
 
 /** Whether a season is in a playoff era, and the era's years for its heading. */
 const inEra = (season, era) => (era.from == null || season >= era.from) && (era.to == null || season <= era.to);
-const eraYears = (era) => (era.from == null ? `to ${era.to}` : era.to == null ? `${era.from} on` : `${era.from}–${era.to}`);
+const eraYears = (era) => (era.from == null ? `to ${seasonName(era.to)}` : era.to == null ? `${seasonName(era.from)} on` : `${seasonName(era.from)}${SITE.seasonLabel ? ' to ' : '–'}${seasonName(era.to)}`);
 
 /** Each finished postseason's record, best first: winning percentage, then
  *  more wins, then the earlier year. A postseason is over when the club was
