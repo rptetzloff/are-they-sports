@@ -1,0 +1,48 @@
+# The NCAA tournament's champions, from Wikipedia's table of them (CC BY-SA).
+# Made by scripts/ncaaw-champions.mjs; do not edit. From 2001, when ESPN's games
+# begin, a champion comes from its final and these rows only check it.
+season,champion,championName,runnerUp,runnerUpName,score
+1982,LT,Louisiana Tech,,Cheyney State,76–62
+1983,USC,USC,LT,Louisiana Tech,69–67
+1984,USC,USC,TENN,Tennessee,72–61
+1985,ODU,Old Dominion,UGA,Georgia,70–65
+1986,TEX,Texas,USC,USC,97–81
+1987,TENN,Tennessee,LT,Louisiana Tech,67–44
+1988,LT,Louisiana Tech,AUB,Auburn,56–54
+1989,TENN,Tennessee,AUB,Auburn,76–60
+1990,STAN,Stanford,AUB,Auburn,88–81
+1991,TENN,Tennessee,UVA,Virginia,70–67
+1992,STAN,Stanford,WKU,Western Kentucky,78–62
+1993,TTU,Texas Tech,OSU,Ohio State,84–82
+1994,UNC,North Carolina,LT,Louisiana Tech,60–59
+1995,CONN,UConn,TENN,Tennessee,70–64
+1996,TENN,Tennessee,UGA,Georgia,83–65
+1997,TENN,Tennessee,ODU,Old Dominion,68–59
+1998,TENN,Tennessee,LT,Louisiana Tech,93–75
+1999,PUR,Purdue,DUKE,Duke,62–45
+2000,CONN,UConn,TENN,Tennessee,71–52
+2001,ND,Notre Dame,PUR,Purdue,68–66
+2002,CONN,UConn,OU,Oklahoma,82–70
+2003,CONN,UConn,TENN,Tennessee,73–68
+2004,CONN,UConn,TENN,Tennessee,70–61
+2005,BAY,Baylor,MSU,Michigan State,84–62
+2006,MD,Maryland,DUKE,Duke,78–75
+2007,TENN,Tennessee,RUTG,Rutgers,59–46
+2008,TENN,Tennessee,STAN,Stanford,64–48
+2009,CONN,UConn,LOU,Louisville,76–54
+2010,CONN,UConn,STAN,Stanford,53–47
+2011,TA&M,Texas A&M,ND,Notre Dame,76–70
+2012,BAY,Baylor,ND,Notre Dame,80–61
+2013,CONN,UConn,LOU,Louisville,93–60
+2014,CONN,UConn,ND,Notre Dame,79–58
+2015,CONN,UConn,ND,Notre Dame,63–53
+2016,CONN,UConn,SYR,Syracuse,82–51
+2017,SC,South Carolina,MSST,Mississippi State,67–55
+2018,ND,Notre Dame,MSST,Mississippi State,61–58
+2019,BAY,Baylor,ND,Notre Dame,82–81
+2021,STAN,Stanford,ARIZ,Arizona,54–53
+2022,SC,South Carolina,CONN,UConn,64–49
+2023,LSU,LSU,IOWA,Iowa,102–85
+2024,SC,South Carolina,IOWA,Iowa,87–75
+2025,CONN,UConn,SC,South Carolina,82–59
+2026,UCLA,UCLA,SC,South Carolina,79–51

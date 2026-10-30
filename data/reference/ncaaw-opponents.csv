@@ -1,0 +1,802 @@
+# Every team a Division I programme has played that is no Division I programme
+# today, by ESPN's id and the latest name a game gives it
+# (scripts/ncaaw-reference.mjs, from the seasons the load keeps; do not edit).
+id,name
+3136,Academy of Art
+2001,Adams State
+2002,Adelphi
+458,Agnes Scott
+2008,Alabama-Huntsville
+298,Alaska
+1,Alaska Anchorage
+2013,Albany State
+2014,Albertson
+109600,Albertus Magnus
+2017,Alderson-Broaddus
+484,Alice Lloyd College
+2018,Allegheny
+2019,Allen
+109514,Allentown
+2022,American International
+2023,Anderson (IN)
+380,Anderson (SC)
+2025,Angelo State
+110395,Antelope Valley
+3111,Apprentice School
+123,Aquinas
+128567,Arcadia
+3188,Arizona Christian
+2028,Ark Monticello
+2027,Arkansas Baptist
+2033,Arkansas Tech
+3166,Arlington Baptist
+381,Armstrong Atl St
+2036,Asbury
+109644,Ashford University
+2040,Auburn Montgomery
+2041,Augusta
+3178,Ave Maria
+2047,Averett
+2049,Azusa Pacific
+487,Bacone College
+109206,Baker University
+105890,Barber-Scotia
+489,Barber-Scotia College
+131664,Bard
+2053,Barry
+2054,Barton
+2959,Baruch College
+130110,Bates College
+2056,Belhaven
+111200,Bellevue University
+2058,Belmont Abbey
+132,Bemidji State
+2059,Benedict
+491,Benedictine
+123387,Benedictine Mesa
+2061,Berea
+131667,Berkeley
+2757,Berry
+2982,Bethany (CA)
+492,Bethany (KS)
+2063,Bethel (KS)
+2802,Bethel (MN)
+2064,Bethel (TN)
+111206,Bethel College Indiana
+108878,Bethesda
+2067,Biola
+3,Birmingham-Southern
+131832,Bismarck State
+2069,Black Hills State
+2070,Blackburn
+2854,Bloomfield
+2071,Bloomsburg
+108827,Blue Mountain Christian
+495,Bluefield
+2073,Bluefield State
+109546,Bob Jones
+2075,Bowie State
+130205,Brenau University
+2855,Brescia
+2913,Brevard
+2077,Brewton Parker
+3065,Briar Cliff
+2078,Bridgeport
+18,Bridgewater State
+108887,Bristol Community College
+2081,Bryan (TN)
+128733,Bryant & Stratton
+124762,Bryn Athyn
+63,Buena Vista
+2085,Buffalo State
+109672,Bushnell
+124765,Bushnell
+2088,BYU Hawaii
+2094,Cal Lutheran
+500,Cal Maritime
+2914,Cal Poly Pomona
+2093,Cal State East Bay
+499,Cal State East Bay
+2345,Cal State Los Angeles
+2863,Cal State Monterey Bay
+3182,Cal State San Marcos
+2857,Caldwell University
+131653,California (PA)
+2858,California PA
+128409,Caltech
+502,Calumet St. Joseph
+2096,Cameron
+125218,Campbellsville-Harrodsburg
+2100,Cardinal Stritch
+111959,Carlow
+2102,Carnegie Mellon
+126756,Carolina University
+2104,Carroll (MT)
+2105,Carson Newman
+111958,Carver College
+2859,Cascade
+2107,Catawba
+2108,Catholic University
+2109,Cedarville
+2113,Centenary (LA)
+2114,Centenary NJ
+3079,Central Baptist
+110402,Central Christian College
+2860,Central Methodist
+2118,Central Missouri State
+109685,Central Penn
+2119,Central State (OH)
+2120,Central Washington
+2123,Chadron State
+2124,Chaminade
+123311,Champion Christian
+411,Chapman
+2128,Charleston (WV)
+121698,Chestnut Hill
+2129,Cheyney (PA)
+14,Chico State
+2804,Chowan
+2131,Christian Brothers
+130132,Christopher Newport
+108833,Cincinnati Christian
+2133,Claflin
+2134,Clarion
+2805,Clark Atlanta
+2965,Clarke University
+108883,Clearwater
+128568,Cleary University
+130129,Clinton
+109704,Coastal Georgia
+229,Coker
+33,Colby
+109542,Colby Sawyer
+128658,College of Biblical Studies
+3159,College of Idaho
+2485,College of Ozarks
+3148,College of Saint Mary
+2862,Colorado Christian
+2144,Colorado College
+2146,Colorado Mines
+111198,Colorado State-Pueblo
+2145,Colorado-Colorado Springs
+15252,Columbia (MO)
+112102,Columbia (SC)
+109688,Columbia International
+504,Columbia International University
+2148,Concord
+2152,Concordia (MN)
+2153,Concordia (TX)
+37,Concordia College
+3099,Concordia College (AL)
+507,Concordia Nebraska
+2150,Concordia Oregon
+506,Concordia University (CA)
+2985,Concordia-Ann Arbor
+2151,Concordia-Chicago
+3066,Concordia-St. Paul
+39,Connecticut College
+451,Converse
+111197,Converse
+3106,Corban
+2155,Cornell College (IA)
+2156,Cortland St
+2157,Covenant
+108824,Crowleys Ridge
+509,Crown
+2092,CSU Dominguez Hills
+2536,CSU San Bernardino
+510,Culver-Stockton
+2161,Cumberland (TN)
+511,Cumberlands
+128442,D'Youville
+2162,Daemen
+512,Dakota State
+513,Dakota Wesleyan
+2163,Dallas
+2937,Dallas Christian
+3092,Davenport
+2167,Davis & Elkins
+131682,Dean
+190,Defiance
+5793,Defiance
+2170,Delta State
+316,Dickinson State
+2176,Dillard
+2177,District of Columbia
+2178,Doane
+2957,Dominican (CA)
+2179,Dominican (NY)
+125763,Dordt
+2183,Drury (MO)
+112703,East Nazarene
+2188,East Stroudsburg University
+2194,East Texas Baptist
+2192,Eastern Mennonite
+2201,Eastern New Mexico
+2202,Eastern Oregon
+2196,Eastern University
+3120,Ecclesia
+128502,Edgewood
+2206,Edward Waters
+2207,Elizabeth City State
+131686,Elms
+111228,Embry Riddle (AZ)
+109676,Emerson College
+2211,Emmanuel (MA)
+2212,Emory
+2213,Emory & Henry
+2214,Emporia State
+2215,Erskine
+101,Eureka
+2865,Evangel
+2866,Evergreen State
+2986,Fairmont St
+3149,Farmingdale State
+2219,Faulkner
+2220,Fayetteville State
+2221,FDU-Florham
+131690,Felician
+2222,Ferris State
+366,Ferrum
+2224,Findlay
+111195,Fisher College
+2225,Fisk
+128602,Five Towns College
+2228,Flagler
+2227,Florida Memorial
+121697,Florida National
+53,Florida Tech
+126864,Fort Lauderdale
+2232,Fort Valley State
+230,Francis Marion
+2233,Franklin
+144,Franklin Pierce
+2915,Freed-Hardeman
+2235,Fresno Pacific
+128451,Friends
+112702,Frostburg State
+2237,Ft. Lewis
+417,Gallaudet University
+2242,Geneva
+415,George Fox University
+2245,Georgetown (KY)
+2246,Georgia College
+111203,Georgia Southwestern
+110419,Georgian Court
+2248,Gettysburg
+2249,Glenville State
+3067,Goshen
+2251,Goucher
+86697,Grace Bible College
+124761,Grace Christian
+2252,Grace College
+530,Graceland University
+125,Grand Valley State
+128456,Great Lakes Christian
+2867,Green Mountain
+2256,Greensboro College
+2257,Greenville
+2258,Guilford
+108867,Gwynedd Mercy
+533,Hannibal-LaGrange College
+2262,Hanover
+2264,Harding
+534,Harris Stowe State
+42,Hartford
+109466,Haskell
+536,Hastings
+2265,Haverford
+2267,Hawaiʻi Hilo
+2269,Hawaii Pacific
+123309,Health Sciences & Pharmacy
+191,Heidelberg
+2271,Henderson State
+418,Hendrix
+131833,Hesston
+2273,Hillsdale
+2274,Hiram
+2868,Holy Names College
+130113,Hood College
+2812,Hope
+3091,Hope International
+2758,Howard Payne
+2279,Huntington College
+2280,Husson
+2281,Huston Tillotson
+2286,Illinois College
+73,Illinois Tech
+542,Illinois-Springfield
+66784,Immaculata
+2288,IND South Bend
+2290,IND Wesleyan
+3232,Indiana Dabney University
+3069,INDIANA TECH
+108785,Indiana University Kokomo
+3088,Indiana-Northwest
+2292,Indianapolis
+2295,Iowa Wesleyan
+175,Ithaca
+130137,IU Columbus
+110442,IU East
+387,IU Southeast
+2939,Jamestown
+2299,Jarvis Christian
+3078,Jessup
+2302,John Carroll
+118,Johns Hopkins
+128474,Johnson
+111194,Johnson & Wales (RI)
+110406,Johnson & Wales Florida
+109019,Johnson & Wales-Charlotte
+353,Johnson and Wales
+3094,Johnson and Wales
+2304,Johnson C. Smith
+121694,Johnson University (FL)
+546,Judson
+126,Kalamazoo
+128450,Kansas Christian
+547,Kansas Wesleyan
+2871,Kean
+313,Keene State
+109502,Keiser University
+108832,Kent St Tuscarawas
+3077,Kentucky Christian
+2310,Kentucky State
+2316,Kentucky Wesleyan
+2873,Keuka
+2312,King (TN)
+247,King's
+255,Knox
+2315,Kutztown
+128537,Kuyper
+2874,La Roche
+111960,La Sierra
+2318,La Verne
+548,LaGrange
+437,Lake Erie
+262,Lake Forest College
+285,Lake Superior State
+2321,Lambuth
+124763,Lancaster Bible College
+2322,Lander
+2323,Lane College
+2324,Langston
+3251,Lawrence Tech
+388,Lebanon Valley
+2875,Lee University
+2327,Lees McRae
+128307,Lehman
+2917,LeMoyne-Owen
+2331,Lenoir-Rhyne College
+2326,LeTourneau
+2332,Lewis
+2333,Lewis & Clark
+2334,Lewis Clark State
+111994,Life Pacific
+116335,Life University
+2336,Limestone
+111967,Lincoln
+126834,Lincoln (CA)
+2876,Lincoln (MO)
+2339,Lincoln (PA)
+2337,Lincoln Memorial
+2877,Lindsey Wilson
+2341,LIU Brooklyn
+2940,Livingstone
+209,Lock Haven
+2347,Louisiana Christian
+14314,Louisiana Christian University
+3233,Lourdes
+100,Loyola New Orleans
+108823,LSU Alexandria
+2353,LSU Shreveport
+2354,Lycoming
+2355,Lynchburg
+2357,Lynn University
+2358,Lyon
+2359,Macalester
+273,MacMurray College
+552,Madonna
+110398,Maine Fort Kent
+274,Maine Maritime Acade
+556,Malone University
+2362,Manchester
+2879,Manhattanville
+2365,Mansfield
+2366,Marian
+2369,Mars Hill
+559,Mary (ND)
+2371,Mary Hardn Bylr
+2942,Mary Washington
+3098,Marygrove College
+2373,Maryville College (TN)
+310,Maryville University
+2374,Marywood
+2375,Master's University
+561,Mayville State
+2816,McKendree
+241,McMurry
+476,Medaille
+2381,Menlo
+2384,Mercy
+111956,Meredith College
+11,Mesa College
+126798,Miami (OH)-Hamilton
+2391,Michigan Dearborn
+110466,Mid-America Christian
+109689,Mid-Atlantic Christian
+564,Mid-Continent University
+419,MidAm Nazarene
+111196,Middle Georgia State
+565,Midland University
+121702,Midway
+2395,Midwestern State
+2396,Miles
+210,Millersville
+2397,Milligan
+74,Millikin
+2398,Millsaps
+2772,Minn Crookston
+134,Minnesota Duluth
+2817,Minnesota State
+2399,Minnesota-Morris
+568,Minot State
+109516,Misericordia
+2401,Mississippi College
+130263,Mississippi U for Women
+2880,Missouri Baptist
+111202,Missouri S&T
+136,Missouri Valley
+137,Missouri Western State
+141,Missouri-St. Louis
+109,MIT
+126799,Mitchell College
+2920,Mobile
+2404,Molloy
+2919,Monmouth ILL
+134332,Monroe (NY)
+2407,Mont St Billings
+569,Montana State-Northern
+148,Montana Tech
+2701,Montana Western
+2409,Montevallo
+2410,Montreat
+571,Morris
+2417,Morris Brown
+481,Mount Ida College
+573,Mount Marty College
+574,Mount Mercy College
+2418,Mount Olive
+289,Mount Saint Mary (NY)
+109681,Mount St. Joseph
+2419,Mount St. Joseph
+2421,Mount Vernon Nazarene (OH)
+2389,MSU Denver
+108846,Multnomah
+332,Muskingum
+108879,Nashua
+2438,Nebraska Kearney
+157,Nebraska Wesleyan
+124682,Nelson
+2904,Nelson (TX)
+131817,Nelson American Indian
+130229,New College (FL)
+2943,New England College
+2820,New Jersey City
+2424,New Mexico Highlands
+2444,Newberry
+580,Newman
+2884,Nichols
+123310,North American
+286,North Carolina Wesleyan
+3071,North Central College
+2822,North Greenville
+3172,Northeastern Oklahom
+196,Northeastern State
+128,Northern Michigan
+3141,Northern New Mexico
+425,Northern State
+2462,Northland
+2887,Northwest Nazarene
+2465,Northwest University
+2471,Northwestern College (Iowa)
+2886,Northwood
+107722,Northwood University
+2467,Norwich
+109716,Notre Dame (MD)
+2468,Notre Dame CA
+587,Notre Dame College
+138,NW Missouri State
+109515,Nyack College
+2474,Oakland City
+3083,Oakwood
+391,Oberlin College
+2475,Occidental
+2476,Oglethorpe
+108834,Ohio Christian
+2477,Ohio Dominican
+2479,Ohio Valley
+589,Oklahoma Christian
+590,Oklahoma Wesleyan
+126755,Old Westbury
+354,Olivet College
+2922,Olivet Nazarene
+2484,Oregon Tech
+86802,Oswego St
+111990,Ottawa (AZ)
+7052,Ottawa (KS)
+359,Otterbein
+2888,Ouachita Baptist
+3158,Our Lady Of The Lake
+2487,Pace
+2486,Pacific Lutheran
+110400,Pacific Union
+2488,Paine
+2489,Palm Beach Atlantic
+2824,Panhandle State (OK)
+116420,Park University Gilbert
+2491,Paul Quinn
+111208,Penn State (Beaver)
+100277,Pensacola Christian
+596,Peru State
+2945,Pfeiffer
+2494,Philander Smith
+2496,Piedmont
+95,Pikeville
+90,Pittsburg State
+2498,Pittsburgh-Johnstown
+107607,Point
+2500,Point Loma
+214,Point Park
+110467,Post University
+531,ProvidenceMT
+2889,Puerto Rico-Bayamon
+2503,Puerto Rico-Mayaguez
+131731,Purchase
+368,Purdue Northwest
+111911,Purdue Northwest
+2512,Queens College
+2825,Quincy
+2973,Ramapo College
+124954,Randolph
+111957,Regent University
+2517,Regis
+2518,Regis University
+2890,Reinhardt
+2528,Rensselaer
+226,Rhode Island College
+2519,Rhodes College
+2891,Ripon
+3160,Robert Morris (IL-Sp
+599,Robert Morris Col.
+600,Roberts Wesleyan Col
+184,Rochester
+2947,Rochester Christian
+2524,Rockford
+2525,Rockhurst
+2826,Rocky Mountain
+121715,Rogers State University
+3163,Roosevelt
+2892,Rust
+371,Rutgers-Newark
+129,Saginaw Valley State
+2830,Saint Anselm
+395,Saint Augustine's
+128455,Saint Elizabeth
+2605,Saint Leo
+2606,Saint Martin's
+108788,Saint Mary (KS)
+126823,Saint Mary of the Woods
+131773,Saint Mary's (MN)
+260,Saint Michael's
+128475,Saint Rose
+123308,Salem College
+108810,Salem University
+2532,Salisbury
+3096,San Diego Christian
+22,San Francisco State
+109246,Sarah Lawrence
+2542,Savannah State
+2543,SC Aiken
+2544,Schreiner
+107599,Science & Arts (OK)
+2778,Scranton
+2548,Seattle Pacific
+611,Seton Hill College
+2553,Sewanee
+2551,Shaw
+2974,Shepherd
+2559,Shippensburg
+2560,Shorter
+2562,Siena Heights
+126757,Simmons (KY)
+109604,Simpson (CA)
+2564,Simpson College
+2894,Sioux Falls
+215,Slippery Rock
+2574,Sonoma State
+613,South Dakota Mines
+107590,South Dakota School of Mines
+3105,Southeastern
+130380,Southeastern Baptist College
+2568,Southern Arkansas
+2583,Southern Connecticut State
+2573,Southern New Orleans
+2584,Southern Oregon
+614,Southern Polytechnic
+2896,Southern Virginia
+2576,Southern Wesleyan
+3154,Southwest
+2586,Southwest Baptist
+2587,Southwest Minnesota State
+108784,Southwestern Christian U
+2927,Southwestern Oklahoma State
+2588,Southwestern University
+2589,Spalding
+2590,Spring Hill
+2949,St Gregory's
+2592,St. Andrews
+3140,St. Catharine
+2594,St. Cloud State
+244,St. Edward's
+2595,St. Francis (IL)
+2831,St. Francis (IN)
+2597,St. Francis Brooklyn
+2604,St. Joseph (VT)
+131775,St. Joseph's Brooklyn
+108885,St. Joseph's Long Island
+2601,St. Josephs (IND)
+117,St. Mary's (MD)
+2610,St. Mary's (TX)
+2611,St. Pauls College
+606,St. Thomas (FL)
+3195,St. Thomas (TX)
+108847,St. Thomas Aquinas
+2615,St. Xavier
+2616,Stanislaus State
+130215,Stanton
+2901,Staten Island
+109680,Stephens
+2618,Stevens Tech
+112704,Stevenson
+2948,Stillman
+2834,Sul Ross State
+131604,SUNY Delhi
+131695,SUNY Fredonia
+2783,SUNY Geneseo
+111998,SUNY New Paltz
+216,Susquehanna
+619,Tabor
+2625,Talladega
+620,Taylor University
+3125,Temple Baptist
+2370,Tennessee Southern
+2631,Tennessee Temple
+2632,Tennessee Wesleyan
+108825,Terrell
+3082,Texas A&M International
+2658,Texas A&M-Kingsville
+130174,Texas A&M-San Antonio
+122210,Texas A&M-Texarkana
+2637,Texas College
+2639,Texas Lutheran
+3081,Texas Permian Basin
+2642,Texas Wesleyan
+3086,Texas-Tyler
+2644,Thiel
+2645,Thomas
+2838,Tiffin
+108884,Toccoa Falls
+128905,Toronto Metropolitan
+2650,Tougaloo
+123358,Transylvania
+2906,Trevecca Nazarene
+2651,Trine University
+108866,Trinity (FL)
+386,Trinity (TX)
+2652,Trinity Christian (IL)
+3174,Trinity College of Jacksonville
+3245,Truett-McConnell
+2654,Truman State
+2839,Tusculum
+2657,Tuskegee
+2928,TX Woman's Univ
+3185,UC Merced
+498,UC Santa Cruz
+2660,UMass Boston
+2882,UNC Pembroke
+2785,Union
+2841,Union (KY)
+237,Union (TN)
+111954,University Of New England
+111207,University of Northwestern Ohio
+435,University of Puerto Rico - Rio Piedras
+124760,University of Science and Arts
+608,University of Sciences
+2723,University of Wisconsin River Falls
+123546,UNT Dallas
+389,Upper Iowa University
+2666,Urbana
+2667,Ursinus
+627,Ursuline College
+2557,US Coast Guard
+2383,US Merchant Marine
+2905,UT Dallas
+2842,UVA Wise
+111204,UVF
+2742,UW-Parkside
+2671,VA Intermont
+2673,Valdosta State
+628,Valley City State
+126973,Vermont State Johnson
+121584,Virgin Islands
+3229,Virginia Lynchburg
+330,Virginia State
+2676,Virginia Union
+2677,Viterbo
+2679,Voorhees
+128478,Vtsu Lyndon
+2706,W. Virginia Tech
+109616,Waldorf College
+3152,Walla Walla
+2682,Walsh
+2683,Warner
+2952,Warner Pacific
+106392,Warner Pacific
+2684,Warren Wilson
+2687,Washburn
+408,Washington Adventist
+108890,Washington Adventist
+7859,Washington College (MD)
+630,Wayland Baptist University
+131,Wayne State (MI)
+2844,Wayne State (NE)
+2845,Waynesburg College
+2691,Webber International
+2846,Wesley
+463,Wesleyan (GA)
+2695,West Alabama
+223,West Chester
+2699,West Liberty
+2704,West Texas A&M
+2707,West Virginia State
+455,West Virginia Wesleyan
+2847,West. Washington
+111961,Westcliff
+2714,Western Colorado
+2843,Western Connecticut State
+2703,Western New Mexico
+2848,Western Oregon
+111214,Westminster (MO)
+224,Westminster (UT)
+2716,Westmont
+121690,Wheaton (MA)
+2719,Wheeling
+2720,Whitman
+110394,Whittier
+2721,Whitworth
+2726,Wilberforce
+2728,Wiley
+2930,Willamette
+2730,William Carey
+2911,William Jewell
+2925,William Peace
+111205,William Peace
+2912,William Penn
+2931,William Woods
+108826,Williams Baptist
+7994,Wilmington (DE)
+2733,Wilmington (OH)
+2732,Wilmington DE
+351,Wingate
+2736,Winston-Salem State
+2741,Wisconsin Lutheran
+2743,Wisconsin Stevens Point
+2744,Wisconsin Stout
+2738,Wisconsin-Eau Claire
+2740,Wisconsin-La Crosse
+126911,Wisconsin-Superior
+402,Worcester State
+2753,Xavier (LA)
+2789,York (NE)
+109754,Young Harris College
