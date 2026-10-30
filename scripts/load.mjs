@@ -23,6 +23,7 @@ import { indexFor, loadHistory, resolver } from '../lib/names.js';
 import { download } from './fetch.mjs';
 import { isoDate } from '../sports/mlb.js';
 import { seedRound } from '../sports/nfl.js';
+import { walkRounds } from '../sports/ncaaw.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const SOURCE_DIR = join(ROOT, 'data', 'sources');
@@ -430,6 +431,7 @@ async function loadChampionships(client, sportId, byCode) {
 	// is a blank page — the "looks complete, isn't" failure, arriving as an empty
 	// table under an MLB scope.
 	if (sportId !== 'nfl') {
+		const hoops = sportId === 'ncaam' || sportId === 'ncaaw';
 		// Written as plain CTEs rather than a clever aggregate. The first version
 		// used `array_agg` over a lateral join and inserted ONE row for 121
 		// seasons of baseball — the kind of wrong that looks like a working query
@@ -480,24 +482,32 @@ async function loadChampionships(client, sportId, byCode) {
 			 WHERE w.rn = 1 AND w.wins > l.wins`,
 		// College basketball's final is one game, and its own note ("Men's
 		// Basketball Championship - National Championship") is no title's name.
-		[sportId, sportId === 'mlb' ? 'World Series' : sportId === 'ncaam' ? 'NCAA Tournament' : 'Championship',
-			sportId === 'ncaam' ? 'championship game' : 'championship series', sportId === 'ncaam']);
+		[sportId, sportId === 'mlb' ? 'World Series' : hoops ? 'NCAA Tournament' : 'Championship',
+			hoops ? 'championship game' : 'championship series', hoops]);
 		console.log(`  champions    ${rowCount} derived from games`);
-		// College basketball's before its games begin (1939-1949), from
-		// Wikipedia's list (scripts/ncaam-champions.mjs): finals played, and no
-		// game here to link.
+		// College basketball's before its games begin (men's 1939-1949, women's
+		// 1982-2000), from Wikipedia (scripts/ncaam-champions.mjs,
+		// ncaaw-champions.mjs): finals played, and no game here to link. Women's
+		// list runs on past the first game, and there checks what the final gave:
+		// a disagreement is reported, as the NFL's is below, and the game stands.
 		const early = join(REFERENCE_DIR, `${sportId}-champions.csv`);
-		if (sportId === 'ncaam' && existsSync(early)) {
+		if (hoops && existsSync(early)) {
 			const { rows: haveF } = await client.query('SELECT id FROM franchise WHERE sport = $1', [sportId]);
 			const known = new Set(haveF.map((r) => r.id));
+			const { rows: derived } = await client.query('SELECT season, champion FROM championship WHERE sport = $1', [sportId]);
+			const fromGames = new Map(derived.map((r) => [Number(r.season), r.champion]));
 			let wrote = 0;
 			for (const r of parseCsv(readFileSync(early, 'utf8'))) {
 				const champion = byCode.get(r.champion) ?? r.champion;
 				const runnerUp = r.runnerUp ? (byCode.get(r.runnerUp) ?? r.runnerUp) : null;
+				if (fromGames.has(Number(r.season))) {
+					if (fromGames.get(Number(r.season)) !== champion) console.log(`  champions    ${r.season}: the games say ${fromGames.get(Number(r.season))}, Wikipedia ${r.championName}`);
+					continue;
+				}
 				if (!known.has(champion)) { console.log(`  champions    ${r.season} ${r.championName}: no such franchise`); continue; }
 				await client.query(
 					`INSERT INTO championship (sport, season, league, champion, runner_up, method, title, game_id, source)
-					 VALUES ($1,$2,'NCAAM',$3,$4,'championship game','NCAA Tournament',NULL,'wikipedia') ON CONFLICT DO NOTHING`,
+					 VALUES ($1,$2,upper($1),$3,$4,'championship game','NCAA Tournament',NULL,'wikipedia') ON CONFLICT DO NOTHING`,
 					[sportId, Number(r.season), champion, runnerUp && known.has(runnerUp) ? runnerUp : null]);
 				wrote++;
 			}
@@ -1703,6 +1713,73 @@ async function main() {
 			if (name) await client.query('INSERT INTO franchise_name (sport, franchise, name, source) VALUES ($1,$2,$3,$4)', ['ncaam', id, name, 'cbbd']);
 		}
 		console.log(`  cbbd         ${calls} calls${remaining != null ? `, ${remaining} left this month` : ''}; ${finals} NCAA games marked; ${notClubs} games between two non-clubs left out`);
+	}
+
+	if (sportId === 'ncaaw') {
+		// sportsdataverse a season at a time, ESPN's ids throughout; see
+		// sports/ncaaw.js. The season being played and the last are fetched again:
+		// a kept copy's unplayed game would write over a final the live refresh had
+		// stored, the file's authority being higher.
+		const codes = codeTable('ncaaw', loadHistory('ncaaw'));
+		const playing = adapter.sources.live.seasonOf(new Date());
+		const names = new Map();
+		const opponents = new Map();
+		const kept = new Set();
+		let notClubs = 0;
+		const take = async (r, finished) => {
+			const row = adapter.espnGameRow(r, { finished });
+			if (!row) return;
+			if (!codes.knows(row.home) && !codes.knows(row.away)) { notClubs++; return; }
+			if (!codes.knows(row.home)) opponents.set(row.home, r.home_location);
+			if (!codes.knows(row.away)) opponents.set(row.away, r.away_location);
+			if (row.title) names.set(row.id, row.title);
+			kept.add(row.id);
+			await put(row);
+		};
+		for (let season = adapter.sources.schedules.from; season <= playing; season++) {
+			const path = join(SOURCE_DIR, 'ncaaw', `wbb_schedule_${season}.csv`);
+			if (season >= playing - 1 && existsSync(path)) rmSync(path);
+			const ok = await ensureSource('ncaaw', path, { url: adapter.sources.schedules.url(season) }, `sportsdataverse women's college basketball ${season}`);
+			if (!ok) {
+				if (season === playing) { console.log(`  not yet      sportsdataverse ${season}; the live refresh carries it`); continue; }
+				await client.query('ROLLBACK');
+				await client.end();
+				return 1;
+			}
+			for await (const r of csvRows(path)) await take(r, season < playing);
+		}
+		// What those files lack, from ESPN's scoreboards (scripts/ncaaw-fill.mjs).
+		for await (const r of csvRows(join(REFERENCE_DIR, 'ncaaw-games-added.csv'))) await take(r, true);
+		await flush();
+		const { rowCount: dropped } = await client.query(
+			"DELETE FROM game WHERE sport = 'ncaaw' AND source = 'sportsdataverse' AND NOT (id = ANY($1::text[]))", [[...kept]]);
+		if (dropped) console.log(`  ncaaw        ${dropped} games no longer given dropped`);
+		// Each season's rounds and final, back from the final (walkRounds).
+		const { rows: post } = await client.query(`
+			SELECT id, season, date::text AS date, stage, home, away,
+			       home_score AS "homeScore", away_score AS "awayScore"
+			  FROM game WHERE sport = 'ncaaw' AND round <> 'regular' AND status = 'final'`);
+		const ids = [], stages = [], finals = [];
+		for (const games of Map.groupBy(post, (g) => g.season).values()) {
+			const { stages: changed, final } = walkRounds(games);
+			for (const [id, stage] of changed) { ids.push(id); stages.push(stage); }
+			if (final) finals.push(final);
+		}
+		await client.query(
+			`UPDATE game g SET stage = v.stage FROM unnest($1::text[], $2::text[]) AS v(id, stage)
+			  WHERE g.sport = 'ncaaw' AND g.id = v.id`, [ids, stages]);
+		await client.query(
+			`UPDATE game SET round = CASE WHEN id = ANY($1::text[]) THEN 'championship' ELSE 'playoff' END
+			  WHERE sport = 'ncaaw' AND round <> 'regular'`, [finals]);
+		await client.query(
+			`UPDATE game g SET title = v.title FROM unnest($1::text[], $2::text[]) AS v(id, title)
+			  WHERE g.sport = 'ncaaw' AND g.id = v.id AND g.title IS DISTINCT FROM v.title`,
+			[[...names.keys()], [...names.values()]]);
+		await client.query("DELETE FROM franchise_name WHERE sport = 'ncaaw' AND source = 'sportsdataverse'");
+		for (const [id, name] of opponents) {
+			if (name) await client.query('INSERT INTO franchise_name (sport, franchise, name, source) VALUES ($1,$2,$3,$4)', ['ncaaw', id, name, 'sportsdataverse']);
+		}
+		console.log(`  ncaaw        ${finals.length} finals marked, ${ids.length} games' rounds read back from them; ${notClubs} games between two non-clubs left out`);
 	}
 
 	// Championship games, marked after the fact.

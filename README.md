@@ -75,6 +75,7 @@ DATABASE_URL=... npm run load wnba    # the WNBA's own logs 1997-2025, ESPN afte
 DATABASE_URL=... npm run load mls     # MLS's own stats API, 1996 on
 DATABASE_URL=... CFBD_API_KEY=... npm run load ncaaf   # CollegeFootballData, 1869 on (FBS)
 DATABASE_URL=... CFBD_API_KEY=... npm run load ncaam   # CollegeBasketballData, 1949-50 on (Division I men)
+DATABASE_URL=... npm run load ncaaw   # sportsdataverse, 2000-01 on (Division I women)
 ```
 
 Both work **inside the deployed container**, which is usually where the database
