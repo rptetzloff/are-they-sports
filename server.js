@@ -36,12 +36,12 @@ import { computeRecords } from './lib/records.js';
 import { computeLeague } from './lib/league.js';
 import { computeSchedule, selectPeriod } from './lib/schedule.js';
 import { computeStandings, divisionPeers, playedSeasons } from './lib/standings.js';
-import { Lru, memo, mergeGames, versionOf } from './lib/derived.js';
+import { Lru, mapLimited, memo, mergeGames, versionOf } from './lib/derived.js';
 import { chartGeometry, coachEras, historyPoints } from './lib/history.js';
 import { codeTables, franchisesForClub, staleFranchises } from './lib/codes.js';
 import { tournamentGames, tournamentSeasons } from './lib/store.js';
 import { buildBracket, bracketPage, ncaamSeeds, nitGames, seasonLabel } from './lib/bracket.js';
-import { availability, championships, close, connect, finalRounds, franchisesWithGames, gameCount, gamesFor, gamesSince, health, lastUpdated, lastUpdatedAll, leaderGames, leaderTenures, rawGamesFor, readSummary, simulcastsFor, standingsTitles, tvTables, withClient, writeSummary } from './lib/store.js';
+import { POOL_MAX, availability, championships, close, connect, finalRounds, franchisesWithGames, gameCount, gamesFor, gamesSince, health, lastUpdated, lastUpdatedAll, leaderGames, leaderTenures, rawGamesFor, readSummary, simulcastsFor, standingsTitles, tvTables, withClient, writeSummary } from './lib/store.js';
 import { lockKeyFor, nextDelay, refreshLive, startLiveLoops, withLock } from './lib/live.js';
 import {
 	daysToNextGame, lastLosslessSeason, latestSeason, recordText, seasons, seasonTally, seasonVerdict,
@@ -166,6 +166,11 @@ const wantsJson = (url) => url.searchParams.get('format') === 'json';
  */
 const gameCache = new Map();
 const CACHE_CHECK_MS = 30_000;
+// A page reading every club leaves a connection for the next request. And a
+// page holds its one read as a promise: `loaded ??= await ...` is unset until
+// the read ends, so each sport on an all-sports page began its own, nine reads of
+// every club at once.
+const READ_AT_ONCE = POOL_MAX - 1;
 
 async function games(entry, season) {
 	// Keyed by SPORT and franchise. Franchise codes collide across sports and
@@ -842,7 +847,7 @@ function main() {
 		// A league's page is named for its league (NHL), the scope's for the scope.
 		const leagueHeading = (sport) => (sport ? LEAGUE_ABBR[sport] ?? sport.toUpperCase() : scopeHeading(scope, table));
 
-		const server = createServer(async (req, res) => {
+		const handle = async (req, res) => {
 			// Before anything reads `available`, including /healthz and the
 			// selector.
 			if (dbHealth.ok) await refresh(Date.now());
@@ -1197,8 +1202,8 @@ function main() {
 				// Lazy, as on /records: nothing reads a game row unless a summary
 				// is missing.
 				let loaded = null;
-				const clubRows = async () => (loaded ??= await Promise.all(
-					withGames.map(async (e) => ({ ...e, team: clubFor(e), rows: await games(e) }))));
+				const clubRows = () => (loaded ??= mapLimited(withGames, READ_AT_ONCE,
+					async (e) => ({ ...e, team: clubFor(e), rows: await games(e) })));
 				const version = await summaryVersion(withGames);
 				const bySport = await Promise.all(wanted.map(async (sport) => {
 					const inSport = () => clubRows().then((all) => all.filter((c) => c.team?.sport === sport));
@@ -1263,11 +1268,11 @@ function main() {
 				// the 400ms computation and none of the read that preceded it.
 				// Nothing here touches a game row unless a summary is missing.
 				let loaded = null;
-				const clubRows = async () => (loaded ??= await Promise.all(
+				const clubRows = () => (loaded ??= mapLimited(withGames, READ_AT_ONCE,
 					// The franchise travels with the club, because the
 					// championship table records a winner as a franchise and the
 					// club id alone is not unique across sports.
-					withGames.map(async (e) => ({ team: clubFor(e), franchise: e.franchise, rows: await games(e) }))));
+					async (e) => ({ team: clubFor(e), franchise: e.franchise, rows: await games(e) })));
 				// One schedule per sport, each grouped by its own unit. Football
 				// plays a round a week and baseball plays most days, and a mixed
 				// scope used to take the first club's rule for everything — so an
@@ -1366,11 +1371,11 @@ function main() {
 				// the 400ms computation and none of the read that preceded it.
 				// Nothing here touches a game row unless a summary is missing.
 				let loaded = null;
-				const clubRows = async () => (loaded ??= await Promise.all(
+				const clubRows = () => (loaded ??= mapLimited(withGames, READ_AT_ONCE,
 					// The franchise travels with the club, because the
 					// championship table records a winner as a franchise and the
 					// club id alone is not unique across sports.
-					withGames.map(async (e) => ({ team: clubFor(e), franchise: e.franchise, rows: await games(e) }))));
+					async (e) => ({ team: clubFor(e), franchise: e.franchise, rows: await games(e) })));
 				// One league per sport, never merged. A scope spanning both used
 				// to rank football seasons against baseball ones and print a note
 				// admitting the lists compared clubs that never played each
@@ -2032,7 +2037,17 @@ function main() {
 				console.error(e);
 				return json(res, 500, { error: e.message });
 			}
-		});
+		};
+
+		// A request that fails answers 500; it does not end the process. The club
+		// routes above have their own catch and the league routes had none, so one
+		// pool timeout on /records was an unhandled rejection, and the site was down
+		// for everyone until Coolify restarted it.
+		const server = createServer((req, res) => handle(req, res).catch((e) => {
+			console.error(e);
+			if (res.headersSent) res.destroy();
+			else json(res, 500, { error: e.message });
+		}));
 
 		server.listen(PORT, () => {
 			console.log(`  listening    http://127.0.0.1:${PORT}`);
