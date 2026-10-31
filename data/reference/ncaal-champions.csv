@@ -1,0 +1,58 @@
+# The NCAA tournament's champions, from Wikipedia's table of them (CC BY-SA).
+# Made by scripts/ncaal-champions.mjs; do not edit. From 2025, when the games here
+# begin, a champion comes from its final and these rows only check it.
+season,champion,championName,runnerUp,runnerUpName,score
+1971,COR,Cornell,MD,Maryland,12–6
+1972,UVA,Virginia,JHU,Johns Hopkins,13–12
+1973,MD,Maryland,JHU,Johns Hopkins,10–9
+1974,JHU,Johns Hopkins,MD,Maryland,17–12
+1975,MD,Maryland,NAVY,Navy,20–13
+1976,COR,Cornell,MD,Maryland,16–13
+1977,COR,Cornell,JHU,Johns Hopkins,16–8
+1978,JHU,Johns Hopkins,COR,Cornell,13–8
+1979,JHU,Johns Hopkins,MD,Maryland,15–9
+1980,JHU,Johns Hopkins,UVA,Virginia,9–8
+1981,UNC,North Carolina,JHU,Johns Hopkins,14–13
+1982,UNC,North Carolina,JHU,Johns Hopkins,7–5
+1983,SYR,Syracuse,JHU,Johns Hopkins,17–16
+1984,JHU,Johns Hopkins,SYR,Syracuse,13–10
+1985,JHU,Johns Hopkins,SYR,Syracuse,11–4
+1986,UNC,North Carolina,UVA,Virginia,10–9
+1987,JHU,Johns Hopkins,COR,Cornell,11–10
+1988,SYR,Syracuse,COR,Cornell,13–8
+1989,SYR,Syracuse,JHU,Johns Hopkins,13–12
+1991,UNC,North Carolina,TOW,Towson,18–13
+1992,PRIN,Princeton,SYR,Syracuse,10–9
+1993,SYR,Syracuse,UNC,North Carolina,13–12
+1994,PRIN,Princeton,UVA,Virginia,9–8
+1995,SYR,Syracuse,MD,Maryland,13–9
+1996,PRIN,Princeton,UVA,Virginia,13–12
+1997,PRIN,Princeton,MD,Maryland,19–7
+1998,PRIN,Princeton,MD,Maryland,15–5
+1999,UVA,Virginia,SYR,Syracuse,12–10
+2000,SYR,Syracuse,PRIN,Princeton,13–7
+2001,PRIN,Princeton,SYR,Syracuse,10–9
+2002,SYR,Syracuse,PRIN,Princeton,13–12
+2003,UVA,Virginia,JHU,Johns Hopkins,9–7
+2004,SYR,Syracuse,NAVY,Navy,14–13
+2005,JHU,Johns Hopkins,DUKE,Duke,9–8
+2006,UVA,Virginia,MASS,Massachusetts,15–7
+2007,JHU,Johns Hopkins,DUKE,Duke,12–11
+2008,SYR,Syracuse,JHU,Johns Hopkins,13–10
+2009,SYR,Syracuse,COR,Cornell,10–9
+2010,DUKE,Duke,ND,Notre Dame,6–5
+2011,UVA,Virginia,MD,Maryland,9–7
+2012,L-MD,Loyola,MD,Maryland,9–3
+2013,DUKE,Duke,SYR,Syracuse,16–10
+2014,DUKE,Duke,ND,Notre Dame,11–9
+2015,DEN,Denver,MD,Maryland,10–5
+2016,UNC,North Carolina,MD,Maryland,14–13
+2017,MD,Maryland,OSU,Ohio State,9–6
+2018,YALE,Yale,DUKE,Duke,13–11
+2019,UVA,Virginia,YALE,Yale,13–9
+2021,UVA,Virginia,MD,Maryland,17–16
+2022,MD,Maryland,COR,Cornell,9–7
+2023,ND,Notre Dame,DUKE,Duke,13–9
+2024,ND,Notre Dame,MD,Maryland,15–5
+2025,COR,Cornell,MD,Maryland,13–10
+2026,PRIN,Princeton,ND,Notre Dame,16–9

@@ -77,6 +77,7 @@ DATABASE_URL=... CFBD_API_KEY=... npm run load ncaaf   # CollegeFootballData, 18
 DATABASE_URL=... CFBD_API_KEY=... npm run load ncaam   # CollegeBasketballData, 1949-50 on (Division I men)
 DATABASE_URL=... npm run load ncaaw   # sportsdataverse, 2000-01 on (Division I women)
 DATABASE_URL=... npm run load ncaah   # ESPN's scoreboards as kept in data/reference, 2003-04 on (Division I men's hockey)
+DATABASE_URL=... npm run load ncaal   # ESPN's scoreboards as kept in data/reference, 2025 on (Division I men's lacrosse)
 ```
 
 Both work **inside the deployed container**, which is usually where the database
