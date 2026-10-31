@@ -1149,6 +1149,7 @@ function main() {
 					season, seasons, bracket, team, heading, colors: NEUTRAL, base: `/${sport}/${leagueRoute.view}`,
 					tabs: HAS_NIT.has(sport) ? `<nav class="br-tabs" aria-label="Tournament">${tab('bracket', 'NCAA Tournament')} · ${tab('nit', nitName)}</nav>` : '',
 					finalTitle: nit ? 'Championship' : sport === 'ncaah' ? 'Frozen Four' : 'Final Four',
+					roundNames: sport === 'ncaah' ? { S16: 'Regional semifinals', E8: 'Regional finals' } : {},
 					// A game's summary, from ESPN through the league page's cache.
 					summaryUrl: `/${sport}/api/espn/apis/site/v2/sports/${POLLED[sport].league}/summary?event=`,
 					espnLeague: POLLED[sport].league.split('/')[1],
