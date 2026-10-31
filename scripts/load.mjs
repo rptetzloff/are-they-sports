@@ -431,7 +431,7 @@ async function loadChampionships(client, sportId, byCode) {
 	// is a blank page — the "looks complete, isn't" failure, arriving as an empty
 	// table under an MLB scope.
 	if (sportId !== 'nfl') {
-		const hoops = sportId === 'ncaam' || sportId === 'ncaaw';
+		const hoops = sportId === 'ncaam' || sportId === 'ncaaw' || sportId === 'ncaah';
 		// Written as plain CTEs rather than a clever aggregate. The first version
 		// used `array_agg` over a lateral join and inserted ONE row for 121
 		// seasons of baseball — the kind of wrong that looks like a working query
@@ -485,10 +485,11 @@ async function loadChampionships(client, sportId, byCode) {
 		[sportId, sportId === 'mlb' ? 'World Series' : hoops ? 'NCAA Tournament' : 'Championship',
 			hoops ? 'championship game' : 'championship series', hoops]);
 		console.log(`  champions    ${rowCount} derived from games`);
-		// College basketball's before its games begin (men's 1939-1949, women's
-		// 1982-2000), from Wikipedia (scripts/ncaam-champions.mjs,
-		// ncaaw-champions.mjs): finals played, and no game here to link. Women's
-		// list runs on past the first game, and there checks what the final gave:
+		// College champions before the games begin (men's basketball 1939-1949,
+		// women's 1982-2000, hockey 1948-2003), from Wikipedia
+		// (scripts/ncaam-champions.mjs, ncaaw-champions.mjs, ncaah-champions.mjs):
+		// finals played, and no game here to link. The women's and hockey lists
+		// run on past the first game, and there check what the final gave:
 		// a disagreement is reported, as the NFL's is below, and the game stands.
 		const early = join(REFERENCE_DIR, `${sportId}-champions.csv`);
 		if (hoops && existsSync(early)) {
@@ -1786,6 +1787,46 @@ async function main() {
 			if (name) await client.query('INSERT INTO franchise_name (sport, franchise, name, source) VALUES ($1,$2,$3,$4)', ['ncaaw', id, name, 'sportsdataverse']);
 		}
 		console.log(`  ncaaw        ${finals.length} finals marked, ${ids.length} games' rounds read back from them; ${notClubs} games between two non-clubs left out`);
+	}
+
+	if (sportId === 'ncaah') {
+		// The games file, ESPN's ids throughout; see sports/ncaah.js. The rounds
+		// are already in it. What it has not reached yet, the season being played
+		// above all, comes from the scoreboards as the live refresh does.
+		const codes = codeTable('ncaah', loadHistory('ncaah'));
+		const names = new Map();
+		const kept = new Set();
+		let notClubs = 0, lastInFile = 0;
+		for await (const r of csvRows(join(REFERENCE_DIR, adapter.sources.history.reference))) {
+			const row = adapter.gameRow(r);
+			if (!row) continue;
+			if (row.season > lastInFile) lastInFile = row.season;
+			if (!codes.knows(row.home) && !codes.knows(row.away)) { notClubs++; continue; }
+			if (row.title) names.set(row.id, row.title);
+			kept.add(row.id);
+			await put(row);
+		}
+		const playing = adapter.sources.live.seasonOf(new Date());
+		for (let season = lastInFile + 1; season <= playing; season++) {
+			const seen = await loadLive(client, 'ncaah', adapter.sources.live, season, put);
+			console.log(`  ncaah        ${season}: ${seen} games from the scoreboards`);
+		}
+		await flush();
+		// As women's basketball: a dropped game lets go of a title first.
+		await client.query(
+			"UPDATE championship SET game_id = NULL WHERE sport = 'ncaah' AND game_id IS NOT NULL AND source <> 'espn' AND NOT (game_id = ANY($1::text[]))", [[...kept]]);
+		const { rowCount: dropped } = await client.query(
+			"DELETE FROM game WHERE sport = 'ncaah' AND source IN ('ncaah-file', 'wikipedia') AND NOT (id = ANY($1::text[]))", [[...kept]]);
+		if (dropped) console.log(`  ncaah        ${dropped} games no longer given dropped`);
+		await client.query(
+			`UPDATE game g SET title = v.title FROM unnest($1::text[], $2::text[]) AS v(id, title)
+			  WHERE g.sport = 'ncaah' AND g.id = v.id AND g.title IS DISTINCT FROM v.title`,
+			[[...names.keys()], [...names.values()]]);
+		await client.query("DELETE FROM franchise_name WHERE sport = 'ncaah' AND source = 'ncaah-file'");
+		for (const r of parseCsv(readFileSync(join(REFERENCE_DIR, 'ncaah-opponents.csv'), 'utf8'))) {
+			await client.query('INSERT INTO franchise_name (sport, franchise, name, source) SELECT $1,$2,$3,$4 WHERE EXISTS (SELECT 1 FROM franchise WHERE sport = $1 AND id = $2)', ['ncaah', r.id, r.name, 'ncaah-file']);
+		}
+		console.log(`  ncaah        ${kept.size} games from the file; ${notClubs} between two non-clubs left out`);
 	}
 
 	// Championship games, marked after the fact.
