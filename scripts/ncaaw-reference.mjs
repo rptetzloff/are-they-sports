@@ -16,6 +16,7 @@
 import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { darkGround } from './college-colors.mjs';
 import { csvRows, parseCsv } from '../lib/csv.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -73,7 +74,7 @@ const q = (v) => `'${String(v).replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`;
 const clubs = teams.map((t) => ({
 	espn: String(t.id), abbr: t.abbreviation, school: t.location, mascot: t.name ?? '',
 	full: t.displayName, conference: conferenceOf.get(String(t.id)) ?? '',
-	slug: slug(t.location), colors: [hex(t.color), hex(t.alternateColor)].filter(Boolean),
+	slug: slug(t.location), colors: darkGround(`${t.location} ${t.name ?? ''}`, [hex(t.color), hex(t.alternateColor)].filter(Boolean)),
 })).sort((a, b) => a.full.localeCompare(b.full));
 for (const key of ['abbr', 'slug', 'espn']) {
 	const seen = new Map();

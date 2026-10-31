@@ -20,6 +20,7 @@
 import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { darkGround } from './college-colors.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const CACHE = join(ROOT, 'data', 'sources', 'cbbd');
@@ -57,7 +58,7 @@ const q = (v) => `'${String(v).replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`;
 const clubs = teams.map((t) => ({
 	cbbd: `c${t.id}`, espn: String(t.sourceId), abbr: t.abbreviation, school: t.school, mascot: t.mascot ?? '',
 	full: t.displayName ?? `${t.school} ${t.mascot ?? ''}`.trim(), conference: t.conference ?? '',
-	slug: slug(t.school), colors: [hex(t.primaryColor), hex(t.secondaryColor)].filter(Boolean),
+	slug: slug(t.school), colors: darkGround(`${t.school} ${t.mascot ?? ''}`, [hex(t.primaryColor), hex(t.secondaryColor)].filter(Boolean)),
 })).sort((a, b) => a.full.localeCompare(b.full));
 for (const key of ['abbr', 'slug', 'espn']) {
 	const seen = new Map();

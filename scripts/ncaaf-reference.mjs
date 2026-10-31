@@ -20,6 +20,7 @@
 import { writeFileSync, mkdirSync, readdirSync, rmSync, existsSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { darkGround } from './college-colors.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const season = Number(process.argv[2]) || new Date().getFullYear();
@@ -58,7 +59,7 @@ const clubs = [...confOf].map(([id, conference]) => {
 		mascot: t.name,
 		full: t.displayName,
 		slug: slug(t.location),
-		colors: [hex(t.color), hex(t.alternateColor)].filter(Boolean),
+		colors: darkGround(`${t.location} ${t.name}`, [hex(t.color), hex(t.alternateColor)].filter(Boolean)),
 	};
 }).sort((a, b) => a.full.localeCompare(b.full));
 
