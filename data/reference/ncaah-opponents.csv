@@ -1,0 +1,30 @@
+# Every team a Division I programme has played that is no Division I programme
+# today, by ESPN's id and the latest name a game gives it
+# (scripts/ncaah-reference.mjs; do not edit).
+id,name
+110134,Adrian College
+2008,Alabama Huntsville
+2022,American International
+126807,Anna Maria College
+2038,Assumption
+2224,Findlay
+126815,Framingham State
+112334,Franklin Pierce
+6858,New England College
+430,Post University
+126814,Rivier University
+599,Rob Morris Ill
+126811,Southern Maine
+3256,Southern New Hampshire
+2830,St. Anselm
+126809,SUNY Canton
+7536,SUNY Cortland
+126813,SUNY Morrisville
+182,SUNY-Potsdam
+2651,Trine University
+379,UMass Dartmouth
+128554,Utica
+131,Wayne St.
+126808,Westfield State
+2738,Wisconsin-Eau Claire
+126810,Worcester State

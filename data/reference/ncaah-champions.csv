@@ -1,0 +1,72 @@
+# The NCAA tournament's champions, from Wikipedia's table of them (CC BY-SA).
+# Made by scripts/ncaah-champions.mjs; do not edit. From 2004, when the games here
+# begin, a champion comes from its final and these rows only check it.
+season,champion,championName,runnerUp,runnerUpName,score
+1948,MICH,Michigan,DART,Dartmouth,8–4
+1949,BC,Boston College,DART,Dartmouth,4–3
+1950,COLC,Colorado College,BU,Boston University,13–4
+1951,MICH,Michigan,BRWN,Brown,7–1
+1952,MICH,Michigan,COLC,Colorado College,4–1
+1953,MICH,Michigan,MINN,Minnesota,7–3
+1954,RPI,Rensselaer,MINN,Minnesota,5–4
+1955,MICH,Michigan,COLC,Colorado College,5–3
+1956,MICH,Michigan,MTU,Michigan Tech,7–5
+1957,COLC,Colorado College,MICH,Michigan,13–6
+1958,DEN,Denver,UND,North Dakota,6–2
+1959,UND,North Dakota,MSU,Michigan State,4–3
+1960,DEN,Denver,MTU,Michigan Tech,5–3
+1961,DEN,Denver,USL,St. Lawrence,12–2
+1962,MTU,Michigan Tech,CLAR,Clarkson,7–1
+1963,UND,North Dakota,DEN,Denver,6–5
+1964,MICH,Michigan,DEN,Denver,6–3
+1965,MTU,Michigan Tech,BC,Boston College,8–2
+1966,MSU,Michigan State,CLAR,Clarkson,6–1
+1967,COR,Cornell,BU,Boston University,4–1
+1968,DEN,Denver,UND,North Dakota,4–0
+1969,DEN,Denver,COR,Cornell,4–3
+1970,COR,Cornell,CLAR,Clarkson,6–4
+1971,BU,Boston University,MINN,Minnesota,4–2
+1972,BU,Boston University,COR,Cornell,4–0
+1973,WIS,Wisconsin,DEN,Denver,4–2
+1974,MINN,Minnesota,MTU,Michigan Tech,4–2
+1975,MTU,Michigan Tech,MINN,Minnesota,6–1
+1976,MINN,Minnesota,MTU,Michigan Tech,6–4
+1977,WIS,Wisconsin,MICH,Michigan,6–5
+1978,BU,Boston University,BC,Boston College,5–3
+1979,MINN,Minnesota,UND,North Dakota,4–3
+1980,UND,North Dakota,NMI,Northern Michigan,5–2
+1981,WIS,Wisconsin,MINN,Minnesota,6–3
+1982,UND,North Dakota,WIS,Wisconsin,5–2
+1983,WIS,Wisconsin,HARV,Harvard,6–2
+1984,BGSU,Bowling Green,UMD,Minnesota-Duluth,5–4
+1985,RPI,Rensselaer,PROV,Providence,2–1
+1986,MSU,Michigan State,HARV,Harvard,6–5
+1987,UND,North Dakota,MSU,Michigan State,5–3
+1988,LSS,Lake Superior State,USL,St. Lawrence,4–3
+1989,HARV,Harvard,MINN,Minnesota,4–3
+1990,WIS,Wisconsin,COLG,Colgate,7–3
+1991,NMI,Northern Michigan,BU,Boston University,8–7
+1992,LSS,Lake Superior State,WIS,Wisconsin,5–3
+1993,ME,Maine,LSS,Lake Superior State,5–4
+1994,LSS,Lake Superior State,BU,Boston University,9–1
+1995,BU,Boston University,ME,Maine,6–2
+1996,MICH,Michigan,COLC,Colorado College,3–2
+1997,UND,North Dakota,BU,Boston University,6–4
+1998,MICH,Michigan,BC,Boston College,3–2
+1999,ME,Maine,UNH,New Hampshire,3–2
+2000,UND,North Dakota,BC,Boston College,4–2
+2001,BC,Boston College,UND,North Dakota,3–2
+2002,MINN,Minnesota,ME,Maine,4–3
+2003,MINN,Minnesota,UNH,New Hampshire,5–1
+2004,DEN,Denver,ME,Maine,1–0
+2005,DEN,Denver,UND,North Dakota,4–1
+2006,WIS,Wisconsin,BC,Boston College,2–1
+2007,MSU,Michigan State,BC,Boston College,3–1
+2008,BC,Boston College,ND,Notre Dame,4–1
+2009,BU,Boston University,M-OH,Miami,4–3
+2010,BC,Boston College,WIS,Wisconsin,5–0
+2011,UMD,Minnesota-Duluth,MICH,Michigan,3–2
+2012,BC,Boston College,FRST,Ferris State,4–1
+2013,YALE,Yale,QUIN,Quinnipiac,4–0
+2014,UNNY,Union,MINN,Minnesota,7–4
+2015,PROV,Providence,BU,Boston University,4–3
