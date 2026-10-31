@@ -227,6 +227,25 @@ test('every club has a colour, and its school\'s, not whoever holds its id elsew
 	assert.equal(by('2172').city, 'Denver')
 })
 
+test('every college club has a ground of its own that white text can be read on', async () => {
+	const { choosePalette, contrast } = await import('../lib/palette.js')
+	const palette = (sport, city) => {
+		const r = parseCsv(read(`data/reference/${sport}-franchise-history.csv`)).find((x) => x.city === city)
+		return choosePalette([r.colorA, r.colorB, r.colorC, r.colorD, r.colorE].filter(Boolean), { base: '#2a2a2a', accent: '#ffffff' })
+	}
+	for (const sport of ['ncaam', 'ncaaw', 'ncaaf']) {
+		for (const r of parseCsv(read(`data/reference/${sport}-franchise-history.csv`))) {
+			assert.ok(r.colorA, `${sport} ${r.city} has no colours`)
+			assert.ok(contrast(palette(sport, r.city).base, '#FFFFFF') >= 3.5, `${sport} ${r.city}`)
+		}
+	}
+	assert.deepEqual(palette('ncaam', 'Iowa'), { base: '#000000', accent: '#FCD116' })
+	assert.equal(palette('ncaam', 'Stonehill').base, '#2F2975', 'purple, not the black behind its letters')
+	assert.equal(palette('ncaam', 'Lamar').base, '#E31937', 'red')
+	assert.equal(palette('ncaam', 'Long Beach State').accent, '#ECAA00', 'gold, not a pale grey')
+	for (const sport of ['ncaam', 'ncaaw', 'ncaaf']) assert.equal(palette(sport, 'Tennessee').accent, '#FF8200', sport)
+})
+
 test('white text can be read on every club\'s ground', () => {
 	const lum = (hex) => {
 		const [r, g, b] = [1, 3, 5].map((i) => Number.parseInt(hex.slice(i, i + 2), 16) / 255)
