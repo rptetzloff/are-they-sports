@@ -13,7 +13,7 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 const read = (p) => readFileSync(join(ROOT, p), 'utf8')
 
 test('basketball\'s polls are ESPN\'s, its preseason poll the regular season\'s week 1', () => {
-	assert.deepEqual(Object.keys(POLLED), ['ncaaf', 'ncaam', 'ncaaw'])
+	assert.deepEqual(Object.keys(POLLED), ['ncaaf', 'ncaam', 'ncaaw', 'ncaah'])
 	assert.equal(rankingsUrl('ncaam'), 'https://site.api.espn.com/apis/site/v2/sports/basketball/mens-college-basketball/rankings')
 	const core = 'https://sports.core.api.espn.com/v2/sports/basketball/leagues/mens-college-basketball/seasons/2027/types/2/weeks'
 	assert.deepEqual(weeksOf(2027, 2, 'ncaam'), [
