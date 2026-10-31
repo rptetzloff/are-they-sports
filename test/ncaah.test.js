@@ -216,6 +216,33 @@ test('every game names a club or an opponent, and a manifest for every club', as
 	assert.equal((await loadTeams()).filter((t) => t.sport === 'ncaah').length, 63)
 })
 
+test('every club has a colour, and its school\'s, not whoever holds its id elsewhere', () => {
+	const rows = parseCsv(read('data/reference/ncaah-franchise-history.csv'))
+	for (const r of rows) assert.match(r.colorA, /^#[0-9A-F]{6}$/, r.city)
+	const by = (id) => rows.find((r) => r.idAbbrv === id)
+	// Virginia Tech's, Washington State's and an English club's, had ids been trusted.
+	assert.notEqual(by('132').colorA, '#7B2129')
+	assert.notEqual(by('134').colorA, '#94022A')
+	assert.notEqual(by('2594').colorA, '#C8142F')
+	assert.equal(by('2172').city, 'Denver')
+})
+
+test('white text can be read on every club\'s ground', () => {
+	const lum = (hex) => {
+		const [r, g, b] = [1, 3, 5].map((i) => Number.parseInt(hex.slice(i, i + 2), 16) / 255)
+			.map((v) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4))
+		return 0.2126 * r + 0.7152 * g + 0.0722 * b
+	}
+	const contrast = (x, y) => (Math.max(lum(x), lum(y)) + 0.05) / (Math.min(lum(x), lum(y)) + 0.05)
+	const rows = parseCsv(read('data/reference/ncaah-franchise-history.csv'))
+	for (const r of rows) {
+		assert.ok(contrast(r.colorA, '#FFFFFF') >= 3, `${r.city} ${r.colorA}`)
+		if (r.colorB) assert.ok(contrast(r.colorA, r.colorB) >= 2.5, `${r.city}'s accent ${r.colorB}`)
+	}
+	const tech = rows.find((r) => r.city === 'Michigan Tech')
+	assert.deepEqual([tech.colorA, tech.colorB], ['#000000', '#FFCD00'])
+})
+
 test('the adapter says what the rest of the site asks of it', () => {
 	assert.equal(sport.id, 'ncaah')
 	assert.equal(sport.championshipTitle(), 'NCAA Tournament')
