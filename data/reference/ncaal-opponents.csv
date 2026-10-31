@@ -1,0 +1,4 @@
+# Every team a Division I programme has played that is no Division I programme
+# today, by ESPN's id and the latest name a game gives it
+# (scripts/ncaal-reference.mjs; do not edit).
+id,name
