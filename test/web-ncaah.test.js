@@ -10,6 +10,7 @@ import { POLLED, createPolls, latestOf, weeksOf } from '../lib/polls.js'
 import { BRACKETED, HAS_NIT } from '../lib/seasons.js'
 import { buildBracket, bracketPage, tournamentSeeds } from '../lib/bracket.js'
 import { parseCsv } from '../lib/csv.js'
+import { rankingsPage } from '../lib/render.js'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 const read = (p) => readFileSync(join(ROOT, p), 'utf8')
@@ -83,6 +84,21 @@ test('USCHO\'s poll: its id is this week\'s, not the AP\'s, and only for hockey'
 	assert.equal(got.length, 2)
 	assert.equal(got[1].ranks.get('2172'), 3)
 	assert.ok(asked.slice(1).every((u) => u.endsWith('/rankings/10624')))
+})
+
+test('a poll ESPN has no votes for shows none, rather than a column of zeros', () => {
+	const poll = (points, firstPlaceVotes) => ({
+		type: 'USCHOMENSPOLL', name: 'USCHO Men\'s Poll', week: 'Week 5',
+		ranks: [{ current: 1, previous: 1, points, firstPlaceVotes, record: '7-0', team: { id: '130', name: 'Michigan Wolverines', school: 'Michigan' } }],
+		others: [{ points, team: { id: '111', name: 'Northeastern Huskies' } }],
+	})
+	const page = (p) => rankingsPage({ polls: [p], heading: 'x', colors: {}, clubUrl: () => null, footer: '' })
+	const none = page(poll(0, 0))
+	assert.match(none, /Others receiving votes: Northeastern Huskies</)
+	assert.doesNotMatch(none, /first-place votes/)
+	const some = page(poll(76, 3))
+	assert.match(some, /Northeastern Huskies 76/)
+	assert.match(some, /In brackets, first-place votes/)
 })
 
 const seedRows = () => parseCsv(read('data/reference/ncaah-seeds.csv'))
