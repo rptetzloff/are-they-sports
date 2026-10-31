@@ -5,7 +5,7 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { buildBracket, regionCells, regionOf, bracketPage, tournamentSeeds, nitGames } from '../lib/bracket.js'
+import { buildBracket, regionCells, bracketCells, regionOf, bracketPage, tournamentSeeds, nitGames } from '../lib/bracket.js'
 import { siteFooterHtml } from '../lib/render.js'
 import { parseCsv } from '../lib/csv.js'
 
@@ -63,12 +63,32 @@ test('a region\'s games sit level with the two they follow', () => {
 	assert.deepEqual(cells.map((c) => [c.node.game.id, c.col, c.row, c.span]), [['1', 1, 1, 2], ['2', 1, 3, 2], ['5', 2, 1, 4]])
 })
 
+test('the whole bracket: the final in the middle, each side running in to it, every game once', () => {
+	const b = buildBracket(games, { seeds, finalId: '7' })
+	const { cols, middle, cells } = bracketCells(b)
+	assert.equal(cols, 2 * (middle - 1) + 1)
+	assert.equal(new Set(cells.map((c) => c.node.game.id)).size, cells.length)
+	assert.ok(!cells.some((c) => c.node === b.final))
+	assert.ok(cells.every((c) => (c.flip ? c.col > middle : c.col < middle)))
+	const lefts = new Set(cells.filter((c) => !c.flip).map((c) => c.depth))
+	for (const d of lefts) assert.equal(cells.find((c) => !c.flip && c.depth === d).col, middle - d)
+	assert.ok(cells.filter((c) => c.fork).every((c) => c.fork[0] < c.fork[1] && c.fork[0] >= 0 && c.fork[1] <= 100))
+})
+
+test('a round is named for its size: eight teams have no Sweet 16', () => {
+	const page = (fieldGames) => bracketPage({ season: 1950, seasons: [1950], bracket: buildBracket(fieldGames), heading: 'h', colors: { base: '#222', accent: '#fff' }, team: (code) => ({ name: code, href: null }) })
+	const game = (id, stage, date, home, away) => ({ id, stage, date, home, away, homeScore: 2, awayScore: 1, title: null })
+	const html = page([game('1', 'S16', '1950-03-23', 'A', 'B'), game('2', 'S16', '1950-03-23', 'C', 'D'), game('3', 'E8', '1950-03-25', 'A', 'C'), game('4', 'FINAL', '1950-03-28', 'A', 'E')])
+	assert.doesNotMatch(html, /Sweet 16/)
+	assert.match(html, /Championship/)
+})
+
 test('the page: champion, rounds, seeds and each side linked', () => {
 	const b = buildBracket(games, { seeds, finalId: '7' })
 	const html = bracketPage({ season: 2025, seasons: [2024, 2025], bracket: b, heading: '2025 NCAA Tournament', colors: { base: '#222', accent: '#fff' },
 		team: (code) => ({ name: code, href: code === 'A1' ? '/ncaam/a1/2025' : null }) })
 	assert.match(html, /A1 beat B2 70–68 for the title/)
-	assert.match(html, /<span class="sd">1<\/span><span class="nm"><a href="\/ncaam\/a1\/2025">A1<\/a>/)
+	assert.match(html, /<span class="sd">1<\/span><span class="nm" title="A1"><a href="\/ncaam\/a1\/2025">A1<\/a>/)
 	// Whole paths, which work from /ncaam/bracket as from /ncaam/bracket/2025.
 	// Each season named as the club pages name it, 2023-2024; its path the
 	// year its tournament was played, as theirs.
@@ -83,7 +103,7 @@ test('the page: champion, rounds, seeds and each side linked', () => {
 	assert.doesNotMatch(html, /data-game=/, 'no summary address, no pop-up')
 	const withSum = bracketPage({ season: 2025, seasons: [2025], bracket: b, heading: 'h', colors: { base: '#222', accent: '#fff' },
 		team: (code) => ({ name: code, href: null }), summaryUrl: '/ncaam/api/espn/summary?event=' })
-	assert.equal(withSum.match(/data-game="/g).length, games.filter((x) => x.homeScore != null).length)
+	assert.equal(new Set(withSum.match(/data-game="[^"]+"/g)).size, games.filter((x) => x.homeScore != null).length)
 	assert.match(withSum, /data-game="7" tabindex="0" role="button" aria-label="Summary: A1 vs B2"/)
 	assert.match(withSum, /<dialog id="br-sum"/)
 	assert.match(withSum, /"\/ncaam\/api\/espn\/summary\?event="/)

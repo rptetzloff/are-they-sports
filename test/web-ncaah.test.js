@@ -135,10 +135,11 @@ test('a bracket page says Frozen Four, and its summary counts three periods and 
 	const bracket = buildBracket(storeRows(2026), { seeds: tournamentSeeds('ncaah', 2026) })
 	const html = bracketPage({
 		season: 2026, seasons: [2025, 2026], bracket, team: (code) => ({ name: code, href: null }), heading: '2025-2026 NCAA Tournament', colors: {},
-		finalTitle: 'Frozen Four', summaryUrl: '/ncaah/api/espn/apis/site/v2/sports/hockey/mens-college-hockey/summary?event=', base: '/ncaah/bracket', espnLeague: 'mens-college-hockey',
+		finalTitle: 'Frozen Four', roundNames: { S16: 'Regional semifinals', E8: 'Regional finals' }, summaryUrl: '/ncaah/api/espn/apis/site/v2/sports/hockey/mens-college-hockey/summary?event=', base: '/ncaah/bracket', espnLeague: 'mens-college-hockey',
 	})
 	assert.match(html, /Frozen Four/)
-	assert.doesNotMatch(html, /Final Four/)
+	assert.match(html, /Regional semifinals/)
+	assert.doesNotMatch(html, /Final Four|Sweet 16|Elite Eight/)
 	assert.match(html, /const HOCKEY = true/)
 	assert.match(html, /shotsTotal/)
 	assert.match(html, /espn\.com\/mens-college-hockey\/game/)
@@ -150,7 +151,8 @@ test('a game Wikipedia alone has opens no summary: ESPN has none to give', () =>
 		season: 2019, seasons: [2019], bracket, team: (code) => ({ name: code, href: null }), heading: 'x', colors: {},
 		summaryUrl: '/x?event=', base: '/ncaah/bracket', espnLeague: 'mens-college-hockey',
 	})
-	assert.equal((html.match(/data-game="/g) ?? []).length, 12)
+	// Both layouts draw each game; only ESPN's twelve can open.
+	assert.equal(new Set(html.match(/data-game="[^"]+"/g)).size, 12)
 })
 
 test('the spring workflow adds hockey\'s season, and a run with nothing new writes nothing', () => {
