@@ -11,6 +11,13 @@
  *  show: 15 of them last season, or this season's first few for a new programme.
  *  The non-Division I sides of those games play one or two a season.
  *
+ *  ESPN's hockey teams have no colours (2 of 116 do). So a club's are its school's
+ *  in ESPN's basketball or football, read from those sports' files, and for the
+ *  schools not Division I in either they are Wikipedia's (Module:College color/data,
+ *  CC BY-SA, each with its citation). ESPN's ids do NOT carry across sports: 132 is
+ *  Bemidji State here and Virginia Tech in baseball. So a school is matched by its
+ *  name and mascot, never its id, and a club left with no colour stops the script.
+ *
  *  Run after scripts/ncaah-games.mjs, when Division I changes:
  *  node scripts/ncaah-reference.mjs. ESPN's lists are kept in data/sources/espn-ncaah.
  *
@@ -75,8 +82,67 @@ const conferenceOf = async (id) => {
 	return groups.find((g) => g.id === String(page.groups?.id))?.name ?? '';
 };
 
-const slug = (s) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/&/g, 'and').replace(/[^a-z0-9]/g, '');
 const hex = (c) => (/^[0-9a-f]{6}$/i.test(c ?? '') && !/^(000000|ffffff)$/i.test(c) ? `#${c.toUpperCase()}` : '');
+
+/** Each sport's schools by name and mascot, for their colours. */
+const elsewhere = new Map();
+for (const sport of ['ncaam', 'ncaaw', 'ncaaf']) {
+	for (const r of parseCsv(readFileSync(join(REF, `${sport}-franchise-history.csv`), 'utf8'))) {
+		const key = `${r.city} ${r.teamName}`;
+		if (r.colorA && !elsewhere.has(key)) elsewhere.set(key, [r.colorA, r.colorB].filter(Boolean));
+	}
+}
+
+const WIKI = join(ROOT, 'data', 'sources', 'wiki-ncaah', 'college-color-data.lua');
+if (!existsSync(WIKI)) {
+	mkdirSync(dirname(WIKI), { recursive: true });
+	const r = await fetch(`https://en.wikipedia.org/w/api.php?action=parse&format=json&prop=wikitext&page=${encodeURIComponent('Module:College color/data')}`,
+		{ headers: { 'User-Agent': 'are-they-sports (https://github.com/rptetzloff/are-they-sports)' } });
+	if (!r.ok) throw new Error(`${r.status} Module:College color/data`);
+	writeFileSync(WIKI, (await r.json()).parse.wikitext['*']);
+}
+const lua = readFileSync(WIKI, 'utf8');
+const wikiColors = new Map();
+const wikiAlias = new Map();
+for (const m of lua.matchAll(/\["([^"]+)"\]\s*=\s*\{\s*"([0-9A-Fa-f]{6})"\s*,\s*"([0-9A-Fa-f]{6})"(?:\s*,\s*"([0-9A-Fa-f]{6})")?/g)) wikiColors.set(m[1], m.slice(2).filter(Boolean));
+for (const m of lua.matchAll(/\["([^"]+)"\]\s*=\s*"([^"]+)"/g)) wikiAlias.set(m[1], m[2]);
+/** ESPN's name for a programme, where Wikipedia's is another. */
+const WIKI_NAME = {
+	'Rensselaer Engineers': 'RPI Engineers', 'Long Island University Sharks': 'LIU Sharks', 'Minnesota Duluth Bulldogs': 'Minnesota–Duluth Bulldogs',
+	// Two schools each, on Wikipedia: these are South Dakota's and Minnesota's.
+	'Augustana (SD) Vikings': 'Augustana (South Dakota) Vikings', 'St. Thomas Tommies': 'St. Thomas (Minnesota) Tommies',
+};
+/** Wikipedia's colours, its white left out and its black kept: ESPN's black means
+ *  it has none, but Michigan Tech's black here is Michigan Tech's. */
+const wikiColor = (name) => {
+	let key = WIKI_NAME[name] ?? name;
+	while (wikiAlias.has(key)) key = wikiAlias.get(key);
+	return (wikiColors.get(key) ?? []).filter((c) => !/^ffffff$/i.test(c)).map((c) => `#${c.toUpperCase()}`);
+};
+
+/** A colour's luminance, and two's contrast, WCAG's measure. */
+const luminance = (color) => {
+	const [r, g, b] = [1, 3, 5].map((i) => Number.parseInt(color.slice(i, i + 2), 16) / 255)
+		.map((v) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4));
+	return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+};
+const between = (a, b) => (Math.max(luminance(a), luminance(b)) + 0.05) / (Math.min(luminance(a), luminance(b)) + 0.05);
+const onWhite = (color) => between(color, '#FFFFFF');
+/** The page's text is white and its results red and green, so its ground must be
+ *  dark enough for all three: the first of a club's colours that is, with the one
+ *  it displaced as the accent. Michigan Tech's gold on black, not white on gold,
+ *  and RIT's orange on black: a win all but vanished on the orange. */
+function readable(colors, more) {
+	const all = [...new Set([...colors, ...more])];
+	const ground = all.find((c) => onWhite(c) >= 3.5);
+	const [first, second] = !ground || ground === all[0] ? colors : [ground, all[0]];
+	// An accent is headings' colour, beside white text: one darker than the ground
+	// or not standing out from it (black on red, Penn State's two blues) leaves
+	// them white.
+	return second && luminance(second) > luminance(first) && between(first, second) >= 2.5 ? [first, second] : [first];
+}
+
+const slug = (s) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/&/g, 'and').replace(/[^a-z0-9]/g, '');
 const csv = (v) => (/[",\n]/.test(String(v ?? '')) ? `"${String(v).replace(/"/g, '""')}"` : String(v ?? ''));
 const q = (v) => `'${String(v).replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`;
 
@@ -87,6 +153,9 @@ for (const id of ids) {
 		espn: id, abbr: t.abbreviation, school: t.location.trim(), mascot: t.name ?? '', full: t.displayName.trim(), conference: await conferenceOf(id),
 		slug: slug(t.location), colors: [hex(t.color), hex(t.alternateColor)].filter(Boolean),
 	});
+	const c = clubs.at(-1);
+	if (!c.colors.length) c.colors = elsewhere.get(`${c.school} ${c.mascot}`) ?? wikiColor(c.full);
+	c.colors = readable(c.colors, wikiColor(c.full));
 }
 clubs.sort((a, b) => a.full.localeCompare(b.full));
 for (const key of ['abbr', 'slug', 'espn']) {
@@ -96,6 +165,10 @@ for (const key of ['abbr', 'slug', 'espn']) {
 		seen.set(c[key], c);
 	}
 }
+const uncoloured = clubs.filter((c) => !c.colors.length);
+if (uncoloured.length) throw new Error(`no colours: ${uncoloured.map((c) => c.full).join(', ')}`);
+const unreadable = clubs.filter((c) => onWhite(c.colors[0]) < 3.5);
+if (unreadable.length) console.log(`too light for white text, and nothing darker: ${unreadable.map((c) => `${c.full} ${c.colors[0]}`).join(', ')}`);
 const unplaced = clubs.filter((c) => !c.conference);
 if (unplaced.length) throw new Error(`no conference: ${unplaced.map((c) => c.full).join(', ')}`);
 
