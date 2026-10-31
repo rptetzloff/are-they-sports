@@ -236,7 +236,7 @@ test('white text can be read on every club\'s ground', () => {
 	const contrast = (x, y) => (Math.max(lum(x), lum(y)) + 0.05) / (Math.min(lum(x), lum(y)) + 0.05)
 	const rows = parseCsv(read('data/reference/ncaah-franchise-history.csv'))
 	for (const r of rows) {
-		assert.ok(contrast(r.colorA, '#FFFFFF') >= 3, `${r.city} ${r.colorA}`)
+		assert.ok(contrast(r.colorA, '#FFFFFF') >= 3.5, `${r.city} ${r.colorA}`)
 		if (r.colorB) assert.ok(contrast(r.colorA, r.colorB) >= 2.5, `${r.city}'s accent ${r.colorB}`)
 	}
 	const tech = rows.find((r) => r.city === 'Michigan Tech')

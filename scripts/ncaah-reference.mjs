@@ -128,12 +128,13 @@ const luminance = (color) => {
 };
 const between = (a, b) => (Math.max(luminance(a), luminance(b)) + 0.05) / (Math.min(luminance(a), luminance(b)) + 0.05);
 const onWhite = (color) => between(color, '#FFFFFF');
-/** The page's text is white, so its ground must be dark enough to read on: the
- *  first of a club's colours that is, with the one it displaced as the accent.
- *  Michigan Tech's gold on black, not white on gold. */
+/** The page's text is white and its results red and green, so its ground must be
+ *  dark enough for all three: the first of a club's colours that is, with the one
+ *  it displaced as the accent. Michigan Tech's gold on black, not white on gold,
+ *  and RIT's orange on black: a win all but vanished on the orange. */
 function readable(colors, more) {
 	const all = [...new Set([...colors, ...more])];
-	const ground = all.find((c) => onWhite(c) >= 3);
+	const ground = all.find((c) => onWhite(c) >= 3.5);
 	const [first, second] = !ground || ground === all[0] ? colors : [ground, all[0]];
 	// An accent is headings' colour, beside white text: one darker than the ground
 	// or not standing out from it (black on red, Penn State's two blues) leaves
@@ -166,7 +167,7 @@ for (const key of ['abbr', 'slug', 'espn']) {
 }
 const uncoloured = clubs.filter((c) => !c.colors.length);
 if (uncoloured.length) throw new Error(`no colours: ${uncoloured.map((c) => c.full).join(', ')}`);
-const unreadable = clubs.filter((c) => onWhite(c.colors[0]) < 3);
+const unreadable = clubs.filter((c) => onWhite(c.colors[0]) < 3.5);
 if (unreadable.length) console.log(`too light for white text, and nothing darker: ${unreadable.map((c) => `${c.full} ${c.colors[0]}`).join(', ')}`);
 const unplaced = clubs.filter((c) => !c.conference);
 if (unplaced.length) throw new Error(`no conference: ${unplaced.map((c) => c.full).join(', ')}`);
