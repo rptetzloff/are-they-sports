@@ -1,7 +1,8 @@
 # The tournaments' seeds, every spring, so nobody has to remember them.
 #
 # April 15th, May 1st and May 15th: read each NCAA tournament just played and
-# rewrite data/reference/ncaam-seeds.csv and ncaaw-seeds.csv. No change, nothing
+# rewrite data/reference/ncaam-seeds.csv and ncaaw-seeds.csv, and add the season
+# to ncaah-games.csv and ncaah-seeds.csv. No change, nothing
 # happens. The later dates are for a source that was late. Dates, not "Mondays":
 # a tournament's first Monday of April can be the night of its final.
 #
@@ -48,6 +49,9 @@ jobs:
         run: node scripts/ncaam-seeds.mjs --espn
       - name: Women's, from Wikipedia's brackets
         run: node scripts/ncaaw-seeds.mjs
+
+      - name: Hockey's, from ESPN's scoreboards and Wikipedia's bracket
+        run: node scripts/ncaah-games.mjs
 
       - name: A branch and an issue, if anything changed
         run: |
