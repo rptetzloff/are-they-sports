@@ -5,14 +5,17 @@
  *  reads, so a deployed load makes none of these calls; and ncaah-seeds.csv, each
  *  tournament game's seeds and region.
  *
- *  About 4,800 calls the first time, kept in data/sources/espn-ncaah/days. Run it
- *  again after a season, and only that season's days are asked for:
- *
- *    node scripts/ncaah-games.mjs
+ *  Adds the seasons the files have not reached, a season's 208 calls each, so a
+ *  season's rows are never asked for twice. Every spring by
+ *  .github/workflows/seeds.yml, or by hand: node scripts/ncaah-games.mjs. It writes
+ *  nothing until the tournament's bracket is whole, and refuses one that is not
+ *  fifteen games. With --all it starts again from 2003-04, about 4,800 calls, kept
+ *  in data/sources/espn-ncaah/days.
  */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { parseCsv } from '../lib/csv.js';
 import { bracketGames, eventFields, sources } from '../sports/ncaah.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -27,7 +30,17 @@ const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 const now = new Date();
 const playing = sources.live.seasonOf(now);
 // The last season to write: this one once its final is well past.
-const LAST = now.getUTCMonth() >= 3 && now.getUTCMonth() < 7 && now.getUTCDate() >= 15 ? playing : playing - 1;
+const LAST = now >= Date.UTC(playing, 3, 15) ? playing : playing - 1;
+// What the files hold, which a run keeps as it is and goes on from.
+const GAMES_FILE = join(REF, 'ncaah-games.csv');
+const SEEDS_FILE = join(REF, 'ncaah-seeds.csv');
+const ALL = process.argv.includes('--all') || !existsSync(GAMES_FILE);
+const keptLines = (path) => (ALL ? [] : readFileSync(path, 'utf8').trimEnd().split('\n').filter((l) => !l.startsWith('#')).slice(1));
+const FIRST = ALL ? sources.history.from : Math.max(...parseCsv(readFileSync(GAMES_FILE, 'utf8')).map((r) => Number(r.season))) + 1;
+if (FIRST > LAST) {
+	console.log(`Nothing new: the files reach ${FIRST - 1}.`);
+	process.exit(0);
+}
 
 async function day(yyyymmdd) {
 	const path = join(DAYS, `${yyyymmdd}.json`);
@@ -71,7 +84,7 @@ const ALIASES = {
 const games = [];
 const kept = new Set();
 const nameId = new Map();
-for (let season = sources.history.from; season <= LAST; season++) {
+for (let season = FIRST; season <= LAST; season++) {
 	const first = games.length;
 	for (const d of sources.live.daysOf(season)) {
 		for (const event of await day(d)) {
@@ -99,7 +112,13 @@ const idOf = (name) => {
 const pair = (a, b) => [a, b].sort().join('-');
 const seeds = [];
 let added = 0, differs = 0;
-for (let season = sources.history.from; season <= LAST; season++) {
+// Every name, for the bracket's sides: the file's for the clubs a new season may
+// not mention by the bracket's spelling.
+for (const r of ALL ? [] : parseCsv(readFileSync(GAMES_FILE, 'utf8'))) {
+	nameId.set(norm(r.home_name), r.home);
+	nameId.set(norm(r.away_name), r.away);
+}
+for (let season = FIRST; season <= LAST; season++) {
 	if (season === 2020) continue; // cancelled
 	const bracket = bracketGames(await wiki(season));
 	// Fifteen, but 2021's thirteen: Michigan and Notre Dame withdrew, unplayed.
@@ -149,18 +168,21 @@ for (let season = sources.history.from; season <= LAST; season++) {
 
 const COLUMNS = ['id', 'season', 'date', 'stage', 'ending', 'home', 'home_name', 'home_score', 'away', 'away_name', 'away_score', 'neutral', 'source', 'title'];
 const rows = games.filter((g) => Number(g.homeScore) || Number(g.awayScore));
-writeFileSync(join(REF, 'ncaah-games.csv'), [
+const lines = (rows2) => rows2.sort((a, b) => a.date.localeCompare(b.date) || String(a.id).localeCompare(String(b.id)))
+	.map((g) => [g.id, g.season, g.date, g.stage, g.ending, g.home, g.homeName.trim(), g.homeScore, g.away, g.awayName.trim(), g.awayScore, g.neutral, g.source === 'wikipedia' ? 'wikipedia' : 'ncaah-file', g.title].map(csv).join(','));
+writeFileSync(GAMES_FILE, [
 	'# Men\'s college hockey, every game from 2003-04: ESPN\'s scoreboards, with each',
 	'# tournament\'s rounds and the games ESPN lacks from Wikipedia\'s bracket',
 	'# (scripts/ncaah-games.mjs; do not edit). Scores are as ESPN gives them.',
 	COLUMNS.join(','),
-	...rows.sort((a, b) => a.date.localeCompare(b.date) || String(a.id).localeCompare(String(b.id)))
-		.map((g) => [g.id, g.season, g.date, g.stage, g.ending, g.home, g.homeName.trim(), g.homeScore, g.away, g.awayName.trim(), g.awayScore, g.neutral, g.source === 'wikipedia' ? 'wikipedia' : 'ncaah-file', g.title].map(csv).join(',')),
+	...keptLines(GAMES_FILE),
+	...lines(rows),
 ].join('\n') + '\n');
-writeFileSync(join(REF, 'ncaah-seeds.csv'), [
+writeFileSync(SEEDS_FILE, [
 	'# Each NCAA tournament game\'s seeds (1 to 4, in its region) and region, from',
 	'# Wikipedia\'s bracket (scripts/ncaah-games.mjs; do not edit).',
 	'season,game,home_seed,away_seed,region',
+	...keptLines(SEEDS_FILE),
 	...seeds.map((r) => r.map(csv).join(',')),
 ].join('\n') + '\n');
 console.log(`${rows.length} games, ${games.length - rows.length} blank 0-0s left out; ${seeds.length} tournament games, ${added} added from Wikipedia, ${differs} where the scores differ`);
